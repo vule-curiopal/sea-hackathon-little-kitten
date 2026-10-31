@@ -8,6 +8,7 @@ These are proposed contracts for the [frontend](frontend.md), [pipeline](pipelin
 - Resolve the profile from a server-issued demo profile token. Never trust a model-generated or caller-supplied profile ID for authorization. Production identity is outside this prototype.
 - The browser generates a unique `request_id` for each mutation. A turn's `turn_id` equals its `request_id`. Retries use the same ID; a different body with the same ID returns `409 idempotency_conflict`.
 - A profile permits only one active turn or greeting. A second request returns `409 turn_in_progress` until the first finishes or is canceled.
+- Cancellation is authorized by the same profile/session token and may arrive before an upload is accepted. Keep bounded transient cancellation/idempotency metadata keyed by session and turn ID so a late-arriving canceled upload cannot start work. Protocol metadata is not conversation memory.
 - Responses include `clock_version` and `state_version`. A canceled turn, closed session, profile switch, deletion, or newer clock/state invalidates obsolete work. The server rechecks versions before response publication and writes.
 - No API response or panel payload contains credentials, a full internal prompt, raw provider output, or raw microphone audio.
 
@@ -36,6 +37,8 @@ This is fixture selection, not production child authentication. When demo mode i
 
 Configuration patches accept only `personality` (one of the 16 allowed MBTI codes), `role` (`friend`, `big_sibling`, `teacher`), `language_mode` (`vi`, `en`, `follow_child`), and `voice_id` from a server allowlist. Reject unknown fields and incompatible voice/language choices. The server returns the effective configuration and new state version; it does not accept raw prompts or safety overrides.
 
+For the first batch voice demo, choose `language_mode=vi` or `en` before the session's first recording. Use this fixed mode for recognition hints, reply generation, fallback text and synthesis; `follow_child` remains part of the broader product contract but is outside this first voice demo. A `language_hint` cannot override the configured mode.
+
 ## Voice-turn request
 
 `POST /api/sessions/{session_id}/turns`, `Content-Type: multipart/form-data`:
@@ -44,11 +47,13 @@ Configuration patches accept only `personality` (one of the 16 allowed MBTI code
 | --- | --- | --- |
 | `request_id` | Yes | Unique turn ID and idempotency key |
 | `kind` | Yes | `utterance` or `greeting` |
-| `audio` | For utterance | Microphone blob; accept WebM/Opus or WAV in the MVP; return `415` for unsupported formats |
+| `audio` | For utterance | Complete microphone blob; accept MP4/AAC (`audio/mp4`, including M4A), WebM/Opus or WAV; preserve actual MIME/container and return `415` for unsupported formats |
 | `language_hint` | No | `vi`, `en`, or `auto`; preference, not an override of server configuration |
 | `fixture_id` | Fake utterances only | Declared deterministic scenario; reject in real mode |
 
-Proposed limits: 20 seconds and 5 MiB per recording. A greeting has no audio and is allowed once at initial entry or explicit return after rollover. It is initiated by a user action, not a background push. It skips STT and creates a synthetic greeting intent; director, safety, and TTS still run.
+First voice-demo limits: 30 seconds and 5 MiB of audio per recording; cap the complete multipart request at 6 MiB to leave room for metadata and boundaries. Duration includes initial noise calibration. Validate duration/container metadata within bounded resources; do not infer compressed-audio duration from byte count. Browser and server limits must agree. A greeting has no audio and is allowed once at initial entry or explicit return after rollover. It is initiated by a user action, not a background push. It skips STT and creates a synthetic greeting intent; director, safety, and TTS still run.
+
+The browser selects a recording MIME through runtime capability detection and submits the finalized blob after the last recorder data event. Safari/iPad is not restricted to the previous WebM/WAV list. For the ElevenLabs batch adapter, forward original container bytes with `file_format=other`; do not label MP4/WebM as raw PCM or add an isolation/transcoding stage to the first demo. Supported provider audio types: [ElevenLabs speech-to-text](https://elevenlabs.io/docs/overview/capabilities/speech-to-text).
 
 For no-microphone accessibility testing, the same endpoint may accept a `text` field instead of audio, with `input_mode=text` explicitly marked in diagnostics. Audio and text are mutually exclusive. The voice acceptance test always submits real recorded bytes; the text path cannot substitute for it.
 
@@ -106,6 +111,8 @@ For no-microphone accessibility testing, the same endpoint may accept a `text` f
 For an utterance, `transcript` is `{ "text": "My dog Mochi fell in a puddle", "language": "en", "uncertain_spans": [] }`. For greetings it is `null`. `reference_id` is nullable and is a server-owned deletion/reference handle, not a second memory to render. These timing values are example fixture values, not a benchmark; stage timings exclude transport and other overhead.
 
 Inline base64 audio avoids an extra media-fetch round trip in the MVP. Send it only after the entire text passes safety. Keep responses bounded by the short-speech rule. A later binary or streaming protocol must preserve the same cancellation and validation boundaries.
+
+`audio.mime_type` describes the actual synthesized bytes, not a fixed WAV requirement: the ElevenLabs MP3 path returns `audio/mpeg`; bundled fixtures may return `audio/wav`. Decode `data_base64` using this MIME and never relabel MP3 bytes as WAV. The response envelope, face/state ownership and playback-receipt routes stay the same; a temporary voice response adapter supplies text/audio and does not fabricate character or memory state.
 
 ## Playback receipt
 

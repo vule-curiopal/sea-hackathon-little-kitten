@@ -24,7 +24,7 @@ The demo panel uses fictional data and is hidden from the child view by default.
 ## Recording and turn lifecycle
 
 1. Obtain microphone permission only after a deliberate Talk action. Keep the browser media stream closed while idle, sleeping, petting, or showing a diary.
-2. Record at most 20 seconds. Tap again to submit; Stop cancels without submitting. Clearly distinguish these actions.
+2. Record at most 30 seconds, including initial noise calibration. For the first batch voice demo, use adaptive RMS/noise-floor thresholds to auto-submit after 1,500 ms below the end threshold following a valid signal; wait at most 5,000 ms for an initial signal after calibration. Keep explicit Send as a fallback; Stop cancels without submitting. Clearly distinguish these actions. Detector tuning and recorder finalization are specified in [microphone and adaptive silence](voice-pipeline/microphone-vad.md).
 3. Release microphone tracks when recording finishes, on Stop, on navigation, or on permission failure. Post one multipart turn request; do not call separate AI services from the browser.
 4. While waiting, show attentive/thinking movement. Keep Stop available. Never play a filler that falsely suggests the question was answered.
 5. Check the response's session, turn, state version, and local cancellation generation before decoding or playing anything. Discard old responses after a profile change, reset, session close, or cancellation.
@@ -35,6 +35,8 @@ The demo panel uses fictional data and is hidden from the child view by default.
 Start a new Talk turn by first canceling current playback and server work. Abort the fetch, call the cancellation route with its known turn ID, stop audio nodes and decorative sounds, then release capture. Aborting the HTTP request alone is insufficient to prevent server-side work.
 
 If the browser blocks autoplay after a delayed response, show a clear Play button. Count the interaction as autoplay-blocked in diagnostics rather than reporting a misleading latency pass. Unlocking audio on the initiating click is an optimization, not a reason to hide playback failure.
+
+The first voice demo targets responsive web on an actual iPad; the frontend owner implements layout and browser capture/playback. Choose Vietnamese or English before the session rather than auto-switching in this first demo. Feature-detect MP4/AAC or WebM/Opus recording, preserve the actual MIME/container, finalize the last recorder data before submitting, and follow the 30-second/5-MiB audio and 6-MiB multipart limits in the [shared API contract](api-contracts.md). Use a trusted HTTPS origin on the iPad, start/resume Web Audio from Talk's gesture, and cancel on background capture interruption. Check portrait, landscape, split view, touch targets and explicit Play recovery; a desktop responsive preview is not a substitute for device testing.
 
 ## UI state machine
 
