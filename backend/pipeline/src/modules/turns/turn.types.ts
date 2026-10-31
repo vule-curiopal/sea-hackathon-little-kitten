@@ -13,4 +13,7 @@ export interface TurnSubmission {
   audio?: IncomingAudio;
   text?: string;
   textOnly?: boolean;
+  /** Internal only: authenticated realtime input reservation, never read from request JSON. */
+  reservationId?: string;
+  inputSource?: 'realtime_stt';
 }

@@ -60,6 +60,7 @@ export class SessionService {
 
   applySnapshot(profile: Profile, snapshot: EngineProfileSnapshot): void {
     if (profile.stateVersion !== snapshot.state_version || profile.clockVersion !== snapshot.clock_version) {
+      profile.inputReservation?.controller.abort();
       for (const session of this.repository.allSessions()) {
         if (session.profile === profile) for (const turn of session.turns.values()) turn.response = undefined;
       }
@@ -89,7 +90,7 @@ export class SessionService {
         return session;
       }
       const oldProfile = this.profiles.get(key);
-      if (oldProfile?.active) throw new PipelineError('turn_in_progress', 409);
+      if (oldProfile?.active || oldProfile?.inputReservation) throw new PipelineError('turn_in_progress', 409);
       const snapshot = await this.bridge!.openSession(key);
       if (oldProfile?.sessionId) {
         const previous = this.repository.getSession(oldProfile.sessionId);
@@ -120,7 +121,7 @@ export class SessionService {
         return old.result;
       }
       this.applySnapshot(profile, await this.bridge!.context(profile.token));
-      if (profile.active) throw new PipelineError('turn_in_progress', 409);
+      if (profile.active || profile.inputReservation) throw new PipelineError('turn_in_progress', 409);
       // Reuse the same allowlist against an isolated validation copy.
       const validationProfile = { ...profile, configuration: { ...profile.configuration }, configRequests: new Map() };
       this.configure(validationProfile, requestId, patch);
@@ -203,7 +204,7 @@ export class SessionService {
       return session;
     }
 
-    if (profile.active) throw new PipelineError('turn_in_progress', 409);
+    if (profile.active || profile.inputReservation) throw new PipelineError('turn_in_progress', 409);
     if (profile.sessionId) {
       const previous = this.repository.getSession(profile.sessionId);
       if (previous) this.close(previous);
@@ -236,6 +237,8 @@ export class SessionService {
   }
 
   close(session: Session): void {
+    session.profile.inputReservation?.controller.abort();
+    session.profile.inputReservation = undefined;
     session.closed = true;
     for (const turn of session.turns.values()) {
       turn.controller.abort();
@@ -249,6 +252,10 @@ export class SessionService {
   }
 
   cancel(session: Session, turnId: string): void {
+    if (session.profile.inputReservation?.turnId === turnId) {
+      session.profile.inputReservation.controller.abort();
+      session.profile.inputReservation = undefined;
+    }
     let turn = session.turns.get(turnId);
     if (!turn) {
       if (session.turns.size >= MAX_RECORDS) {
@@ -263,7 +270,24 @@ export class SessionService {
     if (session.profile.active === turn) session.profile.active = undefined;
   }
 
-  begin(session: Session, id: string, bodyFingerprint: string): { turn: TurnRecord; cached?: TurnResponse } {
+  reserveInput(session: Session, turnId: string, reservationId: string): AbortController {
+    if (session.closed || session.profile.sessionId !== session.id) throw new PipelineError('session_closed', 409);
+    if (session.profile.active || session.profile.inputReservation) throw new PipelineError('turn_in_progress', 409);
+    if (session.turns.has(turnId)) throw new PipelineError('turn_already_completed', 409);
+    if (session.turns.size >= MAX_RECORDS) throw new PipelineError('session_turn_limit', 429);
+    const controller = new AbortController();
+    session.profile.inputReservation = { id: reservationId, turnId, controller };
+    return controller;
+  }
+
+  releaseInput(session: Session, reservationId: string): void {
+    if (session.profile.inputReservation?.id === reservationId) session.profile.inputReservation = undefined;
+  }
+
+  begin(session: Session, id: string, bodyFingerprint: string, reservationId?: string): { turn: TurnRecord; cached?: TurnResponse } {
+    const reservation = session.profile.inputReservation;
+    if (reservation && (reservation.id !== reservationId || reservation.turnId !== id)) throw new PipelineError('turn_in_progress', 409);
+    if (reservationId && (!reservation || reservation.controller.signal.aborted)) throw new PipelineError('turn_canceled', 409);
     const existing = session.turns.get(id);
     if (existing) {
       if (existing.fingerprint && existing.fingerprint !== bodyFingerprint) {
@@ -288,6 +312,7 @@ export class SessionService {
     const turn = this.newRecord(session, id);
     turn.fingerprint = bodyFingerprint;
     session.profile.active = turn;
+    if (reservation) session.profile.inputReservation = undefined;
     return { turn };
   }
 
@@ -304,7 +329,7 @@ export class SessionService {
       }
       return previous.result;
     }
-    if (profile.active) throw new PipelineError('turn_in_progress', 409);
+    if (profile.active || profile.inputReservation) throw new PipelineError('turn_in_progress', 409);
 
     const next = { ...profile.configuration };
     if (patch.language_mode !== undefined) {

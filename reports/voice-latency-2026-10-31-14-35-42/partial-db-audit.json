@@ -1,0 +1,167 @@
+{
+  "scope": "Voice STT flow only; session/config APIs and unrelated maintenance are separate. Full boundary uses backend final-commit acknowledgement, not later client message delivery.",
+  "before_change": {
+    "files": 20,
+    "partial_events": 147,
+    "queries_during_stream_and_drain": 0,
+    "transactions_during_stream_and_drain": 0,
+    "rows": [
+      {
+        "id": "01_vi_clean",
+        "partial_events": 7,
+        "query_calls_before_full": 0,
+        "transactions_before_full": 0,
+        "engine_dispatches": 1
+      },
+      {
+        "id": "02_vi_soft",
+        "partial_events": 7,
+        "query_calls_before_full": 0,
+        "transactions_before_full": 0,
+        "engine_dispatches": 0
+      },
+      {
+        "id": "03_vi_muffled",
+        "partial_events": 7,
+        "query_calls_before_full": 0,
+        "transactions_before_full": 0,
+        "engine_dispatches": 1
+      },
+      {
+        "id": "04_vi_clipped",
+        "partial_events": 7,
+        "query_calls_before_full": 0,
+        "transactions_before_full": 0,
+        "engine_dispatches": 1
+      },
+      {
+        "id": "05_vi_fan_snr20",
+        "partial_events": 7,
+        "query_calls_before_full": 0,
+        "transactions_before_full": 0,
+        "engine_dispatches": 1
+      },
+      {
+        "id": "06_vi_rain_snr10",
+        "partial_events": 7,
+        "query_calls_before_full": 0,
+        "transactions_before_full": 0,
+        "engine_dispatches": 1
+      },
+      {
+        "id": "07_vi_noise_snr0",
+        "partial_events": 8,
+        "query_calls_before_full": 0,
+        "transactions_before_full": 0,
+        "engine_dispatches": 1
+      },
+      {
+        "id": "08_vi_pause_0800ms",
+        "partial_events": 8,
+        "query_calls_before_full": 0,
+        "transactions_before_full": 0,
+        "engine_dispatches": 1
+      },
+      {
+        "id": "09_vi_pause_2200ms",
+        "partial_events": 9,
+        "query_calls_before_full": 0,
+        "transactions_before_full": 0,
+        "engine_dispatches": 1
+      },
+      {
+        "id": "10_vi_noise_only",
+        "partial_events": 7,
+        "query_calls_before_full": 0,
+        "transactions_before_full": 0,
+        "engine_dispatches": 0
+      },
+      {
+        "id": "11_en_clean",
+        "partial_events": 7,
+        "query_calls_before_full": 0,
+        "transactions_before_full": 0,
+        "engine_dispatches": 1
+      },
+      {
+        "id": "12_en_soft",
+        "partial_events": 8,
+        "query_calls_before_full": 0,
+        "transactions_before_full": 0,
+        "engine_dispatches": 0
+      },
+      {
+        "id": "13_en_muffled",
+        "partial_events": 7,
+        "query_calls_before_full": 0,
+        "transactions_before_full": 0,
+        "engine_dispatches": 1
+      },
+      {
+        "id": "14_en_clipped",
+        "partial_events": 7,
+        "query_calls_before_full": 0,
+        "transactions_before_full": 0,
+        "engine_dispatches": 1
+      },
+      {
+        "id": "15_en_fan_snr20",
+        "partial_events": 7,
+        "query_calls_before_full": 0,
+        "transactions_before_full": 0,
+        "engine_dispatches": 1
+      },
+      {
+        "id": "16_en_rain_snr10",
+        "partial_events": 6,
+        "query_calls_before_full": 0,
+        "transactions_before_full": 0,
+        "engine_dispatches": 1
+      },
+      {
+        "id": "17_en_noise_snr0",
+        "partial_events": 7,
+        "query_calls_before_full": 0,
+        "transactions_before_full": 0,
+        "engine_dispatches": 1
+      },
+      {
+        "id": "18_en_pause_0800ms",
+        "partial_events": 8,
+        "query_calls_before_full": 0,
+        "transactions_before_full": 0,
+        "engine_dispatches": 1
+      },
+      {
+        "id": "19_en_pause_2200ms",
+        "partial_events": 10,
+        "query_calls_before_full": 0,
+        "transactions_before_full": 0,
+        "engine_dispatches": 1
+      },
+      {
+        "id": "20_en_noise_only",
+        "partial_events": 6,
+        "query_calls_before_full": 0,
+        "transactions_before_full": 0,
+        "engine_dispatches": 0
+      }
+    ]
+  },
+  "change": "Removed one full-context reconcile at stream startup. Token/session/reservation checks stay in RAM; persistent state is reconciled by TurnService after full transcript and before engine.",
+  "after_change_real_probe": {
+    "window": "websocket start through upstream final-commit acknowledgement",
+    "rows": [
+      {
+        "id": "01_vi_clean",
+        "partial_events": 7,
+        "query_calls_before_full": 0,
+        "transactions_before_full": 0,
+        "engine_dispatches": 1
+      }
+    ],
+    "stream_connect_ms": 489.4,
+    "full_turn_completed": true,
+    "schema_removed": true
+  }
+}

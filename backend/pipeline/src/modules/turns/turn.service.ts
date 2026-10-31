@@ -94,7 +94,7 @@ export class TurnService {
         text: text ?? null,
         textOnly: textOnly === true,
       });
-      const started = sessions.begin(session, id, bodyFingerprint);
+      const started = sessions.begin(session, id, bodyFingerprint, input.reservationId);
       record = started.turn;
       record.textOnly = textOnly === true;
       if (started.cached) return started.cached;
@@ -190,7 +190,7 @@ export class TurnService {
         session_id: session.id, turn_id: id, sequence: session.sequence,
         clock_version: prepared?.clock_version ?? 1, state_version: prepared?.state_version ?? session.profile.stateVersion,
         provider_mode: prepared?.provider_mode ?? providers.mode, engine_mode: bridge ? 'character_memory' : 'voice_stub',
-        input_mode: kind === 'greeting' ? 'greeting' : audio ? 'audio' : 'text',
+        input_mode: input.inputSource ?? (kind === 'greeting' ? 'greeting' : audio ? 'audio' : 'text'),
         transcript, reply: { text: generated.replyText, sentences, language },
         audio: speech ? { mime_type: speech.mimeType, data_base64: speech.bytes.toString('base64'), duration_ms: speech.durationMs } : null,
         presentation: (prepared?.presentation ?? null) as TurnResponse['presentation'],

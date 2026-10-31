@@ -9,7 +9,8 @@ export function voiceErrorKey(error: unknown): TranslationKey | null {
   const code = typeof error === 'object' && error !== null && 'code' in error ? String(error.code) : '';
   if (code === 'INSECURE_CONTEXT') return 'voiceSecure';
   if (code === 'MIC_PERMISSION_DENIED') return 'voiceDenied';
-  if (code === 'NO_SIGNAL') return 'voiceNoSignal';
+  if (code === 'NO_SIGNAL' || code === 'unclear_audio') return 'voiceNoSignal';
+  if (code === 'recording_limit') return 'voiceTooLong';
   if (['NETWORK_ERROR', 'TIMEOUT', 'INVALID_RESPONSE'].includes(code)) return 'voiceOffline';
   if (['session_closed', 'session_not_found', 'unauthorized'].includes(code)) return 'voiceSessionExpired';
   if (['UNSUPPORTED_AUDIO', 'MIC_UNAVAILABLE', 'MIC_NOT_FOUND'].includes(code)) return 'voiceMissing';
@@ -38,7 +39,7 @@ export function usePipelineVoice(options: Options) {
   const [session, setSession] = useState<SessionResponse | null>(null);
   const [state, setState] = useState<VoiceControllerState>('initializing');
   const [capture, setCapture] = useState<CaptureState>('idle');
-  const [meter, setMeter] = useState<MeterSnapshot | null>(null);
+  const [meter, setMeter] = useState<Pick<MeterSnapshot, 'levelDbfs' | 'elapsedMs'> | null>(null);
   const [manualOnly, setManualOnly] = useState(false);
   const [error, setError] = useState<TranslationKey | null>(null);
   const [attempt, setAttempt] = useState(0);
@@ -95,6 +96,7 @@ export function usePipelineVoice(options: Options) {
       else if (event.type === 'capture') {
         if (event.event.type === 'state') setCapture(event.event.state);
         if (event.event.type === 'meter') setMeter(event.event.snapshot);
+        if (event.event.type === 'stream_meter') setMeter({ levelDbfs: event.event.levelDbfs, elapsedMs: event.event.elapsedMs });
         if (event.event.type === 'manual_only') setManualOnly(true);
       }
     });

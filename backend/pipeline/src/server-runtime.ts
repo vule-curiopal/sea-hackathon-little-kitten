@@ -1,6 +1,7 @@
 import { createServer as createHttpServer } from 'node:http';
 import type { Express } from 'express';
 import { disposeApp } from './app.js';
+import { attachSpeechStreams } from './modules/speech-streams/speech-stream.routes.js';
 
 export interface PipelineServer {
   app: Express;
@@ -11,6 +12,7 @@ export interface PipelineServer {
 /** Express handles requests; this adapter owns sockets and process shutdown. */
 export function createServer(app: Express): PipelineServer {
   const server = createHttpServer({ requestTimeout: 45_000, headersTimeout: 45_000 }, app);
+  attachSpeechStreams(app, server);
   let closing: Promise<void> | undefined;
 
   return {

@@ -3,6 +3,7 @@ import { VoiceApiClient, type VoiceApiOptions, type CharacterConfiguration } fro
 import { BrowserVoiceCapture, type CaptureEvent, type CaptureOptions, type CapturedAudio } from './capture.js';
 import { asClientError, canceledError, isCanceled, notify, VoiceClientError } from './errors.js';
 import { VoicePlayback, type PlaybackEvent, type PlaybackOptions, type PlaybackResult, type ReceiptSender } from './playback.js';
+import { RealtimeVoiceCapture } from './realtime/capture.js';
 
 export type VoiceControllerState = 'idle' | 'initializing' | 'recording' | 'processing' | 'speaking' | 'playback_blocked' | 'error';
 export type VoiceControllerEvent =
@@ -26,8 +27,12 @@ export interface PlaybackPort {
   subscribe?(listener: (event: PlaybackEvent) => void): () => void;
 }
 export type VoiceApiPort = Pick<VoiceApiClient,
-  'createRequestId' | 'createSession' | 'configure' | 'submitTurn' | 'cancelTurn' | 'playback' | 'endSession'> & Partial<Pick<VoiceApiClient, 'submitText'>>;
-export interface VoiceControllerOptions { api: VoiceApiPort; capture: CapturePort; playback: PlaybackPort }
+  'createRequestId' | 'createSession' | 'configure' | 'submitTurn' | 'cancelTurn' | 'playback' | 'endSession'> & Partial<Pick<VoiceApiClient, 'submitText' | 'speechCapabilities'>>;
+export interface RealtimeCapturePort {
+  start(session: SessionResponse, requestId: string, signal: AbortSignal, onProcessing: () => void, beforeConnect?: Promise<unknown>): Promise<TurnResponse>;
+  send(): boolean; cancel(): void; subscribe?(listener: (event: CaptureEvent) => void): () => void;
+}
+export interface VoiceControllerOptions { api: VoiceApiPort; capture: CapturePort; playback: PlaybackPort; realtime?: RealtimeCapturePort }
 interface ActiveTurn { id: string; session: SessionResponse; abort: AbortController; response?: TurnResponse }
 
 /** Framework-independent coordinator. A frontend owns layout, captions and rendering. */
@@ -45,6 +50,8 @@ export class VoiceController {
   constructor(private readonly ports: VoiceControllerOptions) {
     const captureUnsubscribe = ports.capture.subscribe?.(event => notify(this.listeners, { type: 'capture', event }));
     if (captureUnsubscribe) this.unsubscriptions.push(captureUnsubscribe);
+    const realtimeUnsubscribe = ports.realtime?.subscribe?.(event => notify(this.listeners, { type: 'capture', event }));
+    if (realtimeUnsubscribe) this.unsubscriptions.push(realtimeUnsubscribe);
     const playbackUnsubscribe = ports.playback.subscribe?.(event => {
       notify(this.listeners, { type: 'playback', event });
       if (event.type === 'error') this.setState('error');
@@ -85,8 +92,11 @@ export class VoiceController {
       created = await this.ports.api.createSession(demoProfileKey, abort.signal);
       if (abort.signal.aborted || generation !== this.setupGeneration) throw canceledError();
       const configured = await this.ports.api.configure(created, language, voiceId, abort.signal, character);
+      const capabilities = created.provider_mode === 'real' ? await this.ports.api.speechCapabilities?.(abort.signal) : undefined;
       if (abort.signal.aborted || generation !== this.setupGeneration) throw canceledError();
-      this.currentSession = { ...created, ...configured };
+      this.currentSession = { ...created, ...configured,
+        ...(capabilities?.input_mode === 'elevenlabs_realtime' ? { speech_input_mode: 'elevenlabs_realtime' as const } : {}),
+      };
       this.setupAbort = null;
       this.setState('idle');
       return this.session!;
@@ -126,11 +136,14 @@ export class VoiceController {
     this.active = active;
     this.setState('recording');
     if (this.active !== active) return Promise.reject(canceledError());
+    if (session.speech_input_mode === 'elevenlabs_realtime') {
+      return this.processRealtimeTurn(active, cancelPrevious);
+    }
     const capture = this.ports.capture.start();
     return this.processTurn(active, capture, cancelPrevious, options.fixtureId);
   }
 
-  send(): boolean { return this.ports.capture.send(); }
+  send(): boolean { return this.currentSession?.speech_input_mode === 'elevenlabs_realtime' ? this.ports.realtime?.send() ?? false : this.ports.capture.send(); }
 
   text(text: string, options: { textOnly?: boolean } = {}): Promise<TurnResponse> {
     return this.processText('utterance', text, options.textOnly === true);
@@ -188,6 +201,7 @@ export class VoiceController {
     this.active = null;
     active?.abort.abort();
     this.ports.capture.cancel();
+    this.ports.realtime?.cancel();
     this.ports.playback.stop();
     this.setState('idle');
     if (active) {
@@ -234,6 +248,17 @@ export class VoiceController {
     } catch (error) { this.failTurn(active, error); throw asClientError(error); }
   }
 
+  private async processRealtimeTurn(active: ActiveTurn, canceledPrevious: Promise<void>): Promise<TurnResponse> {
+    try {
+      if (!this.ports.realtime) throw new VoiceClientError('UNSUPPORTED_AUDIO', 'Realtime capture unavailable.');
+      const response = await this.ports.realtime.start(active.session, active.id, active.abort.signal,
+        () => { if (this.active === active) this.setState('processing'); },
+        Promise.all([canceledPrevious, this.ports.playback.flushReceipts()]));
+      this.assertCurrent(active);
+      return await this.present(active, response);
+    } catch (error) { this.failTurn(active, error); throw asClientError(error); }
+  }
+
   private async present(active: ActiveTurn, response: TurnResponse): Promise<TurnResponse> {
       this.assertCurrent(active);
       active.response = response;
@@ -256,6 +281,7 @@ export class VoiceController {
         this.active = null;
         active.abort.abort();
         this.ports.capture.cancel();
+        this.ports.realtime?.cancel();
         this.ports.playback.stop();
         void this.ports.api.cancelTurn(active.session, active.id).catch(() => {});
         this.handleError(error);
@@ -280,5 +306,6 @@ export function createVoiceClient(options: { api?: VoiceApiOptions; capture?: Ca
   const api = new VoiceApiClient(options.api);
   const capture = new BrowserVoiceCapture(options.capture);
   const playback = new VoicePlayback(options.playback);
-  return { api, capture, playback, controller: new VoiceController({ api, capture, playback }) };
+  const realtime = new RealtimeVoiceCapture(options.api?.baseUrl);
+  return { api, capture, playback, controller: new VoiceController({ api, capture, playback, realtime }) };
 }

@@ -6,3 +6,5 @@ export * from './controller.js';
 export * from './detector.js';
 export * from './errors.js';
 export * from './playback.js';
+export * from './realtime/capture.js';
+export * from './realtime/pcm.js';

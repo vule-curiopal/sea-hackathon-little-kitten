@@ -9,6 +9,7 @@ export function registerSystemRoutes(app: Express, config: VoiceConfig, sessions
   const router = Router();
   router.get('/health', (_request, response) => response.json({
     status: 'ok', provider_mode: config.mode, engine_mode: sessions.engineBridge ? 'character_memory' : 'voice_stub',
+    speech_input_mode: config.speechInputMode,
     capabilities: { text: true, audio: true, memory: !!sessions.engineBridge },
     retention: 'not_verified_by_this_service',
   }));

@@ -1,0 +1,354 @@
+{
+  "scope": "Real paced PCM -> realtime STT -> current real character/memory engine on an isolated PostgreSQL schema -> real TTS. Last-speech timing uses TTS clip segment bounds, not human word alignment. Result latency ends at MP3 receipt, not physical playback.",
+  "successful_turns": 15,
+  "attempted": 20,
+  "summary": {
+    "endpoint_wait_ms": {
+      "median": 3833.7,
+      "mean": 3837.8,
+      "min": 3738.9,
+      "max": 3924
+    },
+    "finalize_drain_ms": {
+      "median": 396.5,
+      "mean": 420.3,
+      "min": 309.8,
+      "max": 555.5
+    },
+    "database_ms": {
+      "median": 9929.7,
+      "mean": 9978.8,
+      "min": 7500.5,
+      "max": 11912.5
+    },
+    "model_api_ms": {
+      "median": 6224.4,
+      "mean": 6090.6,
+      "min": 4782.9,
+      "max": 6980.8
+    },
+    "tts_ms": {
+      "median": 641.6,
+      "mean": 638.8,
+      "min": 454.2,
+      "max": 956.9
+    },
+    "other_ms": {
+      "median": 14.5,
+      "mean": 23.0,
+      "min": 7.9,
+      "max": 120.3
+    },
+    "total_ms": {
+      "median": 21074.8,
+      "mean": 20989.3,
+      "min": 18194.6,
+      "max": 22825.8
+    },
+    "profile_setup_ms": {
+      "median": 7800.1,
+      "mean": 8528.2,
+      "min": 7185.5,
+      "max": 12616.3
+    },
+    "stream_connect_ms": {
+      "median": 1582.1,
+      "mean": 1666.2,
+      "min": 1404.3,
+      "max": 2186.9
+    },
+    "engine_ms": {
+      "median": 9224.4,
+      "mean": 9179.8,
+      "min": 7892,
+      "max": 9950.3
+    },
+    "processing_sql_queries": {
+      "median": 120,
+      "mean": 119.4,
+      "min": 117,
+      "max": 120
+    },
+    "model_requests": {
+      "median": 5,
+      "mean": 5,
+      "min": 5,
+      "max": 5
+    },
+    "outside_engine_database_ms": {
+      "median": 6236.2,
+      "mean": 6172.3,
+      "min": 4795.8,
+      "max": 7415.4
+    }
+  },
+  "model_stages": {
+    "classify": {
+      "requests": 15,
+      "median_ms": 2152.7,
+      "max_ms": 2867.5
+    },
+    "moderation_input": {
+      "requests": 15,
+      "median_ms": 590.9,
+      "max_ms": 996.5
+    },
+    "reply": {
+      "requests": 15,
+      "median_ms": 2018.2,
+      "max_ms": 2657.2
+    },
+    "moderation_output": {
+      "requests": 15,
+      "median_ms": 388.5,
+      "max_ms": 886.4
+    },
+    "check": {
+      "requests": 15,
+      "median_ms": 1772.2,
+      "max_ms": 2285.3
+    }
+  },
+  "assets": [
+    {
+      "id": "01_vi_clean",
+      "endpoint_wait_ms": 3903.2,
+      "finalize_drain_ms": 385.9,
+      "database_ms": 9994.999999999978,
+      "model_api_ms": 6517.9,
+      "tts_ms": 522.6000000000058,
+      "other_ms": 120.30000000001928,
+      "total_ms": 21444.9,
+      "profile_setup_ms": 8703.5,
+      "stream_connect_ms": 1815.9,
+      "engine_ms": 9536.2,
+      "processing_sql_queries": 120,
+      "model_requests": 5,
+      "outside_engine_database_ms": 6318.9
+    },
+    {
+      "id": "03_vi_muffled",
+      "endpoint_wait_ms": 3833.7,
+      "finalize_drain_ms": 346.2,
+      "database_ms": 11607.199999999983,
+      "model_api_ms": 6379.5,
+      "tts_ms": 641.6000000000058,
+      "other_ms": 17.60000000000582,
+      "total_ms": 22825.799999999996,
+      "profile_setup_ms": 7598.8,
+      "stream_connect_ms": 1582.1,
+      "engine_ms": 9847.8,
+      "processing_sql_queries": 120,
+      "model_requests": 5,
+      "outside_engine_database_ms": 7381.0
+    },
+    {
+      "id": "04_vi_clipped",
+      "endpoint_wait_ms": 3911.2,
+      "finalize_drain_ms": 386.4,
+      "database_ms": 8489.00000000003,
+      "model_api_ms": 6745.5,
+      "tts_ms": 520.1999999999971,
+      "other_ms": 11.999999999985448,
+      "total_ms": 20064.30000000001,
+      "profile_setup_ms": 7800.1,
+      "stream_connect_ms": 1404.3,
+      "engine_ms": 9120.2,
+      "processing_sql_queries": 120,
+      "model_requests": 5,
+      "outside_engine_database_ms": 5474.200000000001
+    },
+    {
+      "id": "05_vi_fan_snr20",
+      "endpoint_wait_ms": 3890.7,
+      "finalize_drain_ms": 380.6,
+      "database_ms": 9359.49999999997,
+      "model_api_ms": 6980.8,
+      "tts_ms": 516.1000000000058,
+      "other_ms": 22.40000000001146,
+      "total_ms": 21150.099999999988,
+      "profile_setup_ms": 7340.1,
+      "stream_connect_ms": 1502.6,
+      "engine_ms": 9950.3,
+      "processing_sql_queries": 120,
+      "model_requests": 5,
+      "outside_engine_database_ms": 5712.799999999999
+    },
+    {
+      "id": "06_vi_rain_snr10",
+      "endpoint_wait_ms": 3885.3,
+      "finalize_drain_ms": 555.5,
+      "database_ms": 11912.499999999913,
+      "model_api_ms": 5601.3,
+      "tts_ms": 666.7999999999884,
+      "other_ms": 14.500000000104592,
+      "total_ms": 22635.900000000005,
+      "profile_setup_ms": 7433.6,
+      "stream_connect_ms": 1442.5,
+      "engine_ms": 9172.6,
+      "processing_sql_queries": 120,
+      "model_requests": 5,
+      "outside_engine_database_ms": 7415.4
+    },
+    {
+      "id": "07_vi_noise_snr0",
+      "endpoint_wait_ms": 3833.3,
+      "finalize_drain_ms": 462.8,
+      "database_ms": 9635.799999999988,
+      "model_api_ms": 6430.6,
+      "tts_ms": 454.20000000001164,
+      "other_ms": 9.500000000005457,
+      "total_ms": 20826.200000000004,
+      "profile_setup_ms": 12616.3,
+      "stream_connect_ms": 2113.2,
+      "engine_ms": 9834.2,
+      "processing_sql_queries": 120,
+      "model_requests": 5,
+      "outside_engine_database_ms": 5586.5
+    },
+    {
+      "id": "08_vi_pause_0800ms",
+      "endpoint_wait_ms": 3924,
+      "finalize_drain_ms": 346.5,
+      "database_ms": 7500.500000000029,
+      "model_api_ms": 5798,
+      "tts_ms": 601.6000000000349,
+      "other_ms": 23.999999999970896,
+      "total_ms": 18194.600000000035,
+      "profile_setup_ms": 7698.5,
+      "stream_connect_ms": 1617.5,
+      "engine_ms": 7892,
+      "processing_sql_queries": 117,
+      "model_requests": 5,
+      "outside_engine_database_ms": 4795.8
+    },
+    {
+      "id": "09_vi_pause_2200ms",
+      "endpoint_wait_ms": 3849.9,
+      "finalize_drain_ms": 309.8,
+      "database_ms": 8545.300000000045,
+      "model_api_ms": 6808.5999999999985,
+      "tts_ms": 482.30000000004657,
+      "other_ms": 8.399999999886859,
+      "total_ms": 20004.299999999977,
+      "profile_setup_ms": 7335.7,
+      "stream_connect_ms": 1439.8,
+      "engine_ms": 9246.3,
+      "processing_sql_queries": 117,
+      "model_requests": 5,
+      "outside_engine_database_ms": 5269.700000000001
+    },
+    {
+      "id": "11_en_clean",
+      "endpoint_wait_ms": 3761,
+      "finalize_drain_ms": 488.5,
+      "database_ms": 10189.400000000023,
+      "model_api_ms": 5876.8,
+      "tts_ms": 709.7999999999884,
+      "other_ms": 40.99999999998818,
+      "total_ms": 21066.5,
+      "profile_setup_ms": 10347.1,
+      "stream_connect_ms": 1452.5,
+      "engine_ms": 8679,
+      "processing_sql_queries": 120,
+      "model_requests": 5,
+      "outside_engine_database_ms": 6756.1
+    },
+    {
+      "id": "13_en_muffled",
+      "endpoint_wait_ms": 3738.9,
+      "finalize_drain_ms": 514.9,
+      "database_ms": 9929.699999999953,
+      "model_api_ms": 6224.4,
+      "tts_ms": 880.2000000000116,
+      "other_ms": 17.500000000023647,
+      "total_ms": 21305.599999999988,
+      "profile_setup_ms": 7918.4,
+      "stream_connect_ms": 2186.9,
+      "engine_ms": 9285.6,
+      "processing_sql_queries": 120,
+      "model_requests": 5,
+      "outside_engine_database_ms": 6236.2
+    },
+    {
+      "id": "14_en_clipped",
+      "endpoint_wait_ms": 3771.9,
+      "finalize_drain_ms": 425.6,
+      "database_ms": 10295.000000000058,
+      "model_api_ms": 5892.6,
+      "tts_ms": 681.7999999999884,
+      "other_ms": 7.899999999999636,
+      "total_ms": 21074.800000000047,
+      "profile_setup_ms": 7185.5,
+      "stream_connect_ms": 1587.3,
+      "engine_ms": 8977,
+      "processing_sql_queries": 120,
+      "model_requests": 5,
+      "outside_engine_database_ms": 6314.9
+    },
+    {
+      "id": "15_en_fan_snr20",
+      "endpoint_wait_ms": 3764.6,
+      "finalize_drain_ms": 396.5,
+      "database_ms": 9565.000000000058,
+      "model_api_ms": 5444.5,
+      "tts_ms": 596.5,
+      "other_ms": 9.499999999941792,
+      "total_ms": 19776.6,
+      "profile_setup_ms": 9064.9,
+      "stream_connect_ms": 1733.1,
+      "engine_ms": 8536.7,
+      "processing_sql_queries": 120,
+      "model_requests": 5,
+      "outside_engine_database_ms": 5889.3
+    },
+    {
+      "id": "16_en_rain_snr10",
+      "endpoint_wait_ms": 3782.1,
+      "finalize_drain_ms": 489.6,
+      "database_ms": 11823.100000000151,
+      "model_api_ms": 5349.8,
+      "tts_ms": 956.9000000000233,
+      "other_ms": 13.899999999895044,
+      "total_ms": 22415.40000000007,
+      "profile_setup_ms": 11217.2,
+      "stream_connect_ms": 2082.8,
+      "engine_ms": 9224.4,
+      "processing_sql_queries": 120,
+      "model_requests": 5,
+      "outside_engine_database_ms": 7119.0
+    },
+    {
+      "id": "17_en_noise_snr0",
+      "endpoint_wait_ms": 3891.7,
+      "finalize_drain_ms": 392.8,
+      "database_ms": 11379.10000000021,
+      "model_api_ms": 4782.9,
+      "tts_ms": 669.8000000000466,
+      "other_ms": 10.799999999720967,
+      "total_ms": 21127.099999999977,
+      "profile_setup_ms": 7966.5,
+      "stream_connect_ms": 1563.2,
+      "engine_ms": 9157.1,
+      "processing_sql_queries": 120,
+      "model_requests": 5,
+      "outside_engine_database_ms": 6307.5
+    },
+    {
+      "id": "18_en_pause_0800ms",
+      "endpoint_wait_ms": 3825.7,
+      "finalize_drain_ms": 422.6,
+      "database_ms": 9455.20000000007,
+      "model_api_ms": 6526,
+      "tts_ms": 682.2000000000698,
+      "other_ms": 15.299999999813735,
+      "total_ms": 20926.999999999953,
+      "profile_setup_ms": 7697.4,
+      "stream_connect_ms": 1469.3,
+      "engine_ms": 9238.1,
+      "processing_sql_queries": 117,
+      "model_requests": 5,
+      "outside_engine_database_ms": 6007.5
+    }
+  ]
+}

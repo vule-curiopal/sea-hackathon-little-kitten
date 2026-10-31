@@ -1,5 +1,7 @@
 # Kế hoạch triển khai voice pipeline
 
+**Lựa chọn mới đã triển khai local:** ưu tiên **ElevenLabs realtime STT**, VAD tự động, lọc nền và chờ 1 giây; backend gom/chốt full transcript rồi mới gọi engine/LLM. **Local VAD model để sau.** Xem [cách chạy, contract và kết quả kiểm thử](elevenlabs-realtime.md). [Plan hai chế độ](speech-input-variants-plan.md) và [các lựa chọn](speech-input-decisions.md) đã ghi nhận thứ tự mới; phần RMS bên dưới mô tả bản cũ để tham chiếu/rollback.
+
 Ngày cập nhật: **31/10/2026**. Đã triển khai backend **Express 5 + TypeScript trên Node.js**, tách routes/controllers, services, repository RAM và provider adapters; cùng thư viện browser RMS/capture/playback cho frontend React/TypeScript tích hợp trên iPad. Hướng dẫn chạy: [backend/pipeline/README.md](../../backend/pipeline/README.md). Bộ 139 test tự động dùng fake/mocked provider; các probe riêng đã chạy STT → GPT → TTS thật cho Việt/Anh trên máy phát triển và server. Chưa benchmark p95 hoặc kiểm thử iPad thật; xem [trạng thái triển khai](implementation-status.md).
 
 Phạm vi đã thống nhất: **microphone → STT → GPT tạm → TTS → phát audio**, không memory. Engine trả lời chính thức do thành viên khác phụ trách. Xem [phân chia phạm vi](../voice-pipeline-scope.md) và [đặc tả sản phẩm](../product-specification.md).
@@ -8,6 +10,9 @@ Phạm vi đã thống nhất: **microphone → STT → GPT tạm → TTS → ph
 
 | Tài liệu | Nội dung |
 | --- | --- |
+| [elevenlabs-realtime.md](elevenlabs-realtime.md) | Bản realtime ưu tiên: tham số đang gửi, lifecycle, test thật và bước deploy |
+| [speech-input-variants-plan.md](speech-input-variants-plan.md) | Hai chế độ mới, gate chốt toàn lượt, module/contract, tham số và các bước triển khai |
+| [speech-input-decisions.md](speech-input-decisions.md) | V01–V04: thời gian chờ, tự động/thủ công, giới hạn lượt và mode mặc định |
 | [decisions.md](decisions.md) | Ghi nhận D01–D12, voice đã kế thừa và checklist tài khoản/thiết bị |
 | [voices.md](voices.md) | 5 voice ID đã chọn trong little-buddy-impl, mặc định Việt/Anh và ví dụ env |
 | [implementation-plan.md](implementation-plan.md) | Kiến trúc, thứ tự thực hiện, module và điều kiện xong từng bước |

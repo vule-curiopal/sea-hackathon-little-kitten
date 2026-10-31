@@ -37,7 +37,7 @@ describe('voice controller', () => {
   it('selects language before recording and runs capture/upload/playback through the canonical API', async () => {
     const fake = setup();
     await fake.controller.openProfile('an', 'vi');
-    expect(fake.api.configure).toHaveBeenCalledWith(session(), 'vi', undefined, expect.any(AbortSignal));
+    expect(fake.api.configure).toHaveBeenCalledWith(session(), 'vi', undefined, expect.any(AbortSignal), {});
     const pending = fake.controller.talk({ fixtureId: 'voice_sample_vi' });
     expect(fake.capture.start).toHaveBeenCalledOnce();
     fake.recording().resolve(captured());

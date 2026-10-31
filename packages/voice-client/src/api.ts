@@ -60,7 +60,7 @@ function validateSession(value: unknown): SessionResponse {
   return value as unknown as SessionResponse;
 }
 
-function validateTurn(value: unknown, session: SessionResponse, requestId: string, textOnly = false): TurnResponse {
+export function validateTurnResponse(value: unknown, session: SessionResponse, requestId: string, textOnly = false): TurnResponse {
   const validAudio = record(value) && (textOnly && value.audio === null || record(value.audio)
     && typeof value.audio.mime_type === 'string' && typeof value.audio.data_base64 === 'string'
     && !!value.audio.data_base64 && value.audio.data_base64.length <= Math.ceil(LIMITS.audioBytes / 3) * 4
@@ -92,6 +92,14 @@ export class VoiceApiClient {
   }
 
   createRequestId(): string { return this.makeId(); }
+
+  async speechCapabilities(signal?: AbortSignal): Promise<{ input_mode: 'rms_batch' | 'elevenlabs_realtime' }> {
+    const value = await this.request('/api/voice/capabilities', { method: 'GET' }, signal);
+    if (!record(value) || !['rms_batch', 'elevenlabs_realtime'].includes(String(value.input_mode))) {
+      throw new VoiceClientError('INVALID_RESPONSE', 'Invalid voice capabilities.');
+    }
+    return value as { input_mode: 'rms_batch' | 'elevenlabs_realtime' };
+  }
 
   async createSession(demoProfileKey: string, signal?: AbortSignal): Promise<SessionResponse> {
     const response = await this.request('/api/sessions', {
@@ -135,7 +143,7 @@ export class VoiceApiClient {
     const value = await this.request(`/api/sessions/${encodeURIComponent(session.session_id)}/turns`, {
       method: 'POST', headers: this.headers(session), body: form,
     }, options.signal);
-    return validateTurn(value, session, options.requestId);
+    return validateTurnResponse(value, session, options.requestId);
   }
 
   async submitText(session: SessionResponse, options: SubmitTextOptions): Promise<TurnResponse> {
@@ -147,7 +155,7 @@ export class VoiceApiClient {
       method: 'POST', headers: this.headers(session, true),
       body: JSON.stringify({ request_id: options.requestId, kind: options.kind, ...(text ? { text } : {}), text_only: options.textOnly === true, language_hint: session.configuration.language_mode }),
     }, options.signal);
-    return validateTurn(value, session, options.requestId, options.textOnly === true);
+    return validateTurnResponse(value, session, options.requestId, options.textOnly === true);
   }
 
   /** Uses its own deadline/signal: aborting the upload must not abort the cancellation. */

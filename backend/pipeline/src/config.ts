@@ -8,6 +8,8 @@ export interface VoiceConfig {
   sttModel: string; ttsModel: string; replyModel: string; maxOutputTokens: number;
   enableLogging: boolean; sttTimeoutMs: number; replyTimeoutMs: number; ttsTimeoutMs: number; turnTimeoutMs: number;
   defaultVoices: Record<Language, string>; ffprobePath: string;
+  speechInputMode: 'rms_batch' | 'elevenlabs_realtime';
+  realtimeSilenceMs: number;
 }
 function integer(value: string | undefined, fallback: number, min = 1, max = 120000): number {
   const result = value === undefined ? fallback : Number(value);
@@ -37,6 +39,9 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
     throw new Error('TRUST_PROXY_LOOPBACK must be true or false');
   }
   const enableLogging = readSttLogging(env);
+  const speechInputMode = env.VOICE_INPUT_MODE ?? (mode === 'real' ? 'elevenlabs_realtime' : 'rms_batch');
+  if (speechInputMode !== 'rms_batch' && speechInputMode !== 'elevenlabs_realtime') throw new Error('Invalid VOICE_INPUT_MODE');
+  if (mode === 'fake' && speechInputMode === 'elevenlabs_realtime') throw new Error('Realtime STT requires real providers');
   if (mode === 'real' && (!env.ELEVENLABS_API_KEY || !env.OPENAI_API_KEY)) {
     throw new Error('Real mode requires both API keys');
   }
@@ -61,5 +66,6 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
     sttTimeoutMs: integer(env.STT_TIMEOUT_MS, 10000), replyTimeoutMs: integer(env.REPLY_TIMEOUT_MS, 10000),
     ttsTimeoutMs: integer(env.TTS_TIMEOUT_MS, 10000), turnTimeoutMs: integer(env.TURN_PROCESSING_TIMEOUT_MS, 20000),
     defaultVoices, ffprobePath: env.FFPROBE_PATH ?? 'ffprobe',
+    speechInputMode, realtimeSilenceMs: integer(env.ELEVENLABS_VAD_SILENCE_MS, 1000, 192, 3000),
   };
 }

@@ -1,0 +1,17 @@
+{
+  "browser": "headless Edge, synthetic mic with padded 2.2s-pause corpus audio",
+  "physical_ipad": false,
+  "engine_dispatches": 1,
+  "errors": [],
+  "playback_completed": true,
+  "input_mode": "realtime_stt",
+  "transcript": "Hôm nay mình hơi buồn. Bạn chơi với mình nhé.",
+  "reply_nonempty": true,
+  "audio_mime": "audio/mpeg",
+  "event_counts": {
+    "playback": 1,
+    "capture": 248,
+    "state": 6,
+    "turn": 1
+  }
+}

@@ -8,15 +8,15 @@ Cập nhật theo câu trả lời của bạn ngày **31/10/2026**, yêu cầu 
 | --- | --- | --- |
 | D01 | ElevenLabs cho cả STT và TTS | Scribe v2 batch nhận audio nguyên bản; Flash v2.5 đọc câu trả lời; voice ID ở D08 |
 | D02 | A — React + TypeScript; backend Express 5 + TypeScript theo yêu cầu mới | Giữ Node.js runtime; Express routers/controllers tách khỏi services/repository/providers theo [kiến trúc backend](backend-architecture.md); giao diện React/TS do thành viên frontend phụ trách |
-| D03 | Chỉ batch | Thu xong mới upload; không triển khai realtime STT |
-| D04 | Cách số 4 — ngưỡng âm lượng thích nghi | Web Audio đo RMS/nền; MediaRecorder ghi; tự gửi khi mức âm thấp đủ lâu; Gửi thủ công dự phòng |
-| D05 | A — cân bằng | Im lặng 1.500 ms; chờ tín hiệu ban đầu 5.000 ms sau đo nền; thu tối đa 30.000 ms tính từ lúc recorder bắt đầu |
+| D03 | ElevenLabs realtime STT ưu tiên; local model để sau | Realtime VAD + lọc nền đã triển khai local; full transcript được drain/chốt trước một dispatch engine. [Chi tiết](elevenlabs-realtime.md) |
+| D04 | ElevenLabs tự phát hiện lời nói và lọc nền | Realtime dùng `commit_strategy=vad`, `filter_background_audio=true`; ngưỡng khác để provider mặc định. RMS giữ cho mode cũ; local VAD model để sau |
+| D05 | Realtime chờ im lặng 3.000 ms | Guard không có text 8.000 ms để tính cả độ trễ provider; thu tối đa 30.000 ms. Hết giới hạn khi chưa chốt thì hủy, không gửi câu dở; bản RMS cũ giữ timing riêng |
 | D06 | Demo web trên iPad, responsive | Safari/iPadOS là môi trường kiểm thử chính dự kiến; frontend phụ trách layout, touch, portrait/landscape và split view; phần voice cung cấp contract/lifecycle để tích hợp |
 | D07 | B — chọn Việt/Anh trước mỗi phiên | Lưu cấu hình phiên `vi` hoặc `en`; STT, GPT và TTS cùng dùng tiếng đã chọn; chưa tự chuyển ngôn ngữ trong v1 |
 | D08 | Kế thừa voice đã chọn trong little-buddy-impl | Allowlist 5 ID; mặc định Việt Phan Anh, Anh Little Dude II; chi tiết và nguồn tại [voices.md](voices.md) |
 | D09 | A — GPT đơn giản qua OpenAI API | `gpt-6-luna`, reasoning `none`, tối đa 200 output token; chỉ transcript hiện tại, không conversation/history/memory |
 | D10 | C ban đầu — chưa biết gói/quyền retention; nay dùng normal mode theo LittleBuddy brain theo yêu cầu của bạn | `STT_LOGGING=1` mặc định, không gửi logging query cho STT/TTS. STT normal đã trả 200; STT ZRM (`0`) trả 403 trên tài khoản hiện tại. Không tuyên bố zero retention; GPT vẫn không memory |
-| D11 | B — ưu tiên latency trong phạm vi batch | Một request turn; reuse kết nối provider khi có thể, payload gọn, trả lời ngắn, đo từng stage; không thêm VAD model/Isolation/realtime/streaming |
+| D11 | B cho V1; mở rộng theo plan hai chế độ | V1 ưu tiên latency trong batch. Yêu cầu mới cho phép VAD model và realtime STT, nhưng không gửi chunk/partial tới engine/LLM; timing mới còn ở mức đề xuất |
 | D12 | Theo API contract, có thể bổ sung nếu cần | Dùng endpoint/session/config/cancel/playback chung; bỏ phương án ba route STT/reply/TTS public riêng |
 
 Đây là quyết định thiết kế, không xác nhận quyền model, chất lượng giọng, độ trễ hoặc tính tương thích đã được đo trên iPad thật.

@@ -49,6 +49,23 @@ Configuration patches accept only `personality` (one of the 16 allowed MBTI code
 
 For the first batch voice demo, choose `language_mode=vi` or `en` before the session's first recording. Use this fixed mode for recognition hints, reply generation, fallback text and synthesis; `follow_child` remains part of the broader product contract but is outside this first voice demo. A `language_hint` cannot override the configured mode.
 
+## Realtime speech turn
+
+The real-provider default is ElevenLabs realtime STT with VAD and background filtering. The existing HTTP batch/text turn route remains available. See the [implementation guide](voice-pipeline/elevenlabs-realtime.md).
+
+1. `GET /api/voice/capabilities` returns `input_mode`, `realtime_available`, `silence_ms`, `filter_background_audio`, and `max_recording_ms`.
+2. Connect to `WSS /api/sessions/{session_id}/speech-stream`, using a trusted origin. The first text frame, within 5s, is `{ "type": "stream.start", "token": "<demo_token>", "request_id": "<uuid>", "language": "vi" }`. No tokens in the URL. Authentication and a per-profile input reservation precede any upstream connection.
+3. Wait for `stream.ready`. Audio frames are binary: a 4-byte **unsigned little-endian sequence number**, starting at zero, followed by mono signed PCM16 little-endian at 16kHz. Target 200ms/6,400 PCM bytes per frame; maximum 32,000 PCM bytes per frame and 960,000 PCM bytes/30s per turn.
+4. `transcript.partial` replaces the temporary text; `transcript.segment` reports a settled segment. Neither dispatches the response engine. Provider VAD can emit `turn.end_candidate` after 3s of no speech.
+5. On an end candidate or manual Send, stop/flush microphone processing, send the last PCM frame, then `{ "type": "audio.end", "last_seq": 12 }`. The last sequence must exactly match the final audio frame. This message requests finalization on the same socket.
+6. Backend sends a final provider commit and waits for its committed acknowledgement. An empty acknowledgement is valid for a silence-only tail. Only then emit `stream.drained`, `transcript.final` with the full text, and `stream.processing`, and dispatch the complete utterance once to the existing engine/GPT. No batch retranscription or client-supplied transcript is used.
+7. `turn.result` contains `response: TurnResponse`, with `input_mode: "realtime_stt"` and the existing transcript/reply/audio/version/engine metadata. The WebSocket closes normally after delivery. Playback uses the existing HTTP receipt route.
+8. `stream.cancel`, existing `DELETE /api/sessions/{session_id}/turns/{request_id}`, disconnection, invalid sequences, hard limits or `stream.error` abort work and release the reservation. Error frames contain only a stable `code`. A timeout or abrupt socket close is never a successful end-of-turn signal. No automatic reconnect/replay.
+
+One stream/turn per profile; configuration and clock changes cannot compete with a capturing reservation. Maximum silence without recognized text is 8s, accounting for provider startup; final-drain timeout is 10s. A 30s recording limit rejects an unfinished turn rather than sending a fragment to the engine. Input buffers are ephemeral, not conversation memory. Server shutdown closes upgraded sockets as well as HTTP requests.
+
+These stream event names belong to Miu. ElevenLabs returns segment commits; Miu produces the utterance-level `transcript.final`. Local VAD model input is deferred.
+
 ## Voice-turn request
 
 `POST /api/sessions/{session_id}/turns`, `Content-Type: multipart/form-data`:

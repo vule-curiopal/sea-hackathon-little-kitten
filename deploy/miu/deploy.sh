@@ -34,14 +34,16 @@ log() { printf '[miu-deploy] %s\n' "$*"; }
 fail() { log "$*" >&2; exit 1; }
 is_sha() { [[ $1 =~ ^[0-9a-f]{40}$ ]]; }
 
-case $# in
-  0) ;;
-  2)
-    [[ $1 == --ref ]] && is_sha "$2" || fail 'Usage: miu-deploy [--ref <40 lowercase hex commit>]'
-    requested_ref=$2
-    ;;
-  *) fail 'Usage: miu-deploy [--ref <40 lowercase hex commit>]' ;;
-esac
+requested_branch=main
+while (( $# )); do
+  [[ $# -ge 2 ]] || fail 'Usage: miu-deploy [--branch <branch>] [--ref <40 lowercase hex commit>]'
+  case $1 in
+    --ref) is_sha "$2" || fail 'Invalid commit SHA.'; requested_ref=$2 ;;
+    --branch) git check-ref-format --branch "$2" >/dev/null || fail 'Invalid branch.'; requested_branch=$2 ;;
+    *) fail 'Usage: miu-deploy [--branch <branch>] [--ref <40 lowercase hex commit>]' ;;
+  esac
+  shift 2
+done
 [[ $EUID -eq 0 ]] || fail 'This administrator-owned deployment command must run as root.'
 [[ -x $NODE && -x /opt/node24/bin/npm && -x $RUNUSER ]] || fail 'Dedicated Node24 or runuser is missing.'
 for command in git flock tar nice systemctl curl readlink install mv ln chown chmod find stat seq sleep tee cmp nginx; do
@@ -325,13 +327,13 @@ fi
 [[ $(git_miu rev-parse --show-toplevel) == "$SOURCE" ]] || fail 'Git source root does not match /opt/miu/source.'
 [[ $(git_miu remote get-url origin) == "$REPOSITORY" ]] || fail 'Unexpected Git source origin; refusing to fetch.'
 check_tree "$SOURCE"
-log 'Fetching origin/main without changing any other project checkout.'
-git_miu fetch --no-tags origin '+refs/heads/main:refs/remotes/origin/main'
-target=$(git_miu rev-parse --verify refs/remotes/origin/main)
-is_sha "$target" || fail 'Fetched main does not resolve to a valid commit.'
+log "Fetching origin/$requested_branch without changing any other project checkout."
+git_miu fetch --no-tags origin "+refs/heads/$requested_branch:refs/remotes/origin/$requested_branch"
+target=$(git_miu rev-parse --verify "refs/remotes/origin/$requested_branch")
+is_sha "$target" || fail 'Fetched branch does not resolve to a valid commit.'
 if [[ -n $requested_ref ]]; then
   git_miu cat-file -e "$requested_ref^{commit}" || fail 'Requested commit is not available in the source repository.'
-  git_miu merge-base --is-ancestor "$requested_ref" "$target" || fail 'Requested commit is not part of current main.'
+  git_miu merge-base --is-ancestor "$requested_ref" "$target" || fail 'Requested commit is not part of the selected branch.'
   target=$requested_ref
 fi
 

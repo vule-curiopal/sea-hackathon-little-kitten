@@ -16,7 +16,7 @@ export async function createIntegratedApp(environment: Record<string, string | u
   const hasLoggingChoice = !!(environment.STT_LOGGING?.trim() || environment.ELEVENLABS_ENABLE_LOGGING?.trim());
   const env: Record<string, string | undefined> = { ...environment, MIU_PROVIDER: 'real',
     // Preserve either explicit spelling, including conflicts for loadConfig to reject.
-    ...(!hasLoggingChoice ? { STT_LOGGING: '0' } : {}),
+    ...(!hasLoggingChoice ? { STT_LOGGING: '1' } : {}),
     TURN_PROCESSING_TIMEOUT_MS: environment.TURN_PROCESSING_TIMEOUT_MS ?? '90000',
     STT_TIMEOUT_MS: environment.STT_TIMEOUT_MS ?? '30000',
     TTS_TIMEOUT_MS: environment.TTS_TIMEOUT_MS ?? '30000' };
@@ -46,7 +46,7 @@ export async function createIntegratedApp(environment: Record<string, string | u
         const old = dayReceipts.get(key);
         if (old && old.expected !== body.expected_clock_version) throw new PipelineError('idempotency_conflict', 409);
         if (old) return response.json(await old.work);
-        if (profile.active) throw new PipelineError('turn_in_progress', 409);
+        if (profile.active || profile.inputReservation) throw new PipelineError('turn_in_progress', 409);
         const work = bridge.nextDay(profile.token, id, Number(body.expected_clock_version)).then(async result => {
           sessions.applySnapshot(profile, await bridge.context(profile.token));
           return { ...result, effective_now: result.clock.effectiveNow, local_date: result.clock.localDate,

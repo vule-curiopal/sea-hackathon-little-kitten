@@ -10,12 +10,15 @@ import { registerSystemRoutes } from './modules/system/system.routes.js';
 import { TurnController } from './modules/turns/turn.controller.js';
 import { registerTurnRoutes } from './modules/turns/turn.routes.js';
 import { TurnService } from './modules/turns/turn.service.js';
+import { registerSpeechStreams } from './modules/speech-streams/speech-stream.routes.js';
+import type { RealtimeSttFactory } from './providers/elevenlabs/realtime-stt.provider.js';
 import type { EngineBridge, PipelineProviders } from './ports.js';
 import { createProviders } from './providers/index.js';
 
 export interface BuildAppOptions {
   config?: VoiceConfig;
   providers?: PipelineProviders;
+  realtimeStt?: RealtimeSttFactory;
   /** Retained name for existing callers; this is RAM-only session/protocol state. */
   state?: SessionService;
   engineBridge?: EngineBridge;
@@ -51,6 +54,7 @@ export async function buildApp(options: BuildAppOptions = {}) {
   registerSystemRoutes(app, config, sessions);
   registerSessionRoutes(app, new SessionController(sessions, providers.mode));
   registerTurnRoutes(app, new TurnController(sessions, turns, contexts));
+  const disposeStreams = registerSpeechStreams(app, config, sessions, turns, options.realtimeStt);
   app.use(() => { throw new PipelineError('not_found', 404); });
   registerErrorHandler(app, sessions, contexts);
 
@@ -58,6 +62,7 @@ export async function buildApp(options: BuildAppOptions = {}) {
   expiry.unref();
   disposers.set(app, () => {
     clearInterval(expiry);
+    disposeStreams();
     sessions.dispose();
   });
 

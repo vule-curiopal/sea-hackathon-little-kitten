@@ -1,0 +1,561 @@
+{
+  "tested_at": "2026-10-31T06:28:59.042Z",
+  "scope": "Offline RMS endpoint decisions followed by real local Express HTTP STT -> stateless GPT -> TTS on submitted WAV prefixes. No browser capture, physical microphone, playback, production session or character/memory evaluation.",
+  "reference_scope": "Fictional TTS input annotations; whitespace token edit distance after punctuation/case normalization, not human-verified alignment.",
+  "providers": {
+    "mode": "real",
+    "stt": "scribe_v2",
+    "reply": "gpt-6-luna",
+    "tts": "eleven_flash_v2_5",
+    "stt_logging": false
+  },
+  "detector_config": {
+    "calibrationMs": 750,
+    "maxAnalysisGapMs": 250,
+    "noisePercentile": 20,
+    "noiseFloorMinDbfs": -80,
+    "noiseFloorMaxDbfs": -25,
+    "noiseWindowMs": 2000,
+    "noiseAdaptationMs": 1000,
+    "startMarginDb": 12,
+    "endMarginDb": 6,
+    "startMinDbfs": -55,
+    "startMaxDbfs": -15,
+    "endMinDbfs": -61,
+    "endMaxDbfs": -21,
+    "minSignalMs": 120,
+    "endSilenceMs": 1500,
+    "initialSilenceTimeoutMs": 5000,
+    "maxRecordingMs": 30000
+  },
+  "summary": {
+    "tested_files": 20,
+    "detector_cancel": 2,
+    "pipeline_completed": 0,
+    "request_failed": 18,
+    "premature_endpoints": 2,
+    "transcript_on_noise_only": 0
+  },
+  "assets": [
+    {
+      "id": "01_vi_clean",
+      "language": "vi",
+      "condition": "clean",
+      "speech_present": true,
+      "detector": {
+        "signal_found": true,
+        "first_decision": {
+          "action": "submit",
+          "reason": "silence"
+        },
+        "decision_at_ms": 5460,
+        "noise_floor_dbfs": -70.26,
+        "start_threshold_dbfs": -55,
+        "end_threshold_dbfs": -61,
+        "reference_speech_after_decision": false,
+        "premature_endpoint": false,
+        "false_signal_on_noise_only": false
+      },
+      "full_reference": "Miu ơi, mình muốn nghe một câu chuyện về chú mèo con.",
+      "submitted_reference": "Miu ơi, mình muốn nghe một câu chuyện về chú mèo con.",
+      "submitted_duration_ms": 5460,
+      "status": "real_request_failed",
+      "error_code": "provider_unavailable",
+      "http_total_ms": 1348
+    },
+    {
+      "id": "02_vi_soft",
+      "language": "vi",
+      "condition": "soft",
+      "speech_present": true,
+      "detector": {
+        "signal_found": true,
+        "first_decision": {
+          "action": "submit",
+          "reason": "silence"
+        },
+        "decision_at_ms": 5420,
+        "noise_floor_dbfs": -70.25,
+        "start_threshold_dbfs": -55,
+        "end_threshold_dbfs": -61,
+        "reference_speech_after_decision": false,
+        "premature_endpoint": false,
+        "false_signal_on_noise_only": false
+      },
+      "full_reference": "Miu ơi, mình muốn nghe một câu chuyện về chú mèo con.",
+      "submitted_reference": "Miu ơi, mình muốn nghe một câu chuyện về chú mèo con.",
+      "submitted_duration_ms": 5420,
+      "status": "real_request_failed",
+      "error_code": "provider_unavailable",
+      "http_total_ms": 1000
+    },
+    {
+      "id": "03_vi_muffled",
+      "language": "vi",
+      "condition": "muffled",
+      "speech_present": true,
+      "detector": {
+        "signal_found": true,
+        "first_decision": {
+          "action": "submit",
+          "reason": "silence"
+        },
+        "decision_at_ms": 5460,
+        "noise_floor_dbfs": -70.22,
+        "start_threshold_dbfs": -55,
+        "end_threshold_dbfs": -61,
+        "reference_speech_after_decision": false,
+        "premature_endpoint": false,
+        "false_signal_on_noise_only": false
+      },
+      "full_reference": "Miu ơi, mình muốn nghe một câu chuyện về chú mèo con.",
+      "submitted_reference": "Miu ơi, mình muốn nghe một câu chuyện về chú mèo con.",
+      "submitted_duration_ms": 5460,
+      "status": "real_request_failed",
+      "error_code": "provider_unavailable",
+      "http_total_ms": 1078
+    },
+    {
+      "id": "04_vi_clipped",
+      "language": "vi",
+      "condition": "clipped",
+      "speech_present": true,
+      "detector": {
+        "signal_found": true,
+        "first_decision": {
+          "action": "submit",
+          "reason": "silence"
+        },
+        "decision_at_ms": 5460,
+        "noise_floor_dbfs": -70.23,
+        "start_threshold_dbfs": -55,
+        "end_threshold_dbfs": -61,
+        "reference_speech_after_decision": false,
+        "premature_endpoint": false,
+        "false_signal_on_noise_only": false
+      },
+      "full_reference": "Miu ơi, mình muốn nghe một câu chuyện về chú mèo con.",
+      "submitted_reference": "Miu ơi, mình muốn nghe một câu chuyện về chú mèo con.",
+      "submitted_duration_ms": 5460,
+      "status": "real_request_failed",
+      "error_code": "provider_unavailable",
+      "http_total_ms": 1156
+    },
+    {
+      "id": "05_vi_fan_snr20",
+      "language": "vi",
+      "condition": "fan_snr20",
+      "speech_present": true,
+      "detector": {
+        "signal_found": true,
+        "first_decision": {
+          "action": "submit",
+          "reason": "silence"
+        },
+        "decision_at_ms": 5440,
+        "noise_floor_dbfs": -44.91,
+        "start_threshold_dbfs": -32.91,
+        "end_threshold_dbfs": -38.91,
+        "reference_speech_after_decision": false,
+        "premature_endpoint": false,
+        "false_signal_on_noise_only": false
+      },
+      "full_reference": "Miu ơi, mình muốn nghe một câu chuyện về chú mèo con.",
+      "submitted_reference": "Miu ơi, mình muốn nghe một câu chuyện về chú mèo con.",
+      "submitted_duration_ms": 5440,
+      "status": "real_request_failed",
+      "error_code": "provider_unavailable",
+      "http_total_ms": 1610
+    },
+    {
+      "id": "06_vi_rain_snr10",
+      "language": "vi",
+      "condition": "rain_snr10",
+      "speech_present": true,
+      "detector": {
+        "signal_found": true,
+        "first_decision": {
+          "action": "submit",
+          "reason": "silence"
+        },
+        "decision_at_ms": 5440,
+        "noise_floor_dbfs": -35.97,
+        "start_threshold_dbfs": -23.97,
+        "end_threshold_dbfs": -29.97,
+        "reference_speech_after_decision": false,
+        "premature_endpoint": false,
+        "false_signal_on_noise_only": false
+      },
+      "full_reference": "Miu ơi, mình muốn nghe một câu chuyện về chú mèo con.",
+      "submitted_reference": "Miu ơi, mình muốn nghe một câu chuyện về chú mèo con.",
+      "submitted_duration_ms": 5440,
+      "status": "real_request_failed",
+      "error_code": "provider_unavailable",
+      "http_total_ms": 571
+    },
+    {
+      "id": "07_vi_noise_snr0",
+      "language": "vi",
+      "condition": "noise_snr0",
+      "speech_present": true,
+      "detector": {
+        "signal_found": true,
+        "first_decision": {
+          "action": "submit",
+          "reason": "max_duration"
+        },
+        "decision_at_ms": 30000,
+        "noise_floor_dbfs": -62.86,
+        "start_threshold_dbfs": -50.86,
+        "end_threshold_dbfs": -56.86,
+        "reference_speech_after_decision": false,
+        "premature_endpoint": false,
+        "false_signal_on_noise_only": false
+      },
+      "full_reference": "Miu ơi, mình muốn nghe một câu chuyện về chú mèo con.",
+      "submitted_reference": "Miu ơi, mình muốn nghe một câu chuyện về chú mèo con.",
+      "submitted_duration_ms": 30000,
+      "status": "real_request_failed",
+      "error_code": "provider_unavailable",
+      "http_total_ms": 2168
+    },
+    {
+      "id": "08_vi_pause_0800ms",
+      "language": "vi",
+      "condition": "pause_0800ms",
+      "speech_present": true,
+      "detector": {
+        "signal_found": true,
+        "first_decision": {
+          "action": "submit",
+          "reason": "silence"
+        },
+        "decision_at_ms": 5760,
+        "noise_floor_dbfs": -70.13,
+        "start_threshold_dbfs": -55,
+        "end_threshold_dbfs": -61,
+        "reference_speech_after_decision": false,
+        "premature_endpoint": false,
+        "false_signal_on_noise_only": false
+      },
+      "full_reference": "Hôm nay mình hơi buồn. Bạn chơi với mình nhé.",
+      "submitted_reference": "Hôm nay mình hơi buồn. Bạn chơi với mình nhé.",
+      "submitted_duration_ms": 5760,
+      "status": "real_request_failed",
+      "error_code": "provider_unavailable",
+      "http_total_ms": 1050
+    },
+    {
+      "id": "09_vi_pause_2200ms",
+      "language": "vi",
+      "condition": "pause_2200ms",
+      "speech_present": true,
+      "detector": {
+        "signal_found": true,
+        "first_decision": {
+          "action": "submit",
+          "reason": "silence"
+        },
+        "decision_at_ms": 3700,
+        "noise_floor_dbfs": -70.32,
+        "start_threshold_dbfs": -55,
+        "end_threshold_dbfs": -61,
+        "reference_speech_after_decision": true,
+        "premature_endpoint": true,
+        "false_signal_on_noise_only": false
+      },
+      "full_reference": "Hôm nay mình hơi buồn. Bạn chơi với mình nhé.",
+      "submitted_reference": "Hôm nay mình hơi buồn.",
+      "submitted_duration_ms": 3700,
+      "status": "real_request_failed",
+      "error_code": "provider_unavailable",
+      "http_total_ms": 808
+    },
+    {
+      "id": "10_vi_noise_only",
+      "language": "vi",
+      "condition": "noise_only",
+      "speech_present": false,
+      "detector": {
+        "signal_found": false,
+        "first_decision": {
+          "action": "cancel",
+          "reason": "no_signal"
+        },
+        "decision_at_ms": 5760,
+        "noise_floor_dbfs": -43.14,
+        "start_threshold_dbfs": -31.14,
+        "end_threshold_dbfs": -37.14,
+        "reference_speech_after_decision": false,
+        "premature_endpoint": false,
+        "false_signal_on_noise_only": false
+      },
+      "full_reference": "",
+      "status": "not_uploaded_detector_cancel"
+    },
+    {
+      "id": "11_en_clean",
+      "language": "en",
+      "condition": "clean",
+      "speech_present": true,
+      "detector": {
+        "signal_found": true,
+        "first_decision": {
+          "action": "submit",
+          "reason": "silence"
+        },
+        "decision_at_ms": 5300,
+        "noise_floor_dbfs": -70.23,
+        "start_threshold_dbfs": -55,
+        "end_threshold_dbfs": -61,
+        "reference_speech_after_decision": false,
+        "premature_endpoint": false,
+        "false_signal_on_noise_only": false
+      },
+      "full_reference": "Miu, can you tell me a story about a little kitten?",
+      "submitted_reference": "Miu, can you tell me a story about a little kitten?",
+      "submitted_duration_ms": 5300,
+      "status": "real_request_failed",
+      "error_code": "provider_unavailable",
+      "http_total_ms": 1078
+    },
+    {
+      "id": "12_en_soft",
+      "language": "en",
+      "condition": "soft",
+      "speech_present": true,
+      "detector": {
+        "signal_found": false,
+        "first_decision": {
+          "action": "cancel",
+          "reason": "no_signal"
+        },
+        "decision_at_ms": 5760,
+        "noise_floor_dbfs": -70.13,
+        "start_threshold_dbfs": -55,
+        "end_threshold_dbfs": -61,
+        "reference_speech_after_decision": false,
+        "premature_endpoint": false,
+        "false_signal_on_noise_only": false
+      },
+      "full_reference": "Miu, can you tell me a story about a little kitten?",
+      "status": "not_uploaded_detector_cancel"
+    },
+    {
+      "id": "13_en_muffled",
+      "language": "en",
+      "condition": "muffled",
+      "speech_present": true,
+      "detector": {
+        "signal_found": true,
+        "first_decision": {
+          "action": "submit",
+          "reason": "silence"
+        },
+        "decision_at_ms": 5300,
+        "noise_floor_dbfs": -70.33,
+        "start_threshold_dbfs": -55,
+        "end_threshold_dbfs": -61,
+        "reference_speech_after_decision": false,
+        "premature_endpoint": false,
+        "false_signal_on_noise_only": false
+      },
+      "full_reference": "Miu, can you tell me a story about a little kitten?",
+      "submitted_reference": "Miu, can you tell me a story about a little kitten?",
+      "submitted_duration_ms": 5300,
+      "status": "real_request_failed",
+      "error_code": "provider_unavailable",
+      "http_total_ms": 904
+    },
+    {
+      "id": "14_en_clipped",
+      "language": "en",
+      "condition": "clipped",
+      "speech_present": true,
+      "detector": {
+        "signal_found": true,
+        "first_decision": {
+          "action": "submit",
+          "reason": "silence"
+        },
+        "decision_at_ms": 5320,
+        "noise_floor_dbfs": -70.35,
+        "start_threshold_dbfs": -55,
+        "end_threshold_dbfs": -61,
+        "reference_speech_after_decision": false,
+        "premature_endpoint": false,
+        "false_signal_on_noise_only": false
+      },
+      "full_reference": "Miu, can you tell me a story about a little kitten?",
+      "submitted_reference": "Miu, can you tell me a story about a little kitten?",
+      "submitted_duration_ms": 5320,
+      "status": "real_request_failed",
+      "error_code": "provider_unavailable",
+      "http_total_ms": 528
+    },
+    {
+      "id": "15_en_fan_snr20",
+      "language": "en",
+      "condition": "fan_snr20",
+      "speech_present": true,
+      "detector": {
+        "signal_found": true,
+        "first_decision": {
+          "action": "submit",
+          "reason": "silence"
+        },
+        "decision_at_ms": 5240,
+        "noise_floor_dbfs": -45.68,
+        "start_threshold_dbfs": -33.68,
+        "end_threshold_dbfs": -39.68,
+        "reference_speech_after_decision": false,
+        "premature_endpoint": false,
+        "false_signal_on_noise_only": false
+      },
+      "full_reference": "Miu, can you tell me a story about a little kitten?",
+      "submitted_reference": "Miu, can you tell me a story about a little kitten?",
+      "submitted_duration_ms": 5240,
+      "status": "real_request_failed",
+      "error_code": "provider_unavailable",
+      "http_total_ms": 1185
+    },
+    {
+      "id": "16_en_rain_snr10",
+      "language": "en",
+      "condition": "rain_snr10",
+      "speech_present": true,
+      "detector": {
+        "signal_found": true,
+        "first_decision": {
+          "action": "submit",
+          "reason": "silence"
+        },
+        "decision_at_ms": 5180,
+        "noise_floor_dbfs": -35.87,
+        "start_threshold_dbfs": -23.87,
+        "end_threshold_dbfs": -29.87,
+        "reference_speech_after_decision": false,
+        "premature_endpoint": false,
+        "false_signal_on_noise_only": false
+      },
+      "full_reference": "Miu, can you tell me a story about a little kitten?",
+      "submitted_reference": "Miu, can you tell me a story about a little kitten?",
+      "submitted_duration_ms": 5180,
+      "status": "real_request_failed",
+      "error_code": "provider_unavailable",
+      "http_total_ms": 730
+    },
+    {
+      "id": "17_en_noise_snr0",
+      "language": "en",
+      "condition": "noise_snr0",
+      "speech_present": true,
+      "detector": {
+        "signal_found": true,
+        "first_decision": {
+          "action": "submit",
+          "reason": "max_duration"
+        },
+        "decision_at_ms": 30000,
+        "noise_floor_dbfs": -62.98,
+        "start_threshold_dbfs": -50.98,
+        "end_threshold_dbfs": -56.98,
+        "reference_speech_after_decision": false,
+        "premature_endpoint": false,
+        "false_signal_on_noise_only": false
+      },
+      "full_reference": "Miu, can you tell me a story about a little kitten?",
+      "submitted_reference": "Miu, can you tell me a story about a little kitten?",
+      "submitted_duration_ms": 30000,
+      "status": "real_request_failed",
+      "error_code": "provider_unavailable",
+      "http_total_ms": 1782
+    },
+    {
+      "id": "18_en_pause_0800ms",
+      "language": "en",
+      "condition": "pause_0800ms",
+      "speech_present": true,
+      "detector": {
+        "signal_found": true,
+        "first_decision": {
+          "action": "submit",
+          "reason": "silence"
+        },
+        "decision_at_ms": 6220,
+        "noise_floor_dbfs": -70.18,
+        "start_threshold_dbfs": -55,
+        "end_threshold_dbfs": -61,
+        "reference_speech_after_decision": false,
+        "premature_endpoint": false,
+        "false_signal_on_noise_only": false
+      },
+      "full_reference": "I feel a little sad today. Will you play with me?",
+      "submitted_reference": "I feel a little sad today. Will you play with me?",
+      "submitted_duration_ms": 6220,
+      "status": "real_request_failed",
+      "error_code": "provider_unavailable",
+      "http_total_ms": 563
+    },
+    {
+      "id": "19_en_pause_2200ms",
+      "language": "en",
+      "condition": "pause_2200ms",
+      "speech_present": true,
+      "detector": {
+        "signal_found": true,
+        "first_decision": {
+          "action": "submit",
+          "reason": "silence"
+        },
+        "decision_at_ms": 4000,
+        "noise_floor_dbfs": -70.2,
+        "start_threshold_dbfs": -55,
+        "end_threshold_dbfs": -61,
+        "reference_speech_after_decision": true,
+        "premature_endpoint": true,
+        "false_signal_on_noise_only": false
+      },
+      "full_reference": "I feel a little sad today. Will you play with me?",
+      "submitted_reference": "I feel a little sad today.",
+      "submitted_duration_ms": 4000,
+      "status": "real_request_failed",
+      "error_code": "provider_unavailable",
+      "http_total_ms": 992
+    },
+    {
+      "id": "20_en_noise_only",
+      "language": "en",
+      "condition": "noise_only",
+      "speech_present": false,
+      "detector": {
+        "signal_found": true,
+        "first_decision": {
+          "action": "submit",
+          "reason": "silence"
+        },
+        "decision_at_ms": 3420,
+        "noise_floor_dbfs": -42.64,
+        "start_threshold_dbfs": -30.64,
+        "end_threshold_dbfs": -36.64,
+        "reference_speech_after_decision": false,
+        "premature_endpoint": false,
+        "false_signal_on_noise_only": true
+      },
+      "full_reference": "",
+      "submitted_reference": "",
+      "submitted_duration_ms": 3420,
+      "status": "real_request_failed",
+      "error_code": "provider_unavailable",
+      "http_total_ms": 410
+    }
+  ],
+  "verified_blocker_probe": {
+    "id": "01_vi_clean",
+    "enable_logging": "false",
+    "upstream_status": 403,
+    "upstream_error_code": "not_allowed",
+    "pipeline_error_code": "provider_unavailable",
+    "source": "Observed diagnostic request from this run before explicit normal-logging test."
+  }
+}

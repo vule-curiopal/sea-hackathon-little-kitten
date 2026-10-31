@@ -41,7 +41,9 @@
     "typecheck:voice": "tsc -b --pretty false",
     "typecheck:engine": "tsc --noEmit -p tsconfig.engine.json",
     "test:engine": "tsx --test backend/*.test.ts backend/**/*.test.ts backend/evaluation/growth/*.test.ts",
-    "test:voice": "vitest run"
+    "test:voice": "vitest run",
+    "verify:realtime": "node --env-file=.env --import tsx scripts/verify-realtime-voice.ts --real",
+    "verify:realtime:browser": "node --env-file=.env --import tsx scripts/verify-realtime-browser.ts --real"
   },
   "engines": {
     "node": ">=22.19.0"
@@ -53,6 +55,7 @@
     "@types/node": "^26.6.6",
     "@types/pg": "^8.15.5",
     "@types/supertest": "^7.2.1",
+    "@types/ws": "^8.18.2",
     "playwright": "^1.64.1",
     "supertest": "^7.3.1",
     "tsx": "^4.23.15",
