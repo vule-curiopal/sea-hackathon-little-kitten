@@ -10,13 +10,13 @@ import { logEvent } from '../../logger.js';
 
 export type StreamMessage = Record<string, unknown>;
 
-/** Owns one held utterance: only the client's manual drain can commit a final transcript. */
+/** Owns one utterance: segments are buffered, then a manual drain fences the engine call. */
 export class SpeechStreamService {
   private readonly reservationId = randomUUID();
   private controller!: AbortController;
   private provider?: RealtimeSttConnection;
   private segments: string[] = [];
-  private phase: 'connecting' | 'listening' | 'draining' | 'processing' | 'done' | 'canceled' = 'connecting';
+  private phase: 'connecting' | 'listening' | 'end_requested' | 'draining' | 'processing' | 'done' | 'canceled' = 'connecting';
   private sequence = 0;
   private bytes = 0;
   private timers: ReturnType<typeof setTimeout>[] = [];
@@ -46,7 +46,7 @@ export class SpeechStreamService {
     this.controller = sessions.reserveInput(session, turnId, this.reservationId);
     this.controller.signal.addEventListener('abort', () => this.options.fail(new PipelineError('turn_canceled', 409)), { once: true });
     this.provider = factory(session.profile.configuration.language_mode, event => this.providerEvent(event), { session_id: session.id, turn_id: turnId });
-    this.log('stt.connecting', { commit_strategy: 'manual' });
+    this.log('stt.connecting', { silence_ms: this.options.config.realtimeSilenceMs });
     await Promise.race([this.provider.ready, this.deadline(10_000, 'provider_timeout')]);
     if (this.phase !== 'connecting' || this.controller.signal.aborted) throw new PipelineError('turn_canceled', 409);
     this.phase = 'listening';
@@ -59,7 +59,7 @@ export class SpeechStreamService {
   }
 
   audio(sequence: number, pcm: Buffer): void {
-    if (this.phase !== 'listening' || sequence !== this.sequence
+    if (!['listening', 'end_requested'].includes(this.phase) || sequence !== this.sequence
       || pcm.length === 0 || pcm.length % 2 || pcm.length > 32_000) throw new PipelineError('invalid_audio_sequence', 400);
     this.bytes += pcm.length;
     if (this.bytes > 16000 * 2 * LIMITS.recordingMs / 1000) throw new PipelineError('recording_limit', 422);
@@ -69,7 +69,7 @@ export class SpeechStreamService {
   }
 
   async end(lastSequence: number): Promise<TurnResponse> {
-    if (this.phase !== 'listening' || lastSequence !== this.sequence - 1 || !this.bytes) {
+    if (!['listening', 'end_requested'].includes(this.phase) || lastSequence !== this.sequence - 1 || !this.bytes) {
       throw new PipelineError('invalid_audio_sequence', 400);
     }
     this.phase = 'draining';
@@ -119,9 +119,6 @@ export class SpeechStreamService {
       if (++this.partials === 1) this.log('stt.first_partial', { characters: [...event.text].length });
       this.options.emit({ type: 'transcript.partial', text: event.text }); return;
     }
-    if (this.phase !== 'draining') {
-      this.options.fail(new PipelineError('invalid_transcript', 422)); return;
-    }
     if (event.text) {
       this.segments.push(event.text);
       this.log('stt.segment', { segments: this.segments.length, characters: [...event.text].length });
@@ -130,9 +127,14 @@ export class SpeechStreamService {
       }
       this.options.emit({ type: 'transcript.segment', text: event.text });
     }
-    // Empty manual acknowledgements still drain successfully; end() rejects
-    // their empty transcript without promoting a partial revision to final text.
-    this.drainResolve?.();
+    if (this.phase === 'draining') {
+      // An empty committed_transcript is a valid acknowledgement of a silence-only final commit.
+      this.drainResolve?.();
+    } else if (event.text && this.phase === 'listening') {
+      this.phase = 'end_requested';
+      this.options.emit({ type: 'turn.end_candidate' });
+      this.timers.push(setTimeout(() => this.options.fail(new PipelineError('speech_drain_timeout', 504)), 3000));
+    }
   }
 
   private deadline(ms: number, code: string): Promise<never> {

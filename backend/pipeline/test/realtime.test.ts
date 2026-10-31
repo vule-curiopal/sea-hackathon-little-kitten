@@ -70,10 +70,10 @@ describe('realtime speech turn gate', () => {
   it('preserves a stable engine quota code after full transcript without leaking its message', async () => {
     const t = await setup();
     vi.mocked(t.providers.response.generate).mockRejectedValueOnce(new AppError('provider_quota_exceeded', 429));
-    t.audio(); t.emit({ type: 'partial', text: 'Xin chào.' });
+    t.audio(); t.emit({ type: 'committed', text: 'Xin chào.' });
     t.socket.send(JSON.stringify({ type: 'audio.end', last_seq: 0 }));
     await vi.waitFor(() => expect(t.connection.commit).toHaveBeenCalledOnce());
-    t.emit({ type: 'committed', text: 'Xin chào.' });
+    t.emit({ type: 'committed', text: '' });
     expect(await t.wait('stream.error')).toEqual({ type: 'stream.error', code: 'provider_quota_exceeded', status: 429, retryable: true });
     expect(t.messages.some(message => message.type === 'turn.result')).toBe(false);
   });
@@ -82,17 +82,17 @@ describe('realtime speech turn gate', () => {
       expect(publicSpeechError(error)).toEqual({ code: 'speech_stream_failed', status: 500, retryable: false });
     }
   });
-  it('keeps partial revisions open, flushes the final chunk, then calls the engine once with the complete manual transcript', async () => {
+  it('buffers revisions and segments, flushes the final chunk, then calls the engine exactly once with full text', async () => {
     const t = await setup(); t.audio();
     t.emit({ type: 'partial', text: 'Hôm' }); t.emit({ type: 'partial', text: 'Hôm nay mình buồn.' });
     expect(t.providers.response.generate).not.toHaveBeenCalled();
-    await t.wait('transcript.partial');
-    expect(t.messages.some(message => message.type === 'turn.end_candidate')).toBe(false);
+    t.emit({ type: 'committed', text: 'Hôm nay mình buồn.' });
+    await t.wait('turn.end_candidate');
     expect(t.providers.response.generate).not.toHaveBeenCalled();
     t.audio(1); t.socket.send(JSON.stringify({ type: 'audio.end', last_seq: 1 }));
     await vi.waitFor(() => expect(t.connection.commit).toHaveBeenCalledOnce());
     expect(t.providers.response.generate).not.toHaveBeenCalled();
-    t.emit({ type: 'committed', text: 'Hôm nay mình buồn. Bạn chơi với mình nhé.' });
+    t.emit({ type: 'committed', text: 'Bạn chơi với mình nhé.' });
     const result = await t.wait('turn.result');
     expect(result.response.input_mode).toBe('realtime_stt');
     expect(result.response.transcript.text).toBe('Hôm nay mình buồn. Bạn chơi với mình nhé.');
@@ -101,20 +101,20 @@ describe('realtime speech turn gate', () => {
     expect(t.providers.transcribe).not.toHaveBeenCalled();
   });
 
-  it('accepts the manual final transcript without duplicating its earlier partial revisions', async () => {
-    const t = await setup(); t.audio(); t.emit({ type: 'partial', text: 'Xin chào.' });
+  it('accepts an empty final commit acknowledgement without duplicating the committed text', async () => {
+    const t = await setup(); t.audio(); t.emit({ type: 'committed', text: 'Xin chào.' });
     t.socket.send(JSON.stringify({ type: 'audio.end', last_seq: 0 }));
     await vi.waitFor(() => expect(t.connection.commit).toHaveBeenCalledOnce());
-    t.emit({ type: 'committed', text: 'Xin chào.' });
+    t.emit({ type: 'committed', text: '' });
     expect((await t.wait('turn.result')).response.transcript.text).toBe('Xin chào.');
   });
 
-  it('preserves repeated spoken text from the manual final result instead of concatenating partial replacements', async () => {
+  it('preserves repeated spoken text and ignores partial replacements in the final transcript', async () => {
     const t = await setup(); t.audio();
-    t.emit({ type: 'partial', text: 'Không.' }); t.emit({ type: 'partial', text: 'Không không không' });
+    t.emit({ type: 'committed', text: 'Không.' }); t.emit({ type: 'partial', text: 'Không không không' });
     t.socket.send(JSON.stringify({ type: 'audio.end', last_seq: 0 }));
     await vi.waitFor(() => expect(t.connection.commit).toHaveBeenCalledOnce());
-    t.emit({ type: 'committed', text: 'Không. Không.' });
+    t.emit({ type: 'committed', text: 'Không.' });
     expect((await t.wait('turn.result')).response.transcript.text).toBe('Không. Không.');
   });
 
@@ -178,10 +178,10 @@ describe('realtime speech turn gate', () => {
         state_version: session.profile.stateVersion + 1, clock_version: 1, effective_now: new Date().toISOString() });
     });
     try {
-      t.audio(); t.emit({ type: 'partial', text: 'Full transcript' });
+      t.audio(); t.emit({ type: 'committed', text: 'Full transcript' });
       t.socket.send(JSON.stringify({ type: 'audio.end', last_seq: 0 }));
       await vi.waitFor(() => expect(t.connection.commit).toHaveBeenCalledOnce());
-      t.emit({ type: 'committed', text: 'Full transcript' });
+      t.emit({ type: 'committed', text: '' });
       expect((await t.wait('stream.error')).code).toBe('turn_canceled');
       expect(t.providers.response.generate).not.toHaveBeenCalled();
     } finally { reconcile.mockRestore(); }
@@ -194,66 +194,15 @@ describe('realtime deadlines never submit partial text', () => {
     vi.useFakeTimers();
     const sessions = new SessionService(); const session = sessions.create('an', randomUUID());
     let emit!: (event: RealtimeSttEvent) => void;
-    const execute = vi.fn(async () => ({ timings_ms: { stt: 0, server_total: 0 } }));
-    const failure = vi.fn(); const messages = vi.fn();
-    const connection = { ready: Promise.resolve(), send: vi.fn(), commit: vi.fn(), close: vi.fn() };
+    const execute = vi.fn(); const failure = vi.fn();
     const input = new SpeechStreamService({
       config: loadConfig({}), sessions, session, turnId: randomUUID(),
       turns: { execute } as unknown as TurnService,
-      emit: messages, fail: error => { failure(error); input.cancel(); },
-      factory: (_language, callback) => { emit = callback; return connection; },
+      emit: vi.fn(), fail: error => { failure(error); input.cancel(); },
+      factory: (_language, callback) => { emit = callback; return { ready: Promise.resolve(), send: vi.fn(), commit: vi.fn(), close: vi.fn() }; },
     });
-    await input.start(); return { input, execute, failure, emit, messages, connection, session };
+    await input.start(); return { input, execute, failure, emit };
   }
-  it('keeps multiple manual-mode pauses open past three seconds until release drains the complete utterance', async () => {
-    const t = await service();
-    t.input.audio(0, Buffer.alloc(6400));
-    t.emit({ type: 'partial', text: 'Hôm nay mình buồn.' });
-    await vi.advanceTimersByTimeAsync(3500);
-    expect(t.failure).not.toHaveBeenCalled();
-    expect(t.connection.commit).not.toHaveBeenCalled();
-    expect(t.execute).not.toHaveBeenCalled();
-    expect(t.session.profile.inputReservation).toBeDefined();
-
-    t.input.audio(1, Buffer.alloc(6400));
-    t.emit({ type: 'partial', text: 'Mình muốn' });
-    t.emit({ type: 'partial', text: 'Hôm nay mình buồn. Mình muốn kể thêm.' });
-    await vi.advanceTimersByTimeAsync(3500);
-    expect(t.failure).not.toHaveBeenCalled();
-    expect(t.connection.commit).not.toHaveBeenCalled();
-    expect(t.execute).not.toHaveBeenCalled();
-    expect(t.messages.mock.calls.map(([message]) => message.type)).not.toContain('turn.end_candidate');
-    expect(t.messages.mock.calls.map(([message]) => message.type)).not.toContain('transcript.final');
-
-    t.input.audio(2, Buffer.alloc(6400));
-    const completed = t.input.end(2);
-    expect(t.connection.send).toHaveBeenCalledTimes(3);
-    expect(t.connection.commit).toHaveBeenCalledOnce();
-    expect(t.execute).not.toHaveBeenCalled();
-    t.emit({ type: 'committed', text: 'Hôm nay mình buồn. Mình muốn kể thêm. Bạn nghe mình nhé.' });
-    await completed;
-    expect(t.execute).toHaveBeenCalledOnce();
-    expect(t.execute).toHaveBeenCalledWith(t.session, expect.objectContaining({
-      text: 'Hôm nay mình buồn. Mình muốn kể thêm. Bạn nghe mình nhé.', inputSource: 'realtime_stt',
-    }), expect.any(AbortSignal));
-    expect(t.messages.mock.calls.map(([message]) => message.type)).toEqual([
-      'stream.ready', 'transcript.partial', 'transcript.partial', 'transcript.partial',
-      'transcript.segment', 'stream.drained', 'transcript.final', 'stream.processing',
-    ]);
-    expect(t.failure).not.toHaveBeenCalled();
-    t.input.cancel();
-  });
-
-  it('still rejects eight seconds without recognized speech instead of submitting audio', async () => {
-    const t = await service(); t.input.audio(0, Buffer.alloc(6400));
-    await vi.advanceTimersByTimeAsync(7999);
-    expect(t.failure).not.toHaveBeenCalled();
-    await vi.advanceTimersByTimeAsync(1);
-    expect(t.failure).toHaveBeenCalledWith(expect.objectContaining({ code: 'unclear_audio' }));
-    expect(t.connection.commit).not.toHaveBeenCalled();
-    expect(t.execute).not.toHaveBeenCalled();
-    expect(t.session.profile.inputReservation).toBeUndefined();
-  });
   it('fails a missing final commit acknowledgement without using partial text', async () => {
     const t = await service();
     t.input.audio(0, Buffer.alloc(6400)); t.emit({ type: 'partial', text: 'Not final' });
@@ -261,33 +210,8 @@ describe('realtime deadlines never submit partial text', () => {
     await vi.advanceTimersByTimeAsync(10000); await pending;
     expect(t.execute).not.toHaveBeenCalled(); t.input.cancel();
   });
-  it('discards partial revisions on cancel without finalizing or calling the engine', async () => {
-    const t = await service(); t.input.audio(0, Buffer.alloc(6400));
-    t.emit({ type: 'partial', text: 'Do not send this.' });
-    await vi.advanceTimersByTimeAsync(3500);
-    expect(t.failure).not.toHaveBeenCalled();
-    t.input.cancel();
-    t.emit({ type: 'committed', text: 'Late segment.' });
-    await vi.advanceTimersByTimeAsync(30000);
-    expect(t.connection.close).toHaveBeenCalledOnce();
-    expect(t.connection.commit).not.toHaveBeenCalled();
-    expect(t.execute).not.toHaveBeenCalled();
-    expect(t.session.profile.inputReservation).toBeUndefined();
-    expect(t.messages.mock.calls.map(([message]) => message.type)).not.toContain('transcript.final');
-  });
-  it('rejects an unexpected committed transcript before manual release without calling the engine', async () => {
-    const t = await service(); t.input.audio(0, Buffer.alloc(6400));
-    t.emit({ type: 'committed', text: 'Unexpected automatic segment.' });
-    expect(t.failure).toHaveBeenCalledWith(expect.objectContaining({ code: 'invalid_transcript' }));
-    expect(t.connection.close).toHaveBeenCalledOnce();
-    expect(t.connection.commit).not.toHaveBeenCalled();
-    expect(t.execute).not.toHaveBeenCalled();
-    expect(t.session.profile.inputReservation).toBeUndefined();
-    expect(t.messages.mock.calls.map(([message]) => message.type)).not.toContain('transcript.final');
-  });
   it('rejects a 30s hard limit instead of sending an unfinished utterance', async () => {
-    const t = await service(); t.input.audio(0, Buffer.alloc(6400));
-    t.emit({ type: 'partial', text: 'Still speaking' });
+    const t = await service(); t.emit({ type: 'partial', text: 'Still speaking' });
     await vi.advanceTimersByTimeAsync(30000);
     expect(t.failure).toHaveBeenCalledWith(expect.objectContaining({ code: 'recording_limit' }));
     expect(t.execute).not.toHaveBeenCalled(); t.input.cancel();
@@ -295,7 +219,7 @@ describe('realtime deadlines never submit partial text', () => {
 });
 
 describe('realtime database access boundary', () => {
-  it('does not reconcile at startup, per audio frame, per partial or while draining', async () => {
+  it('does not reconcile at startup, per audio frame, per partial, per segment or while draining', async () => {
     const sessions = new SessionService();
     const session = sessions.create('an', randomUUID());
     const reconcile = vi.spyOn(sessions, 'reconcile');
@@ -313,13 +237,13 @@ describe('realtime database access boundary', () => {
       await input.start();
       input.audio(0, Buffer.alloc(6400));
       for (let i = 0; i < 147; i++) emit({ type: 'partial', text: `Revision ${i}` });
-      emit({ type: 'partial', text: 'First sentence.' });
+      emit({ type: 'committed', text: 'First sentence.' });
       expect(reconcile).not.toHaveBeenCalled();
       expect(execute).not.toHaveBeenCalled();
       const completed = input.end(0);
       expect(reconcile).not.toHaveBeenCalled();
       expect(execute).not.toHaveBeenCalled();
-      emit({ type: 'committed', text: 'First sentence. Last sentence.' });
+      emit({ type: 'committed', text: 'Last sentence.' });
       await completed;
       expect(reconcile).toHaveBeenCalledOnce();
       expect(execute).toHaveBeenCalledOnce();

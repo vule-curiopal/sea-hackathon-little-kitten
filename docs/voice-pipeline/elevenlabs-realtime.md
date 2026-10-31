@@ -1,36 +1,27 @@
 # ElevenLabs realtime STT — triển khai ưu tiên
 
-Cập nhật 31/10/2026 theo lựa chọn của người dùng: **giữ chuột, phím Space hoặc nút cảm ứng để nói; thả để gửi**. Upstream ElevenLabs dùng **manual commit** và tiếp tục lọc nền; local VAD model để sau. Khoảng nghỉ khi còn giữ không chốt transcript hoặc gửi lượt Miu. Các kết quả benchmark cũ bên dưới dùng VAD tự kết thúc và ngưỡng 3 giây; chúng không xác minh hành vi giữ/thả mới.
+Cập nhật 31/10/2026 theo lựa chọn của người dùng: **ElevenLabs tự phát hiện lời nói và lọc nền; local VAD model để sau**. Runtime realtime đã được triển khai và kiểm thử local. Cấu hình phát hành chọn khoảng im lặng **1 giây** theo yêu cầu mới; các kết quả benchmark cũ bên dưới dùng 3 giây và không đại diện cho ngưỡng mới.
 
 ## Luồng đang có
 
 ```text
-Giữ nút Talk / Space / cảm ứng → xin mic và chuẩn bị WebSocket
+Talk → xin mic và chuẩn bị WebSocket
      → AudioWorklet lấy mẫu từ cùng microphone
      → PCM16 mono 16 kHz, chunk 200 ms
      → WSS cùng origin tới backend Miu
-     → ElevenLabs scribe_v2_realtime với manual commit + lọc nền
-     → partial chỉ để cập nhật tạm; vẫn thu qua các khoảng nghỉ khi còn giữ
-     → thả nút → browser dừng mic, flush PCM cuối, gửi audio.end(last_seq)
+     → ElevenLabs scribe_v2_realtime với VAD + lọc nền
+     → partial chỉ để cập nhật tạm; committed segment vào buffer backend
+     → khoảng im lặng 1 giây tạo end candidate
+     → browser dừng mic, flush PCM cuối, gửi audio.end(last_seq)
      → backend gửi manual commit cuối và chờ committed acknowledgement
      → ghép full transcript → TurnService → engine/GPT → TTS → playback
 ```
 
-Không gọi engine/LLM theo từng chunk hoặc partial. `audio.end` là yêu cầu chốt toàn lượt, không đóng WebSocket sớm. Chỉ transcript đã commit sau yêu cầu này mới được gửi cho engine. Acknowledgement rỗng kết thúc drain nhưng bị từ chối với `unclear_audio`; không thay bằng partial tạm.
-
-### Giữ để nói, thả để gửi
-
-Backend giữ trạng thái listening qua mọi khoảng nghỉ; partial mới là revision của cả lượt, không phải đoạn để nối lại. Backend không phát `turn.end_candidate`, không chuyển sang `end_requested` và không đặt deadline 3 giây sau khoảng nghỉ. Chỉ `audio.end(last_seq)` do browser gửi sau khi thả mới bắt đầu một manual commit và deadline drain 10 giây. Engine nhận đúng một full transcript sau acknowledgement cuối; giới hạn 8 giây không có speech và 30 giây thu vẫn hủy lượt, không tự gửi. Hủy hoặc mất kết nối trước khi gửi không tạo lượt engine hay learning.
-
-Manual mode loại bỏ race giữa VAD commit cũ đang bay về và acknowledgement cuối. Adapter từ chối rồi đóng upstream nếu nhận committed transcript trước manual commit hoặc nhận commit trùng; service cũng từ chối committed transcript trước khi draining. Không dùng khoảng chờ đoán để chọn transcript cuối. Theo [tài liệu commit chính thức](https://elevenlabs.io/docs/eleven-api/guides/how-to/speech-to-text/realtime/transcripts-and-commit-strategies), manual mode tự commit sau khoảng 36 giây audio tích lũy; cả giới hạn wall-clock và byte của Miu đều chặn ở 30 giây.
-
-Kiểm tra mới dùng doubles offline cho protocol/orchestration: hai khoảng nghỉ 3,5 giây vẫn giữ reservation, không gọi engine; thả và drain cuối mới dispatch full transcript một lần. Request-contract tests kiểm tra manual strategy, handshake, commit sớm/trùng và đóng kết nối khi lỗi. Đây không phải bằng chứng chất lượng model hoặc đo latency provider thật.
+Không gọi engine/LLM theo từng chunk, partial hay segment. `audio.end` là yêu cầu chốt toàn lượt, không đóng WebSocket sớm. Nếu acknowledgement cuối chứa text rỗng, đó vẫn là xác nhận hợp lệ cho phần đuôi chỉ có silence; giữ các đoạn đã chốt trước đó.
 
 Frontend hiển thị lời người dùng ngay từ `transcript.final`, trước khi chờ engine/TTS. Lời đã nhận dạng được giữ nếu bước trả lời lỗi hoặc người dùng dừng lượt; placeholder processing không được ghi đè transcript thật. Event của lượt cũ/hủy hoặc sau reset không được cập nhật hội thoại. Partial không gọi engine hoặc query DB.
 
-**Handshake thật của manual mode đã xác minh:** `session_started.config` trả `model_id=scribe_v2_realtime`, `filter_background_audio=true`, `vad_commit_strategy=false`, `keepalive_interval_ms=1000`, `disable_logging=false`. Echo vẫn có VAD silence mặc định 1,5 giây; giá trị này không điều khiển manual mode. Probe VAD cũ và các benchmark bên dưới không được dùng để tuyên bố manual-mode STT đã qua kiểm thử audio mới.
-
-**STT smoke thật 31/10/2026:** chạy trên production host với credential server, audio fixture dài 9,4667 giây có khoảng nghỉ 3,5 giây; nhận 10 partial, **0 commit khi còn giữ**, **1 commit sau release** và transcript thật chứa cả hai mệnh đề. Release đến final là 278,54 ms trong ca này. Artifact cục bộ: `reports/production-live-manual-stt-2026-10-31T09-51-15-909Z/report.json`. Đây là kiểm tra protocol/STT của một fixture, không gọi engine/GPT/TTS và không đo latency voice toàn lượt hay xác minh microphone vật lý. Bộ kiểm tra voice offline hiện qua 202 test, 2 test bỏ qua.
+**Probe thật đã xác minh:** VAD mode chấp nhận manual commit cuối và trả `committed_transcript` rỗng sau auto commit. Đây là hành vi đã quan sát trên tài khoản/model hiện tại, không phải một event mới tên `final_transcript` của ElevenLabs. Backend chỉ phát `transcript.final` của Miu sau khi drain thành công.
 
 ## Cấu hình
 
@@ -38,6 +29,7 @@ Frontend hiển thị lời người dùng ngay từ `transcript.final`, trướ
 MIU_PROVIDER=real
 VOICE_INPUT_MODE=elevenlabs_realtime
 STT_LOGGING=1
+ELEVENLABS_VAD_SILENCE_MS=1000
 ```
 
 API key vẫn nằm trong `.env` backend. Không giữ alias `ELEVENLABS_ENABLE_LOGGING=false` cùng `STT_LOGGING=1`, vì cấu hình mâu thuẫn sẽ bị từ chối. Root `.env` đã được đồng bộ lựa chọn normal logging như brain; các credential khác được giữ nguyên.
@@ -47,16 +39,16 @@ API key vẫn nằm trong `.env` backend. Không giữ alias `ELEVENLABS_ENABLE_
 | `model_id` | `scribe_v2_realtime` |
 | `audio_format` | `pcm_16000` |
 | `language_code` | `vi` hoặc `en`, theo phiên |
-| `commit_strategy` | `manual` |
+| `commit_strategy` | `vad` |
 | `filter_background_audio` | `true` |
-| `vad_silence_threshold_secs` | **Không gửi**; không chốt lượt theo silence |
+| `vad_silence_threshold_secs` | `1.0` mặc định, từ env milliseconds |
 | `vad_threshold` | **Không gửi**; dùng mặc định provider cho lọc nền. Probe hiện trả `0.15` |
 | `min_speech_duration_ms`, `min_silence_duration_ms` | **Không gửi**; probe hiện trả `100/100` ms |
 | `include_timestamps`, `include_language_detection`, `no_verbatim` | `false` |
 | `keepalive_interval_ms` | `1000` |
 | `enable_logging` | Không gửi trong normal mode. Nếu chủ động yêu cầu ZRM mà provider không áp dụng, backend từ chối session |
 
-Backend yêu cầu `session_started` xác nhận đúng model, `filter_background_audio=true` và `vad_commit_strategy=false`. Nếu yêu cầu zero retention thì cũng phải xác nhận `disable_logging=true`; không đổi retention hoặc commit strategy âm thầm khi lỗi. `ELEVENLABS_VAD_SILENCE_MS` và các field `silence_ms` cũ còn giữ để tương thích, không kết thúc lượt manual. [API](https://elevenlabs.io/docs/api-reference/speech-to-text/v-1-speech-to-text-realtime), [commit strategy và lọc nền](https://elevenlabs.io/docs/eleven-api/guides/how-to/speech-to-text/realtime/transcripts-and-commit-strategies).
+Backend kiểm tra config mà `session_started` trả về để tránh coi một session không bật đúng VAD/lọc nền là session hợp lệ. Không có auto-tuning tất cả tham số theo từng microphone; provider xử lý phân loại theo chế độ đã chọn. [API](https://elevenlabs.io/docs/api-reference/speech-to-text/v-1-speech-to-text-realtime), [VAD và lọc nền](https://elevenlabs.io/docs/eleven-api/guides/how-to/speech-to-text/realtime/transcripts-and-commit-strategies).
 
 ## Lifecycle và giới hạn
 
@@ -106,7 +98,7 @@ node --env-file=.env --import tsx scripts/verify-realtime-browser.ts --real
 
 Browser acceptance script dùng Edge đã cài, microphone giả bằng WAV có khoảng nghỉ 2,2 giây và padding phục vụ kiểm thử browser. Chạy với gesture thật, AudioWorklet, WS, GPT/TTS thật và playback thật trong browser. Đây không phải kiểm thử mic vật lý/Safari/iPad.
 
-Kết quả lịch sử trước khi chuyển upstream sang manual commit:
+Kết quả đã ghi:
 
 - Typecheck voice + engine, **159 test voice trong 15 file** và **24 test frontend** qua. Đây là kiểm tra contract/orchestration, không dùng để kết luận chất lượng model.
 

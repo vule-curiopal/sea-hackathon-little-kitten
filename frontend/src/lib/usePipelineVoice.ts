@@ -220,7 +220,7 @@ export function usePipelineVoice(options: Options) {
   const send = useCallback(() => {
     const current = controller.current;
     voiceConsole.action('hold.release', { state: current?.state });
-    const preparing = captureRef.current === 'requesting_permission' || captureRef.current === 'preparing_stream';
+    const preparing = captureRef.current === 'requesting_permission';
     const accepted = current?.send() ?? false;
     if (!accepted && preparing) setError('voiceHoldUntilReady');
     voiceConsole.action('capture.send', { state: current?.state, accepted });
