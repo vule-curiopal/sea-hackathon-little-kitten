@@ -6,6 +6,7 @@ export type MiuMessage = Answer & { role: 'miu' };
 export type ConversationMessage = UserMessage | MiuMessage;
 export type Conversation = { phase: Phase; emotion: Emotion; messages: ConversationMessage[]; pendingRequestId?: number };
 export type ConversationEvent =
+  | { type: 'transcript'; user: UserMessage }
   | { type: 'listen'; requestId: number } | { type: 'think'; requestId?: number; user?: UserMessage } | { type: 'speak' } | { type: 'finish'; requestId?: number } | { type: 'pause' } | { type: 'wake' } | { type: 'reset' }
   | { type: 'reply'; answer: Answer; speaking: boolean; user?: UserMessage };
 export const MAX_MESSAGES = 200;
@@ -29,10 +30,14 @@ export function lastUserMessage(state: Conversation): UserMessage | undefined {
 function withUser(messages: ConversationMessage[], user?: UserMessage): ConversationMessage[] {
   if (!user) return messages;
   const index = messages.findIndex(message => message.role === 'user' && message.id === user.id);
+  // A processing placeholder must not replace words already finalized by realtime STT.
+  if (index !== -1 && user.source === 'voice' && !user.text.trim() && messages[index].text.trim()) return messages;
   return index === -1 ? [...messages, user] : messages.map((message, position) => position === index ? user : message);
 }
 export function conversationReducer(state: Conversation, event: ConversationEvent): Conversation {
   switch (event.type) {
+    case 'transcript': return state.pendingRequestId === event.user.id && state.phase !== 'resting'
+      ? { ...state, messages: withUser(state.messages, event.user).slice(-MAX_MESSAGES) } : state;
     case 'listen': return state.phase === 'answered' ? { ...state, phase: 'listening', emotion: 'listening', pendingRequestId: event.requestId } : state;
     case 'think': return state.phase !== 'resting' ? { ...state, phase: 'thinking', emotion: 'thinking', messages: withUser(state.messages, event.user).slice(-MAX_MESSAGES), ...(event.requestId !== undefined ? { pendingRequestId: event.requestId } : {}) } : state;
     case 'speak': return state.phase !== 'resting' ? { ...state, phase: 'speaking' } : state;

@@ -81,7 +81,7 @@ The implementation targets the same Safari 16.4+ baseline as the frontend. Deskt
 
 Open `/app/talk` on the presenting laptop. The QR hangs on the wall inside Miu's room, next to the window. The room retains its full responsive layout. Attendees can scan immediately while you talk with Miu.
 
-The buddy is Miu: **ENFP, friend, curious, playful, imaginative**. Its frontend preset lives in `src/lib/demo-buddy.ts`; replies use the integrated character backend. Scanning opens `/app/talk` and carries only the selected language. Signed-in users open their own persistent profile; other visitors are sent to login. The QR never shares an account session, a profile selector, or conversation data.
+The buddy is Miu: **ENFP, friend, curious, playful, imaginative**. Its frontend preset lives in `src/lib/demo-buddy.ts`; replies use the integrated character backend. Scanning opens `/app/talk` and carries only the selected language. Signed-in users open their own persistent profile; other visitors stay on `/app/talk` and open a sign-in or registration popup. Successful authentication closes the popup and opens the account conversation without leaving the page, using the HttpOnly session cookie. The QR never shares an account session, a profile selector, or conversation data.
 
 For local demos, attendees must join the laptop's Wi-Fi. When the presenter opens `localhost`, Vite supplies the preferred LAN address through its development-only `/__demo/network` endpoint. Microphones on phones require HTTPS; local HTTP can use typed messages against the connected backend.
 

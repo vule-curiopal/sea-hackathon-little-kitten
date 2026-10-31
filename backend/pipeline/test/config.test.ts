@@ -2,6 +2,15 @@ import { describe, expect, it } from 'vitest';
 import { loadConfig } from '../src/config.js';
 
 describe('STT logging configuration', () => {
+  it('defaults real mode to provider VAD, with batch retained for fake mode and explicit rollback', () => {
+    const real = { MIU_PROVIDER: 'real', ELEVENLABS_API_KEY: 'test', OPENAI_API_KEY: 'test' };
+    expect(loadConfig(real).speechInputMode).toBe('elevenlabs_realtime');
+    expect(loadConfig(real).realtimeSilenceMs).toBe(1000);
+    expect(loadConfig({}).speechInputMode).toBe('rms_batch');
+    expect(loadConfig({ ...real, VOICE_INPUT_MODE: 'rms_batch' }).speechInputMode).toBe('rms_batch');
+    expect(() => loadConfig({ VOICE_INPUT_MODE: 'elevenlabs_realtime' })).toThrow();
+    expect(() => loadConfig({ ...real, ELEVENLABS_VAD_SILENCE_MS: '3100' })).toThrow();
+  });
   it.each([{}, { STT_LOGGING: '' }, { STT_LOGGING: '  ', ELEVENLABS_ENABLE_LOGGING: '' }])('defaults to brain normal logging for unset or empty flags: %j', env => {
     expect(loadConfig(env).enableLogging).toBe(true);
   });

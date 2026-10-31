@@ -3,6 +3,22 @@ import assert from 'node:assert/strict';
 import { conversationReducer as reduce, initialConversation, lastUserMessage } from './conversation.ts';
 import { voiceConversationEvent, voiceUserMessage } from './voice-conversation.ts';
 
+test('realtime final words survive a processing placeholder and a subsequent engine failure', () => {
+  const id = 99;
+  const user = { id, role: 'user' as const, source: 'voice' as const, text: 'Tell me a story' };
+  let state = reduce(initialConversation, { type: 'listen', requestId: id });
+  state = reduce(state, { type: 'transcript', user });
+  state = reduce(state, { type: 'think', requestId: id, user: voiceUserMessage(id) });
+  assert.equal(lastUserMessage(state)?.text, user.text);
+  state = reduce(state, { type: 'finish', requestId: id });
+  assert.equal(lastUserMessage(state)?.text, user.text);
+  assert.notEqual(lastUserMessage(state)?.unavailable, true);
+  const reset = reduce(state, { type: 'reset' });
+  assert.equal(reduce(reset, { type: 'transcript', user }), reset);
+  const newer = reduce(reset, { type: 'listen', requestId: id + 1 });
+  assert.equal(reduce(newer, { type: 'transcript', user }), newer);
+});
+
 test('voice connection success or failure cannot discard a pending typed reply', () => {
   for (const phase of ['idle', 'error'] as const) {
     const waiting = reduce(initialConversation, { type: 'think', requestId: 11 });

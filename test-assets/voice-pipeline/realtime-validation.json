@@ -1,0 +1,1613 @@
+{
+  "tested_at": "2026-10-31T07:14:33.035Z",
+  "scope": "Paced PCM over real localhost WebSocket -> ElevenLabs realtime VAD/filtering -> one stateless real GPT dispatch -> real TTS. No character/memory evaluation, production session or physical microphone test.",
+  "config": {
+    "model": "scribe_v2_realtime",
+    "filter_background_audio": true,
+    "vad_silence_threshold_secs": 3,
+    "sensitivity": "provider default",
+    "logging": true
+  },
+  "batch_stt_calls": 0,
+  "summary": {
+    "total": 20,
+    "completed": 16,
+    "rejected": 4,
+    "failed": 0,
+    "early_endpoints": 0,
+    "noise_dispatched_to_engine": 0
+  },
+  "assets": [
+    {
+      "id": "01_vi_clean",
+      "speech_present": true,
+      "language": "vi",
+      "original_duration_ms": 6016.792,
+      "added_background_tail_ms": 2000,
+      "events": [
+        {
+          "type": "stream.ready",
+          "at_ms": 410
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 1517,
+          "text": ""
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 3024,
+          "text": "M"
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 3024,
+          "text": "Miêu ơi, mình"
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 4032,
+          "text": "Miêu ơi, mình muốn nghe một câu chuyện về cờ bạc."
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 5038,
+          "text": "Miêu ơi, mình muốn nghe một câu chuyện về chú mèo con."
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 6045,
+          "text": "Miêu ơi, mình muốn nghe một câu chuyện về chú mèo con."
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 7224,
+          "text": "Miêu ơi, mình muốn nghe một câu chuyện về chú mèo con."
+        },
+        {
+          "type": "transcript.segment",
+          "at_ms": 8022,
+          "text": "Miêu ơi, mình muốn nghe một câu chuyện về chú mèo con."
+        },
+        {
+          "type": "turn.end_candidate",
+          "at_ms": 8022
+        },
+        {
+          "type": "transcript.final",
+          "at_ms": 8463,
+          "text": "Miêu ơi, mình muốn nghe một câu chuyện về chú mèo con."
+        },
+        {
+          "type": "stream.processing",
+          "at_ms": 8463
+        },
+        {
+          "type": "turn.result",
+          "at_ms": 12243
+        }
+      ],
+      "endpoint_media_ms": 7800,
+      "remaining_reference_speech": false,
+      "transcript": "Miêu ơi, mình muốn nghe một câu chuyện về chú mèo con.",
+      "engine_dispatches": 1,
+      "engine_received_full_transcript": true,
+      "reply": "Ngày nọ, có một chú mèo con tên Bông tìm thấy chiếc lá vàng bé xíu. Chú đem chiếc lá tặng bạn chim sẻ để làm chiếc chăn ấm cho tổ, rồi cả hai cùng ngủ ngon dưới ánh trăng.",
+      "returned_audio": {
+        "mime_type": "audio/mpeg",
+        "bytes": 149672,
+        "duration_ms": 9326
+      },
+      "status": "real_pipeline_completed",
+      "total_ms": 12320
+    },
+    {
+      "id": "02_vi_soft",
+      "speech_present": true,
+      "language": "vi",
+      "original_duration_ms": 6016.792,
+      "added_background_tail_ms": 2000,
+      "events": [
+        {
+          "type": "stream.ready",
+          "at_ms": 330
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 1541,
+          "text": ""
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 2544,
+          "text": ""
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 3551,
+          "text": ""
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 4457,
+          "text": ""
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 5462,
+          "text": ""
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 6467,
+          "text": ""
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 7474,
+          "text": ""
+        },
+        {
+          "type": "stream.error",
+          "at_ms": 8343
+        }
+      ],
+      "error_code": "unclear_audio",
+      "engine_dispatches": 0,
+      "engine_received_full_transcript": null,
+      "status": "rejected_before_engine",
+      "total_ms": 8344
+    },
+    {
+      "id": "03_vi_muffled",
+      "speech_present": true,
+      "language": "vi",
+      "original_duration_ms": 6016.792,
+      "added_background_tail_ms": 2000,
+      "events": [
+        {
+          "type": "stream.ready",
+          "at_ms": 346
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 1557,
+          "text": ""
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 2954,
+          "text": ""
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 3057,
+          "text": "Nhu ơi, mình"
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 3962,
+          "text": "Nhu ơi, mình muốn nghe một câu chuyện về con."
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 4987,
+          "text": "Nhu ơi, mình muốn nghe một câu chuyện về chú mèo con."
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 5976,
+          "text": "Nhu ơi, mình muốn nghe một câu chuyện về chú mèo con."
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 7182,
+          "text": "Nhu ơi, mình muốn nghe một câu chuyện về chú mèo con."
+        },
+        {
+          "type": "transcript.segment",
+          "at_ms": 7971,
+          "text": "Nhu ơi, mình muốn nghe một câu chuyện về chú mèo con."
+        },
+        {
+          "type": "turn.end_candidate",
+          "at_ms": 7971
+        },
+        {
+          "type": "transcript.final",
+          "at_ms": 8344,
+          "text": "Nhu ơi, mình muốn nghe một câu chuyện về chú mèo con."
+        },
+        {
+          "type": "stream.processing",
+          "at_ms": 8344
+        },
+        {
+          "type": "turn.result",
+          "at_ms": 15398
+        }
+      ],
+      "endpoint_media_ms": 7800,
+      "remaining_reference_speech": false,
+      "transcript": "Nhu ơi, mình muốn nghe một câu chuyện về chú mèo con.",
+      "engine_dispatches": 1,
+      "engine_received_full_transcript": true,
+      "reply": "Ngày nọ, mèo con Bông thấy một chú bướm đang lạc đường trong vườn. Bông nhẹ nhàng dẫn bạn bướm đến luống hoa thơm, rồi cả hai cùng ngắm hoàng hôn rực rỡ.",
+      "returned_audio": {
+        "mime_type": "audio/mpeg",
+        "bytes": 134625,
+        "duration_ms": 8385
+      },
+      "status": "real_pipeline_completed",
+      "total_ms": 15473
+    },
+    {
+      "id": "04_vi_clipped",
+      "speech_present": true,
+      "language": "vi",
+      "original_duration_ms": 6016.792,
+      "added_background_tail_ms": 2000,
+      "events": [
+        {
+          "type": "stream.ready",
+          "at_ms": 435
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 1843,
+          "text": ""
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 3170,
+          "text": "N"
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 3170,
+          "text": "Nhi ơi, mình..."
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 4272,
+          "text": "Nghỉ thôi, mình muốn nghe một câu chuyện về con."
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 5293,
+          "text": "Nếu ơi, mình muốn nghe một câu chuyện về chú mèo con."
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 6319,
+          "text": "Nhu ơi, mình muốn nghe một câu chuyện về chú mèo con."
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 7275,
+          "text": "Nhu ơi, mình muốn nghe một câu chuyện về chú mèo con."
+        },
+        {
+          "type": "transcript.segment",
+          "at_ms": 8150,
+          "text": "Nhu ơi, mình muốn nghe một câu chuyện về chú mèo con."
+        },
+        {
+          "type": "turn.end_candidate",
+          "at_ms": 8150
+        },
+        {
+          "type": "transcript.final",
+          "at_ms": 8538,
+          "text": "Nhu ơi, mình muốn nghe một câu chuyện về chú mèo con."
+        },
+        {
+          "type": "stream.processing",
+          "at_ms": 8538
+        },
+        {
+          "type": "turn.result",
+          "at_ms": 13391
+        }
+      ],
+      "endpoint_media_ms": 7800,
+      "remaining_reference_speech": false,
+      "transcript": "Nhu ơi, mình muốn nghe một câu chuyện về chú mèo con.",
+      "engine_dispatches": 1,
+      "engine_received_full_transcript": true,
+      "reply": "Ngày xửa ngày xưa, có một chú mèo con tên Bông thích ngắm những đám mây. Một hôm, Bông giúp chú chim sẻ tìm lại chiếc tổ, rồi cả hai cùng cuộn tròn ngủ dưới ánh trăng.",
+      "returned_audio": {
+        "mime_type": "audio/mpeg",
+        "bytes": 149672,
+        "duration_ms": 9326
+      },
+      "status": "real_pipeline_completed",
+      "total_ms": 13476
+    },
+    {
+      "id": "05_vi_fan_snr20",
+      "speech_present": true,
+      "language": "vi",
+      "original_duration_ms": 6016.792,
+      "added_background_tail_ms": 2000,
+      "events": [
+        {
+          "type": "stream.ready",
+          "at_ms": 747
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 1784,
+          "text": ""
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 3380,
+          "text": "M"
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 3522,
+          "text": "Miêu ơi, mình mua-"
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 4517,
+          "text": "Miêu ơi, mình muốn nghe một câu chuyện với-"
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 5465,
+          "text": "Miêu ơi, mình muốn nghe một câu chuyện về chú mèo con."
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 6568,
+          "text": "Miêu ơi, mình muốn nghe một câu chuyện về chú mèo con."
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 7771,
+          "text": "Miêu ơi, mình muốn nghe một câu chuyện về chú mèo con."
+        },
+        {
+          "type": "transcript.segment",
+          "at_ms": 8557,
+          "text": "Miu ơi, mình muốn nghe một câu chuyện về chú mèo con."
+        },
+        {
+          "type": "turn.end_candidate",
+          "at_ms": 8557
+        },
+        {
+          "type": "transcript.final",
+          "at_ms": 9073,
+          "text": "Miu ơi, mình muốn nghe một câu chuyện về chú mèo con."
+        },
+        {
+          "type": "stream.processing",
+          "at_ms": 9073
+        },
+        {
+          "type": "turn.result",
+          "at_ms": 12102
+        }
+      ],
+      "endpoint_media_ms": 8000,
+      "remaining_reference_speech": false,
+      "transcript": "Miu ơi, mình muốn nghe một câu chuyện về chú mèo con.",
+      "engine_dispatches": 1,
+      "engine_received_full_transcript": true,
+      "reply": "Ngày nọ, mèo con Mướp thấy một chú bướm lạc đường nên nhẹ nhàng dẫn bạn về khu vườn đầy hoa. Từ đó, hai bạn cùng chơi vui vẻ dưới nắng vàng.",
+      "returned_audio": {
+        "mime_type": "audio/mpeg",
+        "bytes": 126684,
+        "duration_ms": 7889
+      },
+      "status": "real_pipeline_completed",
+      "total_ms": 12185
+    },
+    {
+      "id": "06_vi_rain_snr10",
+      "speech_present": true,
+      "language": "vi",
+      "original_duration_ms": 6016.792,
+      "added_background_tail_ms": 2000,
+      "events": [
+        {
+          "type": "stream.ready",
+          "at_ms": 509
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 2691,
+          "text": ""
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 2691,
+          "text": "Lưu ơi."
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 3852,
+          "text": "Lưu ơi, mình muốn nghe một câu hát."
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 4797,
+          "text": "Lưu ơi, mình muốn nghe một câu chuyện về chú mèo con."
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 6438,
+          "text": "Lưu ơi, mình muốn nghe một câu chuyện về chú mèo con."
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 6990,
+          "text": "Lưu ơi, mình muốn nghe một câu chuyện về chú mèo con."
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 6990,
+          "text": "Lưu ơi, mình muốn nghe một câu chuyện về chú mèo con."
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 8147,
+          "text": "Lưu ơi, mình muốn nghe một câu chuyện về chú mèo con."
+        },
+        {
+          "type": "transcript.segment",
+          "at_ms": 8149,
+          "text": "Lưu ơi, mình muốn nghe một câu chuyện về chú mèo con."
+        },
+        {
+          "type": "turn.end_candidate",
+          "at_ms": 8149
+        },
+        {
+          "type": "transcript.final",
+          "at_ms": 8596,
+          "text": "Lưu ơi, mình muốn nghe một câu chuyện về chú mèo con."
+        },
+        {
+          "type": "stream.processing",
+          "at_ms": 8596
+        },
+        {
+          "type": "turn.result",
+          "at_ms": 13118
+        }
+      ],
+      "endpoint_media_ms": 7800,
+      "remaining_reference_speech": false,
+      "transcript": "Lưu ơi, mình muốn nghe một câu chuyện về chú mèo con.",
+      "engine_dispatches": 1,
+      "engine_received_full_transcript": true,
+      "reply": "Ngày xưa có một chú mèo con tên Bông, thích chạy theo những chiếc lá bay trong gió. Một hôm, Bông tìm thấy chú chim nhỏ bị lạc và nhẹ nhàng đưa bạn về tổ; từ đó hai bạn cùng ngắm nắng mỗi ngày.",
+      "returned_audio": {
+        "mime_type": "audio/mpeg",
+        "bytes": 171824,
+        "duration_ms": 10710
+      },
+      "status": "real_pipeline_completed",
+      "total_ms": 13348
+    },
+    {
+      "id": "07_vi_noise_snr0",
+      "speech_present": true,
+      "language": "vi",
+      "original_duration_ms": 30000,
+      "added_background_tail_ms": 0,
+      "events": [
+        {
+          "type": "stream.ready",
+          "at_ms": 505
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 3456,
+          "text": ""
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 3456,
+          "text": "Mình ơi, mình"
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 4377,
+          "text": "Nin ơi, mình muốn nghe một câu chuyện."
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 5083,
+          "text": "Nin ơi, mình muốn nghe một câu chuyện về chú mèo con."
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 5950,
+          "text": "Nin ơi, mình muốn nghe một câu chuyện về chú mèo con ."
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 7091,
+          "text": "Nin ơi, mình muốn nghe một câu chuyện về chú mèo con ."
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 8138,
+          "text": "Nin ơi, mình muốn nghe một câu chuyện về chú mèo con ."
+        },
+        {
+          "type": "transcript.segment",
+          "at_ms": 8148,
+          "text": "Nin ơi, mình muốn nghe một câu chuyện về chú mèo con."
+        },
+        {
+          "type": "turn.end_candidate",
+          "at_ms": 8148
+        },
+        {
+          "type": "transcript.final",
+          "at_ms": 8618,
+          "text": "Nin ơi, mình muốn nghe một câu chuyện về chú mèo con."
+        },
+        {
+          "type": "stream.processing",
+          "at_ms": 8618
+        },
+        {
+          "type": "turn.result",
+          "at_ms": 12461
+        }
+      ],
+      "endpoint_media_ms": 7800,
+      "remaining_reference_speech": false,
+      "transcript": "Nin ơi, mình muốn nghe một câu chuyện về chú mèo con.",
+      "engine_dispatches": 1,
+      "engine_received_full_transcript": true,
+      "reply": "Ngày nọ, mèo con Bông thấy một chú bướm lạc đường và nhẹ nhàng dẫn bạn về khu vườn đầy hoa. Từ đó, hai bạn cùng nhau chơi đùa dưới nắng vàng.",
+      "returned_audio": {
+        "mime_type": "audio/mpeg",
+        "bytes": 128774,
+        "duration_ms": 8020
+      },
+      "status": "real_pipeline_completed",
+      "total_ms": 12527
+    },
+    {
+      "id": "08_vi_pause_0800ms",
+      "speech_present": true,
+      "language": "vi",
+      "original_duration_ms": 6331.292,
+      "added_background_tail_ms": 2000,
+      "events": [
+        {
+          "type": "stream.ready",
+          "at_ms": 386
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 1593,
+          "text": ""
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 3030,
+          "text": "Hôm nay-"
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 3108,
+          "text": "Hôm nay mình hơi buồn."
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 4188,
+          "text": "Hôm nay mình hơi buồn."
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 5164,
+          "text": "Hôm nay mình hơi buồn. Bạn chơi với mình nhé."
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 5999,
+          "text": "Hôm nay mình hơi buồn. Bạn chơi với mình nhé."
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 7107,
+          "text": "Hôm nay mình hơi buồn. Bạn chơi với mình nhé."
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 8216,
+          "text": "Hôm nay mình hơi buồn. Bạn chơi với mình nhé."
+        },
+        {
+          "type": "transcript.segment",
+          "at_ms": 8473,
+          "text": "Hôm nay mình hơi buồn. Bạn chơi với mình nhé."
+        },
+        {
+          "type": "turn.end_candidate",
+          "at_ms": 8473
+        },
+        {
+          "type": "transcript.final",
+          "at_ms": 8882,
+          "text": "Hôm nay mình hơi buồn. Bạn chơi với mình nhé."
+        },
+        {
+          "type": "stream.processing",
+          "at_ms": 8882
+        },
+        {
+          "type": "turn.result",
+          "at_ms": 11336
+        }
+      ],
+      "endpoint_media_ms": 8200,
+      "remaining_reference_speech": false,
+      "transcript": "Hôm nay mình hơi buồn. Bạn chơi với mình nhé.",
+      "engine_dispatches": 1,
+      "engine_received_full_transcript": true,
+      "reply": "Miu ở đây chơi cùng bạn nhé. Mình thử thi xem ai kể được một con vật dễ thương hơn nào!",
+      "returned_audio": {
+        "mime_type": "audio/mpeg",
+        "bytes": 71514,
+        "duration_ms": 4441
+      },
+      "status": "real_pipeline_completed",
+      "total_ms": 11398
+    },
+    {
+      "id": "09_vi_pause_2200ms",
+      "speech_present": true,
+      "language": "vi",
+      "original_duration_ms": 7731.292,
+      "added_background_tail_ms": 2000,
+      "events": [
+        {
+          "type": "stream.ready",
+          "at_ms": 426
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 1600,
+          "text": ""
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 3131,
+          "text": "Hôm nay-"
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 3131,
+          "text": "Hôm nay mình hơi buồn."
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 4160,
+          "text": "Hôm nay mình hơi buồn."
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 5270,
+          "text": "Hôm nay mình hơi buồn."
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 6031,
+          "text": "Hôm nay mình hơi buồn. Bạn chơi với mình-"
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 7048,
+          "text": "Hôm nay mình hơi buồn. Bạn chơi với mình nhé."
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 7943,
+          "text": "Hôm nay mình hơi buồn. Bạn chơi với mình nhé."
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 9133,
+          "text": "Hôm nay mình hơi buồn. Bạn chơi với mình nhé."
+        },
+        {
+          "type": "transcript.segment",
+          "at_ms": 9958,
+          "text": "Hôm nay mình hơi buồn. Bạn chơi với mình nhé."
+        },
+        {
+          "type": "turn.end_candidate",
+          "at_ms": 9958
+        },
+        {
+          "type": "transcript.final",
+          "at_ms": 10441,
+          "text": "Hôm nay mình hơi buồn. Bạn chơi với mình nhé."
+        },
+        {
+          "type": "stream.processing",
+          "at_ms": 10441
+        },
+        {
+          "type": "turn.result",
+          "at_ms": 13591
+        }
+      ],
+      "endpoint_media_ms": 9600,
+      "remaining_reference_speech": false,
+      "transcript": "Hôm nay mình hơi buồn. Bạn chơi với mình nhé.",
+      "engine_dispatches": 1,
+      "engine_received_full_transcript": true,
+      "reply": "Miu ở đây chơi cùng bạn nhé. Mình cùng tưởng tượng đang thả những chiếc thuyền giấy xinh xinh trên dòng suối nào.",
+      "returned_audio": {
+        "mime_type": "audio/mpeg",
+        "bytes": 91158,
+        "duration_ms": 5669
+      },
+      "status": "real_pipeline_completed",
+      "total_ms": 13671
+    },
+    {
+      "id": "10_vi_noise_only",
+      "speech_present": false,
+      "language": "vi",
+      "original_duration_ms": 6500,
+      "added_background_tail_ms": 2000,
+      "events": [
+        {
+          "type": "stream.ready",
+          "at_ms": 392
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 1600,
+          "text": ""
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 2613,
+          "text": ""
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 3651,
+          "text": ""
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 4705,
+          "text": ""
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 5708,
+          "text": ""
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 6652,
+          "text": ""
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 7707,
+          "text": ""
+        },
+        {
+          "type": "stream.error",
+          "at_ms": 8395
+        }
+      ],
+      "error_code": "unclear_audio",
+      "engine_dispatches": 0,
+      "engine_received_full_transcript": null,
+      "status": "rejected_before_engine",
+      "total_ms": 8396
+    },
+    {
+      "id": "11_en_clean",
+      "speech_present": true,
+      "language": "en",
+      "original_duration_ms": 5871.917,
+      "added_background_tail_ms": 2000,
+      "events": [
+        {
+          "type": "stream.ready",
+          "at_ms": 376
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 1561,
+          "text": ""
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 3073,
+          "text": "Me."
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 3230,
+          "text": "Mio, can you tell"
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 4099,
+          "text": "Mio, can you tell me a story about a"
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 5142,
+          "text": "Mio, can you tell me a story about a little kitten?"
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 6089,
+          "text": "Mio, can you tell me a story about a little kitten?"
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 7216,
+          "text": "Mio, can you tell me a story about a little kitten?"
+        },
+        {
+          "type": "transcript.segment",
+          "at_ms": 7844,
+          "text": "Mio, can you tell me a story about a little kitten?"
+        },
+        {
+          "type": "turn.end_candidate",
+          "at_ms": 7844
+        },
+        {
+          "type": "transcript.final",
+          "at_ms": 8212,
+          "text": "Mio, can you tell me a story about a little kitten?"
+        },
+        {
+          "type": "stream.processing",
+          "at_ms": 8212
+        },
+        {
+          "type": "turn.result",
+          "at_ms": 13147
+        }
+      ],
+      "endpoint_media_ms": 7600,
+      "remaining_reference_speech": false,
+      "transcript": "Mio, can you tell me a story about a little kitten?",
+      "engine_dispatches": 1,
+      "engine_received_full_transcript": true,
+      "reply": "Once upon a time, a little kitten named Poppy found a tiny star glowing in the grass. She gently carried it up a hill, and the star twinkled so brightly that it showed her the way home.",
+      "returned_audio": {
+        "mime_type": "audio/mpeg",
+        "bytes": 201499,
+        "duration_ms": 12565
+      },
+      "status": "real_pipeline_completed",
+      "total_ms": 13207
+    },
+    {
+      "id": "12_en_soft",
+      "speech_present": true,
+      "language": "en",
+      "original_duration_ms": 5871.917,
+      "added_background_tail_ms": 2000,
+      "events": [
+        {
+          "type": "stream.ready",
+          "at_ms": 516
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 1754,
+          "text": ""
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 3822,
+          "text": "May you continue."
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 3822,
+          "text": "Mia, can you tell me a story about-"
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 4942,
+          "text": "Mia, can you tell me a story about-"
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 5961,
+          "text": "Mia, can you tell me a story about-"
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 6984,
+          "text": "Mia, can you tell me a story about-"
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 8019,
+          "text": "Mia, can you tell me a story about-"
+        },
+        {
+          "type": "stream.error",
+          "at_ms": 25793
+        }
+      ],
+      "error_code": "speech_stream_closed",
+      "engine_dispatches": 0,
+      "engine_received_full_transcript": null,
+      "status": "rejected_before_engine",
+      "total_ms": 25794
+    },
+    {
+      "id": "13_en_muffled",
+      "speech_present": true,
+      "language": "en",
+      "original_duration_ms": 5871.917,
+      "added_background_tail_ms": 2000,
+      "events": [
+        {
+          "type": "stream.ready",
+          "at_ms": 2868
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 3903,
+          "text": ""
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 4742,
+          "text": ""
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 5773,
+          "text": "No."
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 5839,
+          "text": "Ma'am, can you tell"
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 6795,
+          "text": "Liz, can you tell me a story about a"
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 7610,
+          "text": "Lil, can you tell me a story about a little kitten?"
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 8842,
+          "text": "Lil, can you tell me a story about a little kitten?"
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 9874,
+          "text": "Lil, can you tell me a story about a little kitten?"
+        },
+        {
+          "type": "transcript.segment",
+          "at_ms": 10517,
+          "text": "Lil, can you tell me a story about a little kitten?"
+        },
+        {
+          "type": "turn.end_candidate",
+          "at_ms": 10517
+        },
+        {
+          "type": "transcript.final",
+          "at_ms": 11167,
+          "text": "Lil, can you tell me a story about a little kitten?"
+        },
+        {
+          "type": "stream.processing",
+          "at_ms": 11167
+        },
+        {
+          "type": "turn.result",
+          "at_ms": 16390
+        }
+      ],
+      "endpoint_media_ms": 7800,
+      "remaining_reference_speech": false,
+      "transcript": "Lil, can you tell me a story about a little kitten?",
+      "engine_dispatches": 1,
+      "engine_received_full_transcript": true,
+      "reply": "Once upon a time, a little kitten named Pip found a shiny button in the garden. Pip carried it home and gave it to a lonely old teddy bear, who smiled brighter than the moon.",
+      "returned_audio": {
+        "mime_type": "audio/mpeg",
+        "bytes": 178093,
+        "duration_ms": 11102
+      },
+      "status": "real_pipeline_completed",
+      "total_ms": 16472
+    },
+    {
+      "id": "14_en_clipped",
+      "speech_present": true,
+      "language": "en",
+      "original_duration_ms": 5871.917,
+      "added_background_tail_ms": 2000,
+      "events": [
+        {
+          "type": "stream.ready",
+          "at_ms": 432
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 1638,
+          "text": ""
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 3234,
+          "text": ""
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 3343,
+          "text": "Will you tell"
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 4055,
+          "text": "Will, can you tell me a story about a"
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 5067,
+          "text": "Will, can you tell me a story about a little kitten?"
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 6079,
+          "text": "Will, can you tell me a story about a little kitten?"
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 7365,
+          "text": "Will, can you tell me a story about a little kitten?"
+        },
+        {
+          "type": "transcript.segment",
+          "at_ms": 8004,
+          "text": "Will you tell me a story about a little kitten?"
+        },
+        {
+          "type": "turn.end_candidate",
+          "at_ms": 8004
+        },
+        {
+          "type": "transcript.final",
+          "at_ms": 8460,
+          "text": "Will you tell me a story about a little kitten?"
+        },
+        {
+          "type": "stream.processing",
+          "at_ms": 8460
+        },
+        {
+          "type": "turn.result",
+          "at_ms": 11575
+        }
+      ],
+      "endpoint_media_ms": 7600,
+      "remaining_reference_speech": false,
+      "transcript": "Will you tell me a story about a little kitten?",
+      "engine_dispatches": 1,
+      "engine_received_full_transcript": true,
+      "reply": "A little kitten named Pip found a shiny button in the garden. Pip carried it to a lonely robin, and together they made it sparkle in the sunshine.",
+      "returned_audio": {
+        "mime_type": "audio/mpeg",
+        "bytes": 140895,
+        "duration_ms": 8777
+      },
+      "status": "real_pipeline_completed",
+      "total_ms": 11638
+    },
+    {
+      "id": "15_en_fan_snr20",
+      "speech_present": true,
+      "language": "en",
+      "original_duration_ms": 5871.917,
+      "added_background_tail_ms": 2000,
+      "events": [
+        {
+          "type": "stream.ready",
+          "at_ms": 388
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 1572,
+          "text": ""
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 3090,
+          "text": "Me."
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 3206,
+          "text": "Mio, can you tell me?"
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 4088,
+          "text": "Mio, can you tell me a story about a"
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 5229,
+          "text": "Mio, can you tell me a story about a little kitten?"
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 6092,
+          "text": "Mio, can you tell me a story about a little kitten?"
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 7357,
+          "text": "Mio, can you tell me a story about a little kitten?"
+        },
+        {
+          "type": "transcript.segment",
+          "at_ms": 7979,
+          "text": "Mio, can you tell me a story about a little kitten?"
+        },
+        {
+          "type": "turn.end_candidate",
+          "at_ms": 7979
+        },
+        {
+          "type": "transcript.final",
+          "at_ms": 8381,
+          "text": "Mio, can you tell me a story about a little kitten?"
+        },
+        {
+          "type": "stream.processing",
+          "at_ms": 8381
+        },
+        {
+          "type": "turn.result",
+          "at_ms": 10881
+        }
+      ],
+      "endpoint_media_ms": 7600,
+      "remaining_reference_speech": false,
+      "transcript": "Mio, can you tell me a story about a little kitten?",
+      "engine_dispatches": 1,
+      "engine_received_full_transcript": true,
+      "reply": "Once, a little kitten named Pip found a shiny button in the garden. Pip carried it to a lonely turtle, who smiled and said, “Now we have a treasure to share!”",
+      "returned_audio": {
+        "mime_type": "audio/mpeg",
+        "bytes": 158031,
+        "duration_ms": 9848
+      },
+      "status": "real_pipeline_completed",
+      "total_ms": 10944
+    },
+    {
+      "id": "16_en_rain_snr10",
+      "speech_present": true,
+      "language": "en",
+      "original_duration_ms": 5871.917,
+      "added_background_tail_ms": 2000,
+      "events": [
+        {
+          "type": "stream.ready",
+          "at_ms": 426
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 2726,
+          "text": ""
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 3732,
+          "text": "Mia, can you tell me a story"
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 4745,
+          "text": "Mia, can you tell me a story about a little kitten?"
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 5547,
+          "text": "Mia, can you tell me a story about a little kitten?"
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 6675,
+          "text": "Mia, can you tell me a story about a little kitten?"
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 7660,
+          "text": "Mia, can you tell me a story about a little kitten?"
+        },
+        {
+          "type": "transcript.segment",
+          "at_ms": 7967,
+          "text": "Mia, can you tell me a story about a little kitten?"
+        },
+        {
+          "type": "turn.end_candidate",
+          "at_ms": 7967
+        },
+        {
+          "type": "transcript.final",
+          "at_ms": 8343,
+          "text": "Mia, can you tell me a story about a little kitten?"
+        },
+        {
+          "type": "stream.processing",
+          "at_ms": 8343
+        },
+        {
+          "type": "turn.result",
+          "at_ms": 11630
+        }
+      ],
+      "endpoint_media_ms": 7600,
+      "remaining_reference_speech": false,
+      "transcript": "Mia, can you tell me a story about a little kitten?",
+      "engine_dispatches": 1,
+      "engine_received_full_transcript": true,
+      "reply": "Once, a little kitten named Pip found a tiny star glowing in the grass. Pip carried it up a hill, and together they shone so brightly that the whole village smiled goodnight.",
+      "returned_audio": {
+        "mime_type": "audio/mpeg",
+        "bytes": 170570,
+        "duration_ms": 10632
+      },
+      "status": "real_pipeline_completed",
+      "total_ms": 11695
+    },
+    {
+      "id": "17_en_noise_snr0",
+      "speech_present": true,
+      "language": "en",
+      "original_duration_ms": 30000,
+      "added_background_tail_ms": 0,
+      "events": [
+        {
+          "type": "stream.ready",
+          "at_ms": 523
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 1704,
+          "text": ""
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 3748,
+          "text": "No."
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 3748,
+          "text": "Mills, can you tell me-"
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 6291,
+          "text": "Moo, can you tell me a song about a"
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 6899,
+          "text": "Lil, can you tell me a song about a little kitten?"
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 6899,
+          "text": "Lil, can you tell me a song about a little kitten?"
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 8012,
+          "text": "Lil, can you tell me a song about a little kitten?"
+        },
+        {
+          "type": "transcript.segment",
+          "at_ms": 8257,
+          "text": "Lil, can you tell me a story about a little kitten?"
+        },
+        {
+          "type": "turn.end_candidate",
+          "at_ms": 8257
+        },
+        {
+          "type": "transcript.final",
+          "at_ms": 8732,
+          "text": "Lil, can you tell me a story about a little kitten?"
+        },
+        {
+          "type": "stream.processing",
+          "at_ms": 8732
+        },
+        {
+          "type": "turn.result",
+          "at_ms": 11362
+        }
+      ],
+      "endpoint_media_ms": 7800,
+      "remaining_reference_speech": false,
+      "transcript": "Lil, can you tell me a story about a little kitten?",
+      "engine_dispatches": 1,
+      "engine_received_full_transcript": true,
+      "reply": "Once there was a little kitten named Pip who found a shiny blue button in the garden. Pip carried it home and gave it to a lonely hedgehog, who smiled and became Pip’s new friend.",
+      "returned_audio": {
+        "mime_type": "audio/mpeg",
+        "bytes": 165136,
+        "duration_ms": 10292
+      },
+      "status": "real_pipeline_completed",
+      "total_ms": 11445
+    },
+    {
+      "id": "18_en_pause_0800ms",
+      "speech_present": true,
+      "language": "en",
+      "original_duration_ms": 6766.667,
+      "added_background_tail_ms": 2000,
+      "events": [
+        {
+          "type": "stream.ready",
+          "at_ms": 411
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 1620,
+          "text": ""
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 3017,
+          "text": "I-"
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 3017,
+          "text": "I feel a little sad"
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 4046,
+          "text": "I feel a little sad today."
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 5048,
+          "text": "I feel a little sad today. Will you play?"
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 6043,
+          "text": "I feel a little sad today. Will you play with me?"
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 6848,
+          "text": "I feel a little sad today. Will you play with me?"
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 8066,
+          "text": "I feel a little sad today. Will you play with me?"
+        },
+        {
+          "type": "transcript.segment",
+          "at_ms": 8940,
+          "text": "I feel a little sad today. Will you play with me?"
+        },
+        {
+          "type": "turn.end_candidate",
+          "at_ms": 8940
+        },
+        {
+          "type": "transcript.final",
+          "at_ms": 9342,
+          "text": "I feel a little sad today. Will you play with me?"
+        },
+        {
+          "type": "stream.processing",
+          "at_ms": 9342
+        },
+        {
+          "type": "turn.result",
+          "at_ms": 11425
+        }
+      ],
+      "endpoint_media_ms": 8600,
+      "remaining_reference_speech": false,
+      "transcript": "I feel a little sad today. Will you play with me?",
+      "engine_dispatches": 1,
+      "engine_received_full_transcript": true,
+      "reply": "I’m sorry you’re feeling sad, little friend. I’d love to play a guessing game with you—think of an animal, and I’ll try to guess it!",
+      "returned_audio": {
+        "mime_type": "audio/mpeg",
+        "bytes": 135461,
+        "duration_ms": 8438
+      },
+      "status": "real_pipeline_completed",
+      "total_ms": 11488
+    },
+    {
+      "id": "19_en_pause_2200ms",
+      "speech_present": true,
+      "language": "en",
+      "original_duration_ms": 8166.667,
+      "added_background_tail_ms": 2000,
+      "events": [
+        {
+          "type": "stream.ready",
+          "at_ms": 331
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 1450,
+          "text": ""
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 2997,
+          "text": "I-"
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 3061,
+          "text": "I feel a little sad"
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 4086,
+          "text": "I feel a little sad today."
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 5025,
+          "text": "I feel a little sad today."
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 6005,
+          "text": "I feel a little sad today. Will"
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 7002,
+          "text": "I feel a little sad today. Will you play with me?"
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 7791,
+          "text": "I feel a little sad today. Will you play with me?"
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 8785,
+          "text": "I feel a little sad today. Will you play with me?"
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 10143,
+          "text": "I feel a little sad today. Will you play with me?"
+        },
+        {
+          "type": "transcript.segment",
+          "at_ms": 10323,
+          "text": "I feel a little sad today. Will you play with me?"
+        },
+        {
+          "type": "turn.end_candidate",
+          "at_ms": 10323
+        },
+        {
+          "type": "transcript.final",
+          "at_ms": 10692,
+          "text": "I feel a little sad today. Will you play with me?"
+        },
+        {
+          "type": "stream.processing",
+          "at_ms": 10692
+        },
+        {
+          "type": "turn.result",
+          "at_ms": 12778
+        }
+      ],
+      "endpoint_media_ms": 10000,
+      "remaining_reference_speech": false,
+      "transcript": "I feel a little sad today. Will you play with me?",
+      "engine_dispatches": 1,
+      "engine_received_full_transcript": true,
+      "reply": "Of course! I’m an AI kitten, and I’d love to play. Shall we pretend we’re exploring a cozy little forest together?",
+      "returned_audio": {
+        "mime_type": "audio/mpeg",
+        "bytes": 131282,
+        "duration_ms": 8176
+      },
+      "status": "real_pipeline_completed",
+      "total_ms": 12859
+    },
+    {
+      "id": "20_en_noise_only",
+      "speech_present": false,
+      "language": "en",
+      "original_duration_ms": 6500,
+      "added_background_tail_ms": 2000,
+      "events": [
+        {
+          "type": "stream.ready",
+          "at_ms": 384
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 1593,
+          "text": ""
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 3275,
+          "text": ""
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 4290,
+          "text": ""
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 5198,
+          "text": ""
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 6406,
+          "text": ""
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 8209,
+          "text": ""
+        },
+        {
+          "type": "stream.error",
+          "at_ms": 8390
+        }
+      ],
+      "error_code": "unclear_audio",
+      "engine_dispatches": 0,
+      "engine_received_full_transcript": null,
+      "status": "rejected_before_engine",
+      "total_ms": 8390
+    }
+  ]
+}

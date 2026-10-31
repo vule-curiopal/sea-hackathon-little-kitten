@@ -3,6 +3,7 @@ import type { Language } from '@miu/voice-contracts';
 import { PipelineError } from '../errors.js';
 import type { SessionService } from '../modules/sessions/session.service.js';
 import { bearerToken } from './request.js';
+import { logEvent } from '../logger.js';
 
 export type RequestContexts = WeakMap<Request, { language: Language; turnId?: string }>;
 
@@ -61,6 +62,7 @@ export function registerErrorHandler(app: Express, sessions: SessionService, con
         // The request may not yet have an authenticated profile/language.
       }
     }
+    logEvent('http.failed', { code, status, turn_id: context?.turnId });
     response.status(status).json({
       error: { code, message: language === 'en' ? 'Please try again.' : 'Bạn thử lại nhé.', retryable },
       ...(context?.turnId ? { turn_id: context.turnId } : {}),

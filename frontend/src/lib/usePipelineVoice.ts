@@ -17,6 +17,7 @@ type Options = {
   role?: Role;
   onState(state: VoiceControllerState): void;
   onTurn(response: TurnResponse): void;
+  onTranscript(text: string): void;
   onInvalidate(): void;
 };
 
@@ -32,7 +33,7 @@ export function usePipelineVoice(options: Options) {
   const [state, setState] = useState<VoiceControllerState>('initializing');
   const [capture, setCapture] = useState<CaptureState>('idle');
   const captureRef = useRef<CaptureState>('idle');
-  const [meter, setMeter] = useState<MeterSnapshot | null>(null);
+  const [meter, setMeter] = useState<Pick<MeterSnapshot, 'levelDbfs' | 'elapsedMs'> | null>(null);
   const [manualOnly, setManualOnly] = useState(false);
   const [error, setError] = useState<TranslationKey | null>(null);
   const [attempt, setAttempt] = useState(0);
@@ -43,8 +44,22 @@ export function usePipelineVoice(options: Options) {
   const [affect, setAffect] = useState<AffectSnapshot | undefined>();
   const meterRef = useRef<ReturnType<typeof createPlaybackMeter> | null>(null);
   const dayAbort = useRef<AbortController | null>(null);
+  const lastDiagnostic = useRef({ key: '', at: 0 });
   const showError = useCallback((reason: unknown) => {
     voiceConsole.error(reason);
+    const current = controller.current?.session;
+    const code = typeof reason === 'object' && reason !== null && 'code' in reason ? String(reason.code) : 'unknown_client_error';
+    const diagnosticKey = `${current?.session_id}:${code}`;
+    if (current && code !== 'CANCELED' && (lastDiagnostic.current.key !== diagnosticKey || Date.now() - lastDiagnostic.current.at > 5000)) {
+      lastDiagnostic.current = { key: diagnosticKey, at: Date.now() };
+      const abort = new AbortController();
+      const timer = setTimeout(() => abort.abort(), 5000);
+      // Best effort only; diagnostic failure must not trigger another diagnostic or retry a turn.
+      void fetch(`${import.meta.env.VITE_VOICE_API_URL || ''}/api/client-events`, {
+        method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${current.demo_token}` },
+        body: JSON.stringify({ session_id: current.session_id, code }), signal: abort.signal, keepalive: true,
+      }).catch(() => {}).finally(() => clearTimeout(timer));
+    }
     if (typeof reason === 'object' && reason !== null && 'memoryInvalidated' in reason && reason.memoryInvalidated) {
       setLastTurn(null); setAffect(undefined); callbacks.current.onInvalidate(); setRevision(value => value + 1);
     }
@@ -142,8 +157,10 @@ export function usePipelineVoice(options: Options) {
       else if (event.type === 'error') report(event.error);
       else if (event.type === 'playback' && (event.event.type === 'error' || event.event.type === 'receipt_error')) report(event.event.error);
       else if (event.type === 'capture') {
+        if (event.event.type === 'transcript_final') callbacks.current.onTranscript(event.event.text);
         if (event.event.type === 'state') { captureRef.current = event.event.state; setCapture(event.event.state); }
         if (event.event.type === 'meter') setMeter(event.event.snapshot);
+        if (event.event.type === 'stream_meter') setMeter({ levelDbfs: event.event.levelDbfs, elapsedMs: event.event.elapsedMs });
         if (event.event.type === 'manual_only') setManualOnly(true);
       }
     });

@@ -5,7 +5,7 @@ These are proposed contracts for the [frontend](frontend.md), [pipeline](pipelin
 ## Common rules
 
 - Prefix routes with `/api`; return JSON except for the multipart turn request.
-- Resolve the profile from a server-issued demo profile token. Never trust a model-generated or caller-supplied profile ID for authorization. Production identity is outside this prototype.
+- The integrated server resolves an account's profile from its HttpOnly session cookie. A server-issued engine bearer identifies the conversation and independently requires the matching owner cookie. Guest profiles are isolated. Never trust a model-generated or caller-supplied profile ID for authorization.
 - The browser generates a unique `request_id` for each mutation. A turn's `turn_id` equals its `request_id`. Retries use the same ID; a different body with the same ID returns `409 idempotency_conflict`.
 - A profile permits only one active turn or greeting. A second request returns `409 turn_in_progress` until the first finishes or is canceled.
 - Cancellation is authorized by the same profile/session token and may arrive before an upload is accepted. Keep bounded transient cancellation/idempotency metadata keyed by session and turn ID so a late-arriving canceled upload cannot start work. Protocol metadata is not conversation memory.
@@ -26,7 +26,7 @@ Session creation and configuration mutations include a UUID `request_id`, follow
 
 | Method and path | Purpose |
 | --- | --- |
-| `POST /api/sessions` | Create a session for the selected fictional demo profile; return profile token, session ID, configuration, versions, and effective time |
+| `POST /api/sessions` | Create an account-owned or isolated guest session; return profile token, session ID, configuration, versions, and effective time |
 | `PATCH /api/profiles/current/config` | Set one MBTI type, role, language mode, and approved voice; reject changes during an active turn |
 | `POST /api/sessions/{session_id}/turns` | Complete one utterance or explicitly requested greeting; return approved speech audio and face plan |
 | `DELETE /api/sessions/{session_id}/turns/{turn_id}` | Idempotently cancel a pending turn and prevent queued state transitions |
@@ -41,13 +41,32 @@ Demo routes are available only in demo mode for the selected fictional profile. 
 
 ## Session and configuration setup
 
-For the supervised demo, the initial session request accepts a `demo_profile_key` from a server allowlist such as `an` or `binh`. It cannot address arbitrary database profiles. Return a `demo_token` bound to that fictional profile and use `Authorization: Bearer <demo_token>` for subsequent requests. Creating a new session for the same profile may reuse the token; ending a conversation does not prevent its authorized Next day or panel operations. A turn still requires an open session belonging to the token's profile. Profile switching clears client state and obtains the other profile's token explicitly.
+The integrated server accepts `demo_profile_key: "account"` with an authenticated cookie and selects that account's profile on the server. Explicit `guest`, or unauthenticated legacy `an`/`binh` selectors, create a fresh isolated guest profile. They cannot reopen a seeded account or choose an arbitrary database profile. Subsequent requests use `Authorization: Bearer <demo_token>`; account-owned operations also require the matching owner cookie, including client diagnostics. A turn requires an open session belonging to that profile.
 
-This is fixture selection, not production child authentication. When demo mode is disabled, this bootstrap route must not create publicly accessible real-child profiles.
+The standalone voice package retains fictional fixture selectors for development. Its fixture token alone does not replace the integrated server's account authentication.
 
 Configuration patches accept only `personality` (one of the 16 allowed MBTI codes), `role` (`friend`, `big_sibling`, `teacher`), `language_mode` (`vi`, `en`, `follow_child`), and `voice_id` from a server allowlist. Reject unknown fields and incompatible voice/language choices. The server returns the effective configuration and new state version; it does not accept raw prompts or safety overrides.
 
 For the first batch voice demo, choose `language_mode=vi` or `en` before the session's first recording. Use this fixed mode for recognition hints, reply generation, fallback text and synthesis; `follow_child` remains part of the broader product contract but is outside this first voice demo. A `language_hint` cannot override the configured mode.
+
+## Realtime speech turn
+
+The real-provider default is ElevenLabs realtime STT with VAD and background filtering. The existing HTTP batch/text turn route remains available. See the [implementation guide](voice-pipeline/elevenlabs-realtime.md).
+
+1. `GET /api/voice/capabilities` returns `input_mode`, `realtime_available`, `silence_ms`, `filter_background_audio`, and `max_recording_ms`.
+2. Connect to `WSS /api/sessions/{session_id}/speech-stream`, using a trusted origin. The first text frame, within 5s, is `{ "type": "stream.start", "token": "<demo_token>", "request_id": "<uuid>", "language": "vi" }`. No tokens in the URL. Authentication and a per-profile input reservation precede any upstream connection.
+3. Wait for `stream.ready`. Audio frames are binary: a 4-byte **unsigned little-endian sequence number**, starting at zero, followed by mono signed PCM16 little-endian at 16kHz. Target 200ms/6,400 PCM bytes per frame; maximum 32,000 PCM bytes per frame and 960,000 PCM bytes/30s per turn.
+4. `transcript.partial` replaces the temporary text; `transcript.segment` reports a settled segment. Neither dispatches the response engine. Provider VAD can emit `turn.end_candidate` after 3s of no speech.
+5. On an end candidate or manual Send, stop/flush microphone processing, send the last PCM frame, then `{ "type": "audio.end", "last_seq": 12 }`. The last sequence must exactly match the final audio frame. This message requests finalization on the same socket.
+6. Backend sends a final provider commit and waits for its committed acknowledgement. An empty acknowledgement is valid for a silence-only tail. Only then emit `stream.drained`, `transcript.final` with the full text, and `stream.processing`, and dispatch the complete utterance once to the existing engine/GPT. No batch retranscription or client-supplied transcript is used.
+7. `turn.result` contains `response: TurnResponse`, with `input_mode: "realtime_stt"` and the existing transcript/reply/audio/version/engine metadata. The WebSocket closes normally after delivery. Playback uses the existing HTTP receipt route.
+8. `stream.cancel`, existing `DELETE /api/sessions/{session_id}/turns/{request_id}`, disconnection, invalid sequences, hard limits or `stream.error` abort work and release the reservation. Error frames contain only a stable `code`. A timeout or abrupt socket close is never a successful end-of-turn signal. No automatic reconnect/replay.
+
+One stream/turn per profile; configuration and clock changes cannot compete with a capturing reservation. Maximum silence without recognized text is 8s, accounting for provider startup; final-drain timeout is 10s. A 30s recording limit rejects an unfinished turn rather than sending a fragment to the engine. Input buffers are ephemeral, not conversation memory. Server shutdown closes upgraded sockets as well as HTTP requests.
+
+Account streams recheck the owner cookie before starting upstream STT and before final audio dispatch; logout or a different owner's cookie cannot use a retained engine bearer. Only isolated `guest_` profiles bypass account authentication. Per-client connection limits honor a validated forwarded IP only when explicit loopback-proxy trust is enabled.
+
+These stream event names belong to Miu. ElevenLabs returns segment commits; Miu produces the utterance-level `transcript.final`. Local VAD model input is deferred.
 
 ## Voice-turn request
 

@@ -4,6 +4,8 @@ Frontend React/Vite và backend character/memory/voice phục vụ cùng origin 
 
 ## Các URL
 
+**Bản realtime mới:** khi phát hành, cần cập nhật cả frontend/backend và location WebSocket trong `nginx-https.conf`, rồi `nginx -t` trước reload. Chọn `VOICE_INPUT_MODE=elevenlabs_realtime`, `STT_LOGGING=1`, `ELEVENLABS_VAD_SILENCE_MS=1000` trong env riêng Miu. Release realtime cần apply location WebSocket riêng của Miu trước nghiệm thu. Xem [realtime guide](../../docs/voice-pipeline/elevenlabs-realtime.md).
+
 - Website: `https://miu.curiopal.com/`
 - Hội thoại: `https://miu.curiopal.com/app/talk`
 - API health: `https://miu.curiopal.com/api/health`
@@ -55,9 +57,11 @@ Sau khi code đã có trên GitHub, chạy qua SSH root:
 /usr/local/sbin/miu-deploy
 # Hoặc deploy chính xác một commit đã thuộc main:
 /usr/local/sbin/miu-deploy --ref <40-character-commit-sha>
+# Deploy branch riêng, không cần merge main:
+/usr/local/sbin/miu-deploy --branch voice/elevenlabs-realtime-1s --ref <40-character-commit-sha>
 ```
 
-Helper khóa riêng `/run/lock/miu-deploy.lock`, fetch repo cố định và chọn main mới nhất nếu không có `--ref`. Khi có `--ref`, helper kiểm tra ancestry rồi archive/build đúng SHA yêu cầu. Build/typecheck chạy bằng user `miu`, Node24 và nice/ionice. Môi trường build được xóa bằng `env -i`, đặt `MIU_PROVIDER=real`, không nhận runtime/provider secrets và không khởi tạo provider. Helper chỉ cài dependencies, build workspace, typecheck và build frontend; không chạy fake reply, fake HTTP smoke hoặc behavioral evaluation. Root và frontend có lockfile riêng; frontend phải có `dist/index.html` và `assets` trước activate.
+Helper khóa riêng `/run/lock/miu-deploy.lock`, fetch repo cố định và chọn main mới nhất nếu không có `--ref`. Khi có `--ref`, helper kiểm tra ancestry trên branch được chọn rồi archive/build đúng SHA yêu cầu. Build/typecheck chạy bằng user `miu`, Node24 và nice/ionice. Môi trường build được xóa bằng `env -i`, đặt `MIU_PROVIDER=real`, không nhận runtime/provider secrets và không khởi tạo provider. Helper chỉ cài dependencies, build workspace, typecheck và build frontend; không chạy fake reply, fake HTTP smoke hoặc behavioral evaluation. Root và frontend có lockfile riêng; frontend phải có `dist/index.html` và `assets` trước activate.
 
 Helper parse file runtime riêng tư trong process kiểm tra riêng, không `source` hoặc `eval` env. File phải là regular file root `0600`, không symlink. Preflight yêu cầu real provider, credentials có mặt, standard logging rõ ràng và PostgreSQL native; không ghi lại giá trị secret vào log. Health của release mới chỉ qua khi `status=ok`, `provider_mode=real`, `engine_mode=character_memory` và `capabilities.memory=true`. Health không gọi STT/GPT/TTS; nghiệm thu hành vi cần actual real-provider requests riêng, có provenance và lỗi thực tế.
 

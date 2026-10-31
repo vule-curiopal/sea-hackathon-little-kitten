@@ -26,7 +26,7 @@ export default defineConfig({
   build: { target: 'safari16.4' },
   server: {
     port: 5173, strictPort: true,
-    proxy: { '/api': { target: 'http://127.0.0.1:3001', changeOrigin: true } },
+    proxy: { '/api': { target: 'http://127.0.0.1:3001', changeOrigin: true, ws: true } },
   },
-  preview: { proxy: { '/api': { target: 'http://127.0.0.1:3001', changeOrigin: true } } },
+  preview: { proxy: { '/api': { target: 'http://127.0.0.1:3001', changeOrigin: true, ws: true } } },
 });

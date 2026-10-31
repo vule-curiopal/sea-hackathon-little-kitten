@@ -6,10 +6,12 @@ export const RECORDING_MIME_CANDIDATES = [
   'audio/mp4;codecs=mp4a.40.2', 'audio/mp4', 'audio/webm;codecs=opus', 'audio/webm',
 ] as const;
 
-export type CaptureState = 'idle' | 'requesting_permission' | 'calibrating' | 'recording' | 'finalizing_capture';
+export type CaptureState = 'idle' | 'requesting_permission' | 'preparing_stream' | 'calibrating' | 'recording' | 'finalizing_capture';
 export type CaptureEvent =
   | { type: 'state'; state: CaptureState }
   | { type: 'meter'; snapshot: MeterSnapshot }
+  | { type: 'stream_meter'; levelDbfs: number; elapsedMs: number }
+  | { type: 'transcript_final'; requestId: string; text: string }
   | { type: 'complete'; mimeType: string; bytes: number; durationMs: number; reason: CapturedAudio['reason']; peakLevelDbfs: number | null; sampleRate: number | null; channelCount: number | null }
   | { type: 'manual_only'; code: 'METER_UNAVAILABLE' }
   | { type: 'error'; error: VoiceClientError };

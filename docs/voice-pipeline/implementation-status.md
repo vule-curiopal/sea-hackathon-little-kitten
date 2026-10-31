@@ -1,5 +1,7 @@
 # Trạng thái triển khai voice v1
 
+**Cập nhật realtime:** ElevenLabs VAD + lọc nền đã được triển khai local, gom full transcript trước một dispatch engine. Bộ 20 audio realtime thật cho 16 lượt hoàn tất/4 ca bị chặn trước engine; browser Edge dùng mic tổng hợp đã chạy qua AudioWorklet → WS → GPT/TTS → playback. Cấu hình phát hành dùng silence 1 giây; chưa kiểm thử iPad vật lý. Xem [báo cáo và hướng dẫn](elevenlabs-realtime.md). Các số liệu v1 bên dưới là baseline lịch sử; local VAD model được hoãn.
+
 Ngày cập nhật: **31/10/2026**. Backend và browser library đã có; frontend của nhóm đã tích hợp và triển khai. Probe riêng STT → GPT → TTS thật cho Việt/Anh đã qua trên máy phát triển và server. Chưa benchmark p95 hoặc kiểm thử microphone/playback trên iPad thật; memory và character engine vẫn ngoài voice stub.
 
 | Hạng mục | Đã làm | Kiểm tra |

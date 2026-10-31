@@ -43,6 +43,10 @@ SNR được tính trên tổng vùng đoạn lời đã khai báo, bao gồm kh
 
 ## Cách dùng
 
+**Bản realtime mới:** [guide triển khai](../../docs/voice-pipeline/elevenlabs-realtime.md), [kết quả 20 WAV qua provider thật](realtime-validation.json) và [browser acceptance với mic tổng hợp](realtime-browser-validation.json). Local model VAD được hoãn. Kết quả RMS/batch bên dưới giữ làm baseline.
+
+Kết quả chạy lại cả 20 file bằng detector hiện tại và provider thật: [TEST-RESULTS.md](TEST-RESULTS.md). Báo cáo ghi riêng các lỗi endpoint, nhận dạng và cấu hình logging, không coi mọi HTTP thành công là nhận dạng đúng.
+
 **Thử backend/STT:** chọn phiên `vi` hoặc `en` đúng ngôn ngữ file. Gửi WAV nguyên bản vào trường multipart `audio` tại `POST /api/sessions/{session_id}/turns`, kèm `request_id`, `kind=utterance`, `language_hint`. Xem [backend README](../../backend/pipeline/README.md) để tạo session/token/config trước. Cần real provider để đánh giá nhận dạng/câu trả lời thực; fake mode dùng sample Buddy cố định và không nhận dạng các WAV này. Khi thử real không gửi `fixture_id`. Hai ca không lời có `reference_text=""`; ghi nhận cả transcript bịa nếu provider trả lời trên noise-only.
 
 **Thử thuật toán dừng nói bằng waveform:** chạy từ root, không cần API key hoặc microphone:

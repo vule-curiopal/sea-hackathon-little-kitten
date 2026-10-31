@@ -8,6 +8,7 @@ export function voiceErrorKey(error: unknown): TranslationKey | null {
   if (code === 'MIC_PERMISSION_DENIED') return 'voiceDenied';
   if (code === 'NO_SIGNAL' || code === 'NO_AUDIO') return 'voiceNoSignal';
   if (code === 'unclear_audio') return 'voiceUnclear';
+  if (code === 'recording_limit') return 'voiceTooLong';
   if (code === 'RECORDING_LIMIT') return 'voiceRecordingLimit';
   if (code.startsWith('provider_') || ['audio_probe_unavailable', 'audio_probe_timeout'].includes(code)) return 'voiceServiceUnavailable';
   if (['NETWORK_ERROR', 'TIMEOUT', 'INVALID_RESPONSE'].includes(code)) return 'voiceOffline';

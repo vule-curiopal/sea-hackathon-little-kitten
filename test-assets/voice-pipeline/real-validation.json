@@ -1,0 +1,1160 @@
+{
+  "tested_at": "2026-10-31T06:30:48.021Z",
+  "scope": "Offline RMS endpoint decisions followed by real local Express HTTP STT -> stateless GPT -> TTS on submitted WAV prefixes. No browser capture, physical microphone, playback, production session or character/memory evaluation.",
+  "reference_scope": "Fictional TTS input annotations; whitespace token edit distance after punctuation/case normalization, not human-verified alignment.",
+  "providers": {
+    "mode": "real",
+    "stt": "scribe_v2",
+    "reply": "gpt-6-luna",
+    "tts": "eleven_flash_v2_5",
+    "stt_logging": true
+  },
+  "normal_logging_explicit_override": true,
+  "detector_config": {
+    "calibrationMs": 750,
+    "maxAnalysisGapMs": 250,
+    "noisePercentile": 20,
+    "noiseFloorMinDbfs": -80,
+    "noiseFloorMaxDbfs": -25,
+    "noiseWindowMs": 2000,
+    "noiseAdaptationMs": 1000,
+    "startMarginDb": 12,
+    "endMarginDb": 6,
+    "startMinDbfs": -55,
+    "startMaxDbfs": -15,
+    "endMinDbfs": -61,
+    "endMaxDbfs": -21,
+    "minSignalMs": 120,
+    "endSilenceMs": 1500,
+    "initialSilenceTimeoutMs": 5000,
+    "maxRecordingMs": 30000
+  },
+  "summary": {
+    "tested_files": 20,
+    "detector_cancel": 2,
+    "pipeline_completed": 17,
+    "request_failed": 0,
+    "premature_endpoints": 2,
+    "transcript_on_noise_only": 0,
+    "noise_rejected_as_unclear": 1
+  },
+  "assets": [
+    {
+      "id": "01_vi_clean",
+      "language": "vi",
+      "condition": "clean",
+      "speech_present": true,
+      "detector": {
+        "signal_found": true,
+        "first_decision": {
+          "action": "submit",
+          "reason": "silence"
+        },
+        "decision_at_ms": 5460,
+        "noise_floor_dbfs": -70.26,
+        "start_threshold_dbfs": -55,
+        "end_threshold_dbfs": -61,
+        "reference_speech_after_decision": false,
+        "premature_endpoint": false,
+        "false_signal_on_noise_only": false
+      },
+      "full_reference": "Miu ơi, mình muốn nghe một câu chuyện về chú mèo con.",
+      "provider_requests": [
+        {
+          "host": "api.elevenlabs.io",
+          "path": "/v1/speech-to-text",
+          "enable_logging": null,
+          "status": 200
+        },
+        {
+          "host": "api.openai.com",
+          "path": "/v1/responses",
+          "enable_logging": null,
+          "status": 200
+        },
+        {
+          "host": "api.elevenlabs.io",
+          "path": "/v1/text-to-speech/mgBpvrNosWzExdPuRbXP",
+          "enable_logging": null,
+          "status": 200
+        }
+      ],
+      "submitted_reference": "Miu ơi, mình muốn nghe một câu chuyện về chú mèo con.",
+      "submitted_duration_ms": 5460,
+      "status": "real_pipeline_completed",
+      "transcript": "Miu ơi, mình muốn nghe một câu chuyện về chú mèo con",
+      "reply": "Ngày nọ, mèo con Mướp thấy một chú bướm lạc đường và nhẹ nhàng dẫn bạn về vườn hoa. Từ đó, hai bạn cùng chơi đùa dưới nắng vàng, vui ơi là vui.",
+      "normalized_token_error_rate": 0,
+      "transcript_on_noise_only": false,
+      "returned_audio": {
+        "mime_type": "audio/mpeg",
+        "bytes": 142149,
+        "duration_ms": 8856
+      },
+      "timings_ms": {
+        "stt": 1811,
+        "reply": 2069,
+        "validation": 0,
+        "tts": 1437,
+        "server_total": 5318
+      },
+      "http_total_ms": 5412
+    },
+    {
+      "id": "02_vi_soft",
+      "language": "vi",
+      "condition": "soft",
+      "speech_present": true,
+      "detector": {
+        "signal_found": true,
+        "first_decision": {
+          "action": "submit",
+          "reason": "silence"
+        },
+        "decision_at_ms": 5420,
+        "noise_floor_dbfs": -70.25,
+        "start_threshold_dbfs": -55,
+        "end_threshold_dbfs": -61,
+        "reference_speech_after_decision": false,
+        "premature_endpoint": false,
+        "false_signal_on_noise_only": false
+      },
+      "full_reference": "Miu ơi, mình muốn nghe một câu chuyện về chú mèo con.",
+      "provider_requests": [
+        {
+          "host": "api.elevenlabs.io",
+          "path": "/v1/speech-to-text",
+          "enable_logging": null,
+          "status": 200
+        },
+        {
+          "host": "api.openai.com",
+          "path": "/v1/responses",
+          "enable_logging": null,
+          "status": 200
+        },
+        {
+          "host": "api.elevenlabs.io",
+          "path": "/v1/text-to-speech/mgBpvrNosWzExdPuRbXP",
+          "enable_logging": null,
+          "status": 200
+        }
+      ],
+      "submitted_reference": "Miu ơi, mình muốn nghe một câu chuyện về chú mèo con.",
+      "submitted_duration_ms": 5420,
+      "status": "real_pipeline_completed",
+      "transcript": "Miu ơi, mình muốn nghe một câu chuyện về chú mèo con",
+      "reply": "Ngày nọ, mèo con Mun thấy một chiếc lá vàng bay qua sân. Mun chạy theo, rồi phát hiện chiếc lá đang che cho một chú bọ nhỏ khỏi cơn mưa tí tách.",
+      "normalized_token_error_rate": 0,
+      "transcript_on_noise_only": false,
+      "returned_audio": {
+        "mime_type": "audio/mpeg",
+        "bytes": 128774,
+        "duration_ms": 8020
+      },
+      "timings_ms": {
+        "stt": 1281,
+        "reply": 1398,
+        "validation": 0,
+        "tts": 491,
+        "server_total": 3170
+      },
+      "http_total_ms": 3236
+    },
+    {
+      "id": "03_vi_muffled",
+      "language": "vi",
+      "condition": "muffled",
+      "speech_present": true,
+      "detector": {
+        "signal_found": true,
+        "first_decision": {
+          "action": "submit",
+          "reason": "silence"
+        },
+        "decision_at_ms": 5460,
+        "noise_floor_dbfs": -70.22,
+        "start_threshold_dbfs": -55,
+        "end_threshold_dbfs": -61,
+        "reference_speech_after_decision": false,
+        "premature_endpoint": false,
+        "false_signal_on_noise_only": false
+      },
+      "full_reference": "Miu ơi, mình muốn nghe một câu chuyện về chú mèo con.",
+      "provider_requests": [
+        {
+          "host": "api.elevenlabs.io",
+          "path": "/v1/speech-to-text",
+          "enable_logging": null,
+          "status": 200
+        },
+        {
+          "host": "api.openai.com",
+          "path": "/v1/responses",
+          "enable_logging": null,
+          "status": 200
+        },
+        {
+          "host": "api.elevenlabs.io",
+          "path": "/v1/text-to-speech/mgBpvrNosWzExdPuRbXP",
+          "enable_logging": null,
+          "status": 200
+        }
+      ],
+      "submitted_reference": "Miu ơi, mình muốn nghe một câu chuyện về chú mèo con.",
+      "submitted_duration_ms": 5460,
+      "status": "real_pipeline_completed",
+      "transcript": "Miu ơi, mình muốn nghe một câu chuyện về chú mèo con",
+      "reply": "Ngày nọ, có chú mèo con tên Bông thích đuổi theo những tia nắng vàng. Một hôm, Bông tìm thấy chú bướm lạc đường và dịu dàng dẫn bạn về vườn hoa. Từ đó, hai bạn cùng nhau ngắm nắng mỗi ngày.",
+      "normalized_token_error_rate": 0,
+      "transcript_on_noise_only": false,
+      "returned_audio": {
+        "mime_type": "audio/mpeg",
+        "bytes": 166808,
+        "duration_ms": 10397
+      },
+      "timings_ms": {
+        "stt": 1328,
+        "reply": 1723,
+        "validation": 0,
+        "tts": 608,
+        "server_total": 3660
+      },
+      "http_total_ms": 3734
+    },
+    {
+      "id": "04_vi_clipped",
+      "language": "vi",
+      "condition": "clipped",
+      "speech_present": true,
+      "detector": {
+        "signal_found": true,
+        "first_decision": {
+          "action": "submit",
+          "reason": "silence"
+        },
+        "decision_at_ms": 5460,
+        "noise_floor_dbfs": -70.23,
+        "start_threshold_dbfs": -55,
+        "end_threshold_dbfs": -61,
+        "reference_speech_after_decision": false,
+        "premature_endpoint": false,
+        "false_signal_on_noise_only": false
+      },
+      "full_reference": "Miu ơi, mình muốn nghe một câu chuyện về chú mèo con.",
+      "provider_requests": [
+        {
+          "host": "api.elevenlabs.io",
+          "path": "/v1/speech-to-text",
+          "enable_logging": null,
+          "status": 200
+        },
+        {
+          "host": "api.openai.com",
+          "path": "/v1/responses",
+          "enable_logging": null,
+          "status": 200
+        },
+        {
+          "host": "api.elevenlabs.io",
+          "path": "/v1/text-to-speech/mgBpvrNosWzExdPuRbXP",
+          "enable_logging": null,
+          "status": 200
+        }
+      ],
+      "submitted_reference": "Miu ơi, mình muốn nghe một câu chuyện về chú mèo con.",
+      "submitted_duration_ms": 5460,
+      "status": "real_pipeline_completed",
+      "transcript": "Miu ơi, mình muốn nghe một câu chuyện về chú mèo con",
+      "reply": "Ngày nọ, mèo con Mun nhặt được một chiếc lá vàng và dùng nó làm thuyền, thả trôi trên vũng nước sau cơn mưa. Thuyền cập bến bên một chú ốc sên đang lạc đường, rồi Mun vui vẻ đưa bạn về nhà.",
+      "normalized_token_error_rate": 0,
+      "transcript_on_noise_only": false,
+      "returned_audio": {
+        "mime_type": "audio/mpeg",
+        "bytes": 170570,
+        "duration_ms": 10632
+      },
+      "timings_ms": {
+        "stt": 1432,
+        "reply": 1675,
+        "validation": 0,
+        "tts": 756,
+        "server_total": 3862
+      },
+      "http_total_ms": 3931
+    },
+    {
+      "id": "05_vi_fan_snr20",
+      "language": "vi",
+      "condition": "fan_snr20",
+      "speech_present": true,
+      "detector": {
+        "signal_found": true,
+        "first_decision": {
+          "action": "submit",
+          "reason": "silence"
+        },
+        "decision_at_ms": 5440,
+        "noise_floor_dbfs": -44.91,
+        "start_threshold_dbfs": -32.91,
+        "end_threshold_dbfs": -38.91,
+        "reference_speech_after_decision": false,
+        "premature_endpoint": false,
+        "false_signal_on_noise_only": false
+      },
+      "full_reference": "Miu ơi, mình muốn nghe một câu chuyện về chú mèo con.",
+      "provider_requests": [
+        {
+          "host": "api.elevenlabs.io",
+          "path": "/v1/speech-to-text",
+          "enable_logging": null,
+          "status": 200
+        },
+        {
+          "host": "api.openai.com",
+          "path": "/v1/responses",
+          "enable_logging": null,
+          "status": 200
+        },
+        {
+          "host": "api.elevenlabs.io",
+          "path": "/v1/text-to-speech/mgBpvrNosWzExdPuRbXP",
+          "enable_logging": null,
+          "status": 200
+        }
+      ],
+      "submitted_reference": "Miu ơi, mình muốn nghe một câu chuyện về chú mèo con.",
+      "submitted_duration_ms": 5440,
+      "status": "real_pipeline_completed",
+      "transcript": "Miu ơi, mình muốn nghe một câu chuyện về chú mèo con",
+      "reply": "Ngày nọ, chú mèo con Mun thấy một chiếc lá vàng bay lượn trong gió. Mun chạy theo chiếc lá, rồi phát hiện ra một vườn hoa xinh xắn và vui vẻ rủ các bạn đến chơi cùng.",
+      "normalized_token_error_rate": 0,
+      "transcript_on_noise_only": false,
+      "returned_audio": {
+        "mime_type": "audio/mpeg",
+        "bytes": 151762,
+        "duration_ms": 9456
+      },
+      "timings_ms": {
+        "stt": 1421,
+        "reply": 1501,
+        "validation": 0,
+        "tts": 1044,
+        "server_total": 3966
+      },
+      "http_total_ms": 4040
+    },
+    {
+      "id": "06_vi_rain_snr10",
+      "language": "vi",
+      "condition": "rain_snr10",
+      "speech_present": true,
+      "detector": {
+        "signal_found": true,
+        "first_decision": {
+          "action": "submit",
+          "reason": "silence"
+        },
+        "decision_at_ms": 5440,
+        "noise_floor_dbfs": -35.97,
+        "start_threshold_dbfs": -23.97,
+        "end_threshold_dbfs": -29.97,
+        "reference_speech_after_decision": false,
+        "premature_endpoint": false,
+        "false_signal_on_noise_only": false
+      },
+      "full_reference": "Miu ơi, mình muốn nghe một câu chuyện về chú mèo con.",
+      "provider_requests": [
+        {
+          "host": "api.elevenlabs.io",
+          "path": "/v1/speech-to-text",
+          "enable_logging": null,
+          "status": 200
+        },
+        {
+          "host": "api.openai.com",
+          "path": "/v1/responses",
+          "enable_logging": null,
+          "status": 200
+        },
+        {
+          "host": "api.elevenlabs.io",
+          "path": "/v1/text-to-speech/mgBpvrNosWzExdPuRbXP",
+          "enable_logging": null,
+          "status": 200
+        }
+      ],
+      "submitted_reference": "Miu ơi, mình muốn nghe một câu chuyện về chú mèo con.",
+      "submitted_duration_ms": 5440,
+      "status": "real_pipeline_completed",
+      "transcript": "Miu ơi, mình muốn nghe một câu chuyện về chú mèo con.",
+      "reply": "Ngày nọ, mèo con Bông thấy một chú bướm bị mắc trong bụi cỏ, liền nhẹ nhàng giúp bạn bay lên trời. Bướm tặng Bông một cánh hoa thơm, rồi hai bạn cùng ngắm hoàng hôn ấm áp.",
+      "normalized_token_error_rate": 0,
+      "transcript_on_noise_only": false,
+      "returned_audio": {
+        "mime_type": "audio/mpeg",
+        "bytes": 160121,
+        "duration_ms": 9979
+      },
+      "timings_ms": {
+        "stt": 1497,
+        "reply": 1925,
+        "validation": 0,
+        "tts": 580,
+        "server_total": 4002
+      },
+      "http_total_ms": 4073
+    },
+    {
+      "id": "07_vi_noise_snr0",
+      "language": "vi",
+      "condition": "noise_snr0",
+      "speech_present": true,
+      "detector": {
+        "signal_found": true,
+        "first_decision": {
+          "action": "submit",
+          "reason": "max_duration"
+        },
+        "decision_at_ms": 30000,
+        "noise_floor_dbfs": -62.86,
+        "start_threshold_dbfs": -50.86,
+        "end_threshold_dbfs": -56.86,
+        "reference_speech_after_decision": false,
+        "premature_endpoint": false,
+        "false_signal_on_noise_only": false
+      },
+      "full_reference": "Miu ơi, mình muốn nghe một câu chuyện về chú mèo con.",
+      "provider_requests": [
+        {
+          "host": "api.elevenlabs.io",
+          "path": "/v1/speech-to-text",
+          "enable_logging": null,
+          "status": 200
+        },
+        {
+          "host": "api.openai.com",
+          "path": "/v1/responses",
+          "enable_logging": null,
+          "status": 200
+        },
+        {
+          "host": "api.elevenlabs.io",
+          "path": "/v1/text-to-speech/mgBpvrNosWzExdPuRbXP",
+          "enable_logging": null,
+          "status": 200
+        }
+      ],
+      "submitted_reference": "Miu ơi, mình muốn nghe một câu chuyện về chú mèo con.",
+      "submitted_duration_ms": 30000,
+      "status": "real_pipeline_completed",
+      "transcript": "Mi ơi, mình muốn nghe một câu chuyện về chúng ta con",
+      "reply": "Ngày nọ, Mi là mèo con AI gặp bạn nhỏ dưới một tán cây đầy hoa. Hai bạn cùng ngắm mây, tưởng tượng chúng là những chiếc thuyền bông đang chở ước mơ đi thật xa.",
+      "normalized_token_error_rate": 0.25,
+      "transcript_on_noise_only": false,
+      "returned_audio": {
+        "mime_type": "audio/mpeg",
+        "bytes": 142985,
+        "duration_ms": 8908
+      },
+      "timings_ms": {
+        "stt": 2201,
+        "reply": 1470,
+        "validation": 0,
+        "tts": 540,
+        "server_total": 4211
+      },
+      "http_total_ms": 4284
+    },
+    {
+      "id": "08_vi_pause_0800ms",
+      "language": "vi",
+      "condition": "pause_0800ms",
+      "speech_present": true,
+      "detector": {
+        "signal_found": true,
+        "first_decision": {
+          "action": "submit",
+          "reason": "silence"
+        },
+        "decision_at_ms": 5760,
+        "noise_floor_dbfs": -70.13,
+        "start_threshold_dbfs": -55,
+        "end_threshold_dbfs": -61,
+        "reference_speech_after_decision": false,
+        "premature_endpoint": false,
+        "false_signal_on_noise_only": false
+      },
+      "full_reference": "Hôm nay mình hơi buồn. Bạn chơi với mình nhé.",
+      "provider_requests": [
+        {
+          "host": "api.elevenlabs.io",
+          "path": "/v1/speech-to-text",
+          "enable_logging": null,
+          "status": 200
+        },
+        {
+          "host": "api.openai.com",
+          "path": "/v1/responses",
+          "enable_logging": null,
+          "status": 200
+        },
+        {
+          "host": "api.elevenlabs.io",
+          "path": "/v1/text-to-speech/mgBpvrNosWzExdPuRbXP",
+          "enable_logging": null,
+          "status": 200
+        }
+      ],
+      "submitted_reference": "Hôm nay mình hơi buồn. Bạn chơi với mình nhé.",
+      "submitted_duration_ms": 5760,
+      "status": "real_pipeline_completed",
+      "transcript": "Hôm nay mình hơi buồn. Bạn chơi với mình nhé",
+      "reply": "Miu ở đây chơi cùng bạn nhé. Mình cùng tưởng tượng một khu vườn đầy hoa và những chú bướm nhé?",
+      "normalized_token_error_rate": 0,
+      "transcript_on_noise_only": false,
+      "returned_audio": {
+        "mime_type": "audio/mpeg",
+        "bytes": 79873,
+        "duration_ms": 4963
+      },
+      "timings_ms": {
+        "stt": 797,
+        "reply": 1742,
+        "validation": 0,
+        "tts": 555,
+        "server_total": 3093
+      },
+      "http_total_ms": 3159
+    },
+    {
+      "id": "09_vi_pause_2200ms",
+      "language": "vi",
+      "condition": "pause_2200ms",
+      "speech_present": true,
+      "detector": {
+        "signal_found": true,
+        "first_decision": {
+          "action": "submit",
+          "reason": "silence"
+        },
+        "decision_at_ms": 3700,
+        "noise_floor_dbfs": -70.32,
+        "start_threshold_dbfs": -55,
+        "end_threshold_dbfs": -61,
+        "reference_speech_after_decision": true,
+        "premature_endpoint": true,
+        "false_signal_on_noise_only": false
+      },
+      "full_reference": "Hôm nay mình hơi buồn. Bạn chơi với mình nhé.",
+      "provider_requests": [
+        {
+          "host": "api.elevenlabs.io",
+          "path": "/v1/speech-to-text",
+          "enable_logging": null,
+          "status": 200
+        },
+        {
+          "host": "api.openai.com",
+          "path": "/v1/responses",
+          "enable_logging": null,
+          "status": 200
+        },
+        {
+          "host": "api.elevenlabs.io",
+          "path": "/v1/text-to-speech/mgBpvrNosWzExdPuRbXP",
+          "enable_logging": null,
+          "status": 200
+        }
+      ],
+      "submitted_reference": "Hôm nay mình hơi buồn.",
+      "submitted_duration_ms": 3700,
+      "status": "real_pipeline_completed",
+      "transcript": "Hôm nay mình hơi buồn",
+      "reply": "Miu nghe bạn nói vậy thấy thương quá. Bạn muốn kể Miu nghe điều gì làm bạn buồn không?",
+      "normalized_token_error_rate": 0,
+      "transcript_on_noise_only": false,
+      "returned_audio": {
+        "mime_type": "audio/mpeg",
+        "bytes": 70260,
+        "duration_ms": 4362
+      },
+      "timings_ms": {
+        "stt": 1157,
+        "reply": 1545,
+        "validation": 0,
+        "tts": 487,
+        "server_total": 3189
+      },
+      "http_total_ms": 3256
+    },
+    {
+      "id": "10_vi_noise_only",
+      "language": "vi",
+      "condition": "noise_only",
+      "speech_present": false,
+      "detector": {
+        "signal_found": false,
+        "first_decision": {
+          "action": "cancel",
+          "reason": "no_signal"
+        },
+        "decision_at_ms": 5760,
+        "noise_floor_dbfs": -43.14,
+        "start_threshold_dbfs": -31.14,
+        "end_threshold_dbfs": -37.14,
+        "reference_speech_after_decision": false,
+        "premature_endpoint": false,
+        "false_signal_on_noise_only": false
+      },
+      "full_reference": "",
+      "provider_requests": [],
+      "status": "not_uploaded_detector_cancel"
+    },
+    {
+      "id": "11_en_clean",
+      "language": "en",
+      "condition": "clean",
+      "speech_present": true,
+      "detector": {
+        "signal_found": true,
+        "first_decision": {
+          "action": "submit",
+          "reason": "silence"
+        },
+        "decision_at_ms": 5300,
+        "noise_floor_dbfs": -70.23,
+        "start_threshold_dbfs": -55,
+        "end_threshold_dbfs": -61,
+        "reference_speech_after_decision": false,
+        "premature_endpoint": false,
+        "false_signal_on_noise_only": false
+      },
+      "full_reference": "Miu, can you tell me a story about a little kitten?",
+      "provider_requests": [
+        {
+          "host": "api.elevenlabs.io",
+          "path": "/v1/speech-to-text",
+          "enable_logging": null,
+          "status": 200
+        },
+        {
+          "host": "api.openai.com",
+          "path": "/v1/responses",
+          "enable_logging": null,
+          "status": 200
+        },
+        {
+          "host": "api.elevenlabs.io",
+          "path": "/v1/text-to-speech/fBD19tfE58bkETeiwUoC",
+          "enable_logging": null,
+          "status": 200
+        }
+      ],
+      "submitted_reference": "Miu, can you tell me a story about a little kitten?",
+      "submitted_duration_ms": 5300,
+      "status": "real_pipeline_completed",
+      "transcript": "Miu, can you tell me a story about a little kitten?",
+      "reply": "A little kitten named Pip found a shiny button in the garden. He carried it home and gave it to his friend, who used it to fix a teddy bear’s coat. Pip purred happily, proud to have helped.",
+      "normalized_token_error_rate": 0,
+      "transcript_on_noise_only": false,
+      "returned_audio": {
+        "mime_type": "audio/mpeg",
+        "bytes": 180183,
+        "duration_ms": 11233
+      },
+      "timings_ms": {
+        "stt": 1378,
+        "reply": 1424,
+        "validation": 0,
+        "tts": 733,
+        "server_total": 3536
+      },
+      "http_total_ms": 3604
+    },
+    {
+      "id": "12_en_soft",
+      "language": "en",
+      "condition": "soft",
+      "speech_present": true,
+      "detector": {
+        "signal_found": false,
+        "first_decision": {
+          "action": "cancel",
+          "reason": "no_signal"
+        },
+        "decision_at_ms": 5760,
+        "noise_floor_dbfs": -70.13,
+        "start_threshold_dbfs": -55,
+        "end_threshold_dbfs": -61,
+        "reference_speech_after_decision": false,
+        "premature_endpoint": false,
+        "false_signal_on_noise_only": false
+      },
+      "full_reference": "Miu, can you tell me a story about a little kitten?",
+      "provider_requests": [],
+      "status": "not_uploaded_detector_cancel"
+    },
+    {
+      "id": "13_en_muffled",
+      "language": "en",
+      "condition": "muffled",
+      "speech_present": true,
+      "detector": {
+        "signal_found": true,
+        "first_decision": {
+          "action": "submit",
+          "reason": "silence"
+        },
+        "decision_at_ms": 5300,
+        "noise_floor_dbfs": -70.33,
+        "start_threshold_dbfs": -55,
+        "end_threshold_dbfs": -61,
+        "reference_speech_after_decision": false,
+        "premature_endpoint": false,
+        "false_signal_on_noise_only": false
+      },
+      "full_reference": "Miu, can you tell me a story about a little kitten?",
+      "provider_requests": [
+        {
+          "host": "api.elevenlabs.io",
+          "path": "/v1/speech-to-text",
+          "enable_logging": null,
+          "status": 200
+        },
+        {
+          "host": "api.openai.com",
+          "path": "/v1/responses",
+          "enable_logging": null,
+          "status": 200
+        },
+        {
+          "host": "api.elevenlabs.io",
+          "path": "/v1/text-to-speech/fBD19tfE58bkETeiwUoC",
+          "enable_logging": null,
+          "status": 200
+        }
+      ],
+      "submitted_reference": "Miu, can you tell me a story about a little kitten?",
+      "submitted_duration_ms": 5300,
+      "status": "real_pipeline_completed",
+      "transcript": "Leo, can you tell me a story about a little kitten?",
+      "reply": "Once upon a time, a little kitten named Pip found a shiny star hiding in the garden. Pip carried it up the hill, and together they lit the way home for a family of sleepy rabbits.",
+      "normalized_token_error_rate": 0.091,
+      "transcript_on_noise_only": false,
+      "returned_audio": {
+        "mime_type": "audio/mpeg",
+        "bytes": 183945,
+        "duration_ms": 11468
+      },
+      "timings_ms": {
+        "stt": 769,
+        "reply": 1400,
+        "validation": 0,
+        "tts": 720,
+        "server_total": 2890
+      },
+      "http_total_ms": 2963
+    },
+    {
+      "id": "14_en_clipped",
+      "language": "en",
+      "condition": "clipped",
+      "speech_present": true,
+      "detector": {
+        "signal_found": true,
+        "first_decision": {
+          "action": "submit",
+          "reason": "silence"
+        },
+        "decision_at_ms": 5320,
+        "noise_floor_dbfs": -70.35,
+        "start_threshold_dbfs": -55,
+        "end_threshold_dbfs": -61,
+        "reference_speech_after_decision": false,
+        "premature_endpoint": false,
+        "false_signal_on_noise_only": false
+      },
+      "full_reference": "Miu, can you tell me a story about a little kitten?",
+      "provider_requests": [
+        {
+          "host": "api.elevenlabs.io",
+          "path": "/v1/speech-to-text",
+          "enable_logging": null,
+          "status": 200
+        },
+        {
+          "host": "api.openai.com",
+          "path": "/v1/responses",
+          "enable_logging": null,
+          "status": 200
+        },
+        {
+          "host": "api.elevenlabs.io",
+          "path": "/v1/text-to-speech/fBD19tfE58bkETeiwUoC",
+          "enable_logging": null,
+          "status": 200
+        }
+      ],
+      "submitted_reference": "Miu, can you tell me a story about a little kitten?",
+      "submitted_duration_ms": 5320,
+      "status": "real_pipeline_completed",
+      "transcript": "Miu, can you tell me a story about a little kitten?",
+      "reply": "Once, a tiny kitten named Pip found a shiny button in the garden. Pip carried it home and shared it with a lonely hedgehog, and they became the very best of friends.",
+      "normalized_token_error_rate": 0,
+      "transcript_on_noise_only": false,
+      "returned_audio": {
+        "mime_type": "audio/mpeg",
+        "bytes": 152598,
+        "duration_ms": 9509
+      },
+      "timings_ms": {
+        "stt": 894,
+        "reply": 1925,
+        "validation": 0,
+        "tts": 702,
+        "server_total": 3522
+      },
+      "http_total_ms": 3591
+    },
+    {
+      "id": "15_en_fan_snr20",
+      "language": "en",
+      "condition": "fan_snr20",
+      "speech_present": true,
+      "detector": {
+        "signal_found": true,
+        "first_decision": {
+          "action": "submit",
+          "reason": "silence"
+        },
+        "decision_at_ms": 5240,
+        "noise_floor_dbfs": -45.68,
+        "start_threshold_dbfs": -33.68,
+        "end_threshold_dbfs": -39.68,
+        "reference_speech_after_decision": false,
+        "premature_endpoint": false,
+        "false_signal_on_noise_only": false
+      },
+      "full_reference": "Miu, can you tell me a story about a little kitten?",
+      "provider_requests": [
+        {
+          "host": "api.elevenlabs.io",
+          "path": "/v1/speech-to-text",
+          "enable_logging": null,
+          "status": 200
+        },
+        {
+          "host": "api.openai.com",
+          "path": "/v1/responses",
+          "enable_logging": null,
+          "status": 200
+        },
+        {
+          "host": "api.elevenlabs.io",
+          "path": "/v1/text-to-speech/fBD19tfE58bkETeiwUoC",
+          "enable_logging": null,
+          "status": 200
+        }
+      ],
+      "submitted_reference": "Miu, can you tell me a story about a little kitten?",
+      "submitted_duration_ms": 5240,
+      "status": "real_pipeline_completed",
+      "transcript": "Miu, can you tell me a story about a little kitten?",
+      "reply": "A little kitten named Pip found a shiny blue button beneath the garden gate. He carried it home like a treasure, and his family used it to fix Mama Cat’s favorite coat. Pip purred proudly, happy that his tiny discovery helped everyone.",
+      "normalized_token_error_rate": 0,
+      "transcript_on_noise_only": false,
+      "returned_audio": {
+        "mime_type": "audio/mpeg",
+        "bytes": 261267,
+        "duration_ms": 16300
+      },
+      "timings_ms": {
+        "stt": 1350,
+        "reply": 1784,
+        "validation": 0,
+        "tts": 883,
+        "server_total": 4016
+      },
+      "http_total_ms": 4104
+    },
+    {
+      "id": "16_en_rain_snr10",
+      "language": "en",
+      "condition": "rain_snr10",
+      "speech_present": true,
+      "detector": {
+        "signal_found": true,
+        "first_decision": {
+          "action": "submit",
+          "reason": "silence"
+        },
+        "decision_at_ms": 5180,
+        "noise_floor_dbfs": -35.87,
+        "start_threshold_dbfs": -23.87,
+        "end_threshold_dbfs": -29.87,
+        "reference_speech_after_decision": false,
+        "premature_endpoint": false,
+        "false_signal_on_noise_only": false
+      },
+      "full_reference": "Miu, can you tell me a story about a little kitten?",
+      "provider_requests": [
+        {
+          "host": "api.elevenlabs.io",
+          "path": "/v1/speech-to-text",
+          "enable_logging": null,
+          "status": 200
+        },
+        {
+          "host": "api.openai.com",
+          "path": "/v1/responses",
+          "enable_logging": null,
+          "status": 200
+        },
+        {
+          "host": "api.elevenlabs.io",
+          "path": "/v1/text-to-speech/fBD19tfE58bkETeiwUoC",
+          "enable_logging": null,
+          "status": 200
+        }
+      ],
+      "submitted_reference": "Miu, can you tell me a story about a little kitten?",
+      "submitted_duration_ms": 5180,
+      "status": "real_pipeline_completed",
+      "transcript": "Miu, can you tell me a story about a little kitten?",
+      "reply": "A little kitten named Pip found a tiny blue feather beside the garden gate. Pip carried it to a shy robin, who chirped happily and showed Pip the way home beneath the twinkling stars.",
+      "normalized_token_error_rate": 0,
+      "transcript_on_noise_only": false,
+      "returned_audio": {
+        "mime_type": "audio/mpeg",
+        "bytes": 187706,
+        "duration_ms": 11703
+      },
+      "timings_ms": {
+        "stt": 820,
+        "reply": 1407,
+        "validation": 0,
+        "tts": 1136,
+        "server_total": 3363
+      },
+      "http_total_ms": 3438
+    },
+    {
+      "id": "17_en_noise_snr0",
+      "language": "en",
+      "condition": "noise_snr0",
+      "speech_present": true,
+      "detector": {
+        "signal_found": true,
+        "first_decision": {
+          "action": "submit",
+          "reason": "max_duration"
+        },
+        "decision_at_ms": 30000,
+        "noise_floor_dbfs": -62.98,
+        "start_threshold_dbfs": -50.98,
+        "end_threshold_dbfs": -56.98,
+        "reference_speech_after_decision": false,
+        "premature_endpoint": false,
+        "false_signal_on_noise_only": false
+      },
+      "full_reference": "Miu, can you tell me a story about a little kitten?",
+      "provider_requests": [
+        {
+          "host": "api.elevenlabs.io",
+          "path": "/v1/speech-to-text",
+          "enable_logging": null,
+          "status": 200
+        },
+        {
+          "host": "api.openai.com",
+          "path": "/v1/responses",
+          "enable_logging": null,
+          "status": 200
+        },
+        {
+          "host": "api.elevenlabs.io",
+          "path": "/v1/text-to-speech/fBD19tfE58bkETeiwUoC",
+          "enable_logging": null,
+          "status": 200
+        }
+      ],
+      "submitted_reference": "Miu, can you tell me a story about a little kitten?",
+      "submitted_duration_ms": 30000,
+      "status": "real_pipeline_completed",
+      "transcript": "Neil, can you tell me a story about a little kitten?",
+      "reply": "Once there was a little kitten named Pip who found a shiny button in the garden. Pip carried it home and shared it with a lonely mouse, and they became the best of friends.",
+      "normalized_token_error_rate": 0.091,
+      "transcript_on_noise_only": false,
+      "returned_audio": {
+        "mime_type": "audio/mpeg",
+        "bytes": 160121,
+        "duration_ms": 9979
+      },
+      "timings_ms": {
+        "stt": 2453,
+        "reply": 1715,
+        "validation": 0,
+        "tts": 1106,
+        "server_total": 5274
+      },
+      "http_total_ms": 5349
+    },
+    {
+      "id": "18_en_pause_0800ms",
+      "language": "en",
+      "condition": "pause_0800ms",
+      "speech_present": true,
+      "detector": {
+        "signal_found": true,
+        "first_decision": {
+          "action": "submit",
+          "reason": "silence"
+        },
+        "decision_at_ms": 6220,
+        "noise_floor_dbfs": -70.18,
+        "start_threshold_dbfs": -55,
+        "end_threshold_dbfs": -61,
+        "reference_speech_after_decision": false,
+        "premature_endpoint": false,
+        "false_signal_on_noise_only": false
+      },
+      "full_reference": "I feel a little sad today. Will you play with me?",
+      "provider_requests": [
+        {
+          "host": "api.elevenlabs.io",
+          "path": "/v1/speech-to-text",
+          "enable_logging": null,
+          "status": 200
+        },
+        {
+          "host": "api.openai.com",
+          "path": "/v1/responses",
+          "enable_logging": null,
+          "status": 200
+        },
+        {
+          "host": "api.elevenlabs.io",
+          "path": "/v1/text-to-speech/fBD19tfE58bkETeiwUoC",
+          "enable_logging": null,
+          "status": 200
+        }
+      ],
+      "submitted_reference": "I feel a little sad today. Will you play with me?",
+      "submitted_duration_ms": 6220,
+      "status": "real_pipeline_completed",
+      "transcript": "I feel a little sad today. Will you play with me?",
+      "reply": "I’m sorry you feel sad, little friend. I’m an AI kitten, and I’d love to play a tiny guessing game with you: what has whiskers and says “meow”?",
+      "normalized_token_error_rate": 0,
+      "transcript_on_noise_only": false,
+      "returned_audio": {
+        "mime_type": "audio/mpeg",
+        "bytes": 140895,
+        "duration_ms": 8777
+      },
+      "timings_ms": {
+        "stt": 1301,
+        "reply": 1490,
+        "validation": 0,
+        "tts": 658,
+        "server_total": 3449
+      },
+      "http_total_ms": 3512
+    },
+    {
+      "id": "19_en_pause_2200ms",
+      "language": "en",
+      "condition": "pause_2200ms",
+      "speech_present": true,
+      "detector": {
+        "signal_found": true,
+        "first_decision": {
+          "action": "submit",
+          "reason": "silence"
+        },
+        "decision_at_ms": 4000,
+        "noise_floor_dbfs": -70.2,
+        "start_threshold_dbfs": -55,
+        "end_threshold_dbfs": -61,
+        "reference_speech_after_decision": true,
+        "premature_endpoint": true,
+        "false_signal_on_noise_only": false
+      },
+      "full_reference": "I feel a little sad today. Will you play with me?",
+      "provider_requests": [
+        {
+          "host": "api.elevenlabs.io",
+          "path": "/v1/speech-to-text",
+          "enable_logging": null,
+          "status": 200
+        },
+        {
+          "host": "api.openai.com",
+          "path": "/v1/responses",
+          "enable_logging": null,
+          "status": 200
+        },
+        {
+          "host": "api.elevenlabs.io",
+          "path": "/v1/text-to-speech/fBD19tfE58bkETeiwUoC",
+          "enable_logging": null,
+          "status": 200
+        }
+      ],
+      "submitted_reference": "I feel a little sad today.",
+      "submitted_duration_ms": 4000,
+      "status": "real_pipeline_completed",
+      "transcript": "I feel a little sad today",
+      "reply": "I’m sorry you’re feeling sad, little friend. I’m here with you—would a cozy chat or a tiny joke help?",
+      "normalized_token_error_rate": 0,
+      "transcript_on_noise_only": false,
+      "returned_audio": {
+        "mime_type": "audio/mpeg",
+        "bytes": 107876,
+        "duration_ms": 6713
+      },
+      "timings_ms": {
+        "stt": 1170,
+        "reply": 1596,
+        "validation": 0,
+        "tts": 500,
+        "server_total": 3266
+      },
+      "http_total_ms": 3328
+    },
+    {
+      "id": "20_en_noise_only",
+      "language": "en",
+      "condition": "noise_only",
+      "speech_present": false,
+      "detector": {
+        "signal_found": true,
+        "first_decision": {
+          "action": "submit",
+          "reason": "silence"
+        },
+        "decision_at_ms": 3420,
+        "noise_floor_dbfs": -42.64,
+        "start_threshold_dbfs": -30.64,
+        "end_threshold_dbfs": -36.64,
+        "reference_speech_after_decision": false,
+        "premature_endpoint": false,
+        "false_signal_on_noise_only": true
+      },
+      "full_reference": "",
+      "provider_requests": [
+        {
+          "host": "api.elevenlabs.io",
+          "path": "/v1/speech-to-text",
+          "enable_logging": null,
+          "status": 200
+        }
+      ],
+      "submitted_reference": "",
+      "submitted_duration_ms": 3420,
+      "status": "noise_rejected_as_unclear",
+      "error_code": "unclear_audio",
+      "http_total_ms": 956
+    }
+  ]
+}

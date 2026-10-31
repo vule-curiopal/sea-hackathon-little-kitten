@@ -4,6 +4,7 @@ import type { PersistentEngineBridge } from '../integration/engine-bridge.js';
 import { PipelineError } from '../pipeline/src/errors.js';
 import { bearerToken, object } from '../pipeline/src/http/request.js';
 import type { SessionService } from '../pipeline/src/modules/sessions/session.service.js';
+import type { SpeechSessionAuthorizer } from '../pipeline/src/modules/speech-streams/speech-stream.routes.js';
 import { assertAuthRequestOrigin, authenticateRequest } from './http.js';
 import type { AuthStore } from './store.js';
 
@@ -25,13 +26,24 @@ export function accountSessionResolver(auth: AuthStore, bridge: PersistentEngine
   };
 }
 
+/** A WebSocket's engine bearer never substitutes for the owner's live cookie.
+ * IncomingMessage headers share the cookie reader used by Express requests. */
+export function accountSpeechSessionAuthorizer(auth: Pick<AuthStore, 'authenticate'>): SpeechSessionAuthorizer {
+  return async (request, session): Promise<void> => {
+    if (session.profile.key.startsWith('guest_')) return;
+    const user = await authenticateRequest(request, auth);
+    if (!user) throw new PipelineError('unauthorized', 401);
+    if (user.profile_key !== session.profile.key) throw new PipelineError('forbidden', 403);
+  };
+}
+
 /** An engine bearer identifies a conversation. Account cookies independently
  * authorize its owner, including after a logout or account switch. */
 export function registerAccountSessionAccess(api: Express, auth: AuthStore, sessions: SessionService, allowedOrigins: string[] = []): void {
   api.use('/api', async (request, _response, next) => {
     const path = request.path.toLowerCase().replace(/\/+$/u, '');
     const protectedRoute = path.startsWith('/sessions/') || path === '/profiles/current/config'
-      || path === '/demo/panel' || path === '/demo/next-day';
+      || path === '/demo/panel' || path === '/demo/next-day' || path === '/client-events';
     if (!protectedRoute) return next();
     if (!['GET', 'HEAD', 'OPTIONS'].includes(request.method)) assertAuthRequestOrigin(request, allowedOrigins);
     const profile = sessions.profile(bearerToken(request));

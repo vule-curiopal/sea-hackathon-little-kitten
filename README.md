@@ -2,6 +2,8 @@
 
 Miu is a Vietnamese–English voice toy for children ages 4–8, featuring a talking kitten with personality, expressive behavior, and shared memories.
 
+Real voice input now uses ElevenLabs realtime STT with automatic VAD/background filtering. The backend finalizes the complete transcript before dispatching it to the character engine; local VAD models are deferred. See [setup, parameters and verification](docs/voice-pipeline/elevenlabs-realtime.md). Release configuration uses a 1-second silence window.
+
 ## Project structure
 
 ```text

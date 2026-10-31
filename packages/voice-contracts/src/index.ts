@@ -15,11 +15,12 @@ export interface Versions { clock_version: number; state_version: number }
 export interface SessionResponse extends Versions {
   session_id: string; demo_token: string; configuration: FamilyConfig; effective_now: string;
   provider_mode: ProviderMode; engine_mode: EngineMode;
+  speech_input_mode?: 'rms_batch' | 'elevenlabs_realtime';
 }
 export interface VoiceAudio { mime_type: string; data_base64: string; duration_ms: number }
 export interface TurnResponse extends Versions {
   session_id: string; turn_id: string; sequence: number; provider_mode: ProviderMode; engine_mode: EngineMode;
-  input_mode?: 'audio' | 'text' | 'greeting';
+  input_mode?: 'audio' | 'text' | 'greeting' | 'realtime_stt';
   transcript: { text: string; language: Language; uncertain_spans: unknown[] } | null;
   reply: { text: string; sentences: string[]; language: Language };
   audio: VoiceAudio | null;

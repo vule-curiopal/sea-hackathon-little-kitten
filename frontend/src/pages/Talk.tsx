@@ -63,6 +63,11 @@ export default function Talk({ guest = false, user }: { guest?: boolean; user?: 
   const moodRef = useRef(mood);
   moodRef.current = mood;
   const pipeline = usePipelineVoice({ language, profile: user ? 'account' : 'guest', voiceId: voiceId || DEFAULT_VOICE[language], personality, role,
+    onTranscript: text => {
+      const id = voiceRequestRef.current;
+      if (id === null || id !== requestRef.current || turnRedactedRef.current || turnInputRef.current !== 'audio') return;
+      dispatch({ type: 'transcript', user: { id, role: 'user', text, source: 'voice' } });
+    },
     onState: phase => {
       const id = voiceRequestRef.current;
       const event = voiceConversationEvent(voiceStateRef.current, phase, id !== null && id === requestRef.current ? id : undefined, turnInputRef.current);
@@ -211,7 +216,7 @@ export default function Talk({ guest = false, user }: { guest?: boolean; user?: 
     if (!pipeline.session) { pipeline.reconnect(); return false; }
     if (!pipeline.canTalk()) return false;
     if (!window.isSecureContext) { setVoiceError('voiceSecure'); openPanel(true); return false; }
-    if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === 'undefined') { setVoiceError('voiceMissing'); openPanel(true); return false; }
+    if (!navigator.mediaDevices?.getUserMedia || (pipeline.session?.speech_input_mode !== 'elevenlabs_realtime' && typeof MediaRecorder === 'undefined')) { setVoiceError('voiceMissing'); openPanel(true); return false; }
     if (resting) wake();
     stopPending(); voiceRequestRef.current = requestRef.current; turnInputRef.current = 'audio';
     dispatch({ type: 'finish' }); setVoiceError(null);
@@ -231,9 +236,10 @@ export default function Talk({ guest = false, user }: { guest?: boolean; user?: 
     cat.react(reaction);
   }
   function submit(event: FormEvent) { event.preventDefault(); if (!message.trim() || busy || resting) return; answer(message); setMessage(''); }
+  const realtime = pipeline.session?.speech_input_mode === 'elevenlabs_realtime';
   const silentReply = pipeline.state === 'playback_blocked' && pipeline.lastTurn?.audio === null;
   const micControl = microphoneControl(pipeline.state, pipeline.capture, !!pipeline.session, busy, silentReply);
-  const micLabel = micControl.label;
+  const micLabel: TranslationKey = realtime && micControl.ready ? 'sendNow' : realtime && !busy && pipeline.session ? 'voiceRealtimeTalk' : micControl.label;
   const status: TranslationKey = resting ? 'restingTitle' : pipeline.state === 'playback_blocked' ? silentReply ? 'textReady' : 'voiceBlocked' : state.phase === 'listening' ? micControl.preparing ? 'voicePreparing' : pipeline.capture === 'finalizing_capture' ? 'voiceMessageProcessing' : 'voiceReady' : state.phase === 'thinking' ? 'isThinking' : state.phase === 'speaking' ? 'isSpeaking' : 'mutedStatus';
   const ambient = state.phase === 'answered' && !voiceActive && !modal && !memoryOpen;
   const voiceNotice = logoutError ?? voiceError ?? pipeline.error;
@@ -262,10 +268,10 @@ export default function Talk({ guest = false, user }: { guest?: boolean; user?: 
         <div className={`talk-status phase-${state.phase}`} role={ambient ? undefined : 'status'}><span>{ambient ? t(activityLabels[cat.activity]) : t(status)}</span></div>
         <div className="talk-controls">
           {voiceActive && <button className="voice-stop" onClick={stopConversation}><Icon name="stop" />{t('voiceStop')}</button>}
-          <HoldToTalkButton className={`microphone-button ${micControl.ready ? 'is-enabled is-listening' : ''} ${micControl.preparing ? 'is-preparing' : ''}`} label={t(micLabel)} recording={micControl.holding} disabled={micControl.disabled} busy={micControl.busy} icon={micControl.icon} text={t(micControl.text)} onStart={startVoice} onSend={pipeline.send} onCancel={stopConversation} />
+          {realtime ? <button type="button" className={`microphone-button ${micControl.ready ? 'is-enabled is-listening' : ''} ${micControl.preparing ? 'is-preparing' : ''}`} aria-label={t(micLabel)} aria-pressed={micControl.ready} disabled={micControl.disabled || micControl.preparing} onClick={() => { if (micControl.ready) pipeline.send(); else startVoice(); }}><Icon name={micControl.ready ? 'arrow' : micControl.icon} /><span>{t(micControl.ready ? 'sendNow' : !busy && pipeline.session ? 'voiceRealtimeTalk' : micControl.text)}</span></button> : <HoldToTalkButton className={`microphone-button ${micControl.ready ? 'is-enabled is-listening' : ''} ${micControl.preparing ? 'is-preparing' : ''}`} label={t(micLabel)} recording={micControl.holding} disabled={micControl.disabled} busy={micControl.busy} icon={micControl.icon} text={t(micControl.text)} onStart={startVoice} onSend={pipeline.send} onCancel={stopConversation} />}
           <button className="round-button" aria-label={t('conversation')} aria-expanded={panelOpen} aria-controls="conversation-panel" onClick={() => panelOpen ? setPanelOpen(false) : openPanel()}><Icon name="chat" /></button>
         </div>
-        <p className="mic-hint">{t(resting ? 'restingNote' : micControl.preparing ? 'voicePreparing' : micControl.ready ? 'voiceReady' : busy || !pipeline.session ? micLabel : 'micHint')}</p>
+        <p className="mic-hint">{t(resting ? 'restingNote' : micControl.preparing ? 'voicePreparing' : micControl.ready ? realtime ? 'voiceRealtimeCaptureHint' : 'voiceReady' : busy || !pipeline.session ? micLabel : realtime ? 'voiceRealtimeCaptureHint' : 'micHint')}</p>
         {micEnabled && pipeline.meter && <div className="voice-meter"><meter min={-80} max={0} value={pipeline.meter.levelDbfs} aria-label={t('voiceLevel')} /><span>{Math.floor(pipeline.meter.elapsedMs / 1000)} / 30 s</span></div>}
         {pipeline.state === 'playback_blocked' && <button className="button button-primary voice-play" onClick={pipeline.play}><Icon name={silentReply ? 'heart' : 'play'} />{t(silentReply ? 'doneReading' : 'voicePlay')}</button>}
         {voiceNotice && <div className="voice-notice" role="status"><span>{t(voiceNotice)}</span><button aria-label={t('close')} onClick={() => { setLogoutError(null); setVoiceError(null); pipeline.clearError(); }}><Icon name="close" /></button></div>}

@@ -1,0 +1,1314 @@
+{
+  "measured_at": "2026-10-31T07:47:48.118Z",
+  "timezone": "Asia/Ho_Chi_Minh",
+  "schema": "miu_voice_latency_b11b64215940486b8c4bd1e082380322",
+  "schema_removed": true,
+  "performance_time_origin_ms": 1793432825859.613,
+  "database_instrumentation": "Queries and exec inside/outside transactions, plus transaction wall spans. Individual transaction queries include sequential queue wait; use union spans, not summed durations.",
+  "scope": "Real paced PCM -> realtime STT -> current real character/memory engine on an isolated PostgreSQL schema -> real TTS. Last-speech timing uses TTS clip segment bounds, not human word alignment. Result latency ends at MP3 receipt, not physical playback.",
+  "config": {
+    "silence_ms": 3000,
+    "filter_background_audio": true,
+    "engine_models": {
+      "classify": "gpt-6-astra",
+      "reply": "gpt-6-astra",
+      "check": "gpt-6-astra",
+      "moderation": "omni-moderation-latest"
+    },
+    "tts_model": "eleven_flash_v2_5",
+    "sample_rate": 16000,
+    "chunk_ms": 200
+  },
+  "summary": {
+    "attempted": 1,
+    "completed": 0,
+    "rejected": 0,
+    "failed": 1
+  },
+  "assets": [
+    {
+      "id": "19_en_pause_2200ms",
+      "language": "en",
+      "speech_present": true,
+      "reference_last_speech_ms": 6166.667,
+      "events": [
+        {
+          "type": "stream.ready",
+          "at_ms": 23261.5
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 24387
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 26101.6
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 26101.7
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 27119
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 28192.7
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 29092.9
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 29900.5
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 30904.5
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 32033.5
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 33025.2
+        },
+        {
+          "type": "transcript.segment",
+          "at_ms": 33267.3
+        },
+        {
+          "type": "turn.end_candidate",
+          "at_ms": 33267.3
+        },
+        {
+          "type": "stream.drained",
+          "at_ms": 33671.3
+        },
+        {
+          "type": "transcript.final",
+          "at_ms": 33671.3
+        },
+        {
+          "type": "stream.processing",
+          "at_ms": 33671.4
+        },
+        {
+          "type": "stream.error",
+          "at_ms": 41712.6
+        }
+      ],
+      "database": [
+        {
+          "start_ms": 11240.5,
+          "end_ms": 11362.6,
+          "operation": "SELECT"
+        },
+        {
+          "start_ms": 11573.1,
+          "end_ms": 11736.2,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 11736.5,
+          "end_ms": 11903.6,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 11903.6,
+          "end_ms": 12038.5,
+          "operation": "DELETE",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 12038.6,
+          "end_ms": 12194,
+          "operation": "DELETE",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 12194.1,
+          "end_ms": 12340.5,
+          "operation": "DELETE",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 12340.5,
+          "end_ms": 12540.5,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 12540.7,
+          "end_ms": 12680.6,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 12680.9,
+          "end_ms": 12822.5,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 12822.5,
+          "end_ms": 12953.1,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 12822.6,
+          "end_ms": 13097,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 12822.6,
+          "end_ms": 13277.5,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 12822.6,
+          "end_ms": 13454,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 12822.6,
+          "end_ms": 13619.9,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 12822.6,
+          "end_ms": 13800.9,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 12822.6,
+          "end_ms": 13921.7,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 12822.6,
+          "end_ms": 14042.9,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 14157.9,
+          "end_ms": 14267.4,
+          "operation": "SELECT"
+        },
+        {
+          "start_ms": 14483.6,
+          "end_ms": 14540.8,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 14540.8,
+          "end_ms": 14600.3,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 14600.8,
+          "end_ms": 14655,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 14655,
+          "end_ms": 14707.8,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 14707.8,
+          "end_ms": 14765.5,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 14765.6,
+          "end_ms": 14903.3,
+          "operation": "DELETE",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 14903.4,
+          "end_ms": 15063.4,
+          "operation": "DELETE",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 15063.5,
+          "end_ms": 15160.1,
+          "operation": "DELETE",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 15160.2,
+          "end_ms": 15264.8,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 15264.9,
+          "end_ms": 15362,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 15362.6,
+          "end_ms": 15435.8,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 15435.8,
+          "end_ms": 15538.9,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 15435.9,
+          "end_ms": 15632.1,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 15435.9,
+          "end_ms": 15712.3,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 15435.9,
+          "end_ms": 15783.4,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 15435.9,
+          "end_ms": 15861.8,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 15435.9,
+          "end_ms": 15939.1,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 15435.9,
+          "end_ms": 16015.4,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 15435.9,
+          "end_ms": 16089.6,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 16250.3,
+          "end_ms": 16325.3,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 16325.3,
+          "end_ms": 16394.8,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 16394.9,
+          "end_ms": 16457.4,
+          "operation": "DELETE",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 16457.4,
+          "end_ms": 16525.5,
+          "operation": "DELETE",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 16525.5,
+          "end_ms": 16586.2,
+          "operation": "DELETE",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 16586.3,
+          "end_ms": 16644.2,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 16644.2,
+          "end_ms": 16696.6,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 16696.9,
+          "end_ms": 16749.1,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 16749.2,
+          "end_ms": 16799.5,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 16749.3,
+          "end_ms": 16859.6,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 16749.3,
+          "end_ms": 16918.6,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 16749.3,
+          "end_ms": 16980.2,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 16749.3,
+          "end_ms": 17038.7,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 16749.3,
+          "end_ms": 17095.9,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 16749.3,
+          "end_ms": 17156.4,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 16749.3,
+          "end_ms": 17228.8,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 17290.9,
+          "end_ms": 17353.3,
+          "operation": "SELECT"
+        },
+        {
+          "start_ms": 17444.8,
+          "end_ms": 17526.3,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 17526.3,
+          "end_ms": 17596.7,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 17596.8,
+          "end_ms": 17648.1,
+          "operation": "DELETE",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 17648.1,
+          "end_ms": 17702.6,
+          "operation": "DELETE",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 17702.7,
+          "end_ms": 17758.7,
+          "operation": "DELETE",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 17758.7,
+          "end_ms": 17812.4,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 17812.4,
+          "end_ms": 17867,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 17867.3,
+          "end_ms": 17920.1,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 17920.1,
+          "end_ms": 17984.6,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 17920.1,
+          "end_ms": 18048.3,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 17920.1,
+          "end_ms": 18107.4,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 17920.1,
+          "end_ms": 18161.6,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 17920.1,
+          "end_ms": 18229.8,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 17920.1,
+          "end_ms": 18383.9,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 17920.1,
+          "end_ms": 18468.3,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 17920.1,
+          "end_ms": 18550.4,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 18618.2,
+          "end_ms": 18681.4,
+          "operation": "SELECT"
+        },
+        {
+          "start_ms": 18738.9,
+          "end_ms": 18792,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 18792,
+          "end_ms": 18851.5,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 18851.6,
+          "end_ms": 18901.8,
+          "operation": "DELETE",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 18901.8,
+          "end_ms": 18961.2,
+          "operation": "DELETE",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 18961.2,
+          "end_ms": 19089.4,
+          "operation": "DELETE",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 19089.4,
+          "end_ms": 19156.3,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 19156.3,
+          "end_ms": 19221.3,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 19221.7,
+          "end_ms": 19305.8,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 19305.9,
+          "end_ms": 19380.5,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 19305.9,
+          "end_ms": 19485.2,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 19305.9,
+          "end_ms": 19566.4,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 19305.9,
+          "end_ms": 19624.8,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 19305.9,
+          "end_ms": 19698.8,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 19305.9,
+          "end_ms": 19773.2,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 19305.9,
+          "end_ms": 19841.7,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 19305.9,
+          "end_ms": 19922.7,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 19998,
+          "end_ms": 20073.7,
+          "operation": "SELECT"
+        },
+        {
+          "start_ms": 20135.6,
+          "end_ms": 20195.8,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 20195.9,
+          "end_ms": 20262.3,
+          "operation": "UPDATE",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 20262.3,
+          "end_ms": 20326.7,
+          "operation": "UPDATE",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 20326.7,
+          "end_ms": 20398,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 20398.1,
+          "end_ms": 20457.6,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 20457.7,
+          "end_ms": 20516,
+          "operation": "DELETE",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 20516,
+          "end_ms": 20580.6,
+          "operation": "DELETE",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 20580.7,
+          "end_ms": 20639,
+          "operation": "DELETE",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 20639,
+          "end_ms": 20694.1,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 20694.1,
+          "end_ms": 20747.8,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 20748.1,
+          "end_ms": 20807.8,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 20807.8,
+          "end_ms": 20870,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 20807.9,
+          "end_ms": 20950.9,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 20807.9,
+          "end_ms": 21005.9,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 20807.9,
+          "end_ms": 21073,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 20807.9,
+          "end_ms": 21131.1,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 20807.9,
+          "end_ms": 21189.9,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 20807.9,
+          "end_ms": 21245.2,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 20807.9,
+          "end_ms": 21311.9,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 21391.2,
+          "end_ms": 21484.3,
+          "operation": "INSERT"
+        },
+        {
+          "start_ms": 21484.4,
+          "end_ms": 21537.7,
+          "operation": "SELECT"
+        },
+        {
+          "start_ms": 21675.5,
+          "end_ms": 21742.9,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 21742.9,
+          "end_ms": 21829.8,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 21829.9,
+          "end_ms": 21929.8,
+          "operation": "DELETE",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 21929.9,
+          "end_ms": 22015.8,
+          "operation": "DELETE",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 22015.9,
+          "end_ms": 22079,
+          "operation": "DELETE",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 22079.1,
+          "end_ms": 22133.7,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 22133.8,
+          "end_ms": 22191.1,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 22191.4,
+          "end_ms": 22247.4,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 22247.7,
+          "end_ms": 22300.5,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 22247.8,
+          "end_ms": 22355.9,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 22247.8,
+          "end_ms": 22408.3,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 22247.8,
+          "end_ms": 22465.3,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 22247.8,
+          "end_ms": 22516.8,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 22247.8,
+          "end_ms": 22568.9,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 22247.8,
+          "end_ms": 22628.5,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 22247.8,
+          "end_ms": 22683.1,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 22742.7,
+          "end_ms": 22828.9,
+          "operation": "SELECT"
+        },
+        {
+          "start_ms": 33999.8,
+          "end_ms": 34053.8,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 34053.9,
+          "end_ms": 34111.9,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 34112,
+          "end_ms": 34167,
+          "operation": "DELETE",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 34167,
+          "end_ms": 34228.1,
+          "operation": "DELETE",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 34228.2,
+          "end_ms": 34297.5,
+          "operation": "DELETE",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 34297.5,
+          "end_ms": 34352.4,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 34352.4,
+          "end_ms": 34415.7,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 34416.1,
+          "end_ms": 34490.4,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 34490.4,
+          "end_ms": 34585.3,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 34490.4,
+          "end_ms": 34641.4,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 34490.4,
+          "end_ms": 34724.9,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 34490.4,
+          "end_ms": 34808.9,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 34490.4,
+          "end_ms": 34878,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 34490.4,
+          "end_ms": 34937.7,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 34490.4,
+          "end_ms": 35009.5,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 34490.4,
+          "end_ms": 35066.7,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 35122.6,
+          "end_ms": 35175.1,
+          "operation": "SELECT"
+        },
+        {
+          "start_ms": 35244.4,
+          "end_ms": 35307.2,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 35307.2,
+          "end_ms": 35376.5,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 35376.5,
+          "end_ms": 35439.2,
+          "operation": "DELETE",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 35439.2,
+          "end_ms": 35494.7,
+          "operation": "DELETE",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 35494.7,
+          "end_ms": 35551.3,
+          "operation": "DELETE",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 35551.3,
+          "end_ms": 35605.6,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 35605.6,
+          "end_ms": 35662.9,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 35663.3,
+          "end_ms": 35719.7,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 35719.7,
+          "end_ms": 35783.8,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 35719.8,
+          "end_ms": 35836.9,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 35719.8,
+          "end_ms": 35890.3,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 35719.8,
+          "end_ms": 35944.7,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 35719.8,
+          "end_ms": 35995.2,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 35719.8,
+          "end_ms": 36061.6,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 35719.8,
+          "end_ms": 36120.8,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 35719.8,
+          "end_ms": 36173.5,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 36230.6,
+          "end_ms": 36286,
+          "operation": "SELECT"
+        },
+        {
+          "start_ms": 36348.3,
+          "end_ms": 36399.5,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 36399.5,
+          "end_ms": 36452.2,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 36452.3,
+          "end_ms": 36506.8,
+          "operation": "DELETE",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 36506.8,
+          "end_ms": 36563.5,
+          "operation": "DELETE",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 36563.5,
+          "end_ms": 36621.3,
+          "operation": "DELETE",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 36621.3,
+          "end_ms": 36675.2,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 36675.2,
+          "end_ms": 36725.8,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 36726.1,
+          "end_ms": 36780.8,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 36780.8,
+          "end_ms": 36837.8,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 36780.8,
+          "end_ms": 36891.5,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 36780.8,
+          "end_ms": 36949.5,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 36780.8,
+          "end_ms": 37014.5,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 36780.8,
+          "end_ms": 37066.6,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 36780.8,
+          "end_ms": 37126.2,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 36780.8,
+          "end_ms": 37180.1,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 36780.8,
+          "end_ms": 37237.5,
+          "operation": "SELECT",
+          "inside_transaction": true
+        },
+        {
+          "start_ms": 41595.7,
+          "end_ms": 41651.5,
+          "operation": "UPDATE"
+        },
+        {
+          "start_ms": 41653.4,
+          "end_ms": 41711.6,
+          "operation": "UPDATE"
+        },
+        {
+          "start_ms": 41718.2,
+          "end_ms": 41774.8,
+          "operation": "UPDATE"
+        },
+        {
+          "start_ms": 41780.1,
+          "end_ms": 41840.4,
+          "operation": "UPDATE"
+        }
+      ],
+      "transactions": [
+        {
+          "start_ms": 11363.3,
+          "end_ms": 14157.7
+        },
+        {
+          "start_ms": 14267.9,
+          "end_ms": 16172.8
+        },
+        {
+          "start_ms": 16172.8,
+          "end_ms": 17290.2
+        },
+        {
+          "start_ms": 17370.9,
+          "end_ms": 18618.1
+        },
+        {
+          "start_ms": 18682.4,
+          "end_ms": 19998
+        },
+        {
+          "start_ms": 20074,
+          "end_ms": 21391.2
+        },
+        {
+          "start_ms": 21584.9,
+          "end_ms": 22742.6
+        },
+        {
+          "start_ms": 33668.6,
+          "end_ms": 35122.5
+        },
+        {
+          "start_ms": 35175.6,
+          "end_ms": 36230.6
+        },
+        {
+          "start_ms": 36287.3,
+          "end_ms": 37294.9
+        }
+      ],
+      "commits": [
+        {
+          "at_ms": 33266.8,
+          "text_chars": 49
+        },
+        {
+          "at_ms": 33666.8,
+          "text_chars": 0
+        }
+      ],
+      "engine_dispatches": 1,
+      "case_start_ms": 11195.3,
+      "profile_ready_ms": 21540.5,
+      "added_background_tail_ms": 3000,
+      "ws_start_ms": 21575.1,
+      "upstream_connect_start_ms": 22829.1,
+      "stream_ready_ms": 23261.5,
+      "reference_last_speech_clock_ms": 29428.167,
+      "end_candidate_ms": 33267.3,
+      "remaining_reference_speech": false,
+      "audio_end_sent_ms": 33267.3,
+      "manual_commit_ms": 33267.7,
+      "transcript_final_ms": 33671.3,
+      "transcript": "I feel a little sad today. Will you play with me?",
+      "engine_start_ms": 36286.2,
+      "engine_error_code": "model_output_rejected",
+      "rejected_model_reply": "I’m sorry you’re feeling a little sad today. Yes, I’ll play with you—we can take it gently, and you can choose what we play.",
+      "engine_end_ms": 41651.9,
+      "error_code": "speech_stream_failed",
+      "error_at_ms": 41712.6,
+      "status": "failed",
+      "failure_phase": "engine",
+      "model_requests": [
+        {
+          "sequence": 1,
+          "stage": "classify",
+          "api": "responses",
+          "requestedModel": "gpt-6-astra",
+          "returnedModel": "gpt-6-astra",
+          "responseId": "resp_0f06af544d52228f016ae59d020ae087d282481b24d71c46d5",
+          "requestId": "req_272987f5737144bd9f8c5bde8e96ca38",
+          "startedAt": "2026-10-31T07:47:43.190Z",
+          "elapsedMs": 2084.041100000002,
+          "outcome": "completed",
+          "inputTokens": 1087,
+          "outputTokens": 62,
+          "totalTokens": 1149,
+          "reasoningTokens": 0,
+          "errorCode": null,
+          "httpStatus": 200
+        },
+        {
+          "sequence": 2,
+          "stage": "moderation_input",
+          "api": "moderations",
+          "requestedModel": "omni-moderation-latest",
+          "returnedModel": "omni-moderation-latest",
+          "responseId": "modr-2153",
+          "requestId": "req_49169ce2b2514c5a988b0f9eda237ddf",
+          "startedAt": "2026-10-31T07:47:43.191Z",
+          "elapsedMs": 610.5286000000051,
+          "outcome": "completed",
+          "inputTokens": null,
+          "outputTokens": null,
+          "totalTokens": null,
+          "reasoningTokens": null,
+          "errorCode": null,
+          "httpStatus": 200
+        },
+        {
+          "sequence": 3,
+          "stage": "reply",
+          "api": "responses",
+          "requestedModel": "gpt-6-astra",
+          "returnedModel": "gpt-6-astra",
+          "responseId": "resp_0530cdb097b4688d016ae59d03da8087d28a00dba5e08f673d",
+          "requestId": "req_9f81165f3111435ab311d1813b038d95",
+          "startedAt": "2026-10-31T07:47:45.304Z",
+          "elapsedMs": 2140.6376999999993,
+          "outcome": "completed",
+          "inputTokens": 1558,
+          "outputTokens": 36,
+          "totalTokens": 1594,
+          "reasoningTokens": 0,
+          "errorCode": null,
+          "httpStatus": 200
+        }
+      ],
+      "metrics": {
+        "profile_setup_ms": 10345.2,
+        "stream_connect_ms": 1686.4,
+        "endpoint_after_speech_ms": 3839.1,
+        "finalize_drain_ms": 404,
+        "engine_ms": 5365.7,
+        "tts_adapter_ms": null,
+        "after_final_other_ms": null,
+        "speech_end_to_mp3_received_ms": null
+      }
+    }
+  ]
+}

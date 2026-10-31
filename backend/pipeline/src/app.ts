@@ -10,17 +10,24 @@ import { registerSystemRoutes } from './modules/system/system.routes.js';
 import { TurnController } from './modules/turns/turn.controller.js';
 import { registerTurnRoutes } from './modules/turns/turn.routes.js';
 import { TurnService } from './modules/turns/turn.service.js';
+import { registerSpeechStreams, type SpeechSessionAuthorizer } from './modules/speech-streams/speech-stream.routes.js';
+import type { RealtimeSttFactory } from './providers/elevenlabs/realtime-stt.provider.js';
 import type { EngineBridge, PipelineProviders } from './ports.js';
 import { createProviders } from './providers/index.js';
+import { registerClientEvents } from './modules/system/client-events.routes.js';
 
 export interface BuildAppOptions {
   config?: VoiceConfig;
   providers?: PipelineProviders;
+  realtimeStt?: RealtimeSttFactory;
   /** Retained name for existing callers; this is RAM-only session/protocol state. */
   state?: SessionService;
   engineBridge?: EngineBridge;
   /** Integrated auth chooses an owned profile; clients never supply an owner ID. */
   resolveSessionProfile?: (request: Request) => Promise<string>;
+  /** Raw WebSocket upgrades bypass Express; integrated ownership is checked
+   * independently before opening STT and before submitting the final audio. */
+  authorizeSpeechSession?: SpeechSessionAuthorizer;
   registerRoutes?: (app: Express, sessions: SessionService) => void | Promise<void>;
 }
 
@@ -51,8 +58,10 @@ export async function buildApp(options: BuildAppOptions = {}) {
   registerHttpMiddleware(app, config);
   await options.registerRoutes?.(app, sessions);
   registerSystemRoutes(app, config, sessions);
+  registerClientEvents(app, sessions);
   registerSessionRoutes(app, new SessionController(sessions, providers.mode, options.resolveSessionProfile));
   registerTurnRoutes(app, new TurnController(sessions, turns, contexts));
+  const disposeStreams = registerSpeechStreams(app, config, sessions, turns, options.realtimeStt, options.authorizeSpeechSession);
   app.use(() => { throw new PipelineError('not_found', 404); });
   registerErrorHandler(app, sessions, contexts);
 
@@ -60,6 +69,7 @@ export async function buildApp(options: BuildAppOptions = {}) {
   expiry.unref();
   disposers.set(app, () => {
     clearInterval(expiry);
+    disposeStreams();
     sessions.dispose();
   });
 

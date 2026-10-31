@@ -1,0 +1,1030 @@
+{
+  "measured_at": "2026-10-31T07:35:27.704Z",
+  "timezone": "Asia/Ho_Chi_Minh",
+  "schema": "miu_voice_latency_e80ed7a069b1487987263ce8736c810c",
+  "schema_removed": true,
+  "scope": "Real paced PCM -> realtime STT -> current real character/memory engine on an isolated PostgreSQL schema -> real TTS. Last-speech timing uses TTS clip segment bounds, not human word alignment. Result latency ends at MP3 receipt, not physical playback.",
+  "config": {
+    "silence_ms": 3000,
+    "filter_background_audio": true,
+    "engine_models": {
+      "classify": "gpt-6-astra",
+      "reply": "gpt-6-astra",
+      "check": "gpt-6-astra",
+      "moderation": "omni-moderation-latest"
+    },
+    "tts_model": "eleven_flash_v2_5",
+    "sample_rate": 16000,
+    "chunk_ms": 200
+  },
+  "summary": {
+    "attempted": 4,
+    "completed": 3,
+    "rejected": 1,
+    "failed": 0
+  },
+  "assets": [
+    {
+      "id": "01_vi_clean",
+      "language": "vi",
+      "speech_present": true,
+      "reference_last_speech_ms": 4016.792,
+      "events": [
+        {
+          "type": "stream.ready",
+          "at_ms": 24080.5
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 25265.7
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 27055
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 27055
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 28118.2
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 28907.6
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 30028.6
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 31142.3
+        },
+        {
+          "type": "transcript.segment",
+          "at_ms": 31977.6
+        },
+        {
+          "type": "turn.end_candidate",
+          "at_ms": 31977.7
+        },
+        {
+          "type": "stream.drained",
+          "at_ms": 32312.7
+        },
+        {
+          "type": "transcript.final",
+          "at_ms": 32312.7
+        },
+        {
+          "type": "stream.processing",
+          "at_ms": 32312.7
+        },
+        {
+          "type": "turn.result",
+          "at_ms": 49953.9
+        }
+      ],
+      "database": [
+        {
+          "start_ms": 13147,
+          "end_ms": 13210.4,
+          "operation": "SELECT"
+        },
+        {
+          "start_ms": 14454.1,
+          "end_ms": 14504.5,
+          "operation": "SELECT"
+        },
+        {
+          "start_ms": 17027.1,
+          "end_ms": 17110.1,
+          "operation": "SELECT"
+        },
+        {
+          "start_ms": 18326.9,
+          "end_ms": 18399.7,
+          "operation": "SELECT"
+        },
+        {
+          "start_ms": 19769.5,
+          "end_ms": 19840.5,
+          "operation": "SELECT"
+        },
+        {
+          "start_ms": 21803.9,
+          "end_ms": 21873.3,
+          "operation": "INSERT"
+        },
+        {
+          "start_ms": 21873.3,
+          "end_ms": 21973.5,
+          "operation": "SELECT"
+        },
+        {
+          "start_ms": 23571.4,
+          "end_ms": 23632.6,
+          "operation": "SELECT"
+        },
+        {
+          "start_ms": 33788.3,
+          "end_ms": 33860.4,
+          "operation": "SELECT"
+        },
+        {
+          "start_ms": 35320,
+          "end_ms": 35381,
+          "operation": "SELECT"
+        },
+        {
+          "start_ms": 46435.6,
+          "end_ms": 46503.2,
+          "operation": "SELECT"
+        },
+        {
+          "start_ms": 48253.1,
+          "end_ms": 48390.1,
+          "operation": "SELECT"
+        },
+        {
+          "start_ms": 49876.4,
+          "end_ms": 49950.2,
+          "operation": "SELECT"
+        },
+        {
+          "start_ms": 49961.6,
+          "end_ms": 50039.1,
+          "operation": "UPDATE"
+        },
+        {
+          "start_ms": 50044.4,
+          "end_ms": 50117.3,
+          "operation": "UPDATE"
+        }
+      ],
+      "commits": [
+        {
+          "at_ms": 31977.1,
+          "text_chars": 54
+        },
+        {
+          "at_ms": 32307.8,
+          "text_chars": 0
+        }
+      ],
+      "engine_dispatches": 1,
+      "case_start_ms": 13078.5,
+      "profile_ready_ms": 21975,
+      "added_background_tail_ms": 3000,
+      "ws_start_ms": 22011.1,
+      "upstream_connect_start_ms": 23633,
+      "stream_ready_ms": 24080.5,
+      "reference_last_speech_clock_ms": 28097.292,
+      "end_candidate_ms": 31977.7,
+      "remaining_reference_speech": false,
+      "audio_end_sent_ms": 31977.7,
+      "manual_commit_ms": 31978.4,
+      "transcript_final_ms": 32312.7,
+      "transcript": "Miêu ơi, mình muốn nghe một câu chuyện về chú mèo con.",
+      "engine_start_ms": 35381.3,
+      "engine_end_ms": 45067,
+      "tts_start_ms": 46506.7,
+      "tts_http": {
+        "start_ms": 46508.9,
+        "headers_ms": 46862.6,
+        "status": 200,
+        "body_end_ms": 47027.6,
+        "bytes": 102025
+      },
+      "tts_end_ms": 47104.5,
+      "result_ms": 49953.9,
+      "api_timings_ms": {
+        "stt": 1883,
+        "reply": 11122,
+        "validation": 3,
+        "tts": 1884,
+        "server_total": 17972
+      },
+      "reply_chars": 115,
+      "reply": "Trong truyện tưởng tượng, ở góc sách truyện, Miu dựng rạp bóng tưởng tượng. Chú vịt đồ chơi bé xíu tạo bóng rất to.",
+      "audio_bytes": 102025,
+      "audio_duration_ms": 6348,
+      "status": "completed",
+      "model_requests": [
+        {
+          "sequence": 1,
+          "stage": "classify",
+          "api": "responses",
+          "requestedModel": "gpt-6-astra",
+          "returnedModel": "gpt-6-astra",
+          "responseId": "resp_091c816238551b6d016ae599b7db5487d287a9b8230a8295cf",
+          "requestId": "req_1583d9ddaba54a40b38205bd5feb0134",
+          "startedAt": "2026-10-31T07:33:41.116Z",
+          "elapsedMs": 2443.9216000000015,
+          "outcome": "completed",
+          "inputTokens": 1090,
+          "outputTokens": 102,
+          "totalTokens": 1192,
+          "reasoningTokens": 0,
+          "errorCode": null,
+          "httpStatus": 200
+        },
+        {
+          "sequence": 2,
+          "stage": "moderation_input",
+          "api": "moderations",
+          "requestedModel": "omni-moderation-latest",
+          "returnedModel": "omni-moderation-latest",
+          "responseId": "modr-1799",
+          "requestId": "req_842081caab534d15ae1b403a5737628e",
+          "startedAt": "2026-10-31T07:33:41.117Z",
+          "elapsedMs": 554.9449000000022,
+          "outcome": "completed",
+          "inputTokens": null,
+          "outputTokens": null,
+          "totalTokens": null,
+          "reasoningTokens": null,
+          "errorCode": null,
+          "httpStatus": 200
+        },
+        {
+          "sequence": 3,
+          "stage": "reply",
+          "api": "responses",
+          "requestedModel": "gpt-6-astra",
+          "returnedModel": "gpt-6-astra",
+          "responseId": "resp_0556bdc05b724bbd016ae599baad0087d2b09b5d4d25552083",
+          "requestId": "req_4a4f6935a0504a0bbce19c867ef09df5",
+          "startedAt": "2026-10-31T07:33:44.112Z",
+          "elapsedMs": 1887.2280000000028,
+          "outcome": "completed",
+          "inputTokens": 1690,
+          "outputTokens": 40,
+          "totalTokens": 1730,
+          "reasoningTokens": 0,
+          "errorCode": null,
+          "httpStatus": 200
+        },
+        {
+          "sequence": 4,
+          "stage": "moderation_output",
+          "api": "moderations",
+          "requestedModel": "omni-moderation-latest",
+          "returnedModel": "omni-moderation-latest",
+          "responseId": "modr-1236",
+          "requestId": "req_1efbcef4722d450f8576a47e731837d7",
+          "startedAt": "2026-10-31T07:33:46.007Z",
+          "elapsedMs": 529.0760999999984,
+          "outcome": "completed",
+          "inputTokens": null,
+          "outputTokens": null,
+          "totalTokens": null,
+          "reasoningTokens": null,
+          "errorCode": null,
+          "httpStatus": 200
+        },
+        {
+          "sequence": 5,
+          "stage": "check",
+          "api": "responses",
+          "requestedModel": "gpt-6-astra",
+          "returnedModel": "gpt-6-astra",
+          "responseId": "resp_0590b70627a9e52a016ae599bcf81887d2839d5d9dd4e11773",
+          "requestId": "req_fc9cafc331ba459c8185d642b61e507f",
+          "startedAt": "2026-10-31T07:33:46.008Z",
+          "elapsedMs": 1908.8883999999962,
+          "outcome": "completed",
+          "inputTokens": 1175,
+          "outputTokens": 21,
+          "totalTokens": 1196,
+          "reasoningTokens": 0,
+          "errorCode": null,
+          "httpStatus": 200
+        }
+      ],
+      "metrics": {
+        "profile_setup_ms": 8896.5,
+        "stream_connect_ms": 2069.4,
+        "endpoint_after_speech_ms": 3880.4,
+        "finalize_drain_ms": 335,
+        "engine_ms": 9685.7,
+        "tts_adapter_ms": 597.8,
+        "after_final_other_ms": 7357.7,
+        "speech_end_to_mp3_received_ms": 21856.6
+      },
+      "engine_detail": {
+        "model_union_ms": 6241,
+        "database_union_ms": 0,
+        "database_queries": 0,
+        "model_requests": 5
+      }
+    },
+    {
+      "id": "02_vi_soft",
+      "language": "vi",
+      "speech_present": true,
+      "reference_last_speech_ms": 4016.792,
+      "events": [
+        {
+          "type": "stream.ready",
+          "at_ms": 63326.5
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 64507.2
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 65528.9
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 66552.1
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 67530.4
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 68548.9
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 69530.1
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 70540.9
+        },
+        {
+          "type": "stream.error",
+          "at_ms": 71333.1
+        }
+      ],
+      "database": [
+        {
+          "start_ms": 50125.2,
+          "end_ms": 50221.6,
+          "operation": "SELECT"
+        },
+        {
+          "start_ms": 52003.1,
+          "end_ms": 52117.7,
+          "operation": "SELECT"
+        },
+        {
+          "start_ms": 55827.6,
+          "end_ms": 55881.1,
+          "operation": "SELECT"
+        },
+        {
+          "start_ms": 57268,
+          "end_ms": 57366.6,
+          "operation": "SELECT"
+        },
+        {
+          "start_ms": 58767.3,
+          "end_ms": 58824.9,
+          "operation": "SELECT"
+        },
+        {
+          "start_ms": 60455.6,
+          "end_ms": 60558.2,
+          "operation": "INSERT"
+        },
+        {
+          "start_ms": 60558.2,
+          "end_ms": 60637.5,
+          "operation": "SELECT"
+        },
+        {
+          "start_ms": 62687.7,
+          "end_ms": 62893.4,
+          "operation": "SELECT"
+        }
+      ],
+      "commits": [],
+      "engine_dispatches": 0,
+      "case_start_ms": 50122.5,
+      "profile_ready_ms": 60639.1,
+      "added_background_tail_ms": 3000,
+      "ws_start_ms": 60660.4,
+      "upstream_connect_start_ms": 62893.5,
+      "stream_ready_ms": 63326.5,
+      "reference_last_speech_clock_ms": 67343.292,
+      "error_code": "unclear_audio",
+      "error_at_ms": 71333.1,
+      "status": "rejected",
+      "model_requests": [],
+      "metrics": {
+        "profile_setup_ms": 10516.6,
+        "stream_connect_ms": 2666.1,
+        "endpoint_after_speech_ms": null,
+        "finalize_drain_ms": null,
+        "engine_ms": null,
+        "tts_adapter_ms": null,
+        "after_final_other_ms": null,
+        "speech_end_to_mp3_received_ms": null
+      }
+    },
+    {
+      "id": "03_vi_muffled",
+      "language": "vi",
+      "speech_present": true,
+      "reference_last_speech_ms": 4016.792,
+      "events": [
+        {
+          "type": "stream.ready",
+          "at_ms": 82248.1
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 83348.5
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 85163.7
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 85163.7
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 86067.1
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 87070.1
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 88087.8
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 89195.3
+        },
+        {
+          "type": "transcript.segment",
+          "at_ms": 90031.5
+        },
+        {
+          "type": "turn.end_candidate",
+          "at_ms": 90031.5
+        },
+        {
+          "type": "stream.drained",
+          "at_ms": 90347.3
+        },
+        {
+          "type": "transcript.final",
+          "at_ms": 90347.3
+        },
+        {
+          "type": "stream.processing",
+          "at_ms": 90347.3
+        },
+        {
+          "type": "turn.result",
+          "at_ms": 107233.8
+        }
+      ],
+      "database": [
+        {
+          "start_ms": 71360.3,
+          "end_ms": 71429.1,
+          "operation": "SELECT"
+        },
+        {
+          "start_ms": 72975.4,
+          "end_ms": 73070.7,
+          "operation": "SELECT"
+        },
+        {
+          "start_ms": 76772.1,
+          "end_ms": 76831.3,
+          "operation": "SELECT"
+        },
+        {
+          "start_ms": 77945.9,
+          "end_ms": 78003.9,
+          "operation": "SELECT"
+        },
+        {
+          "start_ms": 79230.2,
+          "end_ms": 79283.1,
+          "operation": "SELECT"
+        },
+        {
+          "start_ms": 80532.4,
+          "end_ms": 80608.1,
+          "operation": "INSERT"
+        },
+        {
+          "start_ms": 80608.1,
+          "end_ms": 80664.7,
+          "operation": "SELECT"
+        },
+        {
+          "start_ms": 81855,
+          "end_ms": 81909.1,
+          "operation": "SELECT"
+        },
+        {
+          "start_ms": 91915.2,
+          "end_ms": 91986.8,
+          "operation": "SELECT"
+        },
+        {
+          "start_ms": 93328,
+          "end_ms": 93384.3,
+          "operation": "SELECT"
+        },
+        {
+          "start_ms": 103736.4,
+          "end_ms": 103799.5,
+          "operation": "SELECT"
+        },
+        {
+          "start_ms": 105677.3,
+          "end_ms": 105741.1,
+          "operation": "SELECT"
+        },
+        {
+          "start_ms": 107162.9,
+          "end_ms": 107231.7,
+          "operation": "SELECT"
+        },
+        {
+          "start_ms": 107237.5,
+          "end_ms": 107308.2,
+          "operation": "UPDATE"
+        },
+        {
+          "start_ms": 107312.6,
+          "end_ms": 107369.7,
+          "operation": "UPDATE"
+        }
+      ],
+      "commits": [
+        {
+          "at_ms": 90031.2,
+          "text_chars": 53
+        },
+        {
+          "at_ms": 90345.9,
+          "text_chars": 0
+        }
+      ],
+      "engine_dispatches": 1,
+      "case_start_ms": 71355.9,
+      "profile_ready_ms": 80666.2,
+      "added_background_tail_ms": 3000,
+      "ws_start_ms": 80695.2,
+      "upstream_connect_start_ms": 81909.2,
+      "stream_ready_ms": 82248.1,
+      "reference_last_speech_clock_ms": 86264.892,
+      "end_candidate_ms": 90031.5,
+      "remaining_reference_speech": false,
+      "audio_end_sent_ms": 90031.5,
+      "manual_commit_ms": 90031.7,
+      "transcript_final_ms": 90347.3,
+      "transcript": "Nhu ơi, mình muốn nghe một câu chuyện về chú mèo con.",
+      "engine_start_ms": 93384.4,
+      "engine_end_ms": 102465.3,
+      "tts_start_ms": 103800.9,
+      "tts_http": {
+        "start_ms": 103801.6,
+        "headers_ms": 104138.6,
+        "status": 200,
+        "body_end_ms": 104262,
+        "bytes": 104950
+      },
+      "tts_end_ms": 104328,
+      "result_ms": 107233.8,
+      "api_timings_ms": {
+        "stt": 1955,
+        "reply": 10415,
+        "validation": 1,
+        "tts": 1940,
+        "server_total": 17200
+      },
+      "reply_chars": 115,
+      "reply": "Trong truyện tưởng tượng, ở góc sách truyện, Miu dựng rạp bóng tưởng tượng. Chú vịt đồ chơi bé xíu tạo bóng rất to.",
+      "audio_bytes": 104950,
+      "audio_duration_ms": 6531,
+      "status": "completed",
+      "model_requests": [
+        {
+          "sequence": 6,
+          "stage": "classify",
+          "api": "responses",
+          "requestedModel": "gpt-6-astra",
+          "returnedModel": "gpt-6-astra",
+          "responseId": "resp_0d76f111486d8f17016ae599f18d1487d28533e094ce0ad68a",
+          "requestId": "req_fb171072c97c4edca119de8281edc8c9",
+          "startedAt": "2026-10-31T07:34:38.826Z",
+          "elapsedMs": 2031.265499999994,
+          "outcome": "completed",
+          "inputTokens": 1090,
+          "outputTokens": 62,
+          "totalTokens": 1152,
+          "reasoningTokens": 0,
+          "errorCode": null,
+          "httpStatus": 200
+        },
+        {
+          "sequence": 7,
+          "stage": "moderation_input",
+          "api": "moderations",
+          "requestedModel": "omni-moderation-latest",
+          "returnedModel": "omni-moderation-latest",
+          "responseId": "modr-6086",
+          "requestId": "req_8c12603f01df4f2aac703370530032a1",
+          "startedAt": "2026-10-31T07:34:38.827Z",
+          "elapsedMs": 553.4072000000015,
+          "outcome": "completed",
+          "inputTokens": null,
+          "outputTokens": null,
+          "totalTokens": null,
+          "reasoningTokens": null,
+          "errorCode": null,
+          "httpStatus": 200
+        },
+        {
+          "sequence": 8,
+          "stage": "reply",
+          "api": "responses",
+          "requestedModel": "gpt-6-astra",
+          "returnedModel": "gpt-6-astra",
+          "responseId": "resp_0d0d641487e141fd016ae599f3da0c87d290cbb4ab5c0f50fb",
+          "requestId": "req_48d38be701804f10b69630de92d6b73b",
+          "startedAt": "2026-10-31T07:34:41.271Z",
+          "elapsedMs": 2377.5242,
+          "outcome": "completed",
+          "inputTokens": 1690,
+          "outputTokens": 40,
+          "totalTokens": 1730,
+          "reasoningTokens": 0,
+          "errorCode": null,
+          "httpStatus": 200
+        },
+        {
+          "sequence": 9,
+          "stage": "moderation_output",
+          "api": "moderations",
+          "requestedModel": "omni-moderation-latest",
+          "returnedModel": "omni-moderation-latest",
+          "responseId": "modr-1951",
+          "requestId": "req_37011b247de642c993fedc01bea085a8",
+          "startedAt": "2026-10-31T07:34:43.649Z",
+          "elapsedMs": 389.26840000000084,
+          "outcome": "completed",
+          "inputTokens": null,
+          "outputTokens": null,
+          "totalTokens": null,
+          "reasoningTokens": null,
+          "errorCode": null,
+          "httpStatus": 200
+        },
+        {
+          "sequence": 10,
+          "stage": "check",
+          "api": "responses",
+          "requestedModel": "gpt-6-astra",
+          "returnedModel": "gpt-6-astra",
+          "responseId": "resp_01c84cdfc94aa1a7016ae599f6649c87d281ac53d2de5c5513",
+          "requestId": "req_d888588b92214e58a001e2dd5e1b2eab",
+          "startedAt": "2026-10-31T07:34:43.650Z",
+          "elapsedMs": 1755.3888000000006,
+          "outcome": "completed",
+          "inputTokens": 1175,
+          "outputTokens": 21,
+          "totalTokens": 1196,
+          "reasoningTokens": 0,
+          "errorCode": null,
+          "httpStatus": 200
+        }
+      ],
+      "metrics": {
+        "profile_setup_ms": 9310.3,
+        "stream_connect_ms": 1552.9,
+        "endpoint_after_speech_ms": 3766.6,
+        "finalize_drain_ms": 315.8,
+        "engine_ms": 9080.9,
+        "tts_adapter_ms": 527.1,
+        "after_final_other_ms": 7278.5,
+        "speech_end_to_mp3_received_ms": 20968.9
+      },
+      "engine_detail": {
+        "model_union_ms": 6165.2,
+        "database_union_ms": 0,
+        "database_queries": 0,
+        "model_requests": 5
+      }
+    },
+    {
+      "id": "04_vi_clipped",
+      "language": "vi",
+      "speech_present": true,
+      "reference_last_speech_ms": 4016.792,
+      "events": [
+        {
+          "type": "stream.ready",
+          "at_ms": 117292.5
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 118525.3
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 120127.6
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 120127.6
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 121112.3
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 122235.1
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 123234.3
+        },
+        {
+          "type": "transcript.partial",
+          "at_ms": 124240.1
+        },
+        {
+          "type": "transcript.segment",
+          "at_ms": 125133.6
+        },
+        {
+          "type": "turn.end_candidate",
+          "at_ms": 125133.6
+        },
+        {
+          "type": "stream.drained",
+          "at_ms": 125515.4
+        },
+        {
+          "type": "transcript.final",
+          "at_ms": 125515.4
+        },
+        {
+          "type": "stream.processing",
+          "at_ms": 125515.4
+        },
+        {
+          "type": "turn.result",
+          "at_ms": 143241.7
+        }
+      ],
+      "database": [
+        {
+          "start_ms": 107374.8,
+          "end_ms": 107449.2,
+          "operation": "SELECT"
+        },
+        {
+          "start_ms": 108679.9,
+          "end_ms": 108747.1,
+          "operation": "SELECT"
+        },
+        {
+          "start_ms": 111461.5,
+          "end_ms": 111525,
+          "operation": "SELECT"
+        },
+        {
+          "start_ms": 112866.7,
+          "end_ms": 112956.2,
+          "operation": "SELECT"
+        },
+        {
+          "start_ms": 114031.8,
+          "end_ms": 114111.7,
+          "operation": "SELECT"
+        },
+        {
+          "start_ms": 115593.2,
+          "end_ms": 115653.7,
+          "operation": "INSERT"
+        },
+        {
+          "start_ms": 115653.7,
+          "end_ms": 115712.2,
+          "operation": "SELECT"
+        },
+        {
+          "start_ms": 116881,
+          "end_ms": 116942.9,
+          "operation": "SELECT"
+        },
+        {
+          "start_ms": 126938.2,
+          "end_ms": 126999.2,
+          "operation": "SELECT"
+        },
+        {
+          "start_ms": 128227,
+          "end_ms": 128289.4,
+          "operation": "SELECT"
+        },
+        {
+          "start_ms": 139093.4,
+          "end_ms": 139148.1,
+          "operation": "SELECT"
+        },
+        {
+          "start_ms": 142028.7,
+          "end_ms": 142083.9,
+          "operation": "SELECT"
+        },
+        {
+          "start_ms": 143183.2,
+          "end_ms": 143239.3,
+          "operation": "SELECT"
+        },
+        {
+          "start_ms": 143245.6,
+          "end_ms": 143303.6,
+          "operation": "UPDATE"
+        },
+        {
+          "start_ms": 143307,
+          "end_ms": 143380.5,
+          "operation": "UPDATE"
+        }
+      ],
+      "commits": [
+        {
+          "at_ms": 125133.3,
+          "text_chars": 53
+        },
+        {
+          "at_ms": 125513.9,
+          "text_chars": 0
+        }
+      ],
+      "engine_dispatches": 1,
+      "case_start_ms": 107372.6,
+      "profile_ready_ms": 115713.5,
+      "added_background_tail_ms": 3000,
+      "ws_start_ms": 115748.4,
+      "upstream_connect_start_ms": 116943,
+      "stream_ready_ms": 117292.5,
+      "reference_last_speech_clock_ms": 121309.292,
+      "end_candidate_ms": 125133.6,
+      "remaining_reference_speech": false,
+      "audio_end_sent_ms": 125133.6,
+      "manual_commit_ms": 125133.8,
+      "transcript_final_ms": 125515.4,
+      "transcript": "Nhu ơi, mình muốn nghe một câu chuyện về chú mèo con.",
+      "engine_start_ms": 128289.5,
+      "engine_end_ms": 137716.1,
+      "tts_start_ms": 139148.3,
+      "tts_http": {
+        "start_ms": 139148.5,
+        "headers_ms": 140775.1,
+        "status": 200,
+        "body_end_ms": 140887.4,
+        "bytes": 110384
+      },
+      "tts_end_ms": 140944.3,
+      "result_ms": 143241.7,
+      "api_timings_ms": {
+        "stt": 1866,
+        "reply": 10859,
+        "validation": 0,
+        "tts": 2936,
+        "server_total": 18106
+      },
+      "reply_chars": 115,
+      "reply": "Trong truyện tưởng tượng, ở góc sách truyện, Miu dựng rạp bóng tưởng tượng. Chú vịt đồ chơi bé xíu tạo bóng rất to.",
+      "audio_bytes": 110384,
+      "audio_duration_ms": 6870,
+      "status": "completed",
+      "model_requests": [
+        {
+          "sequence": 11,
+          "stage": "classify",
+          "api": "responses",
+          "requestedModel": "gpt-6-astra",
+          "returnedModel": "gpt-6-astra",
+          "responseId": "resp_05a76b4623295e67016ae59a14822c87d297d1d97967852c3a",
+          "requestId": "req_9efe0340a2c447e7b33eca4cc3155f5d",
+          "startedAt": "2026-10-31T07:35:13.819Z",
+          "elapsedMs": 2646.8594999999914,
+          "outcome": "completed",
+          "inputTokens": 1090,
+          "outputTokens": 102,
+          "totalTokens": 1192,
+          "reasoningTokens": 0,
+          "errorCode": null,
+          "httpStatus": 200
+        },
+        {
+          "sequence": 12,
+          "stage": "moderation_input",
+          "api": "moderations",
+          "requestedModel": "omni-moderation-latest",
+          "returnedModel": "omni-moderation-latest",
+          "responseId": "modr-6070",
+          "requestId": "req_cf6375c0f07a4234b67e3e71700ec4fc",
+          "startedAt": "2026-10-31T07:35:13.819Z",
+          "elapsedMs": 461.7685999999958,
+          "outcome": "completed",
+          "inputTokens": null,
+          "outputTokens": null,
+          "totalTokens": null,
+          "reasoningTokens": null,
+          "errorCode": null,
+          "httpStatus": 200
+        },
+        {
+          "sequence": 13,
+          "stage": "reply",
+          "api": "responses",
+          "requestedModel": "gpt-6-astra",
+          "returnedModel": "gpt-6-astra",
+          "responseId": "resp_02d71c57a9ee8fb6016ae59a17659487d2be4ce41e48892b64",
+          "requestId": "req_c7aff65e66d3404aa955f4b5d2b12c79",
+          "startedAt": "2026-10-31T07:35:16.830Z",
+          "elapsedMs": 1967.0456999999878,
+          "outcome": "completed",
+          "inputTokens": 1690,
+          "outputTokens": 40,
+          "totalTokens": 1730,
+          "reasoningTokens": 0,
+          "errorCode": null,
+          "httpStatus": 200
+        },
+        {
+          "sequence": 14,
+          "stage": "moderation_output",
+          "api": "moderations",
+          "requestedModel": "omni-moderation-latest",
+          "returnedModel": "omni-moderation-latest",
+          "responseId": "modr-1951",
+          "requestId": "req_5af73bec90c14dbda23be1243aa8c7b3",
+          "startedAt": "2026-10-31T07:35:18.798Z",
+          "elapsedMs": 508.53570000000764,
+          "outcome": "completed",
+          "inputTokens": null,
+          "outputTokens": null,
+          "totalTokens": null,
+          "reasoningTokens": null,
+          "errorCode": null,
+          "httpStatus": 200
+        },
+        {
+          "sequence": 15,
+          "stage": "check",
+          "api": "responses",
+          "requestedModel": "gpt-6-astra",
+          "returnedModel": "gpt-6-astra",
+          "responseId": "resp_0daf716cdb3f1c2a016ae59a19872487d2adf44edd950c5e0b",
+          "requestId": "req_7e4d929759e64f7cbea4dfa04fbed991",
+          "startedAt": "2026-10-31T07:35:18.798Z",
+          "elapsedMs": 2079.3501000000106,
+          "outcome": "completed",
+          "inputTokens": 1175,
+          "outputTokens": 21,
+          "totalTokens": 1196,
+          "reasoningTokens": 0,
+          "errorCode": null,
+          "httpStatus": 200
+        }
+      ],
+      "metrics": {
+        "profile_setup_ms": 8340.9,
+        "stream_connect_ms": 1544.1,
+        "endpoint_after_speech_ms": 3824.3,
+        "finalize_drain_ms": 381.8,
+        "engine_ms": 9426.6,
+        "tts_adapter_ms": 1796,
+        "after_final_other_ms": 6503.7,
+        "speech_end_to_mp3_received_ms": 21932.4
+      },
+      "engine_detail": {
+        "model_union_ms": 6693.3,
+        "database_union_ms": 0,
+        "database_queries": 0,
+        "model_requests": 5
+      }
+    }
+  ],
+  "run_kind": "calibration",
+  "database_instrumentation": "Top-level queries only; transaction queries were not captured. Zero database counts must not be interpreted as zero database cost."
+}

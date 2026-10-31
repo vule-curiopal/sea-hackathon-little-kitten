@@ -33,6 +33,7 @@ export interface Profile {
   effectiveNow?: string;
   active?: TurnRecord;
   sessionId?: string;
+  inputReservation?: { id: string; turnId: string; controller: AbortController };
   configRequests: Map<string, { fingerprint: string; result: unknown }>;
 }
 

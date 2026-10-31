@@ -5,7 +5,7 @@ import Icon from '../components/Icon';
 import { useLanguage, type TranslationKey } from '../lib/i18n';
 import { navigate } from '../lib/router';
 import { validateAuth, type AuthErrors, type AuthValues } from '../lib/validation';
-import { AuthApiError, login, register } from '../lib/auth-api';
+import { AuthApiError, login, register, type AuthUser } from '../lib/auth-api';
 import { Brand } from './Landing';
 
 function errorKey(error: unknown): TranslationKey {
@@ -21,7 +21,14 @@ function errorKey(error: unknown): TranslationKey {
   }
 }
 
-export default function Auth({ isLogin = false }: { isLogin?: boolean }) {
+type AuthProps = {
+  isLogin?: boolean;
+  embedded?: boolean;
+  onAuthenticated?(user: AuthUser): void;
+  onModeChange?(isLogin: boolean): void;
+};
+
+export default function Auth({ isLogin = false, embedded = false, onAuthenticated, onModeChange }: AuthProps) {
   const { t, language, setLanguage } = useLanguage();
   const [values, setValues] = useState<AuthValues>({ username: '', password: '' });
   const [errors, setErrors] = useState<AuthErrors>({});
@@ -53,10 +60,11 @@ export default function Auth({ isLogin = false }: { isLogin?: boolean }) {
     const controller = new AbortController();
     requestRef.current = controller; setPending(true);
     try {
-      await (isLogin ? login : register)(values.username, values.password, controller.signal);
+      const session = await (isLogin ? login : register)(values.username, values.password, controller.signal);
       if (controller.signal.aborted) return;
       setValues({ username: '', password: '' }); setShowPassword(false);
-      navigate('/app/talk');
+      if (onAuthenticated) onAuthenticated(session.user);
+      else navigate('/app/talk');
     } catch (error) {
       if (controller.signal.aborted) return;
       setServerError(errorKey(error));
@@ -65,11 +73,13 @@ export default function Auth({ isLogin = false }: { isLogin?: boolean }) {
       if (requestRef.current === controller) { requestRef.current = null; setPending(false); }
     }
   }
-  return <main id="main-content" className="auth-page">
-    <header className="auth-header container"><a className="round-button" href="/" aria-label={t('back')}><Icon name="back" /></a><Brand /><button className="language-toggle" aria-label={t('language')} onClick={() => setLanguage(language === 'en' ? 'vi' : 'en')}><Icon name="globe" />{language === 'en' ? 'VI' : 'EN'}</button></header>
-    <div className="auth-layout">
-      <Room className="auth-room"><div className="auth-room-copy"><span className="eyebrow-pill">{t('parentSpace')}</span><h2>{t('authBlurb')}</h2></div><div className="auth-bubble">{t('happyToMeet')}<span className="speech-tail" /></div><Miu emotion={isLogin ? 'happy' : 'excited'} /><div className="room-nameplate"><span className="small-dot" />Miu</div></Room>
-      <section className="auth-card"><span className="eyebrow">Little Buddy</span><h1>{t(isLogin ? 'signInTitle' : 'createTitle')}</h1><p className="auth-subtitle">{t(isLogin ? 'authLoginSubtitle' : 'authRegisterSubtitle')}</p>
+  const card = <section className={`auth-card${embedded ? ' auth-card-embedded' : ''}`}>
+        {embedded ? <div className="auth-popup-controls"><div className="auth-mode-switch" role="group" aria-label={t('authModeChoice')}>
+          <button type="button" aria-pressed={isLogin} disabled={pending} onClick={() => onModeChange?.(true)}>{t('signIn')}</button>
+          <button type="button" aria-pressed={!isLogin} disabled={pending} onClick={() => onModeChange?.(false)}>{t('create')}</button>
+        </div><button type="button" className="language-toggle" aria-label={t('language')} onClick={() => setLanguage(language === 'en' ? 'vi' : 'en')}><Icon name="globe" />{language === 'en' ? 'VI' : 'EN'}</button></div>
+          : <><span className="eyebrow">Little Buddy</span><h1>{t(isLogin ? 'signInTitle' : 'createTitle')}</h1></>}
+        <p className="auth-subtitle">{t(isLogin ? 'authLoginSubtitle' : 'authRegisterSubtitle')}</p>
         <form noValidate onSubmit={submit} ref={formRef} aria-busy={pending}>
           {fields.map(field => {
             const hint = field.name === 'username' ? 'usernameHint' : undefined;
@@ -89,8 +99,16 @@ export default function Auth({ isLogin = false }: { isLogin?: boolean }) {
           <button className="button button-primary auth-submit" type="submit" disabled={pending}>{t(pending ? isLogin ? 'authSigningIn' : 'authCreating' : isLogin ? 'continue' : 'create')}<Icon name="arrow" /></button>
           <p className="auth-demo"><Icon name="shield" />{t(isLogin ? 'authDemo' : 'authRegisterDemo')}</p>
         </form>
-        <p className="auth-switch">{t(isLogin ? 'newFamily' : 'existing')} <a href={isLogin ? '/register' : '/login'}>{t(isLogin ? 'getStarted' : 'signIn')}</a></p>
-      </section>
+        <p className="auth-switch">{t(isLogin ? 'newFamily' : 'existing')} {embedded
+          ? <button type="button" disabled={pending} onClick={() => onModeChange?.(!isLogin)}>{t(isLogin ? 'getStarted' : 'signIn')}</button>
+          : <a href={isLogin ? '/register' : '/login'}>{t(isLogin ? 'getStarted' : 'signIn')}</a>}</p>
+      </section>;
+  if (embedded) return card;
+  return <main id="main-content" className="auth-page">
+    <header className="auth-header container"><a className="round-button" href="/" aria-label={t('back')}><Icon name="back" /></a><Brand /><button className="language-toggle" aria-label={t('language')} onClick={() => setLanguage(language === 'en' ? 'vi' : 'en')}><Icon name="globe" />{language === 'en' ? 'VI' : 'EN'}</button></header>
+    <div className="auth-layout">
+      <Room className="auth-room"><div className="auth-room-copy"><span className="eyebrow-pill">{t('parentSpace')}</span><h2>{t('authBlurb')}</h2></div><div className="auth-bubble">{t('happyToMeet')}<span className="speech-tail" /></div><Miu emotion={isLogin ? 'happy' : 'excited'} /><div className="room-nameplate"><span className="small-dot" />Miu</div></Room>
+      {card}
     </div>
   </main>;
 }
