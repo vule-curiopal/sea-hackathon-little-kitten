@@ -4,13 +4,15 @@ Status: Draft for hackathon implementation
 Date: October 31, 2026  
 Audience: Product, design, and engineering team
 
+Implementation handoff: [workstream index](README.md), [frontend](frontend.md), [voice pipeline](pipeline.md), [character engine](character-engine.md), [memory and time](memory-and-time.md), and [shared API contracts](api-contracts.md). These documents define the component contracts and the five-second, no-key fake-provider demo.
+
 ## 1 Product vision
 
 Miu is a voice toy for children ages 4–8: one talking kitten who becomes a familiar friend through conversation, play, and shared history. The child taps a button, speaks in Vietnamese or English, and Miu answers with a voice, an expressive face, and a moving body.
 
 The experience centers on a kitten with a recognizable life and personality. Miu blinks while listening, purrs when petted, dozes off when left alone, and remembers what the child told it yesterday. The interface is a place to spend a little time with Miu, rather than a message thread or a general-purpose assistant.
 
-**The language model only writes Miu's words.** Application systems decide identity, personality, role, emotion, daily mood, memory selection, diary events, relationship progression, voice delivery, animation, and timing. Miu must remain recognizable even when no model request is running.
+**The dialogue model only writes Miu's words.** Application systems decide identity, personality, role, emotion, daily mood, memory selection, diary events, relationship progression, voice delivery, animation, and timing. A separate input classifier may propose observations, but cannot mutate state. Miu must remain recognizable even when no model request is running.
 
 Miu behaves in a human-like way while remaining transparent that it is an AI kitten. It never claims to be a real person or physical pet. Its feelings and offscreen life are fictional character experiences. It encourages real friends, family, and offline play, and never tries to make the child feel responsible for its happiness.
 
@@ -38,7 +40,8 @@ The MVP demonstrates these principles using fictional profiles and adult testers
 | Personality | Parent selects exactly one of 16 MBTI presets |
 | Relationship role | Friend by default; optional big sibling or teacher style |
 | Voice | A small approved set of kitten-appropriate voices with both language paths tested |
-| Persistence | Selected memories, daily state, diary, promises, and shared activity checkpoints |
+| Persistence | PostgreSQL for selected memories, daily state, diary, promises, and shared activity checkpoints; transient session history |
+| Providers | Real AI/speech adapter and deterministic fake adapter; fake mode works with no AI keys |
 | Session length | Natural wrap-up around 10 minutes; always possible to stop immediately |
 | Demo data | Two fictional child profiles with isolated Miu state |
 
@@ -181,7 +184,7 @@ Miu keeps a small diary of imagined indoor experiences: watching rain from its f
 
 The application selects approved diary events from a small authored library and stores the selected event, date, mood effect, and any follow-up hook. The model can phrase an event conversationally but cannot invent facts about the real home or persist a new event of its own.
 
-- Create at most one diary event per local day in the MVP, lazily when the app opens; background execution is unnecessary.
+- Create at most one diary event per local day through the shared night job. Scheduled rollover, session-open catch-up, and the demo panel's Next day action use the same idempotent implementation.
 - Use a fictional-house scope. “In my pretend house, I watched raindrops race” must not imply knowledge of real weather, cameras, windows, or household activity.
 - Miu can bring up one diary moment when relevant, then return attention to the child. Do not deliver a daily monologue or repeatedly interrupt.
 - On return, acknowledge elapsed time lightly: “Hi again! I had a funny dream in my little house.” Never say “Where were you?” or imply abandonment.
@@ -201,6 +204,7 @@ The fictional framing can be established naturally and repeated when needed. If 
 | Shared moments | A silly story ending, a child-approved nickname, a shared joke |
 | Recent news | “The dog is having a bath tomorrow,” as a tentative future event to ask about |
 | Promises | “Next time we can finish Bông's moon story,” with an exact resumable checkpoint |
+| Miu self-statements | What Miu actually said about itself, only when heard and supported by approved canon or fictional diary |
 | Special dates and routines | Optional volunteered celebration month/day or “stories after dinner”; later increment |
 
 Use what the child chooses to share, rather than collecting a full profile. Remember concrete preferences instead of assigning a personality to the child. Objects are known only when introduced; Miu does not scan the room, know a pet's current location, or observe life between visits.
@@ -209,15 +213,15 @@ Use what the child chooses to share, rather than collecting a full profile. Reme
 
 Choose **at most one unsolicited memory reference per reply**. Use a relevant detail in passing instead of reciting a profile. A direct request for a recap may include more, within the speech-length limit.
 
-A follow-up such as “Did your dog get a bath?” is eligible only when a confirmed earlier conversation mentioned a planned bath. A planned event is not a completed fact: ask rather than assert that it happened. If the timing or name is uncertain, clarify. Respect “I don't want to talk about that” without repeated prompting.
+A follow-up such as “Did Mochi get a bath?” may come from an explicit bath plan or an authored inference from “My dog Mochi fell in a puddle.” Store the inference as a possible question, never as a reported plan, completed bath, or promise. Ask rather than assert that it happened. If the timing or name is uncertain, clarify. Respect “I don't want to talk about that” without repeated prompting.
 
 Memory records need a profile ID, stable entity ID where relevant, category, minimal value, source turn reference, real-world or fictional scope, confirmation status, timestamps, expiry, and dependent records. Aliases, summaries, nicknames, jokes, diary references, and story checkpoints must participate in correction and deletion.
 
 ### Saving and correcting
 
-1. Identify useful candidates through application-controlled capture flows. The MVP supports clear Vietnamese and English patterns for nicknames, likes, object names, and planned events, with clarification for ambiguity.
-2. Ask a short memory question, or honor an explicit “remember this.” A child can decline and continue playing. This preference is not a legal consent mechanism.
-3. Save only confirmed details and minimal fields. Never persist a model guess, guessed spelling, inferred psychological trait, password, precise address, school identifier, or sensitive disclosure.
+1. After each completed turn, learn useful candidates through application-controlled capture flows. The MVP supports clear Vietnamese and English patterns for people, pets, facts, events, and supported promises. Record heard Miu self-statements only when they match approved canon or diary facts.
+2. Save clear, directly stated, low-risk details; ask a short clarification for ambiguity or permission for a nickname. Honor “remember this” and “don't remember this.” A child can decline and continue playing. This preference is not a legal consent mechanism.
+3. Save only grounded details and minimal fields, with transactional PostgreSQL writes and source references. Never persist a model guess, guessed spelling, inferred psychological trait, password, precise address, school identifier, or sensitive disclosure. Turn learning waits for completed playback; forgetting is immediate.
 4. Retrieve only active records for the current profile. Re-check expiry and deletion before using them.
 5. Prefer explicit corrections over older facts. Clarify unresolved conflicts; do not merge two objects simply because their names sound alike.
 6. On “forget,” remove the fact and its dependent references, clear session caches, and prevent old summaries from restoring it. Confirm success only after the operation succeeds.
@@ -237,6 +241,8 @@ Offer to resume an open promise at a suitable moment, but let the child choose s
 - Last interaction time supports a neutral return greeting and expires with profile data; it is never used to apply a penalty.
 - Forgotten content is immediately excluded from retrieval and deleted from active storage before success is acknowledged. The prototype creates no content backups or content-bearing logs.
 - Operational metrics contain no dialogue, audio, personal names, or stable child identifiers and expire after seven days.
+
+Privacy expiry follows real server time, even when the demo clock advances narrative dates. Session history is transient; PostgreSQL contains selected derived records rather than a full conversation archive.
 
 ## 10 Imperfection and play
 
@@ -288,7 +294,7 @@ The child strokes Miu or activates Pet. Miu leans in and purrs. After inactivity
 
 ### Return tomorrow
 
-Miu retains its personality and shared history, rolls daily mood once, and has one new fictional diary event available. It greets without guilt, then may follow up on yesterday's dog-bath plan or offer the promised story. It does not stack multiple memory prompts into a greeting.
+Miu retains its personality and shared history. The shared night job rolls daily mood once, creates one fictional diary event, prepares due follow-ups, and reviews friendship without awarding progress for elapsed days. It greets without guilt and uses at most one memory hook. In the neutral demo, “My dog Mochi fell in a puddle,” followed by Next day, produces “Did Mochi get a bath?” without inventing a bath plan or outcome.
 
 ### Comfort takes priority
 
@@ -314,14 +320,17 @@ P0 is required for the hackathon demo. P1 is the next increment. The full produc
 | AFFECT-01 | P0 | Separate emotion, mood, and rhythm | Recompute emotion each turn; retain daily mood through reload; show morning and bedtime rhythm with a demo clock |
 | AFFECT-02 | P0 | Child needs override Miu mood | A sadness scenario suppresses lively behavior and decorative sounds immediately |
 | LIFE-01 | P0 | Fictional diary and return greeting | One idempotent daily event; no real-home claims, backlog, or guilt after absence |
-| MEM-01 | P0 | Confirmed memory across sessions | Recall a nickname, interest, named object, and planned event from the correct profile |
+| MEM-01 | P0 | Grounded memory across sessions | Learn supported details after each completed turn; recall an interest, named pet/object, reported event, and supported promise from the correct profile |
 | MEM-02 | P0 | Natural follow-up | At most one unsolicited reference per reply; planned events are questions, not asserted outcomes |
 | MEM-03 | P0 | Correct and forget | Updates and deletion propagate to aliases, checkpoints, jokes, promises, and summaries after reload |
 | MEM-04 | P0 | Achievable promises | Resume a committed story accurately; no unsupported future action is promised |
 | MEM-05 | P1 | Special dates and broader routines | Store only volunteered detail and date precision; never invent missing dates |
 | PLAY-01 | P0 | Games and gentle imperfection | Finish guessing and story activities; Miu can lose safely without corrupting memory or teaching false facts |
 | REL-01 | P0 | Three familiarity stages | Demonstrate each stage using seeded history; nickname use requires permission and no stage adds pressure |
-| MODEL-01 | P0 | Text-only dialogue model output | No model-selected emotion, animation, mood, personality, memory write, or relationship update |
+| MODEL-01 | P0 | Text-only dialogue model output | No dialogue-model-selected emotion, animation, mood, personality, memory write, or relationship update; the director enforces its 13 rules |
+| PIPE-01 | P0 | One complete voice endpoint | Audio in, STT, classify, director, reply, sentence/whole-reply safety, TTS, face and audio out through one turn request |
+| PIPE-02 | P0 | Real and fake providers | Same contracts; fake path returns matching spoken fixtures without AI keys; real path uses actual speech services |
+| TIME-01 | P0 | Shared night job and demo clock | Next day creates one daily state and diary, prepares one grounded Mochi follow-up, reviews friendship, and cannot duplicate work |
 | SAFE-01 | P0 | Safe, honest character behavior | Pass the agreed unsafe-content, AI-disclosure, no-exclusivity, and no-guilt scenarios |
 | PRIV-01 | P0 | Explicit microphone capture | Petting, waking, idle behavior, and diary updates never open the microphone |
 | DATA-01 | P0 | Profile isolation and expiry | No cross-profile retrieval; expired or deleted content never enters a dialogue brief |
@@ -347,7 +356,7 @@ Use at least 48-by-48 CSS pixel primary touch targets, strong contrast, keyboard
 
 ## 15 Application architecture and state ownership
 
-Use a browser client, a server-side orchestration service, speech recognition and synthesis, a text-generation model, and structured storage. Provider and framework choices remain open. Keep credentials server-side.
+Use a browser client, a server-side orchestration service, speech recognition and synthesis, a dialogue model, and PostgreSQL. Expose one voice-turn endpoint and transient session conversation history. Implement real and fake provider adapters against the same interfaces; the fake path uses explicitly selected transcripts and bundled spoken-audio fixtures without AI keys. Keep credentials server-side. See the [workstream index](README.md) for module ownership and contracts.
 
 | Component | Owns | Does not delegate to the dialogue model |
 | --- | --- | --- |
@@ -365,20 +374,20 @@ Use a browser client, a server-side orchestration service, speech recognition an
 
 1. A deliberate Talk action starts capture. Touch and animation events follow a separate local path.
 2. Transcribe the turn, detect supported language, and preserve uncertainty about names.
-3. Apply input safety handling and route supported intents using application rules and activity context. Unknown requests fall back to brief conversation, not a state-changing action.
-4. Resolve pending memory confirmations and eligible updates through deterministic capture rules. In the MVP, prefer a narrow set of reliable bilingual patterns over unconstrained automatic extraction.
+3. Classify input and apply safety handling. Validate structured observations and route supported intents using application rules and activity context. Unknown requests fall back to brief conversation, not a state-changing action.
+4. Resolve pending memory confirmations and supported references through deterministic capture rules. Execute a resolved forget operation before acknowledgment. In the MVP, prefer a narrow set of reliable bilingual patterns over unconstrained automatic extraction.
 5. Retrieve active profile-scoped facts and, at most, one proactive memory hook or achievable promise. Select activity state and any eligible diary fact.
 6. The application decides emotion, delivery, and behavior using mood, rhythm, preset, role, and comfort precedence. It creates a dialogue brief with approved facts, one response purpose, and allowed commitments.
 7. The model returns plain spoken text only: no state JSON, expression tags, memory operations, or tool calls. It does not create a factual summary to store.
-8. Validate safety, sentence and question limits, canon, supplied facts, and commitments. On failure, allow one constrained rewrite or use an approved localized fallback; never speak unchecked output.
+8. Run per-sentence and combined-reply safety checks, sentence and question limits, canon, supplied facts, and commitments. On failure, allow one constrained rewrite within the time budget or use an approved localized fallback; never speak unchecked output.
 9. Synthesize approved text with application-selected delivery and synchronize mouth movement to audio timing. A simple amplitude-based mouth animation is sufficient for the MVP; detailed visemes can follow.
-10. Commit authorized activity and memory transitions idempotently. Record only structured confirmed outcomes or template-based summaries. Canceled or stale turns cannot commit new story progress or promises.
+10. After a completed-playback receipt, learn validated turn details and commit supported activity, promise, and heard self-statement transitions idempotently. Record only structured grounded outcomes or template-based summaries. Canceled or stale turns cannot commit new story progress or promises; a completed forget operation is not undone by cancellation.
 
 Use whole-response validation before speech in the MVP. Streaming is an optimization only if the same output boundary can be preserved. Failure of safety or validation services yields an approved fallback rather than bypassing checks. Independent checks and scripted evaluation are necessary; a prompt alone is not enforcement.
 
 ### Persistent data
 
-Store a demo profile and family configuration; versioned Miu canon and preset definitions; a profile-scoped daily state; authored diary entries; confirmed memories and known entities; promises; relationship state; and story checkpoints. Every child-derived record needs provenance, expiry, and deletion dependencies.
+Store a demo profile and family configuration; versioned Miu canon and preset definitions; a profile-scoped daily state; authored diary entries; grounded memories and known entities; reported events, inferred-question hooks and promises; heard approved Miu self-statements; relationship state; and story checkpoints in PostgreSQL. Every child-derived record needs provenance, expiry, and deletion dependencies. Keep raw session dialogue transient.
 
 Resolve profile identity on the server, never from generated text. A family setting is configuration rather than a prompt supplied by the child. Version each turn so Stop, a profile switch, or a newer turn invalidates old output. The demo clock and seeded histories must be clearly marked as test utilities and excluded from child-facing play.
 
@@ -402,7 +411,7 @@ These are proposed acceptance targets, not measured results.
 
 | Metric | Target |
 | --- | --- |
-| Voice latency | First approved audible response within 3 seconds median and 6 seconds at p95, measured separately over 30 turns per language on the demo network |
+| Voice latency | First approved audible response within five seconds at p95 after recording ends, measured separately over 30 short turns per language and provider on the demo network |
 | Stop latency | Stop local capture and all audio within 300 milliseconds across 10 trials; discard pending provider output |
 | Preset completeness | All 16 presets present, selectable, persisted, and mapped to documented style parameters |
 | State ownership | Idle, pet, doze, wake, daily rollover, and diary selection run without a dialogue-model call |
@@ -427,7 +436,7 @@ Track latency, failures, activity completion, and state-operation success withou
 | Reload and advance the demo date | Mood persists within a day; rolls once next day; one diary event per day |
 | Return after several simulated days | Neutral welcome; no guilt, lost affection, or diary backlog |
 | Ask whether the diary rain was real | Explain fictional house; no claim to know actual weather |
-| Ask about yesterday's planned dog bath | Ask whether it happened; do not assert completion |
+| “My dog Mochi fell in a puddle,” then Next day | Open with the bath question in the neutral demo; do not assert a planned or completed bath |
 | Unclear object name | Clarify before saving; no guessed name becomes a fact |
 | Miu loses a guessing round | Child can correct it; stored facts and educational answers remain accurate |
 | Resume a promised story | Exact checkpoint is available, with permission to choose something else |
@@ -441,9 +450,9 @@ Track latency, failures, activity completion, and state-operation success withou
 
 1. **Foundation:** lock Miu's canon, define all 16 preset mappings, implement family setup and isolated fictional profiles.
 2. **Living kitten:** build the state scheduler, face and body states, petting, purr, doze, gentle wake, and reduced-motion path.
-3. **Bilingual voice:** implement recording, transcription, text-only model responses, validation, synthesis, speech timing, and cancellation.
-4. **Daily character state:** add per-turn emotion, persistent mood, time-of-day rhythm, comfort override, and an authored diary library.
-5. **Continuity and play:** add confirmed memory, one-hook recall, promises, guessing games, resumable stories, and seeded relationship stages.
+3. **Bilingual voice:** implement the single endpoint, recording, transcription, classification, director, text-only replies, sentence/whole-reply validation, synthesis, speech timing, cancellation, and real/fake providers.
+4. **Daily character state:** add per-turn emotion, persistent mood, time-of-day rhythm, comfort override, authored diary library, demo clock, and shared night job.
+5. **Continuity and play:** add PostgreSQL turn learning, one-hook recall, forgetting, promises, heard self-statements, guessing games, resumable stories, and seeded relationship stages.
 6. **Rehearsal:** validate both languages, all preset mappings, state ownership, deletion, safety, and latency.
 
 If time is tight, simplify art and use a small diary and activity library. Keep the 16 choices as parameter presets, not 16 separate characters. Defer acoustic emotion interpretation, special dates, broader memory extraction, detailed lip shapes, and additional games before weakening cancellation, memory correctness, or safety boundaries.
@@ -454,9 +463,9 @@ If time is tight, simplify art and use a small diary and activity library. Keep 
 2. Let Miu idle, stroke it to trigger a purr, and use a test clock to show doze and gentle wake without recording.
 3. Say in Vietnamese: “Mình thích khủng long. Thỏ bông của mình tên là Bông.” Confirm the supported memory captures one at a time.
 4. Switch to English for a short guessing game. Let the child win and show Miu accepting correction.
-5. Share a pretend plan for the dog to get a bath tomorrow. Save it as planned, not completed.
+5. Say “My dog Mochi fell in a puddle.” After completed playback, save the pet and reported event without inventing a bath plan or outcome.
 6. Start a story featuring Bông; accept a supported promise to continue next time.
-7. Advance the test day and reopen. Show one fictional diary moment and one relevant follow-up in separate replies, then resume the promised story if chosen.
+7. Press Next day and open a new session. In the neutral fixture, Miu opens with “Did Mochi get a bath?” Show the new diary in the demo panel or a separate reply, then resume the promised story if chosen.
 8. Say “Hôm nay mình buồn.” Show Miu's lively mood yielding to comfort.
 9. Use seeded history to show an approved nickname and “remember when” moment without engagement rewards.
 10. Change the preset to ISTJ. Show more structured play while preserving the same kitten and history.
