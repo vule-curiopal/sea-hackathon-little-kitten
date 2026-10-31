@@ -15,7 +15,7 @@ Ngày cập nhật: **31/10/2026**. Code đã có, chưa benchmark provider ho�
 
 Lệnh từ root: `npm ci`, `npm run build`, `npm test`, `npm run smoke`, `npm run dev`. Chi tiết: [backend README](../../backend/pipeline/README.md), [browser client README](../../packages/voice-client/README.md).
 
-Kiểm tra sau khi chuyển Express: build/typecheck qua; **111 test trong 11 file** qua; smoke Việt/Anh qua toàn bộ HTTP lifecycle/receipt bằng fake provider. Có HTTP localhost và TCP chunked thật để kiểm tra abort/giới hạn upload, cùng các bài mock browser và provider.
+Kiểm tra sau khi chuyển Express: build/typecheck qua; **113 test trong 12 file** qua; smoke Việt/Anh qua toàn bộ HTTP lifecycle/receipt bằng fake provider. Có HTTP localhost và TCP chunked thật để kiểm tra abort/giới hạn upload, cùng các bài mock browser và provider.
 
 Đã chạy entry point đã biên dịch `backend/pipeline/dist/server.js` trong process con: health HTTP 200, catalog đủ 5 voice, lượt Việt/Anh qua fake provider, rồi đóng process sạch. Các kiểm tra này xác nhận HTTP/runtime và wiring; chưa thay thế kiểm thử API hoặc thiết bị thật.
 

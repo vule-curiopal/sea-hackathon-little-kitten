@@ -52,3 +52,5 @@ npm run dev
 ```
 
 Open `http://localhost:5173/app/talk`. The frontend proxies `/api` to port 3001. Talk records one turn; Send submits it and Stop cancels it. Settings select a fictional profile, language, and approved voice. Fake reference recordings and local typing samples are labeled separately from real voice. Character state, memory and personality behavior are not supplied by the current voice stub.
+
+The frontend and API are deployed together at `miu.curiopal.com`, using isolated Miu services and manual releases. Deployment configuration: [deploy/miu](deploy/miu/README.md). The public voice backend initially uses fake providers.

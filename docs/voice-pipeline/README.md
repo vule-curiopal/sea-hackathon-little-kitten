@@ -12,6 +12,7 @@ Phạm vi đã thống nhất: **microphone → STT → GPT tạm → TTS → ph
 | [voices.md](voices.md) | 5 voice ID đã chọn trong little-buddy-impl, mặc định Việt/Anh và ví dụ env |
 | [implementation-plan.md](implementation-plan.md) | Kiến trúc, thứ tự thực hiện, module và điều kiện xong từng bước |
 | [backend-architecture.md](backend-architecture.md) | Express routers/controllers, TurnService, SessionService/repository, adapters và shutdown |
+| [Deployment](../../deploy/miu/README.md) | Frontend/API cùng miu.curiopal.com, service/cổng riêng, HTTPS và deploy thủ công có release/rollback |
 | [implementation-status.md](implementation-status.md) | Phần đã triển khai, cách kiểm tra và các giới hạn bàn giao |
 | [microphone-vad.md](microphone-vad.md) | Microphone, RMS/dBFS, ước lượng nền, ngưỡng thích nghi, thời gian im lặng và cách tune |
 | [provider-parameters.md](provider-parameters.md) | Tham số ElevenLabs STT batch/TTS, giới hạn VAD/lọc nhiễu của batch, GPT tạm và cấu hình server |

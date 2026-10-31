@@ -136,4 +136,4 @@ Ví dụ đặt trong `backend/pipeline/src`. Đây là điểm nối text-reply
 
 ## Trạng thái kiểm chứng
 
-Build/typecheck, **111 tests trong 11 file**, localhost smoke Việt/Anh và compiled CLI check qua với fake/mocked provider; chi tiết ở [implementation-status.md](implementation-status.md). Các kết quả này chưa chứng minh STT/TTS thật, chất lượng voice, latency hoặc microphone/playback iPad. [20 audio đầu vào](../../test-assets/voice-pipeline/README.md) có job TTS tạo nguồn riêng; job đó không phải kiểm thử trọn pipeline thật.
+Build/typecheck, **113 tests trong 12 file**, localhost smoke Việt/Anh và compiled CLI check qua với fake/mocked provider; chi tiết ở [implementation-status.md](implementation-status.md). Các kết quả này chưa chứng minh STT/TTS thật, chất lượng voice, latency hoặc microphone/playback iPad. [20 audio đầu vào](../../test-assets/voice-pipeline/README.md) có job TTS tạo nguồn riêng; job đó không phải kiểm thử trọn pipeline thật.

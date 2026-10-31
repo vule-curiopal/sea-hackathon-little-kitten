@@ -22,7 +22,7 @@ npm run dev
 
 API defaults to `http://127.0.0.1:3001`; health: `GET /api/health`; public voice catalog: `GET /api/voices`. `npm run dev` loads the existing root `.env` but **does not modify it**. With no explicit `MIU_PROVIDER=real`, only fake providers run. See the root `.env.example` for configuration.
 
-For an iPad on another device, serve the frontend on trusted HTTPS and proxy `/api` to this server over your development network. The frontend and backend must agree on allowed origins. HTTP on a laptop's LAN address does not give an iPad microphone secure context. This repository does not deploy a public endpoint or modify TLS/firewall settings.
+For an iPad on another device, serve the frontend on trusted HTTPS and proxy `/api` to this server. The frontend and backend must agree on allowed origins. HTTP on a laptop's LAN address does not give an iPad microphone secure context. Manual deployment files for the frontend/API at `miu.curiopal.com`, isolated services and HTTPS are in [deploy/miu](../../deploy/miu/README.md). Behind the localhost proxy, set `TRUST_PROXY_LOOPBACK=true` and overwrite forwarded headers as shown there; the default stays false for direct local development.
 
 ## HTTP contract
 

@@ -1,0 +1,9 @@
+[Unit]
+Description=Renew Miu's isolated HTTPS certificate
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/certbot renew --config-dir /etc/miu/letsencrypt --work-dir /var/lib/miu/certbot --logs-dir /var/log/miu-certbot --quiet
+PrivateTmp=true
+TimeoutStartSec=10min

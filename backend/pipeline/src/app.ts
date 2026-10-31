@@ -40,6 +40,7 @@ export async function buildApp(options: BuildAppOptions = {}) {
   const contexts: RequestContexts = new WeakMap();
   const app = express();
   app.disable('x-powered-by');
+  app.set('trust proxy', config.trustProxyLoopback ? 'loopback' : false);
 
   registerHttpMiddleware(app, config);
   registerSystemRoutes(app, config, sessions);

@@ -3,6 +3,7 @@ import type { Language, ProviderMode } from '@miu/voice-contracts';
 
 export interface VoiceConfig {
   mode: ProviderMode; host: string; port: number; allowedOrigins: string[];
+  trustProxyLoopback: boolean;
   elevenApiKey: string; openaiApiKey: string; elevenBaseUrl: string; openaiBaseUrl: string;
   sttModel: string; ttsModel: string; replyModel: string; maxOutputTokens: number;
   enableLogging: boolean | undefined; sttTimeoutMs: number; replyTimeoutMs: number; ttsTimeoutMs: number; turnTimeoutMs: number;
@@ -16,6 +17,10 @@ function integer(value: string | undefined, fallback: number, min = 1, max = 120
 export function loadConfig(env: Record<string, string | undefined> = process.env): VoiceConfig {
   const mode = env.MIU_PROVIDER ?? 'fake';
   if (mode !== 'fake' && mode !== 'real') throw new Error('MIU_PROVIDER must be fake or real');
+  const trustProxyLoopback = env.TRUST_PROXY_LOOPBACK ?? 'false';
+  if (trustProxyLoopback !== 'true' && trustProxyLoopback !== 'false') {
+    throw new Error('TRUST_PROXY_LOOPBACK must be true or false');
+  }
   const logging = env.ELEVENLABS_ENABLE_LOGGING || undefined;
   if (logging !== undefined && logging !== 'true' && logging !== 'false') throw new Error('ELEVENLABS_ENABLE_LOGGING must be true or false');
   if (mode === 'real' && (!env.ELEVENLABS_API_KEY || !env.OPENAI_API_KEY || logging === undefined)) {
@@ -34,6 +39,7 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
   return {
     mode, host: env.HOST ?? '127.0.0.1', port: integer(env.PORT, 3001, 1, 65535),
     allowedOrigins: (env.ALLOWED_ORIGINS ?? 'http://localhost:5173,http://127.0.0.1:5173').split(',').map(x => x.trim()).filter(Boolean),
+    trustProxyLoopback: trustProxyLoopback === 'true',
     elevenApiKey: env.ELEVENLABS_API_KEY ?? '', openaiApiKey: env.OPENAI_API_KEY ?? '', elevenBaseUrl, openaiBaseUrl,
     sttModel: env.ELEVENLABS_STT_MODEL ?? 'scribe_v2', ttsModel: env.ELEVENLABS_TTS_MODEL ?? 'eleven_flash_v2_5',
     replyModel: env.OPENAI_MODEL ?? 'gpt-6-luna', maxOutputTokens: integer(env.OPENAI_MAX_OUTPUT_TOKENS, 200, 32, 1000),

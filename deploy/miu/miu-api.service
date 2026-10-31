@@ -1,0 +1,28 @@
+[Unit]
+Description=Miu Express voice API
+After=network.target
+
+[Service]
+Type=simple
+User=miu
+Group=miu
+WorkingDirectory=/opt/miu/current
+EnvironmentFile=/etc/miu/api.env
+ExecStart=/opt/node24/bin/node /opt/miu/current/backend/pipeline/dist/server.js
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=15
+KillSignal=SIGTERM
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadOnlyPaths=/opt/miu
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+UMask=0077
+MemoryMax=512M
+CPUQuota=100%
+TasksMax=128
+
+[Install]
+WantedBy=multi-user.target
