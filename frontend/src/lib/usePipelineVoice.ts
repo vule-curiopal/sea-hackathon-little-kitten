@@ -14,6 +14,7 @@ type Options = {
   role: Role;
   onState(state: VoiceControllerState): void;
   onTurn(response: TurnResponse): void;
+  onTranscript(text: string): void;
   onInvalidate(): void;
 };
 
@@ -110,6 +111,7 @@ export function usePipelineVoice(options: Options) {
       else if (event.type === 'error') report(event.error);
       else if (event.type === 'playback' && (event.event.type === 'error' || event.event.type === 'receipt_error')) report(event.event.error);
       else if (event.type === 'capture') {
+        if (event.event.type === 'transcript_final') callbacks.current.onTranscript(event.event.text);
         if (event.event.type === 'state') setCapture(event.event.state);
         if (event.event.type === 'meter') setMeter(event.event.snapshot);
         if (event.event.type === 'stream_meter') setMeter({ levelDbfs: event.event.levelDbfs, elapsedMs: event.event.elapsedMs });

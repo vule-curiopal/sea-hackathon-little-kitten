@@ -11,6 +11,7 @@ export type CaptureEvent =
   | { type: 'state'; state: CaptureState }
   | { type: 'meter'; snapshot: MeterSnapshot }
   | { type: 'stream_meter'; levelDbfs: number; elapsedMs: number }
+  | { type: 'transcript_final'; requestId: string; text: string }
   | { type: 'complete'; mimeType: string; bytes: number; durationMs: number; reason: CapturedAudio['reason']; peakLevelDbfs: number | null; sampleRate: number | null; channelCount: number | null }
   | { type: 'manual_only'; code: 'METER_UNAVAILABLE' }
   | { type: 'error'; error: VoiceClientError };

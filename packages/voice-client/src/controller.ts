@@ -50,7 +50,10 @@ export class VoiceController {
   constructor(private readonly ports: VoiceControllerOptions) {
     const captureUnsubscribe = ports.capture.subscribe?.(event => notify(this.listeners, { type: 'capture', event }));
     if (captureUnsubscribe) this.unsubscriptions.push(captureUnsubscribe);
-    const realtimeUnsubscribe = ports.realtime?.subscribe?.(event => notify(this.listeners, { type: 'capture', event }));
+    const realtimeUnsubscribe = ports.realtime?.subscribe?.(event => {
+      if (event.type === 'transcript_final' && (this.active?.id !== event.requestId || this.active.abort.signal.aborted)) return;
+      notify(this.listeners, { type: 'capture', event });
+    });
     if (realtimeUnsubscribe) this.unsubscriptions.push(realtimeUnsubscribe);
     const playbackUnsubscribe = ports.playback.subscribe?.(event => {
       notify(this.listeners, { type: 'playback', event });

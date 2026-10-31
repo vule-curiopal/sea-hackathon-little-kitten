@@ -133,6 +133,12 @@ export class RealtimeVoiceCapture {
               started = true; startedAt = performance.now(); state('recording');
               timers.push(setTimeout(() => fail(new VoiceClientError('TIMEOUT', 'Speech turn timed out.')), 180_000));
             } else if (message.type === 'turn.end_candidate') void finish().catch(fail);
+            else if (message.type === 'transcript.final') {
+              if (typeof message.text !== 'string' || !message.text.trim() || [...message.text].length > 2000) {
+                throw new VoiceClientError('INVALID_RESPONSE', 'Invalid final transcript.');
+              }
+              notify(this.listeners, { type: 'transcript_final', requestId, text: message.text });
+            }
             else if (message.type === 'stream.processing') onProcessing();
             else if (message.type === 'stream.error') fail(new VoiceClientError(String(message.code), 'Speech processing failed.',
               message.retryable === true, typeof message.status === 'number' ? message.status : undefined));

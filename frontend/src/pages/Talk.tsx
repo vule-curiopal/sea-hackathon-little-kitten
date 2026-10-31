@@ -54,6 +54,11 @@ export default function Talk({ guest = false }: { guest?: boolean }) {
   const moodRef = useRef(mood);
   moodRef.current = mood;
   const pipeline = usePipelineVoice({ language, profile, voiceId: voiceId || DEFAULT_VOICE[language], personality, role,
+    onTranscript: text => {
+      const id = voiceRequestRef.current;
+      if (id === null || id !== requestRef.current || turnRedactedRef.current || turnInputRef.current !== 'audio') return;
+      dispatch({ type: 'transcript', user: { id, role: 'user', text, source: 'voice' } });
+    },
     onState: phase => {
       const id = voiceRequestRef.current;
       const event = voiceConversationEvent(voiceStateRef.current, phase, id !== null && id === requestRef.current ? id : undefined, turnInputRef.current);

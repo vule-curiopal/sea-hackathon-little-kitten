@@ -19,6 +19,8 @@ Talk → xin mic và chuẩn bị WebSocket
 
 Không gọi engine/LLM theo từng chunk, partial hay segment. `audio.end` là yêu cầu chốt toàn lượt, không đóng WebSocket sớm. Nếu acknowledgement cuối chứa text rỗng, đó vẫn là xác nhận hợp lệ cho phần đuôi chỉ có silence; giữ các đoạn đã chốt trước đó.
 
+Frontend hiển thị lời người dùng ngay từ `transcript.final`, trước khi chờ engine/TTS. Lời đã nhận dạng được giữ nếu bước trả lời lỗi hoặc người dùng dừng lượt; placeholder processing không được ghi đè transcript thật. Event của lượt cũ/hủy hoặc sau reset không được cập nhật hội thoại. Partial không gọi engine hoặc query DB.
+
 **Probe thật đã xác minh:** VAD mode chấp nhận manual commit cuối và trả `committed_transcript` rỗng sau auto commit. Đây là hành vi đã quan sát trên tài khoản/model hiện tại, không phải một event mới tên `final_transcript` của ElevenLabs. Backend chỉ phát `transcript.final` của Miu sau khi drain thành công.
 
 ## Cấu hình
