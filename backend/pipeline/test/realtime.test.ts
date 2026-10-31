@@ -9,6 +9,11 @@ import { createTestApp, type TestApp } from './http-test-app.js';
 import { SessionService } from '../src/modules/sessions/session.service.js';
 import { SpeechStreamService } from '../src/modules/speech-streams/speech-stream.service.js';
 import type { TurnService } from '../src/modules/turns/turn.service.js';
+import { publicSpeechError } from '../src/modules/speech-streams/speech-stream.routes.js';
+
+class AppError extends Error {
+  constructor(public code: string, public status = 400) { super('Private provider diagnostic: must not reach client'); }
+}
 
 // Offline transport/orchestration checks; doubles do not establish model or memory quality.
 const apps: TestApp[] = [];
@@ -49,6 +54,21 @@ async function setup() {
 }
 
 describe('realtime speech turn gate', () => {
+  it('preserves a stable engine quota code after full transcript without leaking its message', async () => {
+    const t = await setup();
+    vi.mocked(t.providers.response.generate).mockRejectedValueOnce(new AppError('provider_quota_exceeded', 429));
+    t.audio(); t.emit({ type: 'committed', text: 'Xin chào.' });
+    t.socket.send(JSON.stringify({ type: 'audio.end', last_seq: 0 }));
+    await vi.waitFor(() => expect(t.connection.commit).toHaveBeenCalledOnce());
+    t.emit({ type: 'committed', text: '' });
+    expect(await t.wait('stream.error')).toEqual({ type: 'stream.error', code: 'provider_quota_exceeded', status: 429, retryable: true });
+    expect(t.messages.some(message => message.type === 'turn.result')).toBe(false);
+  });
+  it('masks unexpected errors and invalid engine codes', () => {
+    for (const error of [new Error('private'), new AppError('private message with secrets', 500), new AppError('provider_unavailable', 200)]) {
+      expect(publicSpeechError(error)).toEqual({ code: 'speech_stream_failed', status: 500, retryable: false });
+    }
+  });
   it('buffers revisions and segments, flushes the final chunk, then calls the engine exactly once with full text', async () => {
     const t = await setup(); t.audio();
     t.emit({ type: 'partial', text: 'Hôm' }); t.emit({ type: 'partial', text: 'Hôm nay mình buồn.' });

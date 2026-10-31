@@ -134,7 +134,8 @@ export class RealtimeVoiceCapture {
               timers.push(setTimeout(() => fail(new VoiceClientError('TIMEOUT', 'Speech turn timed out.')), 180_000));
             } else if (message.type === 'turn.end_candidate') void finish().catch(fail);
             else if (message.type === 'stream.processing') onProcessing();
-            else if (message.type === 'stream.error') fail(new VoiceClientError(String(message.code), 'Speech processing failed.', true));
+            else if (message.type === 'stream.error') fail(new VoiceClientError(String(message.code), 'Speech processing failed.',
+              message.retryable === true, typeof message.status === 'number' ? message.status : undefined));
             else if (message.type === 'turn.result') {
               const response = validateTurnResponse(message.response, session, requestId);
               if (response.session_id !== session.session_id || response.turn_id !== requestId || !response.reply?.text

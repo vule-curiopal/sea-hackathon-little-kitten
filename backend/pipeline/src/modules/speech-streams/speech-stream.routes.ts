@@ -55,8 +55,8 @@ export function registerSpeechStreams(app: Express, config: VoiceConfig, session
       const fail = (error: unknown) => {
         if (failing || done) return;
         failing = true;
-        const code = error instanceof PipelineError ? error.code : 'speech_stream_failed';
-        if (ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ type: 'stream.error', code }));
+        const failure = publicSpeechError(error);
+        if (ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ type: 'stream.error', ...failure }));
         service?.cancel();
         ws.close(1008, 'Speech stream stopped');
       };
@@ -104,4 +104,18 @@ export function registerSpeechStreams(app: Express, config: VoiceConfig, session
   };
   modules.set(app, { attach(server) { attached = server; server.on('upgrade', upgrade); }, dispose });
   return dispose;
+}
+
+/** Match HTTP's stable engine error boundary; never expose provider messages or payloads. */
+export function publicSpeechError(error: unknown): { code: string; status: number; retryable: boolean } {
+  if (error instanceof PipelineError) return { code: error.code, status: error.status, retryable: error.retryable };
+  if (error instanceof Error) {
+    const engine = error as Error & { code?: unknown; status?: unknown };
+    if ((engine.name === 'AppError' || engine.constructor.name === 'AppError')
+      && typeof engine.code === 'string' && /^[a-z][a-z0-9_]{0,79}$/.test(engine.code)
+      && typeof engine.status === 'number' && Number.isSafeInteger(engine.status) && engine.status >= 400 && engine.status <= 599) {
+      return { code: engine.code, status: engine.status, retryable: [429, 503, 504].includes(engine.status) };
+    }
+  }
+  return { code: 'speech_stream_failed', status: 500, retryable: false };
 }
