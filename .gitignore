@@ -1,0 +1,13 @@
+# Environment files, including nested and local variants
+.env
+.env.*
+
+# Local editor and operating-system files
+.idea/
+.DS_Store
+
+# Local dependencies and Python caches
+node_modules/
+.venv/
+__pycache__/
+*.py[cod]
