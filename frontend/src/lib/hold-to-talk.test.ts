@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { HoldToTalk } from './hold-to-talk.ts';
+import { canStartKeyboardHold, heldTalkKey, HoldToTalk, type HoldKeyboardContext } from './hold-to-talk.ts';
 
 function setup(allowed = true) {
   const calls = { start: 0, send: 0, cancel: 0 };
@@ -62,4 +62,79 @@ test('external capture completion clears ownership so a later release cannot sub
   assert.equal(gesture.press('accessible'), true);
   assert.equal(gesture.release('accessible'), true);
   assert.deepEqual(calls, { start: 2, send: 1, cancel: 0 });
+});
+
+test('a pre-start false render does not clear a new owner before React renders recording', () => {
+  const { gesture, calls } = setup();
+  gesture.observeRecording(false);
+  gesture.press('key:Space');
+  gesture.observeRecording(false); // A queued effect from the preceding render.
+  assert.equal(gesture.activeOwner, 'key:Space');
+  assert.equal(gesture.release('key:Space'), true);
+  assert.deepEqual(calls, { start: 1, send: 1, cancel: 0 });
+});
+
+test('observed capture ending externally clears a held gesture without submitting it again', () => {
+  const { gesture, calls } = setup();
+  gesture.press('pointer:1'); gesture.observeRecording(true);
+  gesture.observeRecording(false);
+  assert.equal(gesture.activeOwner, null);
+  assert.equal(gesture.release('pointer:1'), false);
+  assert.deepEqual(calls, { start: 1, send: 0, cancel: 0 });
+});
+
+test('releasing during microphone preparation remains an explicit send/cancel decision for the capture controller', () => {
+  const { gesture, calls } = setup();
+  gesture.press('key:Space'); gesture.observeRecording(true);
+  // Intent is recording, but actual permission/readiness remains capture-owned.
+  assert.equal(gesture.release('key:Space'), true);
+  assert.equal(gesture.release('key:Space'), false);
+  assert.deepEqual(calls, { start: 1, send: 1, cancel: 0 });
+});
+
+test('a failed synchronous start and a cancellation during start cannot leave an armed owner', () => {
+  const failure = new HoldToTalk({ start: () => { throw new Error('unit start failure'); }, send: () => assert.fail('must not send'), cancel: () => {} });
+  assert.throws(() => failure.press('key:Space'), /unit start failure/);
+  assert.equal(failure.activeOwner, null);
+  assert.equal(failure.release('key:Space'), false);
+  let canceled!: HoldToTalk;
+  canceled = new HoldToTalk({ start: () => { canceled.cancel(); return true; }, send: () => assert.fail('must not send'), cancel: () => {} });
+  assert.equal(canceled.press('pointer:1'), false);
+  assert.equal(canceled.activeOwner, null);
+});
+
+const room: HoldKeyboardContext = { enabled: true, disabled: false, dialogOpen: false, target: 'room' };
+
+test('unfocused room Space starts a hold, while Enter is limited to the microphone', () => {
+  assert.equal(canStartKeyboardHold({ key: ' ', code: 'Space' }, room), true);
+  assert.equal(canStartKeyboardHold({ key: 'Enter' }, room), false);
+  assert.equal(canStartKeyboardHold({ key: ' ', code: 'Space' }, { ...room, target: 'microphone' }), true);
+  assert.equal(canStartKeyboardHold({ key: 'Enter' }, { ...room, target: 'microphone' }), true);
+  assert.equal(heldTalkKey({ key: 'Spacebar' }), 'Space');
+  assert.equal(heldTalkKey({ key: 'Escape' }), null);
+});
+
+test('typing, selects, links, other buttons and dialogs keep their own keyboard input', () => {
+  for (const key of [' ', 'Enter']) {
+    assert.equal(canStartKeyboardHold({ key }, { ...room, target: 'interactive' }), false);
+    assert.equal(canStartKeyboardHold({ key }, { ...room, dialogOpen: true }), false);
+    assert.equal(canStartKeyboardHold({ key }, { ...room, enabled: false }), false);
+    assert.equal(canStartKeyboardHold({ key }, { ...room, disabled: true }), false);
+  }
+});
+
+test('autorepeat, composition, claimed events and modifier combinations cannot start global recording', () => {
+  for (const guard of ['repeat', 'isComposing', 'defaultPrevented', 'altKey', 'ctrlKey', 'metaKey', 'shiftKey']) {
+    assert.equal(canStartKeyboardHold({ key: ' ', [guard]: true }, room), false);
+  }
+});
+
+test('global keyboard repeat and mixed input owners produce one recording and one release', () => {
+  const { gesture, calls } = setup();
+  if (canStartKeyboardHold({ key: ' ' }, room)) gesture.press('key:Space');
+  if (canStartKeyboardHold({ key: ' ', repeat: true }, room)) gesture.press('key:Space');
+  assert.equal(gesture.press('pointer:1'), false);
+  assert.equal(gesture.release('pointer:1'), false);
+  assert.equal(gesture.release('key:Space'), true);
+  assert.deepEqual(calls, { start: 1, send: 1, cancel: 0 });
 });

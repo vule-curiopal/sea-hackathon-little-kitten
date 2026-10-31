@@ -4,7 +4,7 @@ import { VoiceClientError, canceledError, notify } from '../errors.js';
 import { Pcm16Encoder, PCM_WORKLET } from './pcm.js';
 import { validateTurnResponse } from '../api.js';
 
-/** One microphone/WS per utterance. PCM chunks go to STT; only a final turn result reaches playback. */
+/** One held utterance owns one microphone/WS. Release flushes PCM before the final turn. */
 export class RealtimeVoiceCapture {
   private readonly listeners = new Set<(event: CaptureEvent) => void>();
   private stopCurrent?: () => void;
@@ -21,7 +21,7 @@ export class RealtimeVoiceCapture {
     return new Promise((resolve, reject) => {
       let stream: MediaStream | undefined, context: AudioContext | undefined, source: MediaStreamAudioSourceNode | undefined;
       let worklet: AudioWorkletNode | undefined, socket: WebSocket | undefined, encoder: Pcm16Encoder | undefined;
-      let done = false, finishing = false, started = false, sequence = 0;
+      let done = false, finishing = false, started = false, endSent = false, sequence = 0;
       let startedAt = 0;
       let flushResolve: (() => void) | undefined;
       const timers: ReturnType<typeof setTimeout>[] = [];
@@ -65,10 +65,15 @@ export class RealtimeVoiceCapture {
         if (done) return;
         const final = encoder.flush(); if (final) sendPcm(final);
         stopMic();
+        if (!sequence) throw new VoiceClientError('NO_AUDIO', 'No audio was recorded.');
+        endSent = true;
         socket.send(JSON.stringify({ type: 'audio.end', last_seq: sequence - 1 }));
       };
       this.sendCurrent = () => {
-        if (!started || finishing || done) return false;
+        if (finishing || done) return false;
+        // Releasing while permission or the stream is still pending cancels
+        // this hold. A late permission grant must never resume recording.
+        if (!started) { fail(canceledError()); return false; }
         void finish().catch(fail); return true;
       };
       const setup = async () => {
@@ -128,21 +133,30 @@ export class RealtimeVoiceCapture {
           try {
             const message = JSON.parse(String(event.data));
             if (message.type === 'stream.ready') {
+              if (started || finishing) throw new VoiceClientError('INVALID_RESPONSE', 'Duplicate speech-ready message.');
               clearTimeout(connectTimeout);
               source = context!.createMediaStreamSource(stream!); source.connect(worklet!); worklet!.connect(context!.destination);
               started = true; startedAt = performance.now(); state('recording');
               timers.push(setTimeout(() => fail(new VoiceClientError('TIMEOUT', 'Speech turn timed out.')), 180_000));
-            } else if (message.type === 'turn.end_candidate') void finish().catch(fail);
+            } else if (message.type === 'turn.end_candidate') {
+              // A provider's silence boundary is only a transcript segment.
+              // The person holding the button owns the utterance boundary.
+              return;
+            }
             else if (message.type === 'transcript.final') {
-              if (typeof message.text !== 'string' || !message.text.trim() || [...message.text].length > 2000) {
+              if (!endSent || typeof message.text !== 'string' || !message.text.trim() || [...message.text].length > 2000) {
                 throw new VoiceClientError('INVALID_RESPONSE', 'Invalid final transcript.');
               }
               notify(this.listeners, { type: 'transcript_final', requestId, text: message.text });
             }
-            else if (message.type === 'stream.processing') onProcessing();
+            else if (message.type === 'stream.processing') {
+              if (!endSent) throw new VoiceClientError('INVALID_RESPONSE', 'Speech processed before release.');
+              onProcessing();
+            }
             else if (message.type === 'stream.error') fail(new VoiceClientError(String(message.code), 'Speech processing failed.',
               message.retryable === true, typeof message.status === 'number' ? message.status : undefined));
             else if (message.type === 'turn.result') {
+              if (!endSent) throw new VoiceClientError('INVALID_RESPONSE', 'Speech result arrived before release.');
               const response = validateTurnResponse(message.response, session, requestId);
               if (response.session_id !== session.session_id || response.turn_id !== requestId || !response.reply?.text
                 || response.reply.language !== session.configuration.language_mode || !response.audio?.data_base64

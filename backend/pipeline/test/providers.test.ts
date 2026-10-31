@@ -129,7 +129,7 @@ describe('stateless OpenAI reply adapter', () => {
     expect(firstCall.url.pathname).toBe('/v1/responses');
     expect(new Headers(firstCall.init.headers).get('Authorization')).toBe('Bearer openai-test-secret');
     expect(body(firstCall)).toMatchObject({
-      model: 'gpt-6-luna', reasoning: { effort: 'none' }, store: false, stream: false, tools: [], max_output_tokens: 200,
+      model: 'gpt-5.6-luna', reasoning: { effort: 'none' }, store: false, stream: false, tools: [], max_output_tokens: 200,
       input: [{ role: 'user', content: [{ type: 'input_text', text: 'I like dinosaurs.' }] }],
     });
     expect(String(body(http.calls[1]!).instructions)).toContain('Vietnamese');

@@ -25,8 +25,8 @@ export interface OpenAIProviderOptions {
 }
 /** Independent stage choices. Explicit environment/model overrides always win. */
 export const DEFAULT_ENGINE_MODELS = Object.freeze({
-  classifyModel: 'gpt-6-luna', replyModel: 'gpt-6-astra',
-  checkModel: 'gpt-6-astra', moderationModel: 'omni-moderation-latest',
+  classifyModel: 'gpt-5.6-luna', replyModel: 'gpt-5.6-luna',
+  checkModel: 'gpt-5.6-luna', moderationModel: 'omni-moderation-latest',
 });
 export interface OpenAIRequestTelemetry {
   sequence: number;
@@ -199,7 +199,8 @@ export class OpenAIProvider implements Provider {
   private reasoning(model: string, stage: 'classify' | 'reply' | 'check' | 'moderation_context'): { reasoning?: { effort: 'none' | 'low' } } {
     // GPT-4.1/4o are non-reasoning models and reject this parameter. Never swap
     // model IDs or retry a different model to hide a configuration failure.
-    if (stage !== 'reply' && /^gpt-6-luna(?:-\d{4}-\d{2}-\d{2})?$/u.test(model)) return { reasoning: { effort: 'none' } };
+    if (/^gpt-5\.6-luna(?:-\d{4}-\d{2}-\d{2})?$/u.test(model)
+      || (stage !== 'reply' && /^gpt-6-luna(?:-\d{4}-\d{2}-\d{2})?$/u.test(model))) return { reasoning: { effort: 'none' } };
     return /^gpt-(?:[5-9]|[1-9][0-9])(?:[.-]|$)/u.test(model) ? { reasoning: { effort: 'low' } } : {};
   }
   private async request(stage: OpenAIRequestTelemetry['stage'], api: OpenAIRequestTelemetry['api'], model: string, body: Record<string, unknown>, signal?: AbortSignal): Promise<unknown> {

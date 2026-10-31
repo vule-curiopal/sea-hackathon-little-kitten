@@ -61,7 +61,7 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
     trustProxyLoopback: trustProxyLoopback === 'true',
     elevenApiKey: env.ELEVENLABS_API_KEY ?? '', openaiApiKey: env.OPENAI_API_KEY ?? '', elevenBaseUrl, openaiBaseUrl,
     sttModel: env.ELEVENLABS_STT_MODEL ?? 'scribe_v2', ttsModel: env.ELEVENLABS_TTS_MODEL ?? 'eleven_flash_v2_5',
-    replyModel: env.OPENAI_MODEL ?? 'gpt-6-luna', maxOutputTokens: integer(env.OPENAI_MAX_OUTPUT_TOKENS, 200, 32, 1000),
+    replyModel: env.OPENAI_MODEL ?? 'gpt-5.6-luna', maxOutputTokens: integer(env.OPENAI_MAX_OUTPUT_TOKENS, 200, 32, 1000),
     enableLogging,
     sttTimeoutMs: integer(env.STT_TIMEOUT_MS, 10000), replyTimeoutMs: integer(env.REPLY_TIMEOUT_MS, 10000),
     ttsTimeoutMs: integer(env.TTS_TIMEOUT_MS, 10000), turnTimeoutMs: integer(env.TURN_PROCESSING_TIMEOUT_MS, 20000),

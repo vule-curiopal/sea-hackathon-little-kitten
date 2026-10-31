@@ -5,11 +5,11 @@ import { fallback } from '../character/index.js';
 import { FakeProvider, OpenAIProvider, createProvider, type OpenAITransport } from './providers.js';
 import { classifyLocal } from './observations.js';
 
-test('offline latency defaults use Luna classification and retain Astra replies and checking', async () => {
+test('offline GPT-5.6 Luna defaults use no reasoning for classification, replies and checking', async () => {
   const classification = client(completed(classifyLocal('Hello.', 'en')));
   const classifier = new OpenAIProvider({ client: classification.transport });
   await classifier.classify('Hello.', 'en');
-  assert.equal(classification.calls[0]!.body.model, 'gpt-6-luna');
+  assert.equal(classification.calls[0]!.body.model, 'gpt-5.6-luna');
   assert.deepEqual(classification.calls[0]!.body.reasoning, { effort: 'none' });
   const schema = (classification.calls[0]!.body.text as { format: { schema: { required: string[]; properties: Record<string, unknown> } } }).format.schema;
   assert.ok(schema.required.includes('i') && schema.required.includes('c'));
@@ -17,13 +17,13 @@ test('offline latency defaults use Luna classification and retain Astra replies 
 
   const checking = client(completed({ approved: true, violations: [], issues: [] }));
   await new OpenAIProvider({ client: checking.transport }).check('Hello.', plan());
-  assert.equal(checking.calls[0]!.body.model, 'gpt-6-astra');
-  assert.deepEqual(checking.calls[0]!.body.reasoning, { effort: 'low' });
+  assert.equal(checking.calls[0]!.body.model, 'gpt-5.6-luna');
+  assert.deepEqual(checking.calls[0]!.body.reasoning, { effort: 'none' });
 
   const replies = client(completed('Hello.'));
   await new OpenAIProvider({ client: replies.transport }).reply({ instructions: '', input: '' }, plan());
-  assert.equal(replies.calls[0]!.body.model, 'gpt-6-astra');
-  assert.deepEqual(replies.calls[0]!.body.reasoning, { effort: 'low' });
+  assert.equal(replies.calls[0]!.body.model, 'gpt-5.6-luna');
+  assert.deepEqual(replies.calls[0]!.body.reasoning, { effort: 'none' });
 });
 
 test('offline explicit model overrides are honored without injecting unsupported reasoning or silent fallback', async () => {
