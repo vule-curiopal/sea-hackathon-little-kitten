@@ -3,8 +3,8 @@ import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 import { evaluateRun, renderReport } from '../evaluation/evaluate.js';
-import { judgeConversation } from '../evaluation/judge.js';
-import { groupJudgeConversations, selectJudgePriorContext } from '../evaluation/judge-context.js';
+import { judgeConversation, JUDGE_POLICY_VERSION } from '../evaluation/judge.js';
+import { groupJudgeConversations, selectJudgePriorContext, selectJudgeOperationalContext } from '../evaluation/judge-context.js';
 import type { SemanticReview, TurnLog } from '../evaluation/types.js';
 
 const { values } = parseArgs({ options: {
@@ -46,7 +46,7 @@ try {
       const [key, conversation] = selected[next++]!;
       const prior = selectJudgePriorContext(logs, conversation);
       try {
-        const decisions = await judgeConversation(conversation, prior, { model: values.model!, apiKey: process.env.OPENAI_API_KEY!, productSpecification: relevantSpec });
+        const decisions = await judgeConversation(conversation, prior, { model: values.model!, apiKey: process.env.OPENAI_API_KEY!, productSpecification: relevantSpec, operationalContext: selectJudgeOperationalContext(logs, conversation) });
         reviews.push(...decisions);
         journal = journal.then(() => reviewFile.write(`${decisions.map(decision => JSON.stringify(decision)).join('\n')}\n`));
         await journal;
@@ -61,7 +61,7 @@ try {
 } finally { await reviewFile.close(); }
 const report = evaluateRun(logs, reviews);
 await writeFile(resolve(output, 'judge-manifest.json'), `${JSON.stringify({
-  synthetic: true, source_engine_log: input, model: values.model, store: false,
+  synthetic: true, source_engine_log: input, model: values.model, store: false, reviewer_policy_version: JUDGE_POLICY_VERSION,
   include_seed_conversations: values['include-seeds'],
   requested_conversations: selected.length, reviewed_turns: reviews.length, errors,
   note: 'Model judgments are fallible evidence. Independent check failures cannot be overridden. Missing, malformed or stale judgments remain needs_review.',

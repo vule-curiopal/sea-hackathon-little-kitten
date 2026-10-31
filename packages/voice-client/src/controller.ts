@@ -28,7 +28,7 @@ export interface PlaybackPort {
 export type VoiceApiPort = Pick<VoiceApiClient,
   'createRequestId' | 'createSession' | 'configure' | 'submitTurn' | 'cancelTurn' | 'playback' | 'endSession'> & Partial<Pick<VoiceApiClient, 'submitText'>>;
 export interface VoiceControllerOptions { api: VoiceApiPort; capture: CapturePort; playback: PlaybackPort }
-interface ActiveTurn { id: string; session: SessionResponse; abort: AbortController; response?: TurnResponse }
+interface ActiveTurn { id: string; session: SessionResponse; abort: AbortController; response?: TurnResponse; cancellation?: Promise<void> }
 
 /** Framework-independent coordinator. A frontend owns layout, captions and rendering. */
 export class VoiceController {
@@ -198,6 +198,7 @@ export class VoiceController {
     if (active) {
       // Send immediately with an independent signal; a server tombstone also covers upload races.
       const cancellation = this.ports.api.cancelTurn(active.session, active.id);
+      active.cancellation = cancellation;
       const previous = this.pendingCancellation;
       const result = Promise.all([previous, cancellation]).then(() => {});
       this.pendingCancellation = result.catch(() => {});
@@ -251,11 +252,22 @@ export class VoiceController {
       notify(this.listeners, { type: 'turn', response });
       this.assertCurrent(active);
       if (response.audio === null) { this.setState('playback_blocked'); return response; }
-      const result = await this.ports.playback.play(response,
-        receipt => this.ports.api.playback(active.session, active.id, receipt).catch(error => {
+      const result = await this.ports.playback.play(response, async receipt => {
+        try { await this.ports.api.playback(active.session, active.id, receipt); }
+        catch (error) {
           if (this.expireSession(active.session, error)) this.handleError(error);
+          // Local Stop pauses immediately and cancels remotely in parallel.
+          // The cancel tombstone can therefore beat an already queued media
+          // receipt. Only a confirmed cancellation makes that conflict benign.
+          if (receipt.status !== 'completed' && active.abort.signal.aborted && active.cancellation
+            && error instanceof VoiceClientError && error.status === 409
+            && ['turn_canceled', 'invalid_playback_transition', 'invalid_receipt_transition', 'stale_state'].includes(error.code)) {
+            await active.cancellation;
+            return;
+          }
           throw error;
-        }), active.abort.signal);
+        }
+      }, active.abort.signal);
       // A very short clip can finish before play() settles. Natural completion is not cancellation.
       if (this.active === null && !active.abort.signal.aborted && result === 'playing') return response;
       this.assertCurrent(active);

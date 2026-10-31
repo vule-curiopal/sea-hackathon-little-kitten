@@ -1,9 +1,10 @@
 import type { ActiveGame, ActivityBoundaries, MemoryContext, Observation, SessionExchange } from '../shared/types.js';
 import { isStoryTitleQuery, resolveMemoryQuery, storyMetadata } from '../recall.js';
+import { extractLearningActivity, selectLearningActivity } from './learning-activity.js';
 
 export interface TurnAction {
   domain: 'conversation' | 'app' | 'memory' | 'diary' | 'daily_episode' | 'catalog_story' | 'child_story' | 'game' | 'learning' | 'safety';
-  operation: 'respond' | 'explain_policy' | 'recall' | 'clarify' | 'read' | 'read_date' | 'read_title' | 'start' | 'continue' | 'coauthor' | 'ending' | 'pause' | 'vocabulary' | 'game_turn' | 'urgent_support' | 'refuse';
+  operation: 'respond' | 'explain_policy' | 'recall' | 'clarify' | 'read' | 'read_date' | 'read_title' | 'start' | 'continue' | 'coauthor' | 'perform' | 'ending' | 'pause' | 'vocabulary' | 'reading_practice' | 'game_turn' | 'urgent_support' | 'refuse';
   stateEffect: 'none' | 'catalog_start' | 'catalog_continue';
   target?: { kind: string; slot: string; sourceIds: string[]; status?: 'resolved' | 'missing' | 'ambiguous' };
   allowedFacts: string[];
@@ -27,6 +28,26 @@ const newCustomStory = /\b(?:new story|different story)\b|(?:truyện mới|chuy
 const explicitCatalogStart = /^(?:(?:please|can you|could you)\s+)?(?:tell (?:me )?|start |read (?:me )?)(?:a |the |one |a new )?(?:short |little )?(?:story|adventure)(?: please)?[.!?\s]*$|^(?:kể|đọc) (?:cho (?:mình|tớ|con) )?(?:một |một câu )?(?:truyện|câu chuyện)[.!?\s]*$/iu;
 const landingPremise = /\b(?:my|our|pretend|cardboard) (?:ship|rocket).{0,35}\b(?:land|landing|landed)\b|(?:tàu|phi thuyền).{0,30}(?:sắp (?:đáp|hạ cánh)|chuẩn bị hạ cánh|đáp xuống|hạ cánh)/iu;
 const pretendLanding = /\b(?:land|landing|landed).{0,40}\b(?:pillow|cushion|pretend|imaginary)\b|(?:đáp|hạ cánh).{0,45}(?:gối|tưởng tượng|hành tinh)/iu;
+
+/** A language directive changes how an answer is spoken, not its subject. */
+export function splitLanguageRequest(text: string): { substantiveText: string; language: 'vi' | 'en' | null } {
+  let language: 'vi' | 'en' | null = null;
+  const clauses = text.split(/(?<=[.!?;])\s+|,\s*/u);
+  const substantive = clauses.filter(clause => {
+    const words = clause.trim().replace(/[.!?;]+$/u, '');
+    const english = /^(?:(?:now |please )?(?:English|Vietnamese)(?: only| please)?|(?:please )?(?:speak|use|answer in) (?:only )?(?:English|Vietnamese)(?: only| please)?|I (?:want|would like) to speak (?:English|Vietnamese))$/iu;
+    const vietnamese = /^(?:(?:giờ|bây giờ) )?(?:(?:mình|tớ|tôi|con) muốn (?:nói |câu ngắn bằng )?|(?:nói|dùng) )?tiếng (?:Việt|Anh)(?: thôi| nhé| nha)*$/iu;
+    if (!english.test(words) && !vietnamese.test(words)) return true;
+    language = /Vietnamese|tiếng Việt/iu.test(words) ? 'vi' : 'en';
+    return false;
+  });
+  return { substantiveText: substantive.join(' ').trim(), language };
+}
+
+function isPerformanceRequest(text: string): boolean {
+  if (/\b(?:do not|don['’]t|no) (?:want |do |perform |start )|(?:đừng|không muốn) (?:diễn|biểu diễn|chơi)/iu.test(text)) return false;
+  return /\b(?:let['’]s|let us|can (?:we|you)|could (?:we|you)|please|perform|act|do)\b.{0,65}\b(?:puppet show|puppet scene|pretend skit|pretend performance)\b|(?:cùng|hãy|giúp|mình muốn|tớ muốn).{0,45}(?:diễn kịch|biểu diễn|múa rối|rối tất)/iu.test(text);
+}
 
 /** Only a current affirmative invitation may start/reopen play. A remembered
  * mention, preference, declined game, or "I want to tell you" is not one. */
@@ -69,13 +90,19 @@ export function resolveTurnAction(input: TurnActionInput): TurnAction {
     allowedFacts: [text], target: { kind: 'current_child_experience', slot: 'expressed_feeling', sourceIds: [] },
   });
 
-  const memory = resolveMemoryQuery(context, text, history);
+  const languageRequest = splitLanguageRequest(text);
+  const subjectText = languageRequest.substantiveText;
+  const memory = resolveMemoryQuery(context, subjectText, history);
   if (memory) return action('memory', memory.status === 'ambiguous' ? 'clarify' : 'recall', memory.status === 'resolved'
     ? 'Answer the requested memory slot directly from the supplied source facts. Translate ordinary vocabulary naturally into the reply language; preserve every proper name, diacritic, and quoted story title. Distinguish objects, fictional characters, and real reported entities. Retain volunteered routine qualifiers and unknown precision. This read does not start or advance an activity.'
     : memory.status === 'ambiguous' ? 'Several eligible records materially match this specific slot. Ask one focused distinction; do not substitute a catalog title or guess a name.'
       : 'No eligible record supplies this requested slot. State the missing fact briefly without inventing historical recall, a precise time, or an assigned story title.', {
       allowedFacts: memory.status === 'resolved' ? memory.facts : [], target: { kind: memory.targetKind, slot: memory.slot, sourceIds: memory.sourceIds, status: memory.status },
     });
+
+  if (!subjectText && languageRequest.language) return action('app', 'explain_policy', 'Briefly acknowledge the current language and brevity request in that language. This changes the session presentation, not family configuration or a vocabulary topic.', {
+    allowedFacts: [text], target: { kind: 'session_language', slot: 'current_request', sourceIds: [] },
+  });
 
   if (/\b(?:daily mood|new mood|mood.*open|open.*mood|mood.*reload|mood.*day)\b|(?:tâm trạng.*(?:ngày|mở)|mỗi lần mở.*tâm trạng)/iu.test(text)) return action('app', 'explain_policy', 'Answer the app-policy question from authoritative application facts, rather than claiming uncertainty about configured behavior. Miu moods are fictional; the child is never responsible for changing them.', {
     allowedFacts: [`Miu's fictional daily mood stays ${context.daily.mood} throughout local date ${context.daily.localDate}, including reopen/reload. The shared night job replaces it once on a new local date. Turn emotion and time-band presentation can change while daily mood persists. Absence never worsens mood.`], target: { kind: 'app_state', slot: 'daily_mood_policy', sourceIds: [] },
@@ -102,11 +129,24 @@ export function resolveTurnAction(input: TurnActionInput): TurnAction {
   }
   // A clear word-definition request has answerable public meaning; it is not
   // uncertain personal memory even when it refers to prior wordplay.
-  const mixedDefinition = /[A-Za-z]{2,}/u.test(text) && /(?:\s(?:là|nghĩa|trong|tiếng)\s)/u.test(text) && /[?？]|hả|đúng không/u.test(text) && !/\b(?:my|our)\b|của (?:mình|tớ|tôi)/iu.test(text);
-  if (mixedDefinition || /\b(?:mean|meaning|translate|translation|word|vocabulary)\b|(?:nghĩa|dịch|từ .{0,20}tiếng|tiếng Anh (?:thật|của)|tiếng Việt)/iu.test(text)) return action('learning', 'vocabulary', 'Answer the current word meaning or translation in its stated context, directly and accurately. Use heard language-learning context where relevant. Compound parts can aid reading but do not define the whole word literally. Distinguish factual meanings from the child’s explicitly pretend wordplay; do not ask an unnecessary name or meaning clarification.');
+  const readingRequest = extractLearningActivity(subjectText, observation.language);
+  if (readingRequest) return action('learning', 'reading_practice', 'Help the child read the supplied current word using a small age-appropriate decoding step. Preserve the literal topic. This is practice, not evidence of an ability level or a lasting child trait; do not announce a memory write.', {
+    allowedFacts: [`The current child-led reading-practice word is ${JSON.stringify(readingRequest.term)}.`], target: { kind: 'word_practice', slot: 'reading', sourceIds: [] },
+  });
+  const mixedDefinition = /[A-Za-z]{2,}/u.test(subjectText) && /(?:\s(?:là|nghĩa|trong|tiếng|có phải)\s)/u.test(subjectText) && /[?？]|hả|đúng không/u.test(subjectText) && !/\b(?:my|our)\b|của (?:mình|tớ|tôi)/iu.test(subjectText);
+  if (mixedDefinition || /\b(?:mean|meaning|translate|translation|word|vocabulary)\b|(?:nghĩa|dịch|từ .{0,20}tiếng|tiếng Anh (?:thật|của))/iu.test(subjectText)) {
+    const practice = selectLearningActivity(context, subjectText);
+    return action('learning', 'vocabulary', 'Answer the current word meaning or translation in its stated context, directly and accurately. Correct a clear misconception rather than asking the child to repeat it. If the public meaning is genuinely unknown, say so; personal-memory uncertainty does not make an answerable definition ambiguous. Compound parts can aid reading but do not define the whole word literally. Distinguish factual meanings from explicitly pretend wordplay. Stay with the requested sense; omit unasked alternate meanings and unrelated subjects.', {
+      allowedFacts: practice ? [`A completed child-led reading activity practised the exact word ${JSON.stringify(practice.term)} on ${practice.localDate}. Its focus was reading the word, not a child ability assessment. Connect relevant word parts to reading rather than treating the parts as a literal definition.`] : [],
+      ...(practice ? { target: { kind: 'word_practice', slot: 'meaning_in_reading', sourceIds: [practice.id] } } : {}),
+    });
+  }
 
   const declinedStory = /\b(?:do not|don['’]t|no) (?:want )?(?:a |another |the )?story\b|(?:không muốn|đừng) (?:kể )?(?:truyện|chuyện)/iu.test(text);
   if (declinedStory) return action('conversation', 'pause', 'Honor the declined story. Do not start, resume, preview, or commit a scene.');
+  if (isPerformanceRequest(subjectText)) return action('child_story', 'perform', 'Begin the child-requested pretend performance now with one tiny speakable character line or action, using their supplied prop and quiet tone. Contribute before inviting the child to choose a line; an invitation alone does not perform the requested activity. Keep it fictional, bounded, and child-led without stage directions or catalog progress.', {
+    allowedFacts: [text], activity: { kind: 'child_story', premise: [text], constraints: [text], requestedEnding: null },
+  });
   let customStart = -1;
   for (const [index, exchange] of history.entries()) {
     if (explicitCatalogStart.test(exchange.user)) customStart = -1;

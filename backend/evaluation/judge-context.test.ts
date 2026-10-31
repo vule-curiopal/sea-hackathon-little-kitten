@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { groupJudgeConversations, selectJudgePriorContext } from './judge-context.js';
+import { groupJudgeConversations, selectJudgePriorContext, selectJudgeOperationalContext } from './judge-context.js';
 import type { TurnLog } from './types.js';
 
 // Context selection uses only identity/order metadata; no engine or model output is simulated.
@@ -57,4 +57,17 @@ test('prior-context selection rejects mixing seed and test turns into one conver
   const seed = entry('seed', 'an', { phase: 'scenario_history', conversation_id: 'shared-id' });
   const regular = entry('regular', 'an', { conversation_id: 'shared-id' });
   assert.throws(() => selectJudgePriorContext([seed, regular], [seed, regular]), /one conversation/u);
+});
+
+test('offline operational context includes prior profile switches but excludes other cases and future conversations', () => {
+  const an = entry('an-first', 'an');
+  const binh = entry('binh-first', 'binh');
+  const current = entry('current', 'an', { conversation_id: 'current-conversation' });
+  const laterSameConversation = entry('next', 'an', { conversation_id: 'current-conversation' });
+  const future = entry('future', 'an');
+  const otherCase = entry('other', 'an', { scenario_id: 'SC-002' });
+  const logs = [an, binh, otherCase, current, laterSameConversation, future];
+  assert.deepEqual(selectJudgePriorContext(logs, [current, laterSameConversation]), [an]);
+  assert.deepEqual(selectJudgeOperationalContext(logs, [current, laterSameConversation]), [an, binh, current, laterSameConversation]);
+  assert.deepEqual(selectJudgeOperationalContext(logs, []), []);
 });

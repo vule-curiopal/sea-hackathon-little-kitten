@@ -27,8 +27,8 @@ export function validateLocal(text: string, plan: DirectorPlan): ValidationResul
   // An immediate listening response inside this comfort turn is supported.
   // The full remaining clause must match; appended calls, scheduling, secrecy,
   // or future-contact promises retain the ordinary commitment prohibition.
-  const commitmentText = withoutCurrentChatIntentions(cleaned, plan.allowedFacts);
-  if (affirmativeSpeech(commitmentText, /\b(?:i promise|i will|i['’]ll|i can (?:call|visit|watch|remind|contact)|i have (?:called|contacted))\b|(?:miu hứa|miu sẽ (?:gọi|nhắc|đến|theo dõi|giữ bí mật))/iu)) violations.add('unsupported_commitment');
+  const commitmentText = withoutCurrentChatIntentions(cleaned, plan.allowedFacts, plan.preferredAddress);
+  if (affirmativeSpeech(commitmentText, /\b(?:i promise|i will|i['’]ll|i can (?:just )?(?:call|visit|watch|remind|contact)|i have (?:called|contacted))\b|(?:miu hứa|miu sẽ (?:chỉ )?(?:gọi|nhắc|đến|theo dõi|giữ bí mật))/iu)) violations.add('unsupported_commitment');
   if (affirmativeSpeech(cleaned, /\b(?:you have (?:depression|anxiety|adhd|autism)|you are (?:depressed|traumatized)|your personality is)\b|(?:bạn bị (?:trầm cảm|rối loạn|tự kỷ)|tính cách của bạn là)/iu)) violations.add('unsupported_child_assessment');
   if (plan.comfortActive) {
     if (affirmativeSpeech(cleaned, /\b(?:ha(?:ha)+|hehe|lol|giggl(?:e|es|ing)|laugh(?:s|ed|ing)?|purr(?:s|ing)?)\b|(?:hihi|hí hí|ha ha|cười|vui quá|meo meo vui)/iu)) violations.add('laughter_during_comfort');

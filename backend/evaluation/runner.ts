@@ -3,14 +3,14 @@ import { mkdir, open, readFile, readdir, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { resolve } from 'node:path';
 import { z } from 'zod';
-import { MiuApplication } from '../application.js';
+import { MiuApplication, type TurnRequest, type TurnResponse } from '../application.js';
 import { createMemoryStore, type MemoryStore } from '../memory/index.js';
 import { FATAL_OPENAI_ERROR_CODES, OpenAIProvider } from '../pipeline/providers.js';
 import { AppError, type DirectorPlan, type Language, type Observation, type Provider, type ProviderClassificationContext, type ReplyPrompt } from '../shared/types.js';
 import { SCENARIO_CATALOG_VERSION, validateScenarios } from './catalog.js';
 import { EVALUATOR_VERSION, evaluateRun, renderReport } from './evaluate.js';
 import { reviewEvidenceHash, reviewKey } from './review-evidence.js';
-import type { ProviderEvent, Scenario, ScenarioConversation, ScenarioTurn, TurnLog } from './types.js';
+import type { OperationalResponse, ProviderEvent, Scenario, ScenarioConversation, ScenarioTurn, TurnLog } from './types.js';
 
 const historicalSchema = z.object({
   synthetic: z.literal(true), local_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/u),
@@ -130,6 +130,7 @@ export async function runEvaluation(options: RunOptions): Promise<{ runId: strin
   const conversationFile = await open(resolve(outputDir, 'conversations.jsonl'), 'wx');
   const transcriptFile = await open(resolve(outputDir, 'transcripts.md'), 'wx');
   const logs: TurnLog[] = [];
+  const turnRequests = new Map<string, { profileId: string; request: TurnRequest }>();
   let now = Date.parse(history[0]!.started_at);
   const narrativeOffsets = new Map<'an' | 'binh', number>();
   let memory: MemoryStore | undefined;
@@ -138,7 +139,7 @@ export async function runEvaluation(options: RunOptions): Promise<{ runId: strin
   let blocked: EvaluationBlock | null = null;
   const startedAt = new Date().toISOString();
   const fingerprint = (text: string) => createHash('sha256').update(text).digest('hex');
-  const implementationPaths = ['application.ts', 'recall.ts', 'shared/types.ts', 'shared/semantic-speech.ts', 'pipeline/providers.ts', 'pipeline/observations.ts', 'character/action-plan.ts', 'character/director.ts', 'character/prompt.ts', 'character/validation.ts', 'character/templates.ts', 'memory/index.ts', 'memory/assertions.ts', 'memory/evidence.ts', 'memory/normalization.ts', 'memory/patches.ts', 'evaluation/runner.ts'];
+  const implementationPaths = ['application.ts', 'recall.ts', 'shared/types.ts', 'shared/semantic-speech.ts', 'shared/affect.ts', 'pipeline/providers.ts', 'pipeline/observations.ts', 'pipeline/language.ts', 'character/action-plan.ts', 'character/learning-activity.ts', 'character/affect.ts', 'character/director.ts', 'character/prompt.ts', 'character/validation.ts', 'character/templates.ts', 'memory/index.ts', 'memory/affect-store.ts', 'memory/database.ts', 'memory/assertions.ts', 'memory/evidence.ts', 'memory/normalization.ts', 'memory/patches.ts', 'evaluation/runner.ts'];
   implementationPaths.push(...(await readdir(new URL('../memory/migrations/', import.meta.url))).filter(path => path.endsWith('.sql')).sort().map(path => `memory/migrations/${path}`));
   const implementationFiles = await Promise.all(implementationPaths.map(async path => ({ path, sha256: fingerprint(await readFile(new URL(`../${path}`, import.meta.url), 'utf8')) })));
   const spec = await readFile(fileURLToPath(new URL('../../docs/product-specification.md', import.meta.url)), 'utf8');
@@ -177,6 +178,7 @@ export async function runEvaluation(options: RunOptions): Promise<{ runId: strin
     }
     now = Date.parse(at);
     narrativeOffsets.clear();
+    turnRequests.clear();
     if (!Number.isFinite(now)) throw new Error(`Invalid fixture clock: ${at}`);
     if (!memory) memory = await createMemoryStore({ now: () => new Date(now), clockMode: 'demo' });
     else await memory.db.exec('TRUNCATE TABLE profiles CASCADE');
@@ -212,6 +214,20 @@ export async function runEvaluation(options: RunOptions): Promise<{ runId: strin
     if (!Number.isFinite(next) || next < now) throw new Error(`Fixture attempted to move time backwards: ${at}`);
     now = next;
   }
+  const responseEvidence = (response: TurnResponse): OperationalResponse => ({
+    turn_id: response.turn_id, session_id: response.session_id,
+    state_version: response.state_version, clock_version: response.clock_version,
+    reply_text: response.reply.text,
+  });
+  const providerEvidence = () => ({
+    provider_events: structuredClone(recorded.events),
+    api_calls: structuredClone(recorded.apiCalls),
+    classification_evidence: structuredClone(recorded.classificationEvidence),
+    model_reply: structuredClone(recorded.modelReply),
+  });
+  function clearSessionRequests(sessionId: string) {
+    for (const key of turnRequests.keys()) if (key.startsWith(sessionId + '/')) turnRequests.delete(key);
+  }
   async function executeTurn(args: {
     phase: TurnLog['phase']; conversationId: string; profile: 'an' | 'binh';
     sessionId: string; profileId: string; turn: ScenarioTurn; sourceMessageId?: string;
@@ -219,8 +235,9 @@ export async function runEvaluation(options: RunOptions): Promise<{ runId: strin
   }): Promise<TurnLog> {
     const { turn, profileId, sessionId } = args;
     recorded.beginTurn();
-    const before = await app!.getContext(profileId);
+    const before = await app!.getContext(profileId, sessionId);
     const request = { request_id: randomUUID(), kind: turn.kind ?? 'utterance' as const, ...(turn.text ? { text: turn.text } : {}) };
+    turnRequests.set(sessionId + '/' + turn.id, { profileId, request });
     const record: TurnLog = {
       schema_version: 'miu-engine-evaluation-v1', run_id: runId, run_kind: runKind,
       phase: args.phase, scenario_id: currentScenario, conversation_id: args.conversationId,
@@ -228,17 +245,24 @@ export async function runEvaluation(options: RunOptions): Promise<{ runId: strin
       input: { kind: request.kind, ...(request.text ? { text: request.text } : {}) },
       at: before.clock.effectiveNow, wall_at: new Date(now).toISOString(), elapsed_ms: 0, provider_mode: recorded.mode,
       response: null, before, after: before, delivery: null, retry: null, error: null,
+      operational: { request: { request_id: request.request_id, session_id: sessionId }, original_response: null, retry_response: null },
       provider_events: [], ...(args.transition ? { transition: args.transition } : {}),
       assertions: turn.assertions, rubric: turn.rubric,
     };
     const started = performance.now();
-    let stage = 'prepare';
+    let stage = 'operational_before';
+    let mainEvidence: ReturnType<typeof providerEvidence> | undefined;
     try {
+      record.operational!.session_before = await app!.getOperationalState(profileId, sessionId);
+      stage = 'prepare';
       const response = await app!.prepareTurn(profileId, sessionId, request);
       record.response = response;
+      record.operational!.original_response = responseEvidence(response);
       if (turn.retry === 'turn') {
         stage = 'turn_retry';
-        record.retry = await app!.prepareTurn(profileId, sessionId, request);
+        const retry = await app!.prepareTurn(profileId, sessionId, request);
+        record.retry = retry;
+        record.operational!.retry_response = responseEvidence(retry);
       }
       if (turn.delivery === 'canceled') {
         stage = 'cancel';
@@ -251,10 +275,37 @@ export async function runEvaluation(options: RunOptions): Promise<{ runId: strin
         const receipt = { request_id: randomUUID(), status: turn.delivery === 'interrupted' ? 'interrupted' as const : 'completed' as const, state_version: response.state_version };
         const delivery = z.object({ status: z.string(), learning_status: z.string() }).parse(await app!.playback(profileId, sessionId, response.turn_id, receipt));
         record.delivery = { status: receipt.status, receipt_status: delivery.status, learning_status: delivery.learning_status };
+        record.operational!.receipt = { request_id: receipt.request_id, status: receipt.status, result: structuredClone(delivery) };
         if (turn.retry === 'receipt') {
           stage = 'receipt_retry';
           record.retry = await app!.playback(profileId, sessionId, response.turn_id, receipt);
         }
+      }
+      if (turn.probe_stale_replay_of) {
+        stage = 'stale_replay_probe';
+        mainEvidence = providerEvidence();
+        const source = turnRequests.get(sessionId + '/' + turn.probe_stale_replay_of);
+        if (!source || source.profileId !== profileId) throw new Error('Missing same-session replay source');
+        const callOffset = recorded.apiCalls.length;
+        const eventOffset = recorded.events.length;
+        const probe: NonNullable<NonNullable<TurnLog['operational']>['stale_replay']> = {
+          source_turn_spec_id: turn.probe_stale_replay_of, request_id: source.request.request_id,
+          session_id: sessionId, error_code: null, response: null, api_call_count: 0,
+        };
+        record.operational!.stale_replay = probe;
+        try {
+          const replay = await app!.prepareTurn(profileId, sessionId, source.request);
+          probe.response = responseEvidence(replay);
+          // Never play or learn a response unexpectedly generated by this probe.
+          try { await app!.cancel(profileId, sessionId, replay.turn_id); } catch { /* Expose the unexpected response even if it was already retired. */ }
+        } catch (error) {
+          probe.error_code = errorCode(error);
+          if (blockingProviderCodes.has(probe.error_code)) record.error = { code: probe.error_code, stage };
+          try { await app!.cancel(profileId, sessionId, source.request.request_id); } catch { /* An expected stale request has no active turn. */ }
+        }
+        probe.api_calls = structuredClone(recorded.apiCalls.slice(callOffset));
+        probe.api_call_count = probe.api_calls.length;
+        probe.provider_events = structuredClone(recorded.events.slice(eventOffset));
       }
     } catch (error) {
       record.error = { code: errorCode(error), stage };
@@ -263,17 +314,16 @@ export async function runEvaluation(options: RunOptions): Promise<{ runId: strin
       try { await app!.cancel(profileId, sessionId, request.request_id); } catch { /* Already retired or session closed. */ }
     }
     record.elapsed_ms = performance.now() - started;
-    try { record.after = await app!.getContext(profileId); }
+    try { record.after = await app!.getContext(profileId, sessionId); }
     catch (error) {
       record.after_snapshot_error = errorCode(error);
       record.error ??= { code: errorCode(error), stage: 'after_snapshot' };
     }
-    record.provider_events = [...recorded.events];
-    record.api_calls = recorded.apiCalls;
-    record.classification_evidence = recorded.classificationEvidence;
-    record.model_reply = recorded.modelReply;
+    try { record.operational!.session_after = await app!.getOperationalState(profileId, sessionId); }
+    catch (error) { record.error ??= { code: errorCode(error), stage: 'operational_after' }; }
+    Object.assign(record, mainEvidence ?? providerEvidence());
     record.generation ??= record.response?.generation;
-    const replyCall = record.api_calls.find(call => call.stage === 'reply' && call.api === 'responses' && call.outcome === 'completed' && call.responseId && call.responseId === record.model_reply?.responseId);
+    const replyCall = record.api_calls?.find(call => call.stage === 'reply' && call.api === 'responses' && call.outcome === 'completed' && call.responseId && call.responseId === record.model_reply?.responseId);
     record.reply_origin = harnessSelfTest ? 'test_double' : replyCall ? 'model' : record.response ? 'authored_bypass' : 'unavailable';
     logs.push(record);
     await logFile.write(`${JSON.stringify(record)}\n`);
@@ -298,6 +348,7 @@ export async function runEvaluation(options: RunOptions): Promise<{ runId: strin
       });
     }
     await app!.closeSession(profileId, opened.session_id);
+    clearSessionRequests(opened.session_id);
     await conversationFile.write(`${JSON.stringify({ phase, scenario_id: currentScenario, conversation_id: session.session_id, profile_key: 'an', at: session.started_at, turns: logs.length - first, errors: logs.slice(first).filter(log => log.error).length })}\n`);
   }
   async function runConversation(conversation: ScenarioConversation) {
@@ -327,6 +378,7 @@ export async function runEvaluation(options: RunOptions): Promise<{ runId: strin
       await executeTurn({ phase: 'scenario', conversationId: conversation.id, profile: conversation.profile, sessionId: opened.session_id, profileId, turn, ...(index === 0 && transition ? { transition } : {}) });
     }
     await app!.closeSession(profileId, opened.session_id);
+    clearSessionRequests(opened.session_id);
     await conversationFile.write(`${JSON.stringify({ phase: 'scenario', scenario_id: currentScenario, conversation_id: conversation.id, profile_key: conversation.profile, at: conversation.at, transition: transition ?? null, turns: logs.length - first, errors: logs.slice(first).filter(log => log.error).length })}\n`);
   }
   try {

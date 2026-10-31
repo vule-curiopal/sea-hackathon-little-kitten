@@ -113,6 +113,27 @@ export interface StoryProgress {
   title: { en: string; vi: string };
   scene: { en: string; vi: string };
 }
+export interface AddressPreference {
+  preferredAddress: string;
+  allowNickname: boolean;
+  nickname: string | null;
+  scope: 'persistent' | 'day' | 'session';
+  validLocalDate?: string;
+  sessionId?: string;
+  expiresAt: string | null;
+}
+export interface LearningActivityCandidate {
+  kind: 'word_practice';
+  term: string;
+  focus: 'reading';
+  language: Language;
+}
+export interface LearningActivity extends LearningActivityCandidate {
+  id: string;
+  localDate: string;
+  expiresAt: string | null;
+  sourceTurnId: string;
+}
 export interface MemoryContext {
   memoryPolicy?: 'durable_until_forgotten_v1';
   profile: ChildProfile;
@@ -126,7 +147,8 @@ export interface MemoryContext {
   events: MemoryEvent[];
   stories: ChildStory[];
   storyProgress: StoryProgress | null;
-  addressPreference?: { preferredAddress: string; allowNickname: boolean; nickname: string | null; expiresAt: string | null; scope?: 'persistent' | 'day' | 'session'; validLocalDate?: string; sessionId?: string } | null;
+  addressPreference?: AddressPreference | null;
+  learningActivities?: LearningActivity[];
   friendship: 'getting_acquainted' | 'buddies' | 'best_friends';
 }
 
@@ -178,8 +200,20 @@ export interface MemoryRetrievalResult {
 /** Ephemeral context established only by a completed, heard game reply. */
 export interface ActiveGame { premise: readonly string[] }
 export interface ProviderClassificationContext {
-  entities: ReadonlyArray<Pick<Entity, 'id' | 'kind' | 'name' | 'aliases'>>;
+  entities: ReadonlyArray<Pick<Entity, 'id' | 'kind' | 'name' | 'aliases'> & Partial<Pick<Entity, 'species' | 'objectType' | 'represents'>>>;
   recent: readonly SessionExchange[];
+  /** Server-selected, currently eligible same-profile sources for resolving
+   * safety referents; historical evidence never authorizes a new memory write. */
+  safetyEvidence?: ReadonlyArray<{
+    sourceId: string;
+    kind: 'event' | 'preference';
+    value: string;
+    evidenceKind: 'child_reported' | 'reported_plan';
+    scope: 'reported_real' | 'fictional';
+    localDate?: string;
+    conditions?: readonly string[];
+    slot?: string;
+  }>;
 }
 export interface DirectorInput {
   context: MemoryContext;
@@ -194,6 +228,8 @@ export interface DirectorInput {
   turnEvidence?: { kind: 'current_turn'; facts: string[]; persistable: boolean };
   action?: TurnAction;
   affect?: AffectPresentation;
+  /** Current-profile eligible context for resolving a bounded reported referent. */
+  referentEvidence?: ProviderClassificationContext['safetyEvidence'];
   retrieval?: MemoryRetrievalResult;
 }
 export interface DirectorPlan {
@@ -213,6 +249,8 @@ export interface DirectorPlan {
   face: { expression: Emotion; gesture: 'none' | 'head_tilt' | 'slow_blink' | 'small_bounce' | 'yawn' };
   memoryReferenceId: string | null;
   allowedFacts: string[];
+  /** Current scoped child address; a known story/person name is not permission. */
+  preferredAddress?: string;
   allowedQuestion: string | null;
   exactText: string | null;
   responseGoal?: string;
@@ -220,6 +258,7 @@ export interface DirectorPlan {
   maxSentences: number;
   maxQuestions: number;
   maxInstructionSteps?: number;
+  maxChoices?: number;
   action?: TurnAction;
   ruleTrace: string[];
   comfortActive: boolean;
@@ -238,6 +277,7 @@ export interface ProviderCheck {
 export interface GenerationDiagnostics {
   attempts: Array<{ attempt: number; approved: boolean; localViolations: string[]; providerCheck: ProviderCheck | null; errorCode?: string }>;
   repaired: boolean;
+  repairReason?: 'speech_or_grounding' | 'moderation_rephrase';
 }
 export interface Provider {
   readonly mode: 'fake' | 'real';
@@ -254,6 +294,7 @@ export interface LearningInput {
   /** Full current input, used transiently to validate the scope of each excerpt. */
   sourceText: string;
   candidates: MemoryCandidate[];
+  learningActivity?: LearningActivityCandidate;
   affect?: AffectLearningUpdate;
   storyTransition?: 'start' | 'continue';
 }

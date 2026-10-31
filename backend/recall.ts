@@ -15,11 +15,28 @@ export function isGenericPreferenceQuery(text: string): boolean {
     && /\?|\b(?:what|which|remember|recall)\b|(?:gì|nhớ|nào)/iu.test(text);
 }
 
+const copularPetIdentity = (query: string): boolean => /\b(?:which(?: one| of (?:them|these))?|who) (?:is|was) (?:my|our) (?:real )?(?:dog|cat|pet|rabbit|puppy|kitten)(?:[, ]+(?:again|here|now))?[.!?？]*$/iu.test(query)
+  || /\bwhich (?:dog|cat|pet|rabbit|puppy|kitten) (?:is|was) (?:mine|ours)[.!?？]*$/iu.test(query)
+  || /(?:(?:con|bé|thú cưng) nào là (?:con )?(?:chó|mèo|thỏ|thú cưng) (?:của |nhà )?(?:mình|tớ|tôi|con)|(?:con )?(?:chó|mèo|thỏ|thú cưng) (?:của |nhà )?(?:mình|tớ|tôi|con) là con nào|(?:con )?(?:chó|mèo|thỏ|thú cưng) nào là của (?:mình|tớ|tôi|con))(?: (?:nhỉ|vậy))?[.!?？]*$/iu.test(query);
+
+function ambiguousCopularPetQuery(query: string): boolean {
+  // This narrow shortcut resolves one real species slot. Fictional frames and
+  // compound species requests need ordinary scoped dialogue, not first-match
+  // selection from the child's real pets.
+  const fiction = /\b(?:pretend|imaginary|fictional|make-believe)\b|\b(?:in|for) (?:my|our|this|the|a) (?:story|scene|game)\b|(?:trong (?:truyện|câu chuyện|trò chơi|cảnh)|tưởng tượng|giả sử)/iu.test(query);
+  const speciesCount = [/\b(?:dog|puppy)\b|chó/iu, /\b(?:cat|kitten)\b|mèo/iu, /\brabbit\b|thỏ/iu].filter(pattern => pattern.test(query)).length;
+  return fiction || speciesCount > 1;
+}
+
 /** Identity questions can include a return greeting or temporal tail. Event
  * outcome questions stay on the dated-event grounding path. */
 export function isPetIdentityQuery(text: string): boolean {
-  const query = normalized(text);
+  const query = normalized(text).trim();
   if (/\btoy rabbit\b|thỏ bông/iu.test(query) || !/\b(?:dog|cat|pet|rabbit|puppy|kitten)\b|(?:chó|mèo|thú cưng|thỏ)/iu.test(query)) return false;
+  // These clauses request a species-scoped identity, not an event involving
+  // whichever animal matches a verb. Keep the copular forms bounded so that
+  // "which dog fell in a puddle?" stays on the dated-event path.
+  if (copularPetIdentity(query)) return !ambiguousCopularPetQuery(query);
   const explicitName = /\bname\b|(?<![\p{L}\p{M}])tên(?!\s+lửa)(?![\p{L}\p{M}])/iu.test(query)
     || /\bwhat\b.{0,80}\b(?:called|named)(?:\s+(?:now|again|today|before))?[.!?。！？\s]*$/iu.test(query);
   // A relative "who" or "called" inside a story assertion is not a request
@@ -34,10 +51,14 @@ export function isPetIdentityQuery(text: string): boolean {
   return asks && directRecall;
 }
 
+const requestsForgottenIdentity = (text: string): boolean => /\b(?:asked|told|wanted) you (?:to )?forget\b|\b(?:forgotten|deleted) (?:pet|dog|cat|name)\b|(?:bảo|nhờ|yêu cầu).{0,12}quên/iu.test(text);
+
 export function petIdentityMatches(context: MemoryContext, text: string): Entity[] {
   // A request to recover a deliberately forgotten identity cannot select a
   // different surviving pet or use an old name from transient dialogue.
-  if (/\b(?:asked|told|wanted) you (?:to )?forget\b|\b(?:forgotten|deleted) (?:pet|dog|cat|name)\b|(?:bảo|nhờ|yêu cầu).{0,12}quên/iu.test(text)) return [];
+  if (requestsForgottenIdentity(text)) return [];
+  const query = normalized(text).trim();
+  if (copularPetIdentity(query) && ambiguousCopularPetQuery(query)) return [];
   const species = /\b(?:dog|puppy)\b|chó/iu.test(text) ? 'dog'
     : /\b(?:cat|kitten)\b|mèo/iu.test(text) ? 'cat'
       : /\brabbit\b|thỏ/iu.test(text) ? 'rabbit' : null;
@@ -95,17 +116,20 @@ export interface MemoryQueryResolution {
  * generic preference lookup. Sources remain literal; speech may translate
  * ordinary vocabulary while preserving names and quoted story titles. */
 export function resolveMemoryQuery(context: MemoryContext, text: string, history: SessionExchange[] = []): MemoryQueryResolution | null {
-  const asks = isStoryTitleQuery(text) || /[?？]|\b(?:what|which|who|remember|recall|remind|know|repeat|preserve|spell)\b|(?:nhớ|là gì|tên gì|gọi.*gì|đừng bỏ dấu|giữ.*dấu)/iu.test(text);
+  const petIdentityQuery = isPetIdentityQuery(text);
+  const asks = petIdentityQuery || isStoryTitleQuery(text) || /[?？]|\b(?:what|which|who|remember|recall|remind|know|repeat|preserve|spell)\b|(?:nhớ|là gì|tên gì|gọi.*gì|đừng bỏ dấu|giữ.*dấu)/iu.test(text);
   if (!asks) return null;
   const resolution = (targetKind: MemoryQueryResolution['targetKind'], slot: MemoryQueryResolution['slot'], records: { id: string; fact: string }[]): MemoryQueryResolution => ({
     targetKind, slot, status: records.length === 1 ? 'resolved' : records.length ? 'ambiguous' : 'missing', sourceIds: records.map(record => record.id).filter(Boolean), facts: records.map(record => record.fact),
   });
-  if (isPetIdentityQuery(text)) return resolution('pet', 'name', petIdentityMatches(context, text).map(entity => ({
-    id: entity.id, fact: `The child's explicitly reported ${entity.species ?? 'pet'} is named ${JSON.stringify(entity.name)}. Preserve this canonical spelling and identity. A name does not establish an event or outcome.`,
-  })));
+  // A forgotten pet's "name ... asked ... forget" is not a request for the
+  // child's preferred address and cannot substitute another surviving pet.
+  if (petIdentityQuery && requestsForgottenIdentity(text)) return resolution('pet', 'name', []);
   if (/\b(?:what.*(?:call me|want.*called)|(?:name|address).*(?:asked|wanted|preferred)|how.*address me)\b|(?:muốn được gọi|được gọi tên gì|gọi (?:mình|tớ|tôi).*(?:gì|đã nói))/iu.test(text)) {
     const address = context.addressPreference;
-    return resolution('preferred_address', 'address', address ? [{ id: '', fact: `The child chose the form of address ${JSON.stringify(address.preferredAddress)}; nickname permission is ${address.allowNickname ? 'granted only for the explicitly stored nickname' : 'withdrawn'}. Do not restore a nickname merely because a story resumes.` }] : []);
+    return resolution('preferred_address', 'address', [{ id: '', fact: address
+      ? `The child chose the form of address ${JSON.stringify(address.preferredAddress)}; nickname permission is ${address.allowNickname ? 'granted only for the explicitly stored nickname' : 'withdrawn'}. Do not restore a nickname merely because a story resumes.`
+      : `The canonical profile name is ${JSON.stringify(context.profile.displayName)}. No current nickname permission is supplied; use the canonical name. Do not claim the child made a new naming request, reconstruct an ended nickname, or treat this as unknown identity.` }]);
   }
   const mentioned = namedEntities(context, text);
   const characterQuestion = /\bstory character\b|nhân vật/iu.test(text) || mentioned.some(entity => entity.kind === 'story_character');
@@ -113,7 +137,7 @@ export function resolveMemoryQuery(context: MemoryContext, text: string, history
     const characters = mentioned.filter(entity => entity.kind === 'story_character');
     const chosen = characters.length ? characters : context.entities.filter(entity => entity.kind === 'story_character');
     const scope = /\b(?:real|really|above|house|dog|person|visit)\b|(?:thật|trên trời|nhà|chó|người)/iu.test(text);
-    return resolution('story_character', scope ? 'fictional_scope' : 'name', chosen.map(entity => ({ id: entity.id, fact: `The child introduced ${JSON.stringify(entity.name)} as a fictional story character. It belongs to pretend stories, not the real social circle or a physical animal at the child's home.${entity.represents ? ` The child-described fictional form is ${JSON.stringify(entity.represents)}.` : ''}` })));
+    return resolution('story_character', scope ? 'fictional_scope' : 'name', chosen.map(entity => ({ id: entity.id, fact: `The child introduced ${JSON.stringify(entity.name)} as a fictional story character. It belongs to pretend stories, not the real social circle or a physical animal at the child's home.${entity.represents ? ` The child-described fictional form is ${JSON.stringify(entity.represents)}.` : ' Its fictional form or species is unspecified; do not call it a person, animal, or object without child evidence.'}` })));
   }
   const objectQuestion = /\b(?:toy rabbit|plush|stuffed|my toy|my object)\b|(?:thỏ bông|gấu bông|đồ chơi)/iu.test(text) || mentioned.some(entity => entity.kind === 'object');
   if (objectQuestion) {
@@ -122,6 +146,12 @@ export function resolveMemoryQuery(context: MemoryContext, text: string, history
     if (!objects.length && /\b(?:rabbit|bunny)\b|thỏ/iu.test(text)) chosen = chosen.filter(entity => /\b(?:rabbit|bunny)\b|thỏ/iu.test(`${entity.objectType ?? ''} ${entity.represents ?? ''}`));
     if (!objects.length && /\b(?:bear|teddy)\b|gấu/iu.test(text)) chosen = chosen.filter(entity => /\b(?:bear|teddy)\b|gấu/iu.test(`${entity.objectType ?? ''} ${entity.represents ?? ''}`));
     return resolution('object', /\b(?:kind|real|eat|food|living)\b|(?:là gì|ăn|thật|con gì)/iu.test(text) ? 'kind' : 'name', chosen.map(entity => ({ id: entity.id, fact: `The child introduced the object ${JSON.stringify(entity.name)}${entity.objectType ? ` as ${JSON.stringify(entity.objectType)}` : ''}${entity.represents ? `, representing ${JSON.stringify(entity.represents)}` : ''}. It is a toy/object, not a real pet, and pretend care does not create biological needs.` })));
+  }
+  if (petIdentityQuery) {
+    return resolution('pet', 'name', petIdentityMatches(context, text).map(entity => ({
+      id: entity.id,
+      fact: `The child reported their ${entity.species ?? 'pet'} is named ${JSON.stringify(entity.name)}. Preserve that proper name exactly, including across language changes. This identity does not establish a new event or physical observation.`,
+    })));
   }
   const ownTitle = isStoryTitleQuery(text) && /\b(?:my story|story i (?:made|wrote|told)|i made|i wrote)\b|(?:truyện|câu chuyện).{0,16}(?:mình|tớ|tôi).{0,12}(?:kể|bịa|viết)|truyện của (?:mình|tớ|tôi)/iu.test(text);
   if (ownTitle) {
@@ -284,11 +314,12 @@ export function turnGrounding(input: DirectorInput, plan: DirectorPlan) {
       uncertainty: input.observation.uncertainty ?? (input.observation.uncertain ? 'meaning' : null),
       question_is_not_an_assertion: true,
     },
-    relevant_entities: entities.map(entity => ({ kind: entity.kind, canonical_name: entity.name, species: entity.species, object_type: entity.objectType ?? null, represents: entity.represents ?? null, scope: entity.kind === 'story_character' ? 'fictional' : 'reported_real', evidence_kind: 'child_reported' })),
+    relevant_entities: entities.map(entity => ({ kind: entity.kind, canonical_name: entity.name, species: entity.species, object_type: entity.objectType ?? null, represents: entity.represents ?? null, form_is_unspecified: entity.kind === 'story_character' && !entity.represents && !entity.species, scope: entity.kind === 'story_character' ? 'fictional' : 'reported_real', evidence_kind: 'child_reported' })),
     relevant_relationships: input.context.socialCircle.filter(connection => entityIds.has(connection.entityId)).slice(0, 3)
       .map(connection => ({ name: connection.name, relation: connection.relation, evidence_kind: 'child_reported' })),
     relevant_event_reports: input.context.events.filter(event => !!event.subjectId && entityIds.has(event.subjectId)).slice(0, 3)
       .map(event => ({ subject: event.subjectName, local_date: event.localDate, evidence_kind: event.evidenceKind, report: event.value })),
+    eligible_referent_reports: input.referentEvidence ?? [],
     selected_memory: selected ? { fact: selected.fact, claim: selected.claim ?? null, question: selected.question, evidence_kind: selected.evidenceKind } : null,
     historical_correction_facts: correctionGrounding(input.context, input.text),
     story: plan.action ? plan.action.domain === 'catalog_story' ? storyMetadata(input.context) : null : isStoryTitleQuery(input.text) || plan.purpose === 'story' ? storyMetadata(input.context) : null,

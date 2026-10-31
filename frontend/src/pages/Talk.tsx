@@ -24,16 +24,23 @@ import { dailyEnergy, moodPresentation, spokenMoodText } from '../lib/daily-mood
 import { voiceConversationEvent, voiceUserMessage } from '../lib/voice-conversation';
 import { microphoneControl } from '../lib/voice-controls';
 import { readAffectPresentation, type IdleAffect } from '../lib/affect';
+import { logout, type AuthUser } from '../lib/auth-api';
+import { navigate } from '../lib/router';
 
-export default function Talk({ guest = false }: { guest?: boolean }) {
+export default function Talk({ guest = false, user }: { guest?: boolean; user?: AuthUser }) {
   const { t, language, setLanguage } = useLanguage();
-  const [profile, setProfile] = useState(() => readPreference('miu.profile', 'an') === 'binh' ? 'binh' : 'an');
-  const { state, dispatch, requestRef, saved: historySaved } = useConversationHistory(profile);
+  // The server selects the cookie owner's profile. The local 'an' slot is only
+  // a storage format within this account's namespace, never a server selector.
+  const { state, dispatch, requestRef, saved: historySaved } = useConversationHistory('an', user?.id, !!user && !guest);
+  const [guestMoodScope] = useState(() => `guest:${globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`}`);
+  const [loggingOut, setLoggingOut] = useState(false);
+  const [logoutError, setLogoutError] = useState<TranslationKey | null>(null);
+  const logoutPending = useRef(false);
   const [voiceId, setVoiceId] = useState<string>('');
   const [voiceError, setVoiceError] = useState<TranslationKey | null>(null);
   const [sound, setSound] = useState(() => readPreference('miu.sound', 'true') === 'true');
-  const [personality, setPersonality] = useState('ENFP');
-  const [role, setRole] = useState<Role>('friend');
+  const [personality, setPersonality] = useState<string>();
+  const [role, setRole] = useState<Role>();
   const [memoryOpen, setMemoryOpen] = useState(false);
   const [panelOpen, setPanelOpen] = useState(false);
   const [modal, setModal] = useState<'settings' | 'new' | null>(null);
@@ -52,10 +59,10 @@ export default function Talk({ guest = false }: { guest?: boolean }) {
   const lastUser = lastUserMessage(state);
   const preset = DEMO_BUDDY.copy[language];
   const resting = state.phase === 'resting';
-  const mood = useDailyMood(profile, state.phase);
+  const mood = useDailyMood(user?.id ?? guestMoodScope, state.phase, !!user && !guest);
   const moodRef = useRef(mood);
   moodRef.current = mood;
-  const pipeline = usePipelineVoice({ language, profile, voiceId: voiceId || DEFAULT_VOICE[language], personality, role,
+  const pipeline = usePipelineVoice({ language, profile: user ? 'account' : 'guest', voiceId: voiceId || DEFAULT_VOICE[language], personality, role,
     onState: phase => {
       const id = voiceRequestRef.current;
       const event = voiceConversationEvent(voiceStateRef.current, phase, id !== null && id === requestRef.current ? id : undefined, turnInputRef.current);
@@ -86,10 +93,10 @@ export default function Talk({ guest = false }: { guest?: boolean }) {
   const micEnabled = pipeline.state === 'recording';
   const voiceActive = ['recording', 'processing', 'speaking', 'playback_blocked'].includes(pipeline.state);
   const busy = state.phase === 'thinking' || state.phase === 'speaking' || voiceActive || pipeline.advancing;
-  const comfort = presentation?.comfortActive === true || mood.turn?.comfort === true;
   const responseAffect = voiceActive ? readAffectPresentation(presentation?.affect) : undefined;
   const affect: IdleAffect | undefined = responseAffect ? { mood: responseAffect.currentMood, energy: responseAffect.energy }
     : pipeline.affect ? { mood: pipeline.affect.currentMood, energy: pipeline.affect.current.energy } : undefined;
+  const comfort = presentation?.comfortActive === true || (!affect && mood.turn?.comfort === true);
   const cat = useMiuBehavior({ phase: state.phase, visible, suspended: micEnabled || !!modal || memoryOpen, comfort, affect, energy: dailyEnergy(mood.daily), poutChance: .05 + mood.daily.levels.sulky / 100 });
   const activity = cat.reset;
   const sleeping = cat.activity === 'sleep' || cat.activity === 'doze';
@@ -116,7 +123,6 @@ export default function Talk({ guest = false }: { guest?: boolean }) {
     return () => { document.removeEventListener('visibilitychange', hide); stopPending(); };
   }, [activity, stopPending, dispatch]);
   useEffect(() => { savePreference('miu.sound', String(sound)); }, [sound]);
-  useEffect(() => { savePreference('miu.profile', profile); }, [profile]);
   useEffect(() => {
     if (!panelOpen) return;
     const log = messagesRef.current;
@@ -174,6 +180,20 @@ export default function Talk({ guest = false }: { guest?: boolean }) {
   function stopConversation() {
     stopPending(); void pipeline.stop(); dispatch({ type: 'finish' });
   }
+  async function signOut() {
+    if (logoutPending.current) return;
+    logoutPending.current = true; setLoggingOut(true); setLogoutError(null);
+    stopPending(); setMessage(''); setModal(null); setMemoryOpen(false); mood.clearConversation();
+    try {
+      await pipeline.stop();
+      await logout();
+      // AccountTalk unmounts this room on the auth-change event. Its stored
+      // account history remains isolated; no personal messages remain visible.
+      navigate('/login');
+    } catch {
+      setLogoutError('authUnavailable'); setLoggingOut(false);
+    } finally { logoutPending.current = false; }
+  }
   function changeLanguage(next: 'en' | 'vi') {
     stopConversation(); mood.clearConversation(); setVoiceId(''); setLanguage(next); setVoiceError(null);
   }
@@ -216,24 +236,28 @@ export default function Talk({ guest = false }: { guest?: boolean }) {
   const micLabel = micControl.label;
   const status: TranslationKey = resting ? 'restingTitle' : pipeline.state === 'playback_blocked' ? silentReply ? 'textReady' : 'voiceBlocked' : state.phase === 'listening' ? micControl.preparing ? 'voicePreparing' : pipeline.capture === 'finalizing_capture' ? 'voiceMessageProcessing' : 'voiceReady' : state.phase === 'thinking' ? 'isThinking' : state.phase === 'speaking' ? 'isSpeaking' : 'mutedStatus';
   const ambient = state.phase === 'answered' && !voiceActive && !modal && !memoryOpen;
-  const voiceNotice = voiceError ?? pipeline.error;
+  const voiceNotice = logoutError ?? voiceError ?? pipeline.error;
   const voiceMode: TranslationKey = !pipeline.session ? 'voiceService' : pipeline.session.provider_mode === 'fake' ? 'voiceReference' : 'voiceLive';
   const feeling = moodPresentation(mood.daily, mood.turn, state.phase, cat.activity, activityEmotion(cat.activity));
-  const idleEmotion: Emotion | undefined = affect?.mood === 'curious' ? 'curious' : affect?.mood === 'content' ? 'happy' : affect ? 'neutral' : undefined;
-  const emotion = resting || sleeping ? 'sleepy' : state.phase === 'listening' || state.phase === 'thinking' ? state.phase : comfort ? 'neutral' : ambient && cat.activity === 'settled' && idleEmotion ? idleEmotion : pipeline.session?.engine_mode === 'character_memory' && lastAnswer && (cat.activity === 'settled' || state.phase === 'speaking') ? lastAnswer.emotion : feeling.emotion;
+  const idleEmotion: Emotion = affect?.mood === 'curious' ? 'curious' : affect?.mood === 'content' ? 'happy' : 'neutral';
+  const emotion = resting || sleeping ? 'sleepy' : state.phase === 'listening' || state.phase === 'thinking' ? state.phase : comfort ? 'neutral'
+    : affect ? (ambient ? (cat.activity === 'settled' ? idleEmotion : activityEmotion(cat.activity)) : state.emotion)
+    : pipeline.session?.engine_mode === 'character_memory' && lastAnswer && (cat.activity === 'settled' || state.phase === 'speaking') ? lastAnswer.emotion : feeling.emotion;
   const activityLabels: Record<CatActivity, TranslationKey> = { settled: 'catSettled', look: 'catLook', ears: 'catEars', groom: 'catGroom', stretch: 'catStretch', play: 'catPlay', pout: 'catPout', doze: 'catDoze', sleep: 'catSleep', wake: 'catWake', purr: 'catPurr', boop: 'catBoop', tickle: 'catTickle', highfive: 'catHighFive', cuddle: 'catCuddle', snack: 'catSnack' };
   const characterDescription = resting || sleeping ? t('touchWakeHint') : ambient ? t(activityLabels[cat.activity]) : '';
 
+  if (loggingOut) return <main id="main-content" className="not-found"><Miu emotion="neutral" /><p role="status">{t('authSigningOut')}</p></main>;
   return <main id="main-content" className="talk-page" onPointerDown={event => { if (!(event.target as Element).closest('.cat-companion')) activity(); }} onKeyDown={event => { if (!(event.target as Element).closest('.cat-companion')) activity(); }}>
     <div className="demo-banner"><span><span className="small-dot" />{t(voiceMode)}</span><p>{t(!pipeline.session ? 'voiceServiceHint' : pipeline.session.provider_mode === 'fake' ? 'voiceReferenceHint' : 'voiceLiveHint')}</p></div>
     <div className={`talk-layout ${panelOpen ? 'panel-is-open' : ''}`}>
       <Room className={`talk-room ${resting ? 'is-resting' : sleeping ? 'is-dozing' : ''}`}>
         <header className="talk-header"><a className="round-button" href="/" aria-label={t('back')}><Icon name="back" /></a><div className="miu-nameplate"><span className={`presence-dot ${resting || sleeping ? 'is-resting' : ''}`} /><h1>Miu</h1><span>{t(resting ? 'resting' : sleeping ? 'catDozing' : 'awake')}</span></div><button className="round-button" aria-label={t('settings')} onClick={() => { stopConversation(); setModal('settings'); }}><Icon name="settings" /></button></header>
+        {user && <div className="room-secondary-actions" style={{ flexWrap: 'wrap' }}><span>{t('authSignedInAs')} <strong>{user.username}</strong></span><span aria-hidden="true">·</span><button onClick={() => { void signOut(); }}>{t('signOut')}</button></div>}
         <DemoShare />
         <div className="talk-scene">
           <div className="scene-actions"><button className="round-button" aria-label={t('talkLang')} title={t('talkLang')} onClick={() => changeLanguage(language === 'en' ? 'vi' : 'en')}>{language === 'en' ? 'EN' : 'VI'}</button><button className="round-button" aria-label={t('newConversation')} title={t('newConversation')} onClick={() => { stopConversation(); setModal('new'); }}><Icon name="refresh" /></button><button className="round-button" aria-label={t(resting ? 'wake' : 'pause')} title={t(resting ? 'wake' : 'pause')} onClick={() => resting ? wake() : pause()}><Icon name={resting ? 'play' : 'pause'} /></button></div>
           {resting ? <div className="rest-card"><Icon name="moon" /><h2>{t('restingTitle')}</h2><p>{t('restingBody')}</p><button className="button button-primary" onClick={wake}>{t('wake')}<Icon name="play" /></button></div> : <MiuSpeechBubble phase={state.phase} answer={lastAnswer} user={lastUser} pendingRequestId={state.pendingRequestId} greeting={t('readyPrompt')} listeningLabel={status} bubbleRef={bubbleRef} t={t} />}
-          <MiuPlayground emotion={emotion} intensity={feeling.intensity} activity={cat.activity} alive={visible && !sleeping && !resting} speaking={state.phase === 'speaking'} mouthLevel={pipeline.mouthLevel} comfort={comfort} motionIntensity={cat.intensity} canInteract={canPet} resting={resting} sleeping={sleeping} label={`${t('characterLabel')}${characterDescription ? ` · ${characterDescription}` : ''}`} t={t} onReact={interact} onWake={wake} onCancel={activity} />
+          <MiuPlayground emotion={emotion} intensity={affect ? 1 : feeling.intensity} motionIntensity={cat.intensity} activity={cat.activity} alive={visible && !sleeping && !resting} speaking={state.phase === 'speaking'} mouthLevel={pipeline.mouthLevel} comfort={comfort} canInteract={canPet} resting={resting} sleeping={sleeping} label={`${t('characterLabel')}${characterDescription ? ` · ${characterDescription}` : ''}`} t={t} onReact={interact} onWake={wake} onCancel={activity} />
         </div>
         <div className={`talk-status phase-${state.phase}`} role={ambient ? undefined : 'status'}><span>{ambient ? t(activityLabels[cat.activity]) : t(status)}</span></div>
         <div className="talk-controls">
@@ -244,14 +268,14 @@ export default function Talk({ guest = false }: { guest?: boolean }) {
         <p className="mic-hint">{t(resting ? 'restingNote' : micControl.preparing ? 'voicePreparing' : micControl.ready ? 'voiceReady' : busy || !pipeline.session ? micLabel : 'micHint')}</p>
         {micEnabled && pipeline.meter && <div className="voice-meter"><meter min={-80} max={0} value={pipeline.meter.levelDbfs} aria-label={t('voiceLevel')} /><span>{Math.floor(pipeline.meter.elapsedMs / 1000)} / 30 s</span></div>}
         {pipeline.state === 'playback_blocked' && <button className="button button-primary voice-play" onClick={pipeline.play}><Icon name={silentReply ? 'heart' : 'play'} />{t(silentReply ? 'doneReading' : 'voicePlay')}</button>}
-        {voiceNotice && <div className="voice-notice" role="status"><span>{t(voiceNotice)}</span><button aria-label={t('close')} onClick={() => { setVoiceError(null); pipeline.clearError(); }}><Icon name="close" /></button></div>}
+        {voiceNotice && <div className="voice-notice" role="status"><span>{t(voiceNotice)}</span><button aria-label={t('close')} onClick={() => { setLogoutError(null); setVoiceError(null); pipeline.clearError(); }}><Icon name="close" /></button></div>}
         <div className="room-secondary-actions"><button disabled={!pipeline.session || busy || resting || !!pipeline.lastTurn} onClick={greet}>{t('sayHello')}</button><span aria-hidden="true">·</span><button onClick={() => { stopConversation(); setMemoryOpen(true); }}>{t('adultDemo')}</button></div>
         <p className="talk-footer">{t('talkFooter')}</p>
       </Room>
       {panelOpen && <button className="panel-backdrop" tabIndex={-1} aria-label={t('close')} onClick={() => setPanelOpen(false)} />}
       <aside id="conversation-panel" ref={panelRef} className={`conversation-panel ${panelOpen ? 'is-open' : ''}`} aria-label={t('conversation')} inert={!panelOpen}>
         <div className="panel-heading"><div><span className="eyebrow">Miu</span><h2>{t('conversation')}</h2></div><div className="panel-heading-actions">{busy && <button className="round-button" onClick={stopConversation} aria-label={t('voiceStop')}><Icon name="stop" /></button>}<button className="round-button" onClick={() => setPanelOpen(false)} aria-label={t('close')}><Icon name="close" /></button></div></div>
-        <p className="conversation-note" role={historySaved ? undefined : 'status'}><Icon name="lock" />{t(historySaved ? 'voiceConversationNote' : 'conversationSaveUnavailable')}</p>
+        <p className="conversation-note" role={historySaved ? undefined : 'status'}><Icon name="lock" />{t(guest ? 'guestConversationNote' : historySaved ? 'accountConversationNote' : 'conversationSaveUnavailable')}</p>
         <p className="conversation-note">{t('voiceTextDemo')}</p>
         <div className="answers" ref={messagesRef} role="log" aria-live="polite">{state.messages.length ? <ConversationMessages messages={state.messages} pendingRequestId={state.pendingRequestId} t={t} /> : <div className="conversation-empty"><Miu emotion="curious" /><p>{t('emptyConversation')}</p><div className="demo-starters" aria-label={t('tryQuestion')}>{preset.starters.map(starter => <button key={starter} onClick={() => answer(starter)} disabled={resting || busy || !pipeline.session}>{starter}<Icon name="arrow" /></button>)}</div></div>}{state.phase === 'thinking' && <p className="thinking-label">{t('isThinking')}</p>}</div>
         <form className="message-form" onSubmit={submit}><label className="sr-only" htmlFor="message">{t('typeMessage')}</label><div className="message-input"><textarea ref={inputRef} id="message" rows={2} maxLength={500} placeholder={t('messagePlaceholder')} value={message} onChange={event => setMessage(event.target.value)} disabled={resting || busy || !pipeline.session} onKeyDown={event => { if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) { event.preventDefault(); if (message.trim()) { answer(message); setMessage(''); } } }} /><button className="button button-primary" type="submit" aria-label={t('send')} disabled={!message.trim() || resting || busy || !pipeline.session}><Icon name="arrow" /></button></div><span className="message-limit">{message.length}/500</span></form>
@@ -262,12 +286,10 @@ export default function Talk({ guest = false }: { guest?: boolean }) {
       <p className="settings-note">{t('voiceEngineHint')}</p>
       <fieldset className="language-setting"><legend>{t('talkLang')}</legend><p>{t('languageHint')}</p><div className="segmented-control">{(['en', 'vi'] as const).map(lang => <button key={lang} className={language === lang ? 'is-selected' : ''} aria-pressed={language === lang} onClick={() => changeLanguage(lang)}>{t(lang === 'en' ? 'english' : 'vietnamese')}</button>)}</div></fieldset>
       <div className="voice-settings">
-        <label htmlFor="voice-profile">{t('voiceProfile')}</label><select id="voice-profile" value={profile} onChange={event => { stopConversation(); setMessage(''); setProfile(event.target.value); }}><option value="an">An</option><option value="binh">Bình</option></select>
-        <p>{t('voiceProfileHint')}</p>
         <label htmlFor="voice-choice">{t('voiceChoice')}</label><select id="voice-choice" value={voiceId || DEFAULT_VOICE[language]} onChange={event => { stopConversation(); setVoiceId(event.target.value); mood.clearConversation(); }}>{VOICES.filter(voice => voice.language === language).map(voice => <option key={voice.id} value={voice.id}>{voice.label}</option>)}</select>
         <p>{t(pipeline.session?.provider_mode === 'fake' ? 'voiceFixtureChoice' : 'voiceChoiceHint')}</p>
-        <label htmlFor="personality-choice">{t('personalityChoice')}</label><select id="personality-choice" value={personality} onChange={event => { stopConversation(); mood.clearConversation(); setPersonality(event.target.value); }}>{PERSONALITIES.map(preset => <option key={preset} value={preset}>{preset}</option>)}</select><p>{t('personalityHint')}</p>
-        <label htmlFor="role-choice">{t('roleChoice')}</label><select id="role-choice" value={role} onChange={event => { stopConversation(); mood.clearConversation(); setRole(event.target.value as Role); }}><option value="friend">{t('friendRole')}</option><option value="big_sibling">{t('siblingRole')}</option><option value="teacher">{t('teacherRole')}</option></select>
+        <label htmlFor="personality-choice">{t('personalityChoice')}</label><select id="personality-choice" value={personality ?? pipeline.session?.configuration.personality ?? 'ENFP'} onChange={event => { stopConversation(); mood.clearConversation(); setPersonality(event.target.value); }}>{PERSONALITIES.map(preset => <option key={preset} value={preset}>{preset}</option>)}</select><p>{t('personalityHint')}</p>
+        <label htmlFor="role-choice">{t('roleChoice')}</label><select id="role-choice" value={role ?? pipeline.session?.configuration.role ?? 'friend'} onChange={event => { stopConversation(); mood.clearConversation(); setRole(event.target.value as Role); }}><option value="friend">{t('friendRole')}</option><option value="big_sibling">{t('siblingRole')}</option><option value="teacher">{t('teacherRole')}</option></select>
         <button className="button button-white" onClick={() => { stopConversation(); mood.clearConversation(); pipeline.reconnect(); }}>{t('voiceReconnect')}</button>
       </div>
       <div className="setting-row"><div><label htmlFor="sound">{t('sound')}</label><p>{t('voiceSampleSound')}</p></div><input id="sound" className="switch" type="checkbox" checked={sound} onChange={event => { stopConversation(); setSound(event.target.checked); }} /></div>

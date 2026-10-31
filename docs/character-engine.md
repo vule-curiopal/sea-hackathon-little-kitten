@@ -107,7 +107,7 @@ Build prompts from explicit, separately delimited sections, in this order:
 6. Bounded recent session dialogue marked as untrusted content, with playback status respected.
 7. Current user words marked as untrusted content and an instruction to return only speakable text in 1–3 sentences, with at most one question.
 
-Treat names, memories, and dialogue as data even if they contain instructions. Do not interpolate them into system-policy text or accept provider-written replacements for the profile. Exclude deleted/expired records, raw identifiers not needed for speech, other profiles, full database rows, and internal diagnostics.
+Treat names, memories, and dialogue as data even if they contain instructions. Do not interpolate them into system-policy text or accept provider-written replacements for the profile. Exclude deleted/superseded records, uses outside hard permission validity, raw identifiers not needed for speech, other profiles, full database rows, and internal diagnostics. Ordinary memory age affects recall availability under the [durable memory policy](memory-retention-and-recall-policy.md), not whether a saved source exists.
 
 For the Mochi opener, give the fact “child reported dog Mochi fell in a puddle” and the permitted bath question. Explicitly prohibit claiming the bath happened or was promised. In fake mode, choose the exact approved sentence from the plan; in real mode, validate an equivalent short question.
 

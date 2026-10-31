@@ -3,7 +3,7 @@ import { resolve } from 'node:path';
 import { scenarios, SCENARIO_CATALOG_VERSION, validateScenarios } from '../evaluation/catalog.js';
 
 validateScenarios(scenarios);
-const destination = resolve(process.argv[2] ?? 'backend/evaluation/scenarios/catalog.v3.json');
+const destination = resolve(process.argv[2] ?? 'backend/evaluation/scenarios/catalog.v5.json');
 await mkdir(resolve(destination, '..'), { recursive: true });
 const conversations = scenarios.reduce((total, scenario) => total + scenario.conversations.length, 0);
 const turns = scenarios.reduce((total, scenario) => total + scenario.conversations.reduce((count, conversation) => count + conversation.turns.length, 0), 0);

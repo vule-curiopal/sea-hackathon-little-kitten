@@ -8,11 +8,12 @@ export function retiredNameHash(profileId: string, name: string): string {
 }
 
 /** Equality key only: keep the original, source-grounded value for display.
- * The optional Vietnamese activity verb does not create a different hobby.
+ * Reconfirmation wording does not create a different hobby. Restrict English
+ * "still" to an activity gerund so "still life painting" stays distinct.
  * Other categories and meanings are deliberately left separate. */
 export function canonicalPreferenceKey(category: PreferenceCategory, value: string): string {
   const key = value.normalize('NFC').trim().toLocaleLowerCase('vi').replace(/\s+/gu, ' ');
-  return category === 'hobby' ? key.replace(/^chơi\s+(?=\S)/u, '') : key;
+  return category === 'hobby' ? key.replace(/^chơi\s+(?=\S)/u, '').replace(/^still\s+(?=[\p{L}\p{M}]+ing\b)/u, '') : key;
 }
 
 /** Display/evidence stays literal. Ignore only terminal prose punctuation when

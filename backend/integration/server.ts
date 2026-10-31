@@ -10,6 +10,9 @@ import { loadConfig } from '../pipeline/src/config.js';
 import { PipelineError } from '../pipeline/src/errors.js';
 import { bearerToken, identifier, object } from '../pipeline/src/http/request.js';
 import { createServer } from '../pipeline/src/server-runtime.js';
+import { AuthStore } from '../auth/store.js';
+import { registerAuthRoutes } from '../auth/http.js';
+import { accountSessionResolver, registerAccountSessionAccess } from '../auth/session-access.js';
 
 /** Single composition: real STT/TTS, persistent character engine, and React UI. */
 export async function createIntegratedApp(environment: Record<string, string | undefined> = process.env) {
@@ -26,7 +29,21 @@ export async function createIntegratedApp(environment: Record<string, string | u
   const dayReceipts = new Map<string, { expected: number; work: Promise<unknown> }>();
   let maintenance: ReturnType<typeof setInterval> | undefined;
   try {
-    const app = await buildApp({ config, engineBridge: bridge, registerRoutes: (api, sessions) => {
+    const auth = new AuthStore(bridge.application.memory);
+    // This explicitly requested fixture is linked to the existing test profile.
+    // Disable it outside demo installations; regular signup rejects short passwords.
+    if (env.MIU_SEED_TEST_USER === 'true' || (env.MIU_SEED_TEST_USER !== 'false' && env.DEMO_MODE === 'true')) {
+      await auth.seedTestAccount({ username: 'sam', password: '1', profileKey: 'an' });
+    }
+    const app = await buildApp({ config, engineBridge: bridge, resolveSessionProfile: accountSessionResolver(auth, bridge, config.allowedOrigins), registerRoutes: (api, sessions) => {
+      registerAuthRoutes(api, auth, {
+        allowedOrigins: config.allowedOrigins, secureCookies: env.NODE_ENV === 'production' ? true : undefined,
+        onLogout: async user => {
+          const profile = sessions.profiles.get(user.profile_key);
+          if (profile?.sessionId) await sessions.closeSession(sessions.session(profile.sessionId, profile.token));
+        },
+      });
+      registerAccountSessionAccess(api, auth, sessions, config.allowedOrigins);
       api.get('/api/demo/panel', async (request, response) => {
         const token = bearerToken(request);
         const profile = sessions.profile(token);

@@ -7,10 +7,10 @@ import { extendedLifecycleScenarios } from './scenarios/extended-lifecycle.js';
 import { isSafeProjection } from '../memory/evidence.js';
 import type { Scenario } from './types.js';
 
-export const SCENARIO_CATALOG_VERSION = 'miu-product-scenarios-v3';
+export const SCENARIO_CATALOG_VERSION = 'miu-product-scenarios-v5';
 export const SCENARIO_CATALOG_COUNT = 203;
 export const scenarios: Scenario[] = [...coreScenarios, ...advancedScenarios, ...memoryRegressionScenarios, ...extendedMemoryScenarios, ...extendedDialogueScenarios, ...extendedLifecycleScenarios];
-const assertionOps = new Set(['equals', 'not_equals', 'contains', 'not_contains', 'contains_one_of', 'matches', 'not_matches', 'not_affirmative', 'one_of', 'exists', 'gte', 'lte', 'equals_before']);
+const assertionOps = new Set(['equals', 'not_equals', 'contains', 'not_contains', 'contains_one_of', 'matches', 'not_matches', 'not_affirmative', 'one_of', 'exists', 'gte', 'lte', 'equals_before', 'contains_before', 'equals_path']);
 
 export function validateScenarios(items: Scenario[], expectedCount = SCENARIO_CATALOG_COUNT): void {
   if (items.length !== expectedCount) throw new Error(`Expected ${expectedCount} scenarios; found ${items.length}`);
@@ -43,6 +43,7 @@ export function validateScenarios(items: Scenario[], expectedCount = SCENARIO_CA
       const turnIds = new Set<string>();
       for (const turn of conversation.turns) {
         if (!turn.id || turnIds.has(turn.id)) throw new Error(`Duplicate turn ID in ${scenario.id}/${conversation.id}`);
+        if (turn.probe_stale_replay_of && !turnIds.has(turn.probe_stale_replay_of)) throw new Error('Replay probe must reference an earlier same-session turn: ' + scenario.id + '/' + turn.id);
         turnIds.add(turn.id);
         const expectsMissingInput = turn.assertions.some(assertion => assertion.target === 'error.code' && assertion.op === 'equals' && assertion.value === 'missing_text');
         if (turn.kind !== 'greeting' && !turn.text?.trim() && !expectsMissingInput) throw new Error(`Missing input in ${scenario.id}/${turn.id}`);
@@ -50,6 +51,7 @@ export function validateScenarios(items: Scenario[], expectedCount = SCENARIO_CA
         for (const assertion of turn.assertions) {
           if (!assertionOps.has(assertion.op) || !assertion.description.trim() || !assertion.requirement) throw new Error(`Invalid assertion in ${scenario.id}/${turn.id}`);
           if (!assertion.target || assertion.target.split('.').some(part => ['__proto__', 'constructor', 'prototype'].includes(part))) throw new Error(`Unsafe assertion path in ${scenario.id}/${turn.id}`);
+          if (['equals_before', 'contains_before', 'equals_path'].includes(assertion.op) && typeof assertion.value === 'string' && assertion.value.split('.').some(part => ['__proto__', 'constructor', 'prototype'].includes(part))) throw new Error('Unsafe comparison path in ' + scenario.id + '/' + turn.id);
           if (assertion.op === 'matches' || assertion.op === 'not_matches' || assertion.op === 'not_affirmative') {
             if (typeof assertion.value !== 'string') throw new Error(`Regex must be a string in ${scenario.id}/${turn.id}`);
             new RegExp(assertion.value, 'iu');

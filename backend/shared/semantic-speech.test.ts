@@ -61,7 +61,7 @@ test('offline grounded naming acknowledgements permit Vietnamese and polite Engl
     'Okay An, I’ll call you An.',
     'Okay, An, I will call you An.',
     'Of course, I’ll call you An, with no nickname.',
-  ]) assert.equal(withoutCurrentChatIntentions(value, evidence), '', value);
+  ]) assert.equal(affirmativeSpeech(withoutCurrentChatIntentions(value, evidence), /\bI(?: will|['’]ll)\b|Miu sẽ gọi/u), null, value);
   for (const value of [
     'Miu sẽ gọi bạn là An vào ngày mai.',
     'Được rồi, An, Miu sẽ gọi mẹ bạn ngày mai.',

@@ -9,7 +9,7 @@ export interface Assertion {
   description: string;
   /** Dot path into {response,before,after,delivery,error,retry}; arrays support .length. */
   target: string;
-  op: 'equals' | 'not_equals' | 'contains' | 'not_contains' | 'contains_one_of' | 'matches' | 'not_matches' | 'not_affirmative' | 'one_of' | 'exists' | 'gte' | 'lte' | 'equals_before';
+  op: 'equals' | 'not_equals' | 'contains' | 'not_contains' | 'contains_one_of' | 'matches' | 'not_matches' | 'not_affirmative' | 'one_of' | 'exists' | 'gte' | 'lte' | 'equals_before' | 'contains_before' | 'equals_path';
   /** contains on arrays accepts a partial object; matches uses a Unicode case-insensitive regex. */
   value?: JsonValue;
 }
@@ -19,6 +19,8 @@ export interface ScenarioTurn {
   text?: string;
   delivery?: 'completed' | 'interrupted' | 'canceled';
   retry?: 'turn' | 'receipt';
+  /** Operational probe only: reuse this earlier same-session request after this turn completes. */
+  probe_stale_replay_of?: string;
   assertions: Assertion[];
   /** Semantic acceptance criteria are evaluated separately, never silently marked passed by a regex. */
   rubric: string[];
@@ -56,6 +58,40 @@ export interface ProviderEvent {
   details?: unknown;
   error_code?: string;
 }
+export interface OperationalResponse {
+  turn_id: string;
+  session_id: string;
+  state_version: number;
+  clock_version?: number;
+  reply_text: string;
+}
+export interface OperationalSessionState {
+  pending_forget_all: boolean;
+  history_count: number;
+  replay_request_ids: string[];
+  retired_request_ids: string[];
+  last_reference_id: string | null;
+  last_learned_ids: string[];
+}
+export interface OperationalEvidence {
+  request: { request_id: string; session_id: string };
+  original_response?: OperationalResponse | null;
+  retry_response?: OperationalResponse | null;
+  receipt?: { request_id: string; status: string; result: unknown };
+  session_before?: OperationalSessionState;
+  session_after?: OperationalSessionState;
+  stale_replay?: {
+    source_turn_spec_id: string;
+    request_id: string;
+    session_id: string;
+    error_code: string | null;
+    response: OperationalResponse | null;
+    api_call_count: number;
+    /** Separate from the main reply so an unexpected probe cannot replace its provenance. */
+    api_calls?: OpenAIRequestTelemetry[];
+    provider_events?: ProviderEvent[];
+  };
+}
 export interface TurnLog {
   schema_version: 'miu-engine-evaluation-v1';
   run_kind?: 'character_memory_evaluation' | 'harness_self_test';
@@ -76,6 +112,8 @@ export interface TurnLog {
   after: MemoryContext;
   delivery: { status: string; receipt_status?: string; learning_status?: string } | null;
   retry: unknown;
+  /** Direct request/receipt/cache observations, never model-written postconditions. */
+  operational?: OperationalEvidence;
   error: { code: string; stage: string } | null;
   /** If set, after is the last known before snapshot, not evidence of post-turn state. */
   after_snapshot_error?: string;

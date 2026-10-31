@@ -57,12 +57,15 @@ test('demo answers follow the chosen language and emotion', () => {
   assert.equal(getDemoReply('I love you', 'en').emotion, 'love');
 });
 
-test('account validation needs only username and password', () => {
-  assert.deepEqual(validateAuth({ username: '', password: '123' }), { username: 'usernameError', password: 'passwordError' });
-  assert.deepEqual(validateAuth({ username: 'lan.nguyen', password: 'demo1234' }), {});
-  assert.deepEqual(validateAuth({ username: 'bé_mèo', password: 'demo1234' }), {});
-  assert.deepEqual(validateAuth({ username: '   ', password: 'demo1234' }), { username: 'usernameError' });
-  assert.deepEqual(validateAuth({ username: 'x'.repeat(81), password: 'demo1234' }), { username: 'usernameError' });
+test('account validation needs only username/password and preserves backend registration and login rules', () => {
+  assert.deepEqual(validateAuth({ username: '', password: '123' }, false), { username: 'usernameError', password: 'passwordError' });
+  assert.deepEqual(validateAuth({ username: 'a@b', password: '123' }, false), { username: 'usernameError', password: 'passwordError' });
+  assert.deepEqual(validateAuth({ username: 'lan.nguyen', password: 'long-password-12' }, false), {});
+  assert.deepEqual(validateAuth({ username: 'bé_mèo', password: 'long-password-12' }, false), { username: 'usernameError' });
+  assert.deepEqual(validateAuth({ username: '   ', password: 'long-password-12' }, false), { username: 'usernameError' });
+  assert.deepEqual(validateAuth({ username: 'x'.repeat(81), password: 'long-password-12' }, false), { username: 'usernameError' });
+  assert.deepEqual(validateAuth({ username: 'lan.nguyen', password: 'demo1234' }, false), { password: 'passwordError' });
+  assert.deepEqual(validateAuth({ username: 'sam', password: '1' }, true), {});
 });
 
 test('all fifteen expressions have valid SVG values and unknown emotions are neutral', () => {

@@ -1,10 +1,12 @@
-import { mkdir } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { parseArgs } from 'node:util';
 import { existsSync } from 'node:fs';
 import { loadEnvFile } from 'node:process';
 import { scenarios, validateScenarios } from '../evaluation/catalog.js';
 import { runEvaluation } from '../evaluation/runner.js';
+import { summarizeLatency } from '../evaluation/latency.js';
+import type { TurnLog } from '../evaluation/types.js';
 
 const { values } = parseArgs({ options: {
   provider: { type: 'string', default: 'real' }, history: { type: 'string', default: 'none' },
@@ -31,12 +33,20 @@ if (!selected.length) throw new Error('No scenarios selected');
 const defaultParent = resolve('backend/evaluation/runs');
 const outputDir = values.output ? resolve(values.output) : resolve(defaultParent, `${new Date().toISOString().replace(/[:.]/gu, '-')}-${values.provider}`);
 await mkdir(resolve(outputDir, '..'), { recursive: true });
+const runnerStarted = performance.now();
 const result = await runEvaluation({
   scenarios: selected, provider: values.provider as 'fake' | 'real', history: values.history as 'full' | 'none', outputDir,
   progress: message => console.log(message),
 });
+const runnerWallMs = performance.now() - runnerStarted;
+const logs = (await readFile(resolve(result.outputDir, 'turns.jsonl'), 'utf8')).split('\n').filter(Boolean).map(line => JSON.parse(line) as TurnLog);
+const latency = { ...summarizeLatency(logs.filter(log => log.phase === 'scenario')), runner_wall_ms: runnerWallMs,
+  run_status: result.blocked ? 'blocked' : 'complete', blocked: result.blocked,
+  scope_note: 'Scenario-turn timing only. runner_wall_ms also includes runner setup, optional history/seeds, reports and shutdown; it excludes CLI startup. Inspect report.json for correctness and coverage.' };
+await writeFile(resolve(result.outputDir, 'latency.json'), `${JSON.stringify(latency, null, 2)}\n`);
 console.log(`Saved ${result.logCount} actual engine turn records to ${result.outputDir}`);
 console.log(JSON.stringify(result.report.totals, null, 2));
+console.log(JSON.stringify({ runner_wall_ms: runnerWallMs, scenario_turn_mean_ms: latency.elapsed_ms.mean_ms, scenario_turn_p95_ms: latency.elapsed_ms.p95_ms, p95_small_sample: latency.elapsed_ms.p95_small_sample }));
 const statuses = result.report.turns.map(turn => turn.status);
 if (result.blocked) process.exitCode = 1;
 else if (values['fail-on'] !== 'none' && statuses.includes('fail')) process.exitCode = 1;

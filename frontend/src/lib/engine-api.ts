@@ -27,7 +27,7 @@ export type DemoPanelData = { memory_available: boolean; context?: DemoContext; 
 export async function engineRequest<T>(session: SessionResponse, path: string, init: RequestInit = {}, signal?: AbortSignal): Promise<T> {
   const base = (import.meta.env.VITE_VOICE_API_URL || '').replace(/\/$/, '');
   const response = await fetch(`${base}${path}`, {
-    ...init, signal, cache: 'no-store', credentials: 'same-origin',
+    ...init, signal, cache: 'no-store', credentials: 'include',
     headers: { Authorization: `Bearer ${session.demo_token}`, ...(init.body ? { 'Content-Type': 'application/json' } : {}), ...init.headers },
   });
   const value = await response.json();

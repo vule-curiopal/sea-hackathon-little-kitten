@@ -75,12 +75,13 @@ export class SessionService {
     this.applySnapshot(session.profile, await this.bridge.context(session.profile.token));
   }
 
-  async createSession(key: string, requestId: string): Promise<Session> {
+  async createSession(key: string, requestId: string, resolvedOwner = false): Promise<Session> {
     if (!this.bridge) return this.create(key, requestId);
-    if (!['an', 'binh'].includes(key)) throw new PipelineError('invalid_demo_profile', 400);
-    return this.lifecycle('bootstrap', async () => {
+    if (!['an', 'binh'].includes(key) && !(resolvedOwner && /^(?:user|guest)_[a-f0-9-]{36}$/u.test(key))) throw new PipelineError('invalid_demo_profile', 400);
+    return this.lifecycle('bootstrap:' + key, async () => {
       this.sweep();
-      const existing = this.repository.getBootstrap(requestId);
+      const bootstrapKey = key + ':' + requestId;
+      const existing = this.repository.getBootstrap(bootstrapKey);
       if (existing) {
         if (existing.key !== key) throw new PipelineError('idempotency_conflict', 409);
         const session = this.repository.getSession(existing.sessionId);
@@ -104,7 +105,7 @@ export class SessionService {
         touchedAt: this.now(), closed: false };
       this.profiles.set(key, profile);
       this.repository.saveSession(session);
-      this.repository.saveBootstrap(requestId, { key, sessionId: session.id }, MAX_RECORDS);
+      this.repository.saveBootstrap(bootstrapKey, { key, sessionId: session.id }, MAX_RECORDS);
       this.repository.removeClosedSessions();
       return session;
     });
@@ -136,6 +137,9 @@ export class SessionService {
   async closeSession(session: Session): Promise<void> {
     this.close(session);
     if (this.bridge) await this.bridge.closeSession(session.profile.token, session.id);
+    if (session.profile.key.startsWith('guest_') && this.profiles.get(session.profile.key) === session.profile) {
+      this.profiles.delete(session.profile.key);
+    }
   }
 
   async cancelTurn(session: Session, turnId: string): Promise<void> {

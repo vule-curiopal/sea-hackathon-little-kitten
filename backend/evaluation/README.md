@@ -1,6 +1,6 @@
 # Miu engine evaluation
 
-This environment runs synthetic conversations through the actual `MiuApplication`, character director, provider, memory store, and playback-receipt lifecycle. The catalog contains **203 scenarios, 421 conversations, and 998 scenario turns**, including the 100 additional cases SC-104 through SC-203. Every scenario has multiple conversations, and every scenario turn has explicit assertions and a semantic acceptance rubric.
+This environment runs synthetic conversations through the actual `MiuApplication`, character director, provider, memory store, and playback-receipt lifecycle. The catalog contains **203 scenarios, 421 conversations, and 1000 scenario turns**, including the 100 additional cases SC-104 through SC-203. Every scenario has multiple conversations, and every scenario turn has explicit assertions and a semantic acceptance rubric.
 
 **Character and memory evaluation requires the real provider and actual model requests.** This is the user's project policy, recorded in [AGENTS.md](../../AGENTS.md). The fake provider is reserved for frontend and pipeline development. Offline unit or harness doubles can check local logic, but their output is not character, memory, or model-quality evidence.
 
@@ -15,7 +15,7 @@ npm run eval:catalog
 node --env-file=.env --import tsx backend/scripts/run-engine-evaluation.ts --provider real --history full --output backend/evaluation/runs/my-real-run
 ```
 
-`eval:catalog` validates the authored cases and exports [scenarios/catalog.v3.json](scenarios/catalog.v3.json). The core cases cover everyday questions, games, nonsense, language switching, names, tâm sự, mood, memory, correction, deletion, and privacy. The advanced cases add configuration, fictional life, story resumption, stopping, retries, clocks, expiry, and relationship boundaries. See [core.ts](scenarios/core.ts), [advanced.ts](scenarios/advanced.ts), and the additional scenario sources below for the actual inputs and expected behavior.
+`eval:catalog` validates the authored cases and exports [scenarios/catalog.v5.json](scenarios/catalog.v5.json). The core cases cover everyday questions, games, nonsense, language switching, names, tâm sự, mood, memory, correction, deletion, and privacy. The advanced cases add configuration, fictional life, story resumption, stopping, retries, clocks, legacy expiry, and relationship boundaries. See [core.ts](scenarios/core.ts), [advanced.ts](scenarios/advanced.ts), and the additional scenario sources below for the actual inputs and expected behavior.
 
 The evaluation CLI defaults to `real` and rejects `--provider fake`; the runner also enforces the real-provider requirement. Real runs call the configured classification, reply, and safety services while using an isolated **in-memory PGlite database**. They do not connect through `DATABASE_URL` or modify production memories. A generic acknowledgement does not satisfy a scenario that requires arithmetic, a game move, a correction, or a specific answer. A blocked real request remains a recorded failure rather than receiving a substitute fake answer.
 
@@ -52,7 +52,7 @@ The version 3 catalog preserves SC-001 through SC-103 and adds **100 cases with 
 | SC-139–SC-173 | 35 | [extended-dialogue.ts](scenarios/extended-dialogue.ts) | Rule-based games, everyday reasoning, language precision, bounded creativity, and needs/autonomy |
 | SC-174–SC-203 | 30 | [extended-lifecycle.ts](scenarios/extended-lifecycle.ts) | Delivery atomicity, clock/privacy boundaries, settings/affect, authority/capability boundaries, and selective deletion/recovery |
 
-Regenerate the complete [catalog.v3.json](scenarios/catalog.v3.json) with `npm run eval:catalog`. The export records `execution_status: not_run` and `character_memory_quality_evidence: false`: generating or validating test definitions does not run the character engine or establish model quality. Existing versioned catalog exports and evaluation evidence are preserved.
+Regenerate the complete [catalog.v5.json](scenarios/catalog.v5.json) with `npm run eval:catalog`. Version 5 moves SC012’s language-switch name-preservation check to the turn where that switch is observed; the preceding acknowledgment is judged only on evidence already available. Inputs, assertions, counts, and all other criteria are unchanged from v4. The export records `execution_status: not_run` and `character_memory_quality_evidence: false`: generating or validating test definitions does not run the character engine or establish model quality. Existing versioned catalog exports and evaluation evidence are preserved.
 
 Run an individual new case using the existing real-provider workflow, for example:
 
@@ -78,6 +78,7 @@ Each scenario controls the clock in `Asia/Ho_Chi_Minh`. Ordinary chronological g
 | `scenarios.json` | The exact selected scenario definitions for this run. |
 | `manifest.json` | Run identity, provider, completion status, scope, model settings, labeled legacy-state preconditions, and hashes of relevant implementation files, the specification, scenario selection, and historical fixture. |
 | `report.json`, `report.md` | Independent checks, scenario failures, semantic review queue, functional-requirement coverage, and director-rule coverage. |
+| `latency.json` | CLI-generated scenario timing: per-turn and per-stage statistics, overlapping API requests, failures, and sample-size limits. Local/database residual is not an isolated SQL measurement. |
 | `review-tasks.jsonl` | Human-review templates bound to each exact scenario-turn record and its rubric. |
 
 Turn phases are `history`, `scenario_history`, and `scenario`. The first two contain engine answers to replayed historical child inputs; `scenario` contains the authored acceptance cases. Raw dialogue and state snapshots are included because this harness uses fictional test data. These artifacts are synthetic testing evidence, not a production transcript archive.
@@ -136,3 +137,34 @@ The implementation uses the Responses API with structured output and `store: fal
 This harness measures text execution and inspects application state and presentation plans. It does not test microphone capture, STT, TTS, audible playback, browser behavior, physical gestures, touch animation, actual acoustic cues, or end-to-end voice latency. `elapsed_ms` and provider-stage timings describe text processing only.
 
 Unexercised voice/UI requirements are marked `not_tested`, and mixed requirements retain their incomplete scope; an observed independent failure still takes precedence. Passing a sampled text assertion does not establish whole-product acceptance or completion of a P1 feature. Use the generated reports to identify concrete failures, unresolved semantic judgments, and the voice/UI checks still needing their own execution environment.
+
+## Measure latency on the production host
+
+[measure-production-latency.ts](../scripts/measure-production-latency.ts) starts an isolated app on the actual production host, using native PostgreSQL and real providers. It binds an ephemeral loopback port and creates a unique `miu_latency_*` schema with no `public` fallback in its search path. The active service, public routing, shared An/Bình sessions, and production environment file are unchanged. SSH credentials come from the selected local environment; provider and database credentials stay on the server.
+
+```sh
+node --import tsx backend/scripts/measure-production-latency.ts --env-file .env --source current --output reports/production-latency-baseline-NEW
+node --import tsx backend/scripts/measure-production-latency.ts --env-file .env --source overlay --overlay /path/to/trusted-candidate.tar.gz --classify-model gpt-6-luna --check-model gpt-6-astra --output reports/production-latency-candidate-NEW
+```
+
+Use a fresh output directory and a trusted, secret-free candidate archive containing the required backend source and package files. `current` imports the deployed checkout; `overlay` extracts its own temporary copy and reuses deployed dependencies. Model overrides apply only to that probe process. The report records the deployed release, candidate archive hash, model settings, actual replies, errors, and cleanup results. Compare these provenance fields before attributing a timing difference to one optimization.
+
+On macOS, build the archive with `COPYFILE_DISABLE=1 tar --exclude='._*' ...` to omit AppleDouble metadata: a stray `._*.sql` file can otherwise be interpreted as a migration. Also exclude credentials, `node_modules`, build output, and prior run artifacts; package regular files and directories only.
+
+The probe sends the five SC-104 text inputs across two fresh sessions on the **same actual date**, with completed text-delivery receipts. It does not reproduce the catalog's next-day timing. Measurements cover production-host loopback HTTP and the native database, **not public HTTPS turn latency**, microphone input, STT, TTS, or audible playback. Read-only public health/release checks establish which release is live; they do not measure a conversation turn.
+
+Interpret `http_elapsed_ms`, `timings_ms.server_total`, and SQL timings separately. SQL work is the sum of `pg` client query round trips; SQL union merges overlapping query intervals. Neither isolates PostgreSQL CPU execution, and HTTP minus SQL union still includes providers and local orchestration. Completion receipts have separate timings. Five turns are a small sample, and timing completion is not a behavioral-quality verdict. Preserve failures and verify the report's cleanup fields: only the run's own server, schema, and temporary source are removed.
+
+## Verify reviewed fixes and the remaining original cases
+
+Use the same frozen snapshot and exact source manifest for both real runs. The reviewed suite contains the 20 previously reviewed original cases plus SC204/205; the remaining suite contains the other 80 original cases and no supplements. This avoids paying to repeat the reviewed turns. Credentials are loaded only for verification, from the explicitly selected local environment file or the existing process environment. These commands use isolated in-memory databases and never connect to production.
+
+```sh
+node --import tsx backend/scripts/verify-reviewed-fixes-real.ts --suite reviewed --env-file /path/to/main/.env --source-manifest source-manifest.json --output /path/to/new-reviewed
+node --import tsx backend/scripts/verify-reviewed-fixes-real.ts --suite remaining --env-file /path/to/main/.env --source-manifest source-manifest.json --output /path/to/new-remaining
+node --import tsx backend/scripts/merge-engine-evaluations.ts --reviewed /path/to/new-reviewed --remaining /path/to/new-remaining --output /path/to/new-combined
+```
+
+Run both verification commands from that frozen snapshot. Run the merger beside the matching frozen evaluator and evidence hasher; the merger itself makes no provider calls. It refuses different source hashes, non-real or incomplete runs, overlapping/missing cases, altered inputs/criteria, missing or mismatched reviews, and invalid final-reply provenance. It preserves parent JSONL bytes and run IDs and writes only a new output directory, with separate original-100 and SC204/205 reports. Counts are derived from the actual case definitions and user-only historical seeds; the current definitions yield 607 records (595 original-cohort records plus 12 supplement records).
+
+These runs still exercise the frozen runtime’s **legacy 30-day expiry behavior** where explicitly tested. They do not establish the newly documented durable-memory or stochastic age-recall policy, which remains unimplemented. Full voice, physical audio interruption, UI and production acceptance require separate evidence. Failures and needs-review judgments remain visible in each SUMMARY.md; merging does not turn them into passes or rewrite earlier runs.

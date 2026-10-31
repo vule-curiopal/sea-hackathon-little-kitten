@@ -24,6 +24,17 @@ function input(overrides: Partial<DirectorInput> = {}): DirectorInput {
   return { context: context(), observation: observation(), text: 'Hello', recall: null, comfortActive: false, history: [], ...overrides };
 }
 
+test('director supplies the current scoped child address independently of recalled facts', () => {
+  const turn = input();
+  assert.equal(decide(turn).preferredAddress, 'An');
+  turn.context.addressPreference = { preferredAddress: 'Captain Star', allowNickname: true, nickname: 'Captain Star', scope: 'session', sessionId: 'current-session', expiresAt: '2026-12-01T00:00:00.000Z' };
+  assert.equal(decide(turn).preferredAddress, 'Captain Star');
+  turn.context.addressPreference = { preferredAddress: 'An', allowNickname: false, nickname: null, scope: 'persistent', expiresAt: '2026-12-01T00:00:00.000Z' };
+  assert.equal(decide(turn).preferredAddress, 'An');
+  turn.context.addressPreference = null;
+  assert.equal(decide(turn).preferredAddress, 'An');
+});
+
 test('all sixteen personalities have bounded unique style settings and one immutable canon', () => {
   assert.deepEqual(Object.keys(PERSONALITY_PRESETS).sort(), [...PERSONALITIES].sort());
   const settings = new Set<string>();

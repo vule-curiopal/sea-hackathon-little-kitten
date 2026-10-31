@@ -12,7 +12,7 @@ export function registerHttpMiddleware(app: Express, config: VoiceConfig): void 
     response.setHeader('Cache-Control', 'no-store');
     next();
   });
-  app.use(cors({ origin: (origin, callback) => callback(null, !origin || config.allowedOrigins.includes(origin)) }));
+  app.use(cors({ credentials: true, origin: (origin, callback) => callback(null, !origin || config.allowedOrigins.includes(origin)) }));
   app.use(rateLimit({
     limit: 60, windowMs: 60_000, standardHeaders: 'draft-8', legacyHeaders: false,
     handler: (_request, _response, next) => next(new PipelineError('rate_limited', 429, true)),

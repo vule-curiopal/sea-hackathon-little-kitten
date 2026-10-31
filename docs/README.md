@@ -4,6 +4,8 @@ These documents split the [product specification](product-specification.md) into
 
 For the proposed build approach, module interfaces, OpenAI integration, and delivery sequence for character and memory/time, see the [Character engine and memory technical proposal](character-memory-technical-proposal.md).
 
+The [durable memory and age-based recall policy](memory-retention-and-recall-policy.md) records the user’s decision to keep saved memories until explicit forgetting, with no automatic 30-day deletion. The [vector memory integration plan](vector-memory-integration-plan.md) describes the future hybrid-search design, prerequisites, rollout and evaluation gates. Vector implementation is deferred; current legacy expiry code requires migration before that rollout.
+
 The character engine and memory schema are implemented. See the [backend setup and text integration guide](../backend/README.md) for local execution, daily growth, schema tables, and API usage. Voice transport integration with this engine and measured real-provider voice latency remain integration work.
 
 | Workstream | Document | Implementation location | Owns |

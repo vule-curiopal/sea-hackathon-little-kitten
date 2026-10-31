@@ -5,6 +5,8 @@ import { reviewEvidenceHash, reviewKey } from './review-evidence.js';
 import type { TurnLog } from './types.js';
 import type { OpenAITransport } from '../pipeline/providers.js';
 
+// Offline review-transport and packet checks only. Mock verdicts here are not
+// evidence of character, memory or semantic model performance.
 function log(id = 'turn-1'): TurnLog {
   const snapshot = {
     profile: { id: 'synthetic-an', demoKey: 'an', displayName: 'An', ageBand: '6-8' as const, languageMode: 'follow_child' as const, timezone: 'Asia/Ho_Chi_Minh', stateVersion: 1, deletionEpoch: 0 },
@@ -177,4 +179,44 @@ test('empty conversations do not call the judge and explicit model selection is 
   assert.deepEqual(await judgeConversation([], [], options(transport.client)), []);
   await assert.rejects(() => judgeConversation([log()], [], { ...options(transport.client), model: ' ' }), /selected explicitly/u);
   assert.equal(transport.calls.length, 0);
+});
+
+test('offline review packet includes original/retry IDs, API metadata and sanitized operation evidence', async () => {
+  const turn = log('retry-turn');
+  turn.operational = {
+    request: { request_id: 'request-original', session_id: 'session-1' },
+    original_response: { turn_id: 'request-original', session_id: 'session-1', state_version: 1, reply_text: turn.response!.reply.text },
+    retry_response: { turn_id: 'request-original', session_id: 'session-1', state_version: 1, reply_text: turn.response!.reply.text },
+    session_after: { pending_forget_all: false, history_count: 1, replay_request_ids: ['request-original'], retired_request_ids: [], last_reference_id: null, last_learned_ids: [] },
+  };
+  turn.retry = { ...turn.response, turn_id: 'request-original' };
+  turn.api_calls = [];
+  const transport = mocked({ status: 'completed', output_text: JSON.stringify(verdict([turn])) });
+  await judgeConversation([turn], [], options(transport.client));
+  const input = JSON.parse(String(transport.calls[0]!.body.input));
+  assert.deepEqual(input.conversation[0].operational, turn.operational);
+  assert.deepEqual(input.conversation[0].api_calls, []);
+  assert.equal(input.operational_context[0].api_call_count, 0);
+  assert.equal(input.operational_context[0].operational.original_response.turn_id, input.operational_context[0].operational.retry_response.turn_id);
+  const instruction = String(transport.calls[0]!.body.instructions);
+  assert.match(instruction, /Later child turns cannot justify earlier invented facts/u);
+  assert.match(instruction, /operational lifecycle postconditions only/u);
+  assert.match(instruction, /follow_child mode follows a clear current/u);
+  assert.match(instruction, /Immediate-danger|immediate danger/u);
+});
+
+test('offline operational review context exposes profile isolation without mixing factual prior context', async () => {
+  const prior = log('binh-prior');
+  prior.profile_key = 'binh';
+  prior.before.profile.id = 'synthetic-binh';
+  prior.after.profile.id = 'synthetic-binh';
+  const turn = log();
+  const transport = mocked({ status: 'completed', output_text: JSON.stringify(verdict([turn])) });
+  await judgeConversation([turn], [], { ...options(transport.client), operationalContext: [prior, turn] });
+  const input = JSON.parse(String(transport.calls[0]!.body.input));
+  assert.deepEqual(input.prior_context, []);
+  assert.deepEqual(input.operational_context.map((entry: { profile: string }) => entry.profile), ['binh', 'an']);
+  assert.equal(Object.hasOwn(input.operational_context[0], 'child_input'), false);
+  const foreignRun = { ...prior, run_id: 'other-run' };
+  await assert.rejects(() => judgeConversation([turn], [], { ...options(transport.client), operationalContext: [foreignRun] }), /same isolated scenario/u);
 });

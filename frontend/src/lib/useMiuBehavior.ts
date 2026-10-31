@@ -3,9 +3,7 @@ import type { Phase } from './conversation';
 import { createIdleRoutine, idleMoment, idleMotionIntensity, presentedActivity, reactionDuration, type CatActivity, type CatReaction } from './miu-behavior';
 import type { IdleAffect } from './affect';
 
-export function useMiuBehavior({ phase, visible, suspended, comfort, energy = .6, poutChance = .25, affect }: {
-  phase: Phase; visible: boolean; suspended: boolean; comfort: boolean; energy?: number; poutChance?: number; affect?: IdleAffect;
-}) {
+export function useMiuBehavior({ phase, visible, suspended, comfort, affect, energy = .6, poutChance = .25 }: { phase: Phase; visible: boolean; suspended: boolean; comfort: boolean; affect?: IdleAffect; energy?: number; poutChance?: number }) {
   const [revision, setRevision] = useState(0);
   const [idle, setIdle] = useState<CatActivity>('settled');
   const [reaction, setReaction] = useState<{ activity: CatActivity; duration: number } | null>(null);
@@ -25,10 +23,8 @@ export function useMiuBehavior({ phase, visible, suspended, comfort, energy = .6
       return () => clearTimeout(timer);
     }
     const started = performance.now();
-    // Randomness changes cosmetic gestures only; server affect takes precedence.
-    const routine = createIdleRoutine(Math.random, affect
-      ? { ...affect, energy: comfort ? Math.min(.25, affect.energy) : affect.energy }
-      : { energy: comfort ? .25 : energy, poutChance: comfort ? 0 : poutChance });
+    // Server affect takes precedence; randomness changes cosmetic gestures only.
+    const routine = createIdleRoutine(Math.random, affect ?? { energy: comfort ? .25 : energy, poutChance: comfort ? 0 : poutChance });
     let timer: ReturnType<typeof setTimeout> | undefined;
     const step = () => {
       const moment = idleMoment(routine, performance.now() - started, comfort);

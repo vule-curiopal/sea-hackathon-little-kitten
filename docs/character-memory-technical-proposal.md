@@ -2,6 +2,8 @@
 
 Status: Proposed implementation
 
+Policy update, 2026-10-31: saved memories are durable until explicit forgetting; the earlier 30-day memory TTL is superseded by [durable memory and age-based recall](memory-retention-and-recall-policy.md). Current code/tests still require migration. [Vector integration](vector-memory-integration-plan.md) remains a design only.
+
 Date: October 31, 2026
 
 Scope: `backend/character/` and `backend/memory/`
@@ -137,10 +139,10 @@ Any blocking result prevents TTS for the entire reply. Allow one constrained rew
 | Context | Location | Lifetime and use |
 | --- | --- | --- |
 | Recent dialogue and pending clarification | Pipeline session memory | Current session, at most 30 minutes idle; supports pronouns and immediate reference resolution |
-| Selected personal memories and supported activities | PostgreSQL | 30 real days from creation or explicit reconfirmation; minimal grounded records |
+| Selected personal memories and supported activities | PostgreSQL | Durable until explicit forgetting/deletion or correction; age affects recall, not storage |
 | Miu canon and authored fictional life | Versioned configuration plus current daily records | Canon is authored; personal diary/checkpoint references follow retention and deletion rules |
 
-Use structured SQL retrieval first: due date, entity, event type, topic category, status, and recency are sufficient for the demo. Defer semantic retrieval. If broader recall later needs it, OpenAI embeddings can rank already eligible records in PostgreSQL; they must share source dependencies, expiry, and deletion behavior. Embeddings measure relatedness and do not establish evidence. [OpenAI embeddings](https://developers.openai.com/api/docs/guides/embeddings).
+Use structured SQL retrieval first: due date, entity, event type, topic category, status, and recency are sufficient for the demo. Defer semantic retrieval. If broader recall later needs it, OpenAI embeddings can rank already eligible records in PostgreSQL; they must share source dependencies, hard permission validity, and deletion behavior. Embeddings measure relatedness and do not establish evidence. [OpenAI embeddings](https://developers.openai.com/api/docs/guides/embeddings).
 
 ### Schema and invariants
 
@@ -185,9 +187,9 @@ Conservatively discard interrupted turns for MVP learning. Started playback mark
 
 ### Recall and reservation
 
-`reserveRecall()` returns zero or one hook after filtering by profile, active source dependencies, confirmation, real expiry, narrative eligibility, and deletion epoch. For a neutral greeting, rank due follow-ups, supported open promises, relevant facts, then approved shared moments. For ordinary turns, current topic and wellbeing win.
+`reserveRecall()` returns zero or one hook after filtering by profile, active source dependencies, confirmation, hard permission/due validity, narrative eligibility, and deletion epoch. Ordinary source age does not invalidate a memory. Apply the separately versioned recall-availability policy to eligible ordinary old memories. For a neutral greeting, rank due follow-ups, supported open promises, relevant facts, then approved shared moments. For ordinary turns, current topic and wellbeing win.
 
-Reserve a follow-up under the profile lock with a turn ID and a short lease measured in real time. An atomic status check prevents duplicate selection. Release on generation failure or cancellation before playback; expire abandoned reservations. A valid started receipt marks the hook presented. Retain its terminal receipt until the source expires so rollover cannot recreate it.
+Reserve a follow-up under the profile lock with a turn ID and a short lease measured in real time. An atomic status check prevents duplicate selection. Release on generation failure or cancellation before playback; expire abandoned reservations. A valid started receipt marks the hook presented. Retain the necessary minimal terminal receipt while its source can generate that hook so rollover cannot recreate it; delete it with the source.
 
 The director can suppress a reservation, including during comfort, without marking it heard. Release suppressed hooks. A diary opener occupies the same single proactive-reference slot.
 
@@ -210,21 +212,21 @@ Corrections preserve a confirmed entity's stable ID, retire invalid aliases, upd
 
 ### Retention
 
-Expiry always uses real server time. Retrieval does not renew it. Filter expired records on every read and run a periodic dependency-aware cleanup to physically remove them, independent of nightly narrative rollover. Diary entries, promises, relationship permissions, and checkpoints also expire within 30 real days. Derived records cannot outlive their supporting personal data.
+Saved memories have no automatic age-based deletion. They and their dependent index representations remain durable until explicit forgetting/deletion or retirement by correction. Day/session permissions, reservation leases and transient operational state have separate hard validity. Age-based stochastic recall affects ordinary episode availability, never canonical truth or source storage. See the linked policy for the migration gap and evaluation requirements.
 
 Keep session text only in session memory. Keep operational diagnostics content-free for seven real days, without names, transcripts, or stable child identifiers. Do not create content-bearing logs or persistent content backups in this prototype. The panel exposes bounded projections rather than prompts or raw candidates.
 
 ## Clock and daily rollover
 
-Expose `wallNow()` for privacy expiry, reservation leases, and real timestamps; use a monotonic clock for latency and deadlines. Expose `effectiveNow(profile)` and `localDate(profile)` for event dates, mood, diary, follow-ups, and rhythm. Store the profile timezone explicitly, defaulting to `Asia/Ho_Chi_Minh` in demo fixtures.
+Expose `wallNow()` for transient operational expiry, reservation leases, and real timestamps; use a monotonic clock for latency and deadlines. Expose `effectiveNow(profile)` and `localDate(profile)` for event dates, mood, diary, follow-ups, and rhythm. Store the profile timezone explicitly, defaulting to `Asia/Ho_Chi_Minh` in demo fixtures.
 
 In real mode, effective time follows wall time. In demo mode it advances from a stored effective anchor using elapsed wall time; panel actions move that anchor forward. Add calendar dates in the configured timezone. Next day targets **09:00 on the next local date**, rather than adding 24 hours. Clock changes never extend privacy retention.
 
-Implement one `runNightJob()` path used by Next day, scheduler requests, and session-open catch-up. Its transaction locks the profile, checks for active turns/pending learning and completed receipts, removes expired sources, derives supported hooks, selects one authored diary and daily mood, reviews friendship, and records completion. Next day also updates the clock and closes the old session in that transaction. Failure rolls back both the clock change and the daily state.
+Implement one `runNightJob()` path used by Next day, scheduler requests, and session-open catch-up. Its transaction locks the profile, checks for active turns/pending learning and completed receipts, ends out-of-window permissions and transient leases without deleting ordinary aged memories, derives supported hooks, selects one authored diary and daily mood, reviews friendship, and records completion. Next day also updates the clock and closes the old session in that transaction. Failure rolls back both the clock change and the daily state.
 
 Use a stable authored selection seed for profile/date/template version so retries choose the same diary/mood. Keep fictional events independent of child data where possible. A diary involving a known toy needs an explicit dependency edge. Rollover makes no OpenAI request and never starts speech.
 
-Relationship stages require actual completed shared activities and welcomed familiarity. A new day or repeated visit does not advance friendship. Expiry/deletion removes unsupported nickname, joke, and milestone references while keeping Miu warm.
+Relationship stages require actual completed shared activities and welcomed familiarity. A new day or repeated visit does not advance friendship. Permission withdrawal, correction and deletion remove unsupported nickname, joke, and milestone references while keeping Miu warm. Random recall skips never demote the relationship stage.
 
 If several dates were skipped, initialize only the current date. Repeated request IDs return the same completed result; a different request with a stale expected clock version returns `409 stale_clock`. For scheduler/catch-up calls, unique date completion prevents duplicates. A new explicitly opened session requests its greeting through the existing turn endpoint.
 
@@ -261,7 +263,7 @@ interface MemoryService {
 }
 ```
 
-`MemoryContext` is a bounded snapshot of the current daily state, permitted familiarity, supported activity state, and eligible references. `RecallHook` contains evidence kind, minimal facts, an allowed claim/question, source IDs, expiry, and deletion epoch. `ForgetResult` returns committed versions and invalidated handles. None of these internal objects grant the client permission to query arbitrary records.
+`MemoryContext` is a bounded snapshot of the current daily state, permitted familiarity, supported activity state, and eligible references. `RecallHook` contains evidence kind, minimal facts, an allowed claim/question, source IDs, any hard permission/due validity, and deletion epoch. Ordinary memory age is not source expiry. `ForgetResult` returns committed versions and invalidated handles. None of these internal objects grant the client permission to query arbitrary records.
 
 For the initial single-process deployment, a per-profile operation coordinator serializes turn registration, configuration changes, learning, deletion, and rollover. PostgreSQL profile-row locks protect every persistent mutation. Do not hold a database transaction or row lock while calling OpenAI. Capture a consistent snapshot, release the transaction, then recheck cancellation and all versions before publication or writes. Multiple backend processes would require a shared active-operation lease before deployment.
 
@@ -282,7 +284,7 @@ Use the Responses API for classification, dialogue, and contextual validation. S
 
 For structured calls, use Responses `text.format` with a strict JSON Schema, or the SDK's Zod helper. Require all keys, use nullable fields for absence, and reject additional properties. Handle refusal and incomplete responses explicitly. Schema adherence does not guarantee truthful evidence or safe semantics. [Structured Outputs](https://developers.openai.com/api/docs/guides/structured-outputs?api-mode=responses).
 
-Set `store: false` on every Responses request and pass bounded context explicitly. Do not use provider Conversations, `previous_response_id`, hosted file search, or provider vector stores as Miu's durable memory. This keeps application correction, expiry, and deletion under one authority. Response storage and provider abuse-monitoring retention are separate controls; `store: false` does not establish zero retention. [Conversation state](https://developers.openai.com/api/docs/guides/conversation-state), [data controls](https://developers.openai.com/api/docs/guides/your-data).
+Set `store: false` on every Responses request and pass bounded context explicitly. Do not use provider Conversations, `previous_response_id`, hosted file search, or provider vector stores as Miu's durable memory. This keeps application correction, permission validity, and deletion under one authority. Response storage and provider abuse-monitoring retention are separate controls; `store: false` does not establish zero retention. [Conversation state](https://developers.openai.com/api/docs/guides/conversation-state), [data controls](https://developers.openai.com/api/docs/guides/your-data).
 
 Use server-side credentials, shared request deadlines, cancellation signals, and bounded retries. Disable implicit SDK retries that would exceed the turn deadline. Do not expose database tools to the model. STT/TTS remain pipeline-owned; their OpenAI model/voice choices need separate Vietnamese/English evaluation against the same playback and privacy requirements.
 

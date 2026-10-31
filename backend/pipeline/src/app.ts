@@ -1,4 +1,4 @@
-import express, { type Express } from 'express';
+import express, { type Express, type Request } from 'express';
 import { loadConfig, type VoiceConfig } from './config.js';
 import { PipelineError } from './errors.js';
 import { registerErrorHandler, type RequestContexts } from './http/error-handler.js';
@@ -19,6 +19,8 @@ export interface BuildAppOptions {
   /** Retained name for existing callers; this is RAM-only session/protocol state. */
   state?: SessionService;
   engineBridge?: EngineBridge;
+  /** Integrated auth chooses an owned profile; clients never supply an owner ID. */
+  resolveSessionProfile?: (request: Request) => Promise<string>;
   registerRoutes?: (app: Express, sessions: SessionService) => void | Promise<void>;
 }
 
@@ -49,7 +51,7 @@ export async function buildApp(options: BuildAppOptions = {}) {
   registerHttpMiddleware(app, config);
   await options.registerRoutes?.(app, sessions);
   registerSystemRoutes(app, config, sessions);
-  registerSessionRoutes(app, new SessionController(sessions, providers.mode));
+  registerSessionRoutes(app, new SessionController(sessions, providers.mode, options.resolveSessionProfile));
   registerTurnRoutes(app, new TurnController(sessions, turns, contexts));
   app.use(() => { throw new PipelineError('not_found', 404); });
   registerErrorHandler(app, sessions, contexts);

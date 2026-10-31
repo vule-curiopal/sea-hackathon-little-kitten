@@ -24,3 +24,15 @@ export function selectJudgePriorContext(logs: TurnLog[], conversation: TurnLog[]
   return logs.slice(0, start).filter(log => log.run_id === first.run_id
     && log.scenario_id === first.scenario_id && log.profile_key === first.profile_key);
 }
+
+/** Operational profile-switch evidence may include other fictional profiles,
+ * but only within this isolated scenario and through this conversation. It
+ * cannot supply another profile's facts to justify a reply. */
+export function selectJudgeOperationalContext(logs: TurnLog[], conversation: TurnLog[]): TurnLog[] {
+  if (!conversation.length) return [];
+  selectJudgePriorContext(logs, conversation); // Reuse identity/order validation.
+  const first = conversation[0]!;
+  const end = logs.indexOf(conversation.at(-1)!);
+  if (end < 0) throw new Error('Conversation end is not present in the ordered engine log.');
+  return logs.slice(0, end + 1).filter(log => log.run_id === first.run_id && log.scenario_id === first.scenario_id);
+}

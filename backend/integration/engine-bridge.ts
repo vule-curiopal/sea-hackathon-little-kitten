@@ -84,7 +84,7 @@ export class PersistentEngineBridge implements EngineBridge {
 
   async openSession(key: string): Promise<EngineSessionSnapshot> {
     if (this.closed) throw new AppError('engine_closed', 503);
-    if (!['an', 'binh'].includes(key)) throw new AppError('unknown_demo_profile', 400);
+    if (!/^(?:an|binh|(?:user|guest)_[a-f0-9-]{36})$/u.test(key)) throw new AppError('unknown_profile', 400);
     const profile = await this.application.memory.findProfile(key);
     if (!profile) throw new AppError('profile_not_found', 404);
     return this.serial(profile.id, async () => {
@@ -194,7 +194,12 @@ export class PersistentEngineBridge implements EngineBridge {
   }
 
   async closeSession(token: string, sessionId: string): Promise<unknown> {
-    return this.application.closeSession(this.profileId(token), sessionId);
+    const profileId = this.profileId(token);
+    const result = await this.application.closeSession(profileId, sessionId);
+    // Guest profiles belong to one connection. Account profiles (including
+    // Sam's existing An record) survive logout and conversation closure.
+    await this.application.memory.db.query("DELETE FROM profiles WHERE id=$1 AND left(demo_key,6)='guest_'", [profileId]);
+    return result;
   }
 
   async nextDay(token: string, requestId: string, expectedClockVersion: number) {

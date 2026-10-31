@@ -7,6 +7,8 @@ import { scenarios, validateScenarios } from './catalog.js';
 import { loadHistoricalSessions, runEvaluation } from './runner.js';
 import { FakeProvider } from '../pipeline/providers.js';
 import { AppError } from '../shared/types.js';
+import { MiuApplication, type TurnRequest } from '../application.js';
+import { randomUUID } from 'node:crypto';
 import type { Scenario, TurnLog } from './types.js';
 
 const turn = (id: string, text: string) => ({
@@ -122,4 +124,126 @@ test('harness preserves a blocking provider failure and leaves subsequent turns 
   assert.equal(record.response, null);
   assert.equal(record.error.code, 'provider_quota_exceeded');
   assert.equal(result.report.validity.character_memory_quality_evidence, false);
+});
+
+// These integration checks exercise request journaling and lifecycle evidence
+// with an explicitly injected offline double. They are not model-quality runs.
+async function operationalHarness(selected: Scenario[], prefix: string) {
+  const parent = await mkdtemp(join(tmpdir(), prefix));
+  const result = await runEvaluation({ scenarios: selected, history: 'none', outputDir: join(parent, 'run'), runKind: 'harness_self_test', providerInstance: new FakeProvider() });
+  const logs = (await readFile(join(result.outputDir, 'turns.jsonl'), 'utf8')).trim().split('\n').map(line => JSON.parse(line) as TurnLog);
+  assert.equal(result.report.validity.character_memory_quality_evidence, false);
+  return { result, logs };
+}
+
+test('offline SC095 harness records original and retry identities without duplicate provider work or learning', async () => {
+  const { logs } = await operationalHarness([scenarios.find(item => item.id === 'SC-095')!], 'miu-retry-evidence-');
+  const request = logs.find(log => log.turn_spec_id === 'pet-request-retry')!;
+  assert.equal(request.error, null);
+  assert.equal(request.operational!.request.request_id, request.response!.turn_id);
+  assert.deepEqual(request.operational!.original_response, request.operational!.retry_response);
+  assert.equal((request.retry as { turn_id: string }).turn_id, request.operational!.original_response!.turn_id);
+  assert.equal(request.provider_events.filter(event => event.stage === 'classify').length, 1);
+  assert.equal(request.provider_events.filter(event => event.stage === 'reply').length, 1);
+  assert.equal(request.after.entities.filter(entity => entity.name === 'Mochi').length, 1);
+  const receipt = logs.find(log => log.turn_spec_id === 'preference-receipt-retry')!;
+  assert.ok(receipt.operational!.receipt!.request_id);
+  assert.deepEqual(receipt.operational!.receipt!.result, receipt.retry);
+  assert.equal(receipt.after.preferences.filter(preference => preference.value === 'folding paper boats').length, 1);
+});
+
+test('offline SC098 harness proves zero-call invalid input and recovery in the same actual session', async () => {
+  const { logs } = await operationalHarness([scenarios.find(item => item.id === 'SC-098')!], 'miu-invalid-evidence-');
+  for (const [invalidId, validId, code] of [['too-long', 'valid-after-long', 'text_too_long'], ['empty', 'valid-question', 'missing_text']]) {
+    const invalid = logs.find(log => log.turn_spec_id === invalidId)!;
+    const valid = logs.find(log => log.turn_spec_id === validId)!;
+    assert.equal(invalid.error!.code, code);
+    assert.deepEqual(invalid.api_calls, []);
+    assert.deepEqual(invalid.provider_events, []);
+    assert.equal(invalid.operational!.original_response, null);
+    assert.deepEqual(invalid.before, invalid.after);
+    assert.equal(valid.error, null);
+    assert.ok(valid.response);
+    assert.equal(invalid.operational!.request.session_id, valid.operational!.request.session_id);
+    assert.equal(valid.response!.session_id, invalid.operational!.request.session_id);
+  }
+});
+
+test('offline SC100 harness measures interrupted confirmation, same-session Yes and a rejected stale replay', async () => {
+  const { logs } = await operationalHarness([scenarios.find(item => item.id === 'SC-100')!], 'miu-deletion-evidence-');
+  const interrupted = logs.find(log => log.turn_spec_id === 'unheard-confirmation')!;
+  const yes = logs.find(log => log.turn_spec_id === 'same-session-yes')!;
+  assert.equal(interrupted.delivery!.status, 'interrupted');
+  assert.equal(interrupted.operational!.session_after!.pending_forget_all, false);
+  assert.equal(yes.operational!.session_before!.pending_forget_all, false);
+  assert.equal(yes.operational!.request.session_id, interrupted.operational!.request.session_id);
+  assert.equal(yes.after.profile.deletionEpoch, yes.before.profile.deletionEpoch);
+  assert.ok(yes.after.entities.some(entity => entity.name === 'Mochi'));
+  const source = logs.find(log => log.turn_spec_id === 'replay-seed')!;
+  const confirm = logs.find(log => log.turn_spec_id === 'confirm')!;
+  assert.equal(confirm.operational!.session_before!.pending_forget_all, true);
+  assert.equal(confirm.after.entities.length, 0);
+  assert.equal(confirm.after.profile.deletionEpoch, confirm.before.profile.deletionEpoch + 1);
+  const probe = confirm.operational!.stale_replay!;
+  assert.equal(probe.request_id, source.operational!.request.request_id);
+  assert.equal(probe.session_id, source.operational!.request.session_id);
+  assert.equal(probe.error_code, 'stale_state');
+  assert.equal(probe.response, null);
+  assert.equal(probe.api_call_count, 0);
+  assert.deepEqual(probe.provider_events, []);
+  assert.equal(confirm.operational!.session_after!.pending_forget_all, false);
+  assert.deepEqual(confirm.operational!.session_after!.last_learned_ids, []);
+  assert.equal(confirm.operational!.session_after!.last_reference_id, null);
+  assert.ok(!confirm.operational!.session_after!.replay_request_ids.includes(probe.request_id));
+  assert.ok(confirm.operational!.session_after!.retired_request_ids.includes(probe.request_id));
+  assert.equal(confirm.operational!.original_response!.turn_id, confirm.response!.turn_id);
+});
+
+test('offline harness snapshots retain session-only address permission only inside its actual session', async () => {
+  const selected: Scenario = {
+    id: 'SC-903', title: 'Harness session-scoped diagnostics', category: 'harness', requirements: ['REL-01'], history_dates: [],
+    conversations: [
+      { id: 'permitted-session', profile: 'an', at: '2026-11-01T09:00:00+07:00', turns: [turn('permission', 'Call me Captain Pebble for this session.'), turn('same-session', 'Hello.')] },
+      { id: 'new-session', profile: 'an', at: '2026-11-01T10:00:00+07:00', turns: [turn('outside-permission', 'Hello.'), turn('leave', 'Goodbye.')] },
+    ],
+  };
+  const { logs } = await operationalHarness([selected], 'miu-session-evidence-');
+  assert.equal(logs[0]!.after.addressPreference!.preferredAddress, 'Captain Pebble');
+  assert.equal(logs[0]!.after.addressPreference!.scope, 'session');
+  assert.equal(logs[1]!.before.addressPreference!.preferredAddress, 'Captain Pebble');
+  assert.notEqual(logs[2]!.before.addressPreference?.preferredAddress, 'Captain Pebble');
+});
+
+test('offline negative control exposes and cancels unexpected probe generation without replacing main evidence', async () => {
+  // Inject a broken request-cache boundary for this harness-only test. The
+  // actual application must still cancel the new unplayed turn and not learn it.
+  const prepare = MiuApplication.prototype.prepareTurn;
+  const seen = new Set<string>();
+  MiuApplication.prototype.prepareTurn = function(profileId: string, sessionId: string, request: TurnRequest) {
+    if (seen.has(request.request_id) && request.text === 'My dog is named Mochi.') {
+      return prepare.call(this, profileId, sessionId, { ...request, request_id: randomUUID() });
+    }
+    seen.add(request.request_id);
+    return prepare.call(this, profileId, sessionId, request);
+  };
+  try {
+    const { result, logs } = await operationalHarness([scenarios.find(item => item.id === 'SC-100')!], 'miu-bad-probe-evidence-');
+    const confirm = logs.find(log => log.turn_spec_id === 'confirm')!;
+    const probe = confirm.operational!.stale_replay!;
+    assert.equal(confirm.error, null);
+    assert.equal(probe.error_code, null);
+    assert.ok(probe.response);
+    assert.notEqual(probe.response!.turn_id, confirm.response!.turn_id);
+    assert.ok(probe.provider_events!.some(event => event.stage === 'classify'));
+    for (const event of confirm.provider_events.filter(event => event.stage === 'reply')) {
+      assert.equal((event.details as { text: string }).text, confirm.response!.reply.text, 'Probe reply events must not replace the published main reply evidence');
+    }
+    assert.equal(confirm.operational!.original_response!.turn_id, confirm.response!.turn_id);
+    assert.equal(confirm.after.entities.length, 0);
+    assert.equal(logs.find(log => log.turn_spec_id === 'deleted-recall')!.error, null, 'The unexpected probe turn was canceled so the session stays usable');
+    const scored = result.report.turns.find(log => log.turn_spec_id === 'confirm')!;
+    assert.ok(scored.checks.some(check => check.status === 'fail' && check.description === 'Stale replay produces no old response'));
+  } finally {
+    MiuApplication.prototype.prepareTurn = prepare;
+  }
 });

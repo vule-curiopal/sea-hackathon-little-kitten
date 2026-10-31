@@ -2,6 +2,8 @@
 
 Location: `backend/memory/`, the server-side memory responsibility referred to as `server/memory`. Storage: **PostgreSQL**. Dependencies: [pipeline](pipeline.md), [character engine](character-engine.md), and [API contracts](api-contracts.md).
 
+> Policy update, 2026-10-31: [Durable memory and age-based recall](memory-retention-and-recall-policy.md) supersedes automatic 30-day memory deletion. Current expiry columns/purge behavior and historical acceptance results are legacy implementation details; runtime migration is not performed by the vector plan. Hard permission, session, reservation and job validity remain separate.
+
 ## Outcome
 
 Miu learns selected details after every completed turn, recalls one relevant memory, honors “forget that,” and carries an authored fictional life into the next day. One clock and one idempotent night job drive follow-ups, diary, daily mood, and friendship review. The demo panel shows what was learned and why a follow-up is eligible.
@@ -65,9 +67,9 @@ Clear, directly stated low-risk facts may be saved without a separate confirmati
 
 ### Transaction
 
-1. Validate profile, turn completion, supported categories, evidence spans, retention, and deletion epoch.
+1. Validate profile, turn completion, supported categories, evidence spans, capture policy, and deletion epoch.
 2. Deduplicate by turn/candidate key. Resolve entities conservatively; similar names alone cannot merge people or pets.
-3. Save validated entities, facts, events, and heard supported claims in one transaction with source IDs and expiry.
+3. Save validated entities, facts, events, and heard supported claims in one transaction with source IDs, durable timestamps and any narrower hard permission/due validity.
 4. Link dependencies and update exact checkpoint/promise transitions. Do not mark an offered future activity as fulfilled before it happens.
 5. Record shared milestones only when they actually occurred and familiarity was welcomed. Do not count elapsed minutes, disclosures, or visit streaks.
 6. Mark learning complete and discard processed projection content. Expose typed outcomes and status to the panel without raw private passages.
@@ -78,9 +80,9 @@ Until learning completes, the pipeline must either use a validated pending proje
 
 ## Recall one memory
 
-Retrieve active same-profile candidates with provenance, confirmation and expiry checked. Suggested ordering for a neutral greeting: an eligible due follow-up, an open supported promise, a topic-relevant fact, then an approved shared moment. For an ordinary turn, the child's current topic and needs take priority over this ordering.
+Retrieve active same-profile candidates with provenance, confirmation and hard permission/due validity checked. Ordinary source age is not invalidity; apply the separately versioned recall-availability policy after eligibility. Suggested ordering for a neutral greeting: an eligible due follow-up, an open supported promise, a topic-relevant fact, then an approved shared moment. For an ordinary turn, the child's current topic and needs take priority over this ordering.
 
-Return one `RecallHook` containing reference ID, source IDs, minimal supported facts, evidence kind, permitted question/claim, expiry, and deletion epoch. The director may use it or suppress it. A diary entry is an alternative opener, not an additional memory to stack into the same greeting.
+Return one `RecallHook` containing reference ID, source IDs, minimal supported facts, evidence kind, permitted question/claim, any hard permission/due validity, and deletion epoch. Ordinary memory age is not an expiry field. The director may use it or suppress it. A diary entry is an alternative opener, not an additional memory to stack into the same greeting.
 
 Reserve a due hook while generating so concurrent requests cannot select it twice. Release reservation if the turn fails before playback; mark it presented on a valid started receipt. A completed response alone does not prove it was heard. If the child declines the topic, cancel or snooze it without repeated probing. Recheck deletion/version before returning cached speech that mentions it.
 
@@ -119,7 +121,7 @@ Use one injectable `Clock` interface throughout the server:
 
 Default timezone can be `Asia/Ho_Chi_Minh` for the demo; store it explicitly. Do not request location. The demo panel may advance within the day or use Next day. Do not allow backward movement except a full explicit demo reset. Add one calendar date in the configured timezone rather than assuming every local day is exactly 24 hours.
 
-Demo time must not prolong privacy retention or overwrite latency measurements. A 30-day memory expiry is based on real server time. Narrative records also become ineligible when their event/date window is no longer relevant. Store both source effective time and real creation time when needed.
+Demo time must not overwrite latency measurements. Saved memories are durable; narrative local-day age can influence a separately versioned recall probability. An old event remains a historical fact rather than becoming physically expired. Current-use permissions and due windows still govern whether it may be used for a particular purpose. Store learned/reconfirmed local date separately from event date and real creation time.
 
 ## Shared Next day and night job
 
@@ -128,7 +130,7 @@ Demo time must not prolong privacy retention or overwrite latency measurements. 
 Under a profile-scoped lock and transaction:
 
 1. Reject or defer while a turn is active or accepted learning remains pending. Snapshot clock/state/deletion versions.
-2. Check unique profile/target-date completion; return the existing result if already applied. Expire invalid source data before deriving anything.
+2. Check unique profile/target-date completion; return the existing result if already applied. Revalidate source dependencies and end out-of-window permissions/leases before deriving anything; do not delete ordinary memories because of age.
 3. Create due follow-ups from eligible reported events, explicit plans, and supported promises. Deduplicate by source and rule. Do not recreate presented/resolved hooks for the same event.
 4. Select one authored fictional indoor diary event for the target date. It can reference a known safe shared object only through a tracked dependency; otherwise keep it independent of child data.
 5. Create the new daily mood once and evaluate friendship stage from validated shared milestones and child permission. Review can leave the stage unchanged; advancing a day alone never increases friendship.
@@ -142,7 +144,7 @@ In real-clock mode, a scheduler can request rollover after local midnight. If un
 
 Diary templates are fictional indoor moments: window raindrops, a funny dream, a cardboard fort. Store the chosen template and fictional scope. Never infer actual rain, surveillance, movement, or household conditions. One diary entry per profile/date; no guilt if it is never read.
 
-Stages are `getting_acquainted`, `buddies`, and `best_friends`. A completed shared activity plus welcomed familiarity can support `buddies`; another validated shared moment plus explicit permission for a nickname or recurring joke can support `best_friends`. These are tone presets, not exclusive claims. Seeded history can demonstrate all stages without repeated visits. Recomputing after expiry/deletion removes unsupported references without withdrawing kindness.
+Stages are `getting_acquainted`, `buddies`, and `best_friends`. A completed shared activity plus welcomed familiarity can support `buddies`; another validated shared moment plus explicit permission for a nickname or recurring joke can support `best_friends`. These are tone presets, not exclusive claims. Seeded history can demonstrate all stages without repeated visits. Recomputing after permission withdrawal, correction or deletion removes unsupported references without withdrawing kindness. Age-based recall skips do not demote the relationship stage or impose a penalty for absence.
 
 ## Panel read model
 
@@ -152,7 +154,7 @@ Stages are `getting_acquainted`, `buddies`, and `best_friends`. A completed shar
 | --- | --- |
 | Clock | Effective time/date, timezone, clock mode/version, next-day availability |
 | Character | MBTI, role, daily mood, rhythm, latest turn emotion, terse director-rule trace |
-| Memory | Minimal entity/fact/event cards, evidence kind, source handle, expiry, learning status |
+| Memory | Minimal entity/fact/event cards, evidence kind, source handle, memory age, any hard permission validity, learning status |
 | Follow-through | Selected/due follow-up, promise status and checkpoint summary |
 | Life | Current fictional diary, friendship stage and permitted shared references, last night-job result |
 | Pipeline | Provider mode, fixture, turn status, stage times, client audio-start latency when reported |
@@ -161,7 +163,7 @@ Do not expose raw prompts, recordings, full conversation archives, unfiltered ca
 
 ## Retention and acceptance
 
-Session text: session-only, 30-minute inactivity expiry. Derived personal memories/diary/promises: 30 real days unless explicitly reconfirmed, with no renewal merely from retrieval. Daily mood: current state only, no child mood history. Diagnostic operation metadata: seven real days, content-free. Pending learning projections: process promptly and purge within the session inactivity window if unrecoverable.
+Session text: session-only, 30-minute inactivity expiry. Saved personal memories and necessary derived records: durable until explicit forgetting/deletion or retirement by correction; no 30-day memory TTL. Random age-based recall does not delete sources, renew them on passive reads, or override hard permission validity. Daily mood: current state only, no child mood history. Diagnostic operation metadata: seven real days, content-free. Pending learning projections: process promptly and purge within the session inactivity window if unrecoverable.
 
 Acceptance requires PostgreSQL integration checks for:
 
@@ -172,4 +174,4 @@ Acceptance requires PostgreSQL integration checks for:
 - Advancing a day alone does not increase friendship; authorized shared experiences can.
 - Immediate “forget that,” entity-wide forgetting, dependent deletion, and a concurrent stale learner cannot restore the forgotten content.
 - Failed transactions leave no partial clock/day advance or false deletion acknowledgment.
-- Profile isolation, expiry, and session-text disposal hold after reload/restart. Clock changes affect sleepiness while privacy expiry still follows wall time.
+- Profile isolation, explicit deletion, durable-memory persistence and session-text disposal hold after reload/restart. Old-memory recall follows its declared age policy; hard permission/session expiry is tested separately.

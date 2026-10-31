@@ -4,16 +4,16 @@ import { conversationMood, localDay, restoreDailyMood, type TurnMood } from './d
 import type { Emotion } from './miu-pose';
 import type { Phase } from './conversation';
 
-export function useDailyMood(profile: string, phase: Phase) {
+export function useDailyMood(profile: string, phase: Phase, persist = true) {
   const [now, setNow] = useState(() => new Date());
   const date = localDay(now);
-  const daily = useMemo(() => restoreDailyMood(profile, date, readPreference(`miu.daily-mood.${profile}`, 'null')), [profile, date]);
+  const daily = useMemo(() => restoreDailyMood(profile, date, persist ? readPreference(`miu.daily-mood.${profile}`, 'null') : null), [profile, date, persist]);
   const [turn, setTurn] = useState<(TurnMood & { expires: number }) | null>(null);
   const current = turn?.profile === daily.profile && turn.date === daily.date ? turn : null;
 
   useEffect(() => setTurn(null), [profile, date]);
 
-  useEffect(() => { savePreference(`miu.daily-mood.${profile}`, JSON.stringify(daily)); }, [profile, daily]);
+  useEffect(() => { if (persist) savePreference(`miu.daily-mood.${profile}`, JSON.stringify(daily)); }, [profile, daily, persist]);
   useEffect(() => {
     const next = new Date(); next.setHours(24, 0, 0, 30);
     const timer = setTimeout(() => setNow(new Date()), Math.max(1, next.getTime() - Date.now()));

@@ -6,15 +6,19 @@ import type { SessionService } from './session.service.js';
 
 /** Translate HTTP input/output; session rules live in SessionService. */
 export class SessionController {
-  constructor(private readonly sessions: SessionService, private readonly providerMode: ProviderMode) {}
+  constructor(private readonly sessions: SessionService, private readonly providerMode: ProviderMode,
+    private readonly resolveProfile?: (request: Request) => Promise<string>) {}
 
   readonly create = async (request: Request, response: Response) => {
     const body = object(request.body);
     if (Object.keys(body).some(key => !['demo_profile_key', 'request_id'].includes(key))
-      || typeof body.demo_profile_key !== 'string') {
+      || (body.demo_profile_key !== undefined && typeof body.demo_profile_key !== 'string')
+      || (!this.resolveProfile && typeof body.demo_profile_key !== 'string')) {
       throw new PipelineError('invalid_request', 400);
     }
-    const session = await this.sessions.createSession(body.demo_profile_key, identifier(body.request_id));
+    const requestId = identifier(body.request_id);
+    const key = this.resolveProfile ? await this.resolveProfile(request) : body.demo_profile_key as string;
+    const session = await this.sessions.createSession(key, requestId, !!this.resolveProfile);
     const result: SessionResponse = {
       session_id: session.id,
       demo_token: session.profile.token,

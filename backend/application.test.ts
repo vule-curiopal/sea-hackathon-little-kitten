@@ -5,7 +5,7 @@ import { MiuApplication, type TurnResponse } from './application.js';
 import { createMemoryStore } from './memory/index.js';
 import { FakeProvider, OpenAIProvider, type OpenAITransport } from './pipeline/providers.js';
 import { classifyLocal } from './pipeline/observations.js';
-import { AppError, type Provider } from './shared/types.js';
+import { AppError, type Provider, type ProviderClassificationContext, type ReplyPrompt, type DirectorPlan } from './shared/types.js';
 
 async function fixture(provider: Provider = new FakeProvider()) {
   const store = await createMemoryStore({ now: () => new Date('2026-10-31T03:00:00Z') });
@@ -209,5 +209,131 @@ test('offline a repeated completed name correction is a read without another mut
     assert.equal(after.profile.deletionEpoch, before.profile.deletionEpoch);
     assert.equal(after.entities[0]?.id, before.entities[0]?.id);
     assert.equal(after.entities[0]?.name, 'Bình');
+  } finally { await f.app.close(); }
+});
+
+test('offline application wiring learns a completed reading topic and supports named forgetting', async () => {
+  const f = await fixture();
+  try {
+    const first = await f.turn('I cannot read butterfly.');
+    assert.equal((await f.app.getContext(f.profileId)).learningActivities?.length, 0);
+    await f.complete(first);
+    const saved = await f.app.getContext(f.profileId);
+    assert.deepEqual(saved.learningActivities?.map(({ kind, term, focus }) => ({ kind, term, focus })), [
+      { kind: 'word_practice', term: 'butterfly', focus: 'reading' },
+    ]);
+    const followup = await f.turn('What does butterfly mean?');
+    assert.ok(followup.presentation.allowedFacts.some(fact => /completed.*reading activity.*butterfly/iu.test(fact)));
+    await f.complete(followup);
+    const forgotten = await f.turn('Forget butterfly.');
+    assert.equal(forgotten.memory.invalidate_replay, true);
+    assert.deepEqual((await f.app.getContext(f.profileId)).learningActivities, []);
+  } finally { await f.app.close(); }
+});
+
+test('offline application wiring excludes interrupted and no-save reading activities', async () => {
+  const f = await fixture();
+  try {
+    const unheard = await f.turn('Help me read butterfly.');
+    await f.app.playback(f.profileId, unheard.session_id, unheard.turn_id, { request_id: randomUUID(), status: 'started', state_version: unheard.state_version });
+    await f.app.playback(f.profileId, unheard.session_id, unheard.turn_id, { request_id: randomUUID(), status: 'interrupted', state_version: unheard.state_version });
+    assert.deepEqual((await f.app.getContext(f.profileId)).learningActivities, []);
+    await f.complete(await f.turn('Help me read butterfly. Do not save this.'));
+    assert.deepEqual((await f.app.getContext(f.profileId)).learningActivities, []);
+  } finally { await f.app.close(); }
+});
+
+test('offline application passes actual session identity for nickname permissions and hides them on reopen', async () => {
+  const f = await fixture();
+  try {
+    await f.complete(await f.turn('Call me Captain Star for this session.'));
+    assert.equal((await f.app.getContext(f.profileId, f.session.session_id)).addressPreference?.nickname, 'Captain Star');
+    assert.equal((await f.app.getContext(f.profileId)).addressPreference, null);
+    const response = await f.turn('What do you call me?');
+    assert.ok(response.presentation.allowedFacts.some(fact => fact.includes('Captain Star')));
+    await f.complete(response);
+    const reopened = await f.app.openSession('an');
+    assert.equal(reopened.context.addressPreference, null);
+    assert.equal((await f.app.getContext(f.profileId, reopened.session_id)).addressPreference, null);
+    const current = await f.app.prepareTurn(f.profileId, reopened.session_id, { request_id: randomUUID(), kind: 'utterance', text: 'What should you call me?' });
+    assert.ok(current.presentation.allowedFacts.some(fact => fact.includes('"An"')));
+    assert.ok(current.presentation.allowedFacts.every(fact => !fact.includes('Captain Star')));
+    await f.app.cancel(f.profileId, reopened.session_id, current.turn_id);
+  } finally { await f.app.close(); }
+});
+
+test('offline address mutation retains separate ship premise without retaining the nickname directive', async () => {
+  class PromptRecording extends FakeProvider {
+    prompts: ReplyPrompt[] = [];
+    override async reply(prompt: ReplyPrompt, plan: DirectorPlan) {
+      this.prompts.push(prompt);
+      return super.reply(prompt, plan);
+    }
+  }
+  const provider = new PromptRecording();
+  const f = await fixture(provider);
+  try {
+    await f.complete(await f.turn('Hôm nay gọi mình Thuyền trưởng Chuối nhé.Tàu sắp đáp.'));
+    const next = await f.turn('Đáp lên cái gối trong nhà tưởng tượng của Miu.');
+    assert.equal(next.presentation.action?.domain, 'child_story');
+    assert.ok(next.presentation.action?.activity?.premise.some(text => text === 'Tàu sắp đáp.'));
+    const history = JSON.parse(provider.prompts.at(-1)!.input).recent_heard_dialogue;
+    // The exact context structure may evolve; the actual action premise is the
+    // contract, and the persisted user clause must not contain address commands.
+    assert.doesNotMatch(JSON.stringify(next.presentation.action?.activity?.premise), /gọi mình|Thuyền trưởng Chuối/u);
+    assert.ok(history === undefined || Array.isArray(history));
+    await f.complete(next);
+    const context = await f.app.getContext(f.profileId, f.session.session_id);
+    await f.app.nextDay(f.profileId, randomUUID(), context.clock.version);
+    assert.equal((await f.app.openSession('an')).context.addressPreference, null);
+  } finally { await f.app.close(); }
+});
+
+test('offline application supplies eligible benign referents to safety without crossing profiles or forgetting', async () => {
+  class ContextRecording extends FakeProvider {
+    contexts: Array<ProviderClassificationContext | undefined> = [];
+    replyContexts: unknown[] = [];
+    checkContexts: unknown[] = [];
+    override async classify(...args: Parameters<FakeProvider['classify']>) {
+      this.contexts.push(args[3]);
+      return super.classify(...args);
+    }
+    override async reply(prompt: ReplyPrompt, plan: DirectorPlan) {
+      this.replyContexts.push(JSON.parse(prompt.input).grounding.eligible_referent_reports);
+      return super.reply(prompt, plan);
+    }
+    override async check(text: string, plan: DirectorPlan, _signal?: AbortSignal, prompt?: ReplyPrompt) {
+      this.checkContexts.push(prompt ? JSON.parse(prompt.input).grounding.eligible_referent_reports : []);
+      return super.check(text, plan);
+    }
+  }
+  const provider = new ContextRecording();
+  const f = await fixture(provider);
+  try {
+    const seed = await f.app.getContext(f.profileId);
+    const sourceText = 'I drew a cardboard rocket in my picture.';
+    // Explicit storage fixture for a context-plumbing check, not evidence that
+    // the offline classifier learned arbitrary natural-language events.
+    await f.store.learn({ profileId: f.profileId, turnId: randomUUID(), localDate: seed.clock.localDate, deletionEpoch: seed.profile.deletionEpoch,
+      sourceText, candidates: [{ kind: 'event', eventType: 'reported_event', subjectName: null, value: 'cardboard rocket in my picture', evidence: sourceText }] });
+    const context = await f.app.getContext(f.profileId);
+    const event = context.events.find(event => /cardboard rocket/u.test(event.value));
+    assert.ok(event);
+    await f.complete(await f.turn('Which color should I use for my cardboard rocket?'));
+    assert.ok(provider.contexts.at(-1)?.safetyEvidence?.some(card => card.sourceId === event.id && /cardboard rocket/u.test(card.value)));
+    assert.deepEqual(provider.replyContexts.at(-1), provider.contexts.at(-1)?.safetyEvidence);
+    assert.deepEqual(provider.checkContexts.at(-1), provider.replyContexts.at(-1));
+    await f.store.forget(f.profileId, event.id, (await f.app.getContext(f.profileId)).profile.deletionEpoch);
+    await f.complete(await f.turn('Which color should I use for my cardboard rocket?'));
+    assert.equal(provider.contexts.at(-1)?.safetyEvidence?.some(card => card.sourceId === event.id), false);
+    assert.deepEqual(provider.replyContexts.at(-1), []);
+    assert.deepEqual(provider.checkContexts.at(-1), []);
+    const other = await f.app.openSession('binh');
+    const otherId = f.app.profileForToken(other.demo_token);
+    const reply = await f.app.prepareTurn(otherId, other.session_id, { request_id: randomUUID(), kind: 'utterance', text: 'Which color should I use for my cardboard rocket?' });
+    assert.deepEqual(provider.contexts.at(-1)?.safetyEvidence, []);
+    assert.deepEqual(provider.replyContexts.at(-1), []);
+    assert.deepEqual(provider.checkContexts.at(-1), []);
+    await f.app.cancel(otherId, other.session_id, reply.turn_id);
   } finally { await f.app.close(); }
 });

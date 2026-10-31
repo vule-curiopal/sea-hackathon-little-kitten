@@ -148,6 +148,47 @@ describe('voice controller', () => {
     await fake.controller.close();
   });
 
+  it('accepts a late interruption conflict only after the same turn cancellation succeeds', async () => {
+    for (const conflict of ['invalid_playback_transition', 'invalid_receipt_transition', 'turn_canceled', 'stale_state']) {
+    const fake = setup();
+    await fake.controller.openProfile('an', 'vi');
+    const pending = fake.controller.talk();
+    fake.recording().resolve(captured());
+    await pending;
+    const sender = fake.playback.play.mock.calls[0]![1];
+    const cancellation = deferred<void>();
+    fake.api.cancelTurn.mockReturnValueOnce(cancellation.promise);
+    fake.api.playback.mockRejectedValueOnce(new VoiceClientError(conflict, 'Canceled', false, 409));
+    const stopping = fake.controller.stop();
+    let finished = false;
+    const receipt = sender({ request_id: 'late-interrupted', status: 'interrupted', played_ms: 100, state_version: 2 }).then(() => { finished = true; });
+    await settle();
+    expect(finished).toBe(false);
+    cancellation.resolve();
+    await stopping;
+    await receipt;
+    expect(fake.controller.state).toBe('idle');
+    }
+  });
+
+  it('does not hide failed cancellation, completed-receipt conflicts or unrelated receipt errors', async () => {
+    for (const kind of ['cancel-failed', 'completed', 'unrelated', 'not-canceled'] as const) {
+      const fake = setup();
+      await fake.controller.openProfile('an', 'vi');
+      const pending = fake.controller.talk();
+      fake.recording().resolve(captured());
+      await pending;
+      const sender = fake.playback.play.mock.calls[0]![1];
+      if (kind === 'cancel-failed') fake.api.cancelTurn.mockRejectedValueOnce(new VoiceClientError('NETWORK_ERROR', 'Unavailable'));
+      const stopping = kind === 'not-canceled' ? Promise.resolve() : fake.controller.stop();
+      const stopped = kind === 'cancel-failed' ? expect(stopping).rejects.toMatchObject({ code: 'NETWORK_ERROR' }) : stopping;
+      const code = kind === 'unrelated' ? 'idempotency_conflict' : kind === 'not-canceled' ? 'stale_state' : 'invalid_playback_transition';
+      fake.api.playback.mockRejectedValueOnce(new VoiceClientError(code, 'Conflict', false, 409));
+      await expect(sender({ request_id: 'late-receipt', status: kind === 'completed' ? 'completed' : 'interrupted', played_ms: 100, state_version: 2 })).rejects.toMatchObject({ code: kind === 'cancel-failed' ? 'NETWORK_ERROR' : code });
+      await stopped;
+      if (kind === 'not-canceled') await fake.controller.stop();
+    }
+  });
   it('selects language before recording and runs capture/upload/playback through the canonical API', async () => {
     const fake = setup();
     await fake.controller.openProfile('an', 'vi');

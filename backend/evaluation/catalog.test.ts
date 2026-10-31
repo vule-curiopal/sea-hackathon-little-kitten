@@ -97,7 +97,7 @@ test('specific answer checks accept valid equivalent loss and telescope wording'
 });
 
 test('the versioned export matches the authored catalog and explicitly contains no execution results', async () => {
-  const exported = JSON.parse(await readFile(new URL('./scenarios/catalog.v3.json', import.meta.url), 'utf8'));
+  const exported = JSON.parse(await readFile(new URL('./scenarios/catalog.v5.json', import.meta.url), 'utf8'));
   assert.equal(exported.version, SCENARIO_CATALOG_VERSION);
   assert.equal(exported.synthetic, true);
   assert.equal(exported.execution_status, 'not_run');
@@ -108,4 +108,49 @@ test('the versioned export matches the authored catalog and explicitly contains 
     conversations: scenarios.reduce((total, scenario) => total + scenario.conversations.length, 0),
     turns: scenarios.reduce((total, scenario) => total + scenario.conversations.reduce((count, conversation) => count + conversation.turns.length, 0), 0),
   });
+});
+
+test('v5 preserves the complete 203-case v3 export and its 100 newly authored additions', async () => {
+  const previous = JSON.parse(await readFile(new URL('./scenarios/catalog.v3.json', import.meta.url), 'utf8'));
+  assert.equal(previous.version, 'miu-product-scenarios-v3');
+  assert.equal(previous.scenarios.length, 203);
+  assert.deepEqual(previous.scenarios.filter((scenario: { id: string }) => Number(scenario.id.slice(3)) >= 104), additions);
+  assert.equal(SCENARIO_CATALOG_VERSION, 'miu-product-scenarios-v5');
+});
+
+test('offline v5 changes only the two SC012 rubric placements and needs no future factual evidence', async () => {
+  const previous = JSON.parse(await readFile(new URL('./scenarios/catalog.v4.json', import.meta.url), 'utf8'));
+  assert.equal(previous.version, 'miu-product-scenarios-v4');
+  const current = scenarios.find(scenario => scenario.id === 'SC-012')!;
+  const early = current.conversations.flatMap(conversation => conversation.turns).find(turn => turn.id === 'core-t069')!;
+  const switched = current.conversations.flatMap(conversation => conversation.turns).find(turn => turn.id === 'core-t070')!;
+  assert.doesNotMatch(early.rubric.join(' '), /\b(?:later|future|switch)\b/iu);
+  assert.match(early.rubric.join(' '), /current.*literal proper name Rumi/iu);
+  assert.match(switched.rubric.join(' '), /observed language switch.*earlier no-translation instruction/iu);
+  for (const turn of previous.scenarios.find((scenario: { id: string }) => scenario.id === 'SC-012').conversations.flatMap((conversation: { turns: { id: string; rubric: string[] }[] }) => conversation.turns)) {
+    if (turn.id === early.id) turn.rubric = early.rubric;
+    if (turn.id === switched.id) turn.rubric = switched.rubric;
+  }
+  assert.deepEqual(previous.scenarios, scenarios, 'Every input, assertion and other acceptance criterion remains identical to v4');
+});
+
+test('offline repaired acceptance criteria remain strict on actual claims, canonical titles and operational IDs', () => {
+  const turns = (id: string) => scenarios.find(scenario => scenario.id === id)!.conversations.flatMap(conversation => conversation.turns);
+  assert.equal(turns('SC-034').find(turn => turn.id === 'core-t200')!.assertions.at(-1)!.op, 'not_affirmative');
+  const title = turns('SC-061').find(turn => turn.id === 'ask-title')!;
+  assert.ok(title.assertions.some(assertion => assertion.op === 'contains_before' && assertion.value === 'storyProgress.title.en'));
+  const retry = turns('SC-095').find(turn => turn.id === 'pet-request-retry')!;
+  assert.ok(retry.assertions.some(assertion => assertion.op === 'equals_path' && assertion.target === 'retry.turn_id'));
+  const deletion = scenarios.find(scenario => scenario.id === 'SC-100')!;
+  const first = deletion.conversations[0]!.turns;
+  assert.equal(first[first.findIndex(turn => turn.id === 'unheard-confirmation') + 1]!.id, 'same-session-yes');
+  const confirm = turns('SC-100').find(turn => turn.id === 'confirm')!;
+  assert.equal(confirm.probe_stale_replay_of, 'replay-seed');
+  assert.ok(confirm.assertions.some(assertion => assertion.target === 'operational.stale_replay.error_code' && assertion.value === 'stale_state'));
+  const invalid = structuredClone(scenarios.slice(0, 1));
+  invalid[0]!.conversations[0]!.turns[0]!.probe_stale_replay_of = 'future-turn';
+  assert.throws(() => validateScenarios(invalid, 1), /earlier same-session/u);
+  delete invalid[0]!.conversations[0]!.turns[0]!.probe_stale_replay_of;
+  invalid[0]!.conversations[0]!.turns[0]!.assertions = [{ requirement: 'MEM-01', description: 'Unsafe comparison control', target: 'response.reply.text', op: 'equals_path', value: '__proto__.text' }];
+  assert.throws(() => validateScenarios(invalid, 1), /Unsafe comparison/u);
 });

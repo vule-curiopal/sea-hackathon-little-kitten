@@ -205,3 +205,55 @@ test('offline strict transport schema requires nullable metadata and normalizes 
   assert.deepEqual(observation.candidates, [{ kind: 'entity', entityKind: 'pet', name: 'Mochi', species: 'dog', evidence: 'My dog is Mochi' }]);
   assert.throws(() => normalizeObservationTransport({ candidates: [] }));
 });
+
+test('offline real-entity capture rejects the three SC-103 fictional hypothetical and quoted name propositions', () => {
+  const context = { entities: [{ id: 'known-dog-contract', kind: 'pet' as const, name: 'Moki', aliases: [], species: 'dog' }], recent: [] };
+  const cases = [
+    { text: 'In my pretend story, my dog is Mochi, not Moki.', name: 'Mochi', evidence: 'my dog is Mochi' },
+    { text: 'If my dog is Nori, not Moki, would a pretend story change its name?', name: 'Nori', evidence: 'my dog is Nori' },
+    { text: 'My friend said, "My dog is Nori, not Moki."', name: 'Nori', evidence: 'My dog is Nori' },
+  ];
+  for (const { text, name, evidence } of cases) {
+    assert.equal(classifyLocal(text, 'en', context).candidates.some(candidate => candidate.kind === 'entity' && candidate.entityKind === 'pet'), false, text);
+    const proposed = {
+      ...classifyLocal('Hello.', 'en'),
+      candidates: [{ kind: 'entity' as const, entityKind: 'pet' as const, name, species: 'dog', evidence }],
+    };
+    const result = validateObservationEvidence(text, proposed, context);
+    assert.deepEqual(result.accepted.candidates, [], text);
+    assert.deepEqual(result.proposed.candidates, proposed.candidates, 'Model proposals remain visible without being relabeled as local facts.');
+    assert.equal(result.rejectedCandidates[0]?.reason, 'non_asserted_source', text);
+    assert.equal(result.accepted.entityCorrection, null, text);
+  }
+});
+
+test('offline entity-scope guard preserves an actual correction and independent real disclosures', () => {
+  const context = { entities: [{ id: 'known-dog-contract', kind: 'pet' as const, name: 'Moki', aliases: [], species: 'dog' }], recent: [] };
+  const actual = 'I said the name wrong. My dog is Mochi, not Moki. Please correct it.';
+  const correction = classifyLocal(actual, 'en', context);
+  assert.equal(correction.intent, 'correct');
+  assert.equal(correction.entityCorrection?.oldName, 'Moki');
+  assert.equal(correction.entityCorrection?.newName, 'Mochi');
+  assert.equal(validateObservationEvidence(actual, correction, context).accepted.entityCorrection?.newName, 'Mochi');
+  for (const text of [
+    'In my pretend story, my dog is Mochi, not Moki. My cat is Nori.',
+    'My friend said, "My dog is Mochi."; my cat is Nori.',
+    'If my dog is Mochi, would the story change? My cat is Nori.',
+    'In my pretend story, my dog is Mochi, but in real life my cat is Nori.',
+  ]) {
+    const accepted = validateObservationEvidence(text, classifyLocal('Hello.', 'en'), context).accepted;
+    assert.ok(accepted.candidates.some(candidate => candidate.kind === 'entity' && candidate.name === 'Nori' && candidate.entityKind === 'pet' && candidate.species === 'cat'), text);
+    assert.equal(accepted.candidates.some(candidate => candidate.kind === 'entity' && candidate.name === 'Mochi' && candidate.entityKind === 'pet'), false, text);
+  }
+});
+
+test('offline entity scope permits quoted names, a repeated real assertion, and fictional character typing', () => {
+  const proposal = { kind: 'entity' as const, entityKind: 'pet' as const, name: 'Mochi', species: 'dog', evidence: 'My dog is "Mochi".' };
+  const quotedName = validateObservationEvidence(proposal.evidence, { ...classifyLocal('Hello.'), candidates: [proposal] });
+  assert.ok(quotedName.accepted.candidates.some(candidate => candidate.kind === 'entity' && candidate.name === 'Mochi' && candidate.entityKind === 'pet'));
+  const repeated = 'My friend said, "My dog is Mochi." My dog is Mochi.';
+  assert.ok(classifyLocal(repeated).candidates.some(candidate => candidate.kind === 'entity' && candidate.name === 'Mochi' && candidate.entityKind === 'pet'));
+  const character = classifyLocal('My story character is named Luna.');
+  assert.ok(character.candidates.some(candidate => candidate.kind === 'entity' && candidate.name === 'Luna' && candidate.entityKind === 'story_character'));
+  assert.equal(character.candidates.some(candidate => candidate.kind === 'entity' && candidate.entityKind === 'pet'), false);
+});

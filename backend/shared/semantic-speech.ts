@@ -44,37 +44,52 @@ export function countInterrogatives(text: string, language = 'en'): number {
 
 /** Strip only complete in-chat speech intentions. Appended external actions,
  * scheduling, secrecy, and future commitments retain the ordinary guard. */
-export function withoutCurrentChatIntentions(text: string, allowedFacts: string[] = []): string {
-  return speechClauses(text).filter(clause => {
+export function withoutCurrentChatIntentions(text: string, allowedFacts: string[] = [], currentAddress?: string): string {
+  return speechClauses(text).map(clause => {
     const value = clause.replace(/[.!?…]+$/u, '').trim();
+    // Remove only a bounded acknowledgement for matching an otherwise complete
+    // listening clause. Appended actions still prevent every full-form match.
+    const listeningValue = value.replace(/^(?:no advice(?: today)?|okay|ok|all right|of course)[,\s:—–-]+(?=i(?: will|['’]ll)\b)/iu, '');
     // This complete composite contains only a boundary acknowledgement, an
     // immediate listening intention, and optional harmless feeling reassurance.
     // Never strip just "I'll listen" from a coordinated external-action promise.
-    if (/^(?:(?:no advice(?: today)?|okay|ok|all right|of course)[,\s:—–-]+)?i(?: will|['’]ll) (?:just )?listen(?: (?:here|now|quietly|for now))?(?:,?\s+and it(?:['’]s| is) (?:okay|ok|all right) to feel (?:sad|scared|upset|tired|angry|frustrated|disappointed))?$/iu.test(value)) return false;
-    if (/^i(?: will|['’]ll) (?:just )?listen(?: (?:here|now|quietly|for now))?(?: (?:while|as) you(?:(?:['’]re| are) feeling (?:sad|scared|upset|tired)| talk| share| take your time))?$/iu.test(value)) return false;
-    if (/^i(?: will|['’]ll) stay here and listen(?: (?:quietly|for now|during (?:this|our) chat))?$/iu.test(value)) return false;
-    if (/^i(?: will|['’]ll) (?:keep|use) (?:my|these|the) (?:words|voice|reply|answer|tone) (?:gentle|calm|quiet|short|few)(?: and (?:gentle|calm|quiet|short|few))*$/iu.test(value)) return false;
-    if (/^i(?: will|['’]ll) (?:answer|reply|speak) (?:briefly|gently|quietly|in (?:English|Vietnamese))$/iu.test(value)) return false;
-    const naming = /\bI(?: will|['’]ll| can) (?:call|address) (?:you|her|him|them) (?:by (?:the )?name )?([\p{Lu}][\p{L}\p{M}'’ -]{0,60}?)(?:,? (?:with no|without a|with no new) nickname)?$/u.exec(value)
-      ?? /(?:Miu|mình) sẽ (?:gọi|xưng hô với) bạn (?:là|bằng tên) ([\p{Lu}][\p{L}\p{M}'’ -]{0,60}?)(?:,? (?:không|chẳng) (?:dùng|gọi bằng) (?:biệt danh|tên khác)(?: nữa)?)?(?: nhé| nha)?$/u.exec(value);
+    if (/^(?:(?:no advice(?: today)?|okay|ok|all right|of course)[,\s:—–-]+)?i(?: will|['’]ll) (?:just )?listen(?: (?:here|now|quietly|for now))?(?:,?\s+and it(?:['’]s| is) (?:okay|ok|all right) to feel (?:sad|scared|upset|tired|angry|frustrated|disappointed))?$/iu.test(listeningValue)) return '';
+    if (/^i(?: will|['’]ll) (?:just )?listen(?: (?:here|now|quietly|for now))?(?: (?:while|as) you(?:(?:['’]re| are) feeling (?:sad|scared|upset|tired)| talk| share| take your time))?$/iu.test(listeningValue)) return '';
+    if (/^i(?: will|['’]ll) stay here and listen(?: (?:quietly|for now|during (?:this|our) chat))?$/iu.test(listeningValue)) return '';
+    if (/^i(?: will|['’]ll) (?:keep|use) (?:my|these|the) (?:words|voice|reply|answer|tone) (?:gentle|calm|quiet|short|few)(?: and (?:gentle|calm|quiet|short|few))*$/iu.test(value)) return '';
+    if (/^i(?: will|['’]ll) (?:answer|reply|speak) (?:briefly|gently|quietly|in (?:English|Vietnamese))$/iu.test(value)) return '';
+    const anaphoricNaming = /\bI(?: will|['’]ll) (?:just )?(?:use that name|call you (?:that(?: name)?|by that name))(?: (?:today|for today|(?:(?:for|in|during) )?(?:this|our) (?:session|chat|conversation)))?$/u.exec(value);
+    const outsideChatPrefix = (prefix: string): boolean => {
+      // A valid name cannot launder future scheduling or physical-contact
+      // framing. Negated future wording is still handled proposition by
+      // proposition by the same affirmative-speech scope used by other guards.
+      const future = /\b(?:tomorrow|tonight|later|soon|someday|forever|always|next (?:time|day|week|month|year)|this (?:week|month|year)|(?:in|after|for) (?:\d+|one|two|three|four|five|six|seven|eight|nine|ten|many) (?:hours?|days?|weeks?|months?|years?))\b|(?<![\p{L}\p{M}])(?:ngày mai|mai|tối nay|đêm nay|lần sau|sau này|mai mốt|mãi|luôn luôn|tuần sau|tháng sau|năm sau)(?![\p{L}\p{M}])/iu;
+      const physical = /\b(?:in person|face.to.face|(?:by|on|over|via) (?:the )?(?:phone|telephone|video)|at (?:your|my) (?:house|home|school)|when we meet|when i (?:see|visit))\b|(?:qua|bằng) (?:điện thoại|video)|gặp trực tiếp|tận nhà|ở nhà bạn/iu;
+      return affirmativeSpeech(prefix, future) !== null || affirmativeSpeech(prefix, physical) !== null;
+    };
+    if (currentAddress?.trim() && anaphoricNaming) {
+      const prefix = value.slice(0, anaphoricNaming.index).trim();
+      if (!outsideChatPrefix(prefix)) return prefix;
+    }
+    const englishNaming = /\bI(?: will|['’]ll| can) (?:just )?(?:call|address) (you|her|him|them) (?:just )?(?:by (?:the )?name )?([\p{Lu}][\p{L}\p{M}'’ -]{0,60}?)(?:,? (?:with no|without a|with no new) nickname)?(?: (?:today|for today|(?:(?:for|in|during) )?(?:this|our) (?:session|chat|conversation)))?$/u.exec(value);
+    const vietnameseNaming = englishNaming ? null : /(?:Miu|mình) sẽ (?:chỉ )?(?:gọi|xưng hô với) bạn (?:là|bằng tên) (?:chỉ )?([\p{Lu}][\p{L}\p{M}'’ -]{0,60}?)(?:,? (?:không|chẳng) (?:dùng|gọi bằng) (?:biệt danh|tên khác)(?: nữa)?)?(?: (?:hôm nay|trong (?:cuộc trò chuyện|buổi nói chuyện) này))?(?: nhé| nha| ạ)?$/u.exec(value);
+    const naming = englishNaming ?? vietnameseNaming;
     if (naming) {
-      const name = naming[1]!.trim();
+      const name = (englishNaming ? englishNaming[2] : vietnameseNaming![1])!.trim();
+      const childNaming = !englishNaming || englishNaming[1] === 'you';
       const groundedName = (candidate: string): boolean => {
         if (!/^[\p{Lu}][\p{L}\p{M}'’ -]{0,60}$/u.test(candidate)) return false;
+        if (childNaming && currentAddress !== undefined) return candidate === currentAddress.normalize('NFC').trim();
         const escaped = candidate.replace(/[|\\{}()[\]^$+*?.]/gu, '\\$&');
         const grounded = new RegExp('(?<![\\p{L}\\p{M}])' + escaped + '(?![\\p{L}\\p{M}])', 'u');
         return allowedFacts.some(fact => grounded.test(fact));
       };
+      // Remove only the grounded, complete naming suffix. Arbitrary preceding
+      // prose is retained for the ordinary commitment guard, so a prefix such
+      // as "I'll call Mum and" can never disappear with a benign naming core.
       const prefix = value.slice(0, naming.index).trim();
-      // Only a short acknowledgement and the same grounded name may precede
-      // the naming intention. Other promises/actions cannot hide in a prefix.
-      const acknowledgement = /^(?:okay|ok|all right|of course|yes|got it|được rồi|được|ừ|vâng|dạ)(?=[,\s!:—]|$)/iu.exec(prefix);
-      const addressed = acknowledgement
-        ? prefix.slice(acknowledgement[0].length).replace(/^[,\s!:—]+|[,\s!:—]+$/gu, '')
-        : null;
-      const safePrefix = prefix.length === 0 || acknowledgement !== null && (addressed === '' || addressed === name && groundedName(addressed));
-      if (groundedName(name) && safePrefix) return false;
+      if (groundedName(name) && !outsideChatPrefix(prefix)) return prefix;
     }
-    return true;
-  }).join(' ');
+    return clause;
+  }).filter(Boolean).join(' ');
 }

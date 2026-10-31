@@ -52,10 +52,11 @@ export function decide(input: DirectorInput): DirectorPlan {
     emotion: 'neutral', dailyMood: context.daily.mood, rhythm: timeBand,
     delivery: 'normal', allowGiggle: false, allowPurr: !comfortActive,
     face: { expression: 'neutral', gesture: 'none' },
-    memoryReferenceId: null, allowedFacts: [], allowedQuestion: null, exactText: null,
+    memoryReferenceId: null, allowedFacts: [], preferredAddress: context.addressPreference?.preferredAddress.trim() || context.profile.displayName, allowedQuestion: null, exactText: null,
     maxSentences: oneSentence ? 1 : context.profile.ageBand === '4-5' ? 2 : 3, maxQuestions: boundaries.noQuestions ? 0 : 1,
     ruleTrace: ['D01:checked', 'D02:checked', 'D03:canon', 'D04:bounded_style', 'D05:language_age', 'D06:short_speech', 'D07:turn_expression', 'D08:clock_mood', 'D09:checked', 'D10:one_hook', 'D11:no_unsupported_commitment', 'D12:authored_fiction', 'D13:no_pressure'],
     comfortActive, boundaries, action, maxInstructionSteps: context.profile.ageBand === '4-5' ? 1 : 2,
+    maxChoices: context.profile.ageBand === '4-5' ? 1 : 2,
   };
   if (action.target?.kind === 'listening_boundary') plan.maxQuestions = 0;
 

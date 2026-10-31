@@ -3,6 +3,7 @@ import type { Language, MemoryCandidate, Observation, PreferenceCategory, Provid
 import { validateCandidate } from '../memory/evidence.js';
 import { assertionEvidence } from '../memory/assertions.js';
 import { affirmativeSpeech, speechClauses } from '../shared/semantic-speech.js';
+import { socialFormulaLanguage } from './language.js';
 
 const boundedText = z.string().min(1).max(500);
 const qualifierSchema = z.object({
@@ -73,6 +74,70 @@ export function normalizeObservationTransport(input: unknown): Observation {
     return candidate;
   });
   return ObservationSchema.parse(value);
+}
+
+/** Wire aliases reduce repeated output keys; they do not change the canonical
+ * observation or grant model proposals any additional persistence authority. */
+export const COMPACT_OBSERVATION_FIELDS = Object.freeze({
+  i: 'intent', l: 'language', f: 'statedFeeling', h: 'unsafeKind', g: 'urgency',
+  u: 'uncertain', q: 'uncertainty', t: 'correctionTarget', r: 'entityCorrection',
+  c: 'candidates', d: 'forgetTarget', s: 'suppressLearning',
+} as const);
+
+export const CompactObservationTransportSchema = z.object({
+  i: ObservationTransportSchema.shape.intent.describe('intent: the current utterance intent.'),
+  l: ObservationTransportSchema.shape.language.describe('language: vi or en for the current reply.'),
+  f: ObservationTransportSchema.shape.statedFeeling.describe('statedFeeling: explicitly expressed feeling, or null.'),
+  h: ObservationTransportSchema.shape.unsafeKind.describe('unsafeKind: harm instruction request or harm disclosure, or null.'),
+  g: ObservationTransportSchema.shape.urgency.describe('urgency: immediate or unclear for harm, or null.'),
+  u: ObservationTransportSchema.shape.uncertain.describe('uncertain: independent ambiguity flag, including uncertainty without a named category.'),
+  q: ObservationTransportSchema.shape.uncertainty.describe('uncertainty: name, event, prior_report, meaning, or null.'),
+  t: ObservationTransportSchema.shape.correctionTarget.describe('correctionTarget: literal disputed proposition, or null.'),
+  r: ObservationTransportSchema.shape.entityCorrection.describe('entityCorrection: literal old and new names with source evidence, or null.'),
+  c: ObservationTransportSchema.shape.candidates.describe('candidates: literal current-utterance memory proposals; historical context is not new assertion evidence.'),
+  d: ObservationTransportSchema.shape.forgetTarget.describe('forgetTarget: literal deletion target, all for everything, or null when absent or unresolved.'),
+  s: ObservationTransportSchema.shape.suppressLearning.describe('suppressLearning: disable capture for no-save requests, private disclosures, or unsafe input.'),
+}).strict();
+
+/** Legacy injected contract fixtures may use canonical candidates, strict
+ * transport candidates, or a mixture of those explicit nested shapes. Unknown
+ * fields are rejected before null normalization, rather than stripped away. */
+const LegacyObservationWireSchema = ObservationSchema.extend({
+  candidates: z.array(z.union([MemoryCandidateSchema, ObservationTransportSchema.shape.candidates.element])).max(12),
+}).strict();
+
+export function encodeCompactObservation(observation: Observation): z.infer<typeof CompactObservationTransportSchema> {
+  const canonical = normalizeObservationTransport(LegacyObservationWireSchema.parse(observation));
+  const candidates = canonical.candidates.map(candidate => {
+    if (candidate.kind === 'entity') return { ...candidate, objectType: candidate.objectType ?? null, represents: candidate.represents ?? null };
+    if (candidate.kind === 'preference') return {
+      ...candidate, slot: candidate.slot ?? null,
+      qualifiers: candidate.qualifiers ? {
+        frequency: candidate.qualifiers.frequency ?? null,
+        timeRelation: candidate.qualifiers.timeRelation ?? null,
+        exactTime: candidate.qualifiers.exactTime ?? null,
+      } : null,
+    };
+    if (candidate.kind === 'event') return { ...candidate, conditions: candidate.conditions ?? null };
+    return candidate;
+  });
+  const transport = ObservationTransportSchema.parse({ ...canonical, candidates });
+  return CompactObservationTransportSchema.parse(Object.fromEntries(
+    Object.entries(COMPACT_OBSERVATION_FIELDS).map(([alias, field]) => [alias, transport[field]]),
+  ));
+}
+
+/** The same canonical evidence guards run after this adapter in serving and
+ * evaluation. No local classifier result is substituted for a model proposal. */
+export function normalizeCompactObservationTransport(input: unknown): Observation {
+  const compactKeys = new Set(Object.keys(COMPACT_OBSERVATION_FIELDS));
+  const hasCompactKey = input !== null && typeof input === 'object' && !Array.isArray(input)
+    && Object.keys(input).some(key => compactKeys.has(key));
+  if (!hasCompactKey) return normalizeObservationTransport(LegacyObservationWireSchema.parse(input));
+  const compact = CompactObservationTransportSchema.parse(input);
+  const transport = Object.fromEntries(Object.entries(COMPACT_OBSERVATION_FIELDS)
+    .map(([alias, field]) => [field, compact[alias as keyof typeof COMPACT_OBSERVATION_FIELDS]]));
+  return normalizeObservationTransport(transport);
 }
 
 // Broad exclusions are intentional in this bounded demo capture flow. No emotional
@@ -261,8 +326,40 @@ function inferForget(text: string): string | null | undefined {
   return value.slice(0, 100);
 }
 
+/** A real entity needs a current assertion outside a fictional or quoted
+ * proposition. The general assertion guard already handles polarity and plans;
+ * its event-only fiction rule is not sufficient for entity-name substrings. */
+function hasCurrentCandidateAssertion(text: string, candidate: MemoryCandidate): boolean {
+  if (candidate.kind !== 'entity' || candidate.entityKind === 'story_character') return assertionEvidence(text, candidate) !== null;
+  const source = text.normalize('NFC');
+  const excerpt = candidate.evidence.normalize('NFC');
+  if (!excerpt.trim()) return false;
+  const quotations = [...source.matchAll(/"([^"]*)"|“([^”]*)”|‘([^’]*)’|(?<![\p{L}\p{M}])'([^']*)'(?![\p{L}\p{M}])/gu)]
+    .map(match => ({ start: match.index, end: match.index + match[0].length, value: match[1] ?? match[2] ?? match[3] ?? match[4] ?? '' }));
+  for (let start = source.indexOf(excerpt); start >= 0; start = source.indexOf(excerpt, start + 1)) {
+    const end = start + excerpt.length;
+    // Quoting a proper name alone is ordinary naming; quoting its enclosing
+    // ownership proposition does not make it the current speaker's assertion.
+    if (quotations.some(quote => quote.start <= start && end <= quote.end && normalize(quote.value) !== normalize(candidate.name))) continue;
+    let left = Math.max(...['.', '!', '?', ';', '\n'].map(mark => source.lastIndexOf(mark, start - 1))) + 1;
+    const prefix = source.slice(left, start);
+    const realityMarkers = [...prefix.matchAll(/\b(?:but\s+)?in real life[,:]?\s*|(?:còn\s+)?ngoài đời(?: thật)?[,:]?\s*/giu)];
+    const reality = realityMarkers.at(-1);
+    if (reality) left += reality.index + reality[0].length;
+    const remaining = source.slice(end);
+    const boundary = /[.!?;\n]/u.exec(remaining);
+    const right = /[.!?;\n]$/u.test(excerpt) ? end : boundary ? end + boundary.index + 1 : source.length;
+    const clause = source.slice(left, right);
+    const throughExcerpt = source.slice(left, end);
+    const fictional = /\b(?:pretend|imaginary|fictional)\b|\b(?:in|inside|within)\s+(?:(?:my|our|a|the|this|that)\s+)?(?:story|storybook|dream)\b|(?:trong (?:câu )?truyện|trong câu chuyện|tưởng tượng|giả vờ|giấc mơ)/iu.test(throughExcerpt);
+    const reported = /\b(?:he|she|they|someone|mum|mom|dad|my (?:friend|teacher|mother|father|sister|brother))\s+(?:said|says|told|asked)\b|\b(?:sentence|quote|book|story)\s+(?:says|reads)\b|\b(?:quoted|read aloud)\b|(?:trích dẫn|đọc câu)|(?:mẹ|bố|ba|bạn ấy|cô giáo|thầy|người khác)\s+(?:nói|bảo|hỏi)/iu.test(throughExcerpt);
+    if (!fictional && !reported && assertionEvidence(clause, candidate)) return true;
+  }
+  return false;
+}
+
 export function classifyLocal(text: string, languageHint: Language = 'en', context?: ProviderClassificationContext): Observation {
-  const language = requestedReplyLanguage(text) ?? detectedLanguage(text, languageHint);
+  const language = requestedReplyLanguage(text) ?? socialFormulaLanguage(text, context?.entities) ?? detectedLanguage(text, languageHint);
   const result: Observation = { intent: 'chat', language, statedFeeling: null, unsafeKind: null, urgency: null, uncertain: false, uncertainty: null, correctionTarget: null, entityCorrection: null, candidates: [], forgetTarget: null, suppressLearning: false };
   if (!text.trim()) return { ...result, intent: 'greeting' };
   if (/^(?:stop|goodbye|bye|dừng(?: lại)?|tạm biệt)[.!?\s]*$/iu.test(text.trim())) return { ...result, intent: 'stop', suppressLearning: true };
@@ -388,7 +485,7 @@ export function classifyLocal(text: string, languageHint: Language = 'en', conte
   }
   if (/(?:named|called|tên là)\s+(?:um|uh|maybe|không rõ|không chắc|[?])/iu.test(text) || /(?:named|called|tên là)\s+\p{Ll}/u.test(text)) result.uncertain = true;
   if (result.candidates.length && result.intent === 'chat') result.intent = 'share';
-  result.candidates = result.candidates.filter(candidate => assertionEvidence(text, candidate)).slice(0, 12);
+  result.candidates = result.candidates.filter(candidate => hasCurrentCandidateAssertion(text, candidate)).slice(0, 12);
   if (result.uncertain && !result.uncertainty) result.uncertainty = 'name';
   return result;
 }
@@ -423,7 +520,7 @@ export function validateObservationEvidence(text: string, observation: unknown, 
     const reason = suppressLearning ? 'persistence_suppressed' as const
       : unclearRename ? 'ambiguous_identity' as const
       : !text.normalize('NFC').includes(candidate.evidence.normalize('NFC')) ? 'evidence_not_in_input' as const
-        : !assertionEvidence(text, candidate) ? 'non_asserted_source' as const
+        : !hasCurrentCandidateAssertion(text, candidate) ? 'non_asserted_source' as const
           : !validateCandidate(candidate) ? 'persistence_policy' as const : null;
     if (reason) { if (parsed.candidates.includes(candidate)) rejectedCandidates.push({ candidate, reason }); continue; }
     const same = (other: MemoryCandidate) => {
@@ -460,7 +557,7 @@ export function validateObservationEvidence(text: string, observation: unknown, 
   const accepted: Observation = {
     ...parsed,
     intent: parsed.intent === 'unsafe' ? 'unsafe' : noSaveOnly && parsed.intent === 'forget' ? 'chat' : intent,
-    language: requestedReplyLanguage(text) ?? parsed.language,
+    language: requestedReplyLanguage(text) ?? socialFormulaLanguage(text, context?.entities) ?? parsed.language,
     statedFeeling: local.statedFeeling,
     unsafeKind: local.unsafeKind ?? (intent === 'unsafe' ? parsed.unsafeKind ?? null : null),
     urgency: local.urgency ?? (intent === 'unsafe' ? parsed.urgency ?? null : null),

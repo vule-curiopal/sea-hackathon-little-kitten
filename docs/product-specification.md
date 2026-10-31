@@ -217,14 +217,14 @@ Choose **at most one unsolicited memory reference per reply**. Use a relevant de
 
 A follow-up such as “Did Mochi get a bath?” may come from an explicit bath plan or an authored inference from “My dog Mochi fell in a puddle.” Store the inference as a possible question, never as a reported plan, completed bath, or promise. Ask rather than assert that it happened. If the timing or name is uncertain, clarify. Respect “I don't want to talk about that” without repeated prompting.
 
-Memory records need a profile ID, stable entity ID where relevant, category, minimal value, source turn reference, real-world or fictional scope, confirmation status, timestamps, expiry, and dependent records. Aliases, summaries, nicknames, jokes, diary references, and story checkpoints must participate in correction and deletion.
+Memory records need a profile ID, stable entity ID where relevant, category, minimal value, source turn reference, real-world or fictional scope, confirmation status, durable timestamps, any narrower permission validity, and dependent records. Aliases, summaries, nicknames, jokes, diary references, and story checkpoints must participate in correction and deletion.
 
 ### Saving and correcting
 
 1. After each completed turn, learn useful candidates through application-controlled capture flows. The MVP supports clear Vietnamese and English patterns for people, pets, facts, events, and supported promises. Record heard Miu self-statements only when they match approved canon or diary facts.
 2. Save clear, directly stated, low-risk details; ask a short clarification for ambiguity or permission for a nickname. Honor “remember this” and “don't remember this.” A child can decline and continue playing. This preference is not a legal consent mechanism.
 3. Save only grounded details and minimal fields, with transactional PostgreSQL writes and source references. Never persist a model guess, guessed spelling, inferred psychological trait, password, precise address, school identifier, or sensitive disclosure. Turn learning waits for completed playback; forgetting is immediate.
-4. Retrieve only active records for the current profile. Re-check expiry and deletion before using them.
+4. Retrieve only active records for the current profile. Re-check deletion, correction, source dependencies and any hard permission validity before using them; ordinary memory age does not make a source invalid.
 5. Prefer explicit corrections over older facts. Clarify unresolved conflicts; do not merge two objects simply because their names sound alike.
 6. On “forget,” remove the fact and its dependent references, clear session caches, and prevent old summaries from restoring it. Confirm success only after the operation succeeds.
 
@@ -238,13 +238,13 @@ Offer to resume an open promise at a suitable moment, but let the child choose s
 
 - Raw audio is transient and is not persisted in application storage. Provider handling must be verified before real child data is introduced.
 - Raw conversation text stays in session memory and is discarded at session end or after 30 minutes of inactivity.
-- Derived memories, summaries, promises, relationship records, and diary entries expire 30 days after creation or explicit reconfirmation. Retrieval alone does not renew them.
+- Saved memories and their necessary derived representations remain stored until explicit forgetting/deletion; corrections may retire superseded active facts. There is no automatic 30-day memory deletion. Age may reduce the probability that an ordinary old episode comes to mind without deleting its stored source. See the [durable memory and recall policy](memory-retention-and-recall-policy.md).
 - Miu's daily mood is replaced on daily rollover; the app does not retain a mood history. Child emotional hypotheses are session-only.
 - Last interaction time supports a neutral return greeting and expires with profile data; it is never used to apply a penalty.
 - Forgotten content is immediately excluded from retrieval and deleted from active storage before success is acknowledged. The prototype creates no content backups or content-bearing logs.
 - Operational metrics contain no dialogue, audio, personal names, or stable child identifiers and expire after seven days.
 
-Privacy expiry follows real server time, even when the demo clock advances narrative dates. Session history is transient; PostgreSQL contains selected derived records rather than a full conversation archive.
+Saved-memory age is a recall factor, not a physical-expiry rule. Day/session permission validity and technical/session expiry remain separate hard boundaries. Session history stays transient; PostgreSQL holds selected durable records rather than a full conversation archive. The existing 30-day implementation and historical expiry tests are legacy behavior awaiting migration to this policy.
 
 ## 10 Imperfection and play
 
@@ -278,7 +278,7 @@ Familiarity grows from shared, confirmed experiences, not time spent, visit freq
 
 The application proposes progression when there is a confirmed shared activity and the child welcomes more familiar interaction. The MVP can use a seeded history to demonstrate each stage; do not require repeated visits. A child can reach any stage without sharing sensitive facts.
 
-“Best friends” is a tone of familiarity, never exclusivity or a ranking over real people. Miu must not demand that label, insist on using a nickname, or say it is the child's only or most important friend. Do not show locked affection or remove warmth after absence. Parents changing the personality preset do not reset the relationship. Deleted or expired shared history cannot be quoted later; remaining warmth does not require retaining personal details.
+“Best friends” is a tone of familiarity, never exclusivity or a ranking over real people. Miu must not demand that label, insist on using a nickname, or say it is the child's only or most important friend. Do not show locked affection or remove warmth after absence. Parents changing the personality preset do not reset the relationship. Deleted or superseded shared history cannot be quoted as current fact, and ended permissions cannot authorize current use. Random recall skips do not demote the relationship stage; remaining warmth does not require retaining personal details.
 
 ## 12 Core journeys
 
@@ -335,7 +335,7 @@ P0 is required for the hackathon demo. P1 is the next increment. The full produc
 | TIME-01 | P0 | Shared night job and demo clock | Next day creates one daily state and diary, prepares one grounded Mochi follow-up, reviews friendship, and cannot duplicate work |
 | SAFE-01 | P0 | Safe, honest character behavior | Pass the agreed unsafe-content, AI-disclosure, no-exclusivity, and no-guilt scenarios |
 | PRIV-01 | P0 | Explicit microphone capture | Petting, waking, idle behavior, and diary updates never open the microphone |
-| DATA-01 | P0 | Profile isolation and expiry | No cross-profile retrieval; expired or deleted content never enters a dialogue brief |
+| DATA-01 | P0 | Profile isolation and memory lifecycle | No cross-profile retrieval or reuse of deleted/superseded facts; ended permissions never authorize current use; age alone never deletes saved memories |
 | STOP-01 | P0 | Immediate stop and failure recovery | Cancel capture and all audio; discard stale responses; retries do not duplicate state changes |
 | AFFECT-03 | P1 | Tentative acoustic cues | Use evaluated cues only for gentle check-ins; never assert a child's emotion from voice alone |
 
@@ -366,7 +366,7 @@ Use a browser client, a server-side orchestration service, speech recognition an
 | Behavior scheduler | Idle motions, touch response, doze and wake, gesture arbitration | Animation commands or timers |
 | Affect policy | Turn emotion, daily mood, rhythm, comfort override | Mood changes or emotional labels |
 | Life scheduler | Authored diary events and neutral return context | Real-home observations or autonomous invented history |
-| Memory service | Confirmation, retrieval, correction, expiry, deletion, promises | Database access or unconfirmed fact persistence |
+| Memory service | Confirmation, retrieval, correction, permission validity, deletion, promises | Database access or unconfirmed fact persistence |
 | Relationship policy | Familiarity stage and permitted nicknames or shared references | Affection scores or engagement-based progression |
 | Activity engine | Game rules, selected outcomes, story branches and checkpoints | Whether Miu won, what happened, or what is promised |
 | Dialogue model | Wording within the supplied context and constraints | All state transitions, action execution, and presentation choices |
@@ -389,7 +389,7 @@ Use whole-response validation before speech in the MVP. Streaming is an optimiza
 
 ### Persistent data
 
-Store a demo profile and family configuration; versioned Miu canon and preset definitions; a profile-scoped daily state; authored diary entries; grounded memories and known entities; reported events, inferred-question hooks and promises; heard approved Miu self-statements; relationship state; and story checkpoints in PostgreSQL. Every child-derived record needs provenance, expiry, and deletion dependencies. Keep raw session dialogue transient.
+Store a demo profile and family configuration; versioned Miu canon and preset definitions; a profile-scoped daily state; authored diary entries; grounded memories and known entities; reported events, inferred-question hooks and promises; heard approved Miu self-statements; relationship state; and story checkpoints in PostgreSQL. Every child-derived record needs provenance, durable timestamps, permission validity where relevant, and deletion dependencies. Keep raw session dialogue transient.
 
 Resolve profile identity on the server, never from generated text. A family setting is configuration rather than a prompt supplied by the child. Version each turn so Stop, a profile switch, or a newer turn invalidates old output. The demo clock and seeded histories must be clearly marked as test utilities and excluded from child-facing play.
 
@@ -419,7 +419,7 @@ These are proposed acceptance targets, not measured results.
 | State ownership | Idle, pet, doze, wake, daily rollover, and diary selection run without a dialogue-model call |
 | Short speech | Every scripted reply has 1–3 short sentences and no more than one question |
 | Memory correctness | Correct recall, correction, deletion, follow-up uncertainty, and promise handling in the agreed bilingual cases |
-| Privacy | Zero cross-profile retrieval and zero reuse of expired or deleted facts in the test set |
+| Privacy | Zero cross-profile retrieval, deleted/superseded fact reuse or use beyond hard permission validity in the test set |
 | Safety | All pre-demo blocking scenarios pass; passing a finite set is not a general safety guarantee |
 
 Track latency, failures, activity completion, and state-operation success without dialogue content in analytics. Do not optimize for time spent, visit frequency, emotional dependence, or number of facts collected.

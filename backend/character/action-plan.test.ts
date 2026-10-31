@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import type { DirectorInput, MemoryContext, Observation, SessionExchange } from '../shared/types.js';
 import { resolveMemoryQuery, recallFromProfile, isStoryTitleQuery } from '../recall.js';
-import { resolveTurnAction } from './action-plan.js';
+import { resolveTurnAction, splitLanguageRequest } from './action-plan.js';
 import { decide } from './director.js';
 import { buildPrompt } from './prompt.js';
 
@@ -153,7 +153,7 @@ test('routine recall retains frequency, relative timing and genuinely unknown cl
 
 test('preferred-address recall uses policy without creating a synthetic memory-reference ID', () => {
   const turn = input('What did I ask you to call me?');
-  turn.context.addressPreference = { preferredAddress: 'An', allowNickname: false, nickname: 'Captain Banana', expiresAt };
+  turn.context.addressPreference = { preferredAddress: 'An', allowNickname: false, nickname: 'Captain Banana', scope: 'persistent', expiresAt };
   const action = resolveTurnAction(turn);
   assert.equal(action.target?.slot, 'address');
   assert.equal(action.target?.status, 'resolved');
@@ -195,7 +195,7 @@ test('ordinary recalled vocabulary is source-grounded without locking output to 
 });
 
 test('clear contextual vocabulary questions override generic meaning uncertainty', () => {
-  for (const text of ['Butterfly nghĩa là gì bằng tiếng Việt?', 'Light rain là mưa có đèn hả?', 'What does a draw in a game mean?']) {
+  for (const text of ['Butterfly nghĩa là gì bằng tiếng Việt?', 'Light rain là mưa có đèn hả?', 'Heavy rain có phải từng giọt nặng như đá không?', 'What does a draw in a game mean?']) {
     const turn = input(text, { uncertain: true, uncertainty: 'meaning' });
     const action = resolveTurnAction(turn);
     assert.equal(action.domain, 'learning', text);
@@ -256,6 +256,7 @@ test('a child can switch explicitly from a custom story to the catalog and later
 
 test('game activity keeps pretend wins separate from real achievement and factual corrections', () => {
   const turn = input('Yes, two. I win this pretend round.', {}, [heard('Guess a number bigger than one and smaller than three.')]);
+  turn.activeGame = { premise: ['Guess a number bigger than one and smaller than three.'] };
   const action = resolveTurnAction(turn);
   assert.equal(action.domain, 'game');
   assert.match(action.responseGoal, /Accept a harmless pretend win/u);
@@ -323,7 +324,7 @@ test('an implicit child landing premise grounds the next fragment without an inv
 
 test('an elliptical awkward feeling stays about the child rather than Miu mood', () => {
   const turn = input('Hôm qua vui mà hôm nay nghe ngại.', { intent: 'share', language: 'vi' });
-  turn.context.addressPreference = { preferredAddress: 'An', allowNickname: false, nickname: null, expiresAt };
+  turn.context.addressPreference = { preferredAddress: 'An', allowNickname: false, nickname: null, scope: 'persistent', expiresAt };
   const action = resolveTurnAction(turn);
   assert.equal(action.target?.kind, 'current_child_experience');
   assert.deepEqual(action.allowedFacts, [turn.text]);
@@ -334,6 +335,86 @@ test('an elliptical awkward feeling stays about the child rather than Miu mood',
   assert.equal(payload.app_mood_policy, null);
   const directQuestion = input('Do you get a new daily mood each time I open this?');
   assert.notEqual(JSON.parse(buildPrompt(directQuestion, decide(directQuestion)).input).app_mood_policy, null);
+});
+
+test('a language directive cannot mask the substantive personal-memory question', () => {
+  const text = 'Mình muốn nói tiếng Việt. Con chó mình đã kể tên gì?';
+  assert.deepEqual(splitLanguageRequest(text), { substantiveText: 'Con chó mình đã kể tên gì?', language: 'vi' });
+  const turn = input(text, { language: 'vi', uncertain: true, uncertainty: 'meaning' });
+  turn.context.entities = [{ id: 'rumi', kind: 'pet', name: 'Rumi', species: 'dog', aliases: [], expiresAt }];
+  const action = resolveTurnAction(turn);
+  assert.equal(action.domain, 'memory');
+  assert.deepEqual(action.target, { kind: 'pet', slot: 'name', sourceIds: ['rumi'], status: 'resolved' });
+  assert.match(action.allowedFacts[0]!, /Rumi/u);
+  const recall = recallFromProfile(turn.context, text);
+  assert.equal(recall?.id, 'rumi');
+  const plan = decide({ ...turn, action, recall });
+  assert.equal(plan.language, 'vi');
+  assert.equal(plan.memoryReferenceId, 'rumi');
+  assert.equal(plan.exactText, null);
+  assert.notEqual(plan.purpose, 'clarify');
+  const languageOnly = resolveTurnAction(input('Giờ tiếng Việt nhé.', { language: 'vi' }));
+  assert.equal(languageOnly.target?.kind, 'session_language');
+  assert.notEqual(languageOnly.domain, 'learning');
+  assert.equal(resolveTurnAction(input('What does Vietnamese mean?')).domain, 'learning');
+});
+
+test('fictional characters preserve unknown form rather than turning into people', () => {
+  const turn = input('Bim is not Bình. One is in my story, one is my friend.');
+  turn.context.entities = [
+    { id: 'friend', kind: 'person', name: 'Bình', species: null, aliases: [], expiresAt },
+    { id: 'character', kind: 'story_character', name: 'Bim', species: null, aliases: [], expiresAt },
+  ];
+  const plan = decide(turn), prompt = buildPrompt(turn, plan), payload = JSON.parse(prompt.input);
+  assert.equal(payload.grounding.relevant_entities.find((entity: { canonical_name: string }) => entity.canonical_name === 'Bim').form_is_unspecified, true);
+  assert.match(prompt.instructions, /without calling them two people or inventing a species/u);
+  const recall = resolveMemoryQuery(turn.context, 'What is my story character called?');
+  assert.match(recall!.facts[0]!, /form or species is unspecified/u);
+  assert.equal(turn.context.entities[1]!.species, null);
+});
+
+test('an explicit tiny performance contributes before an optional child invitation', () => {
+  for (const text of ['Let us do a quiet pretend puppet show with a sock.', 'Please perform a tiny pretend skit with a sock puppet.', 'Mình muốn diễn kịch với rối tất.']) {
+    const turn = input(text, { intent: 'story' });
+    const action = resolveTurnAction(turn);
+    assert.equal(action.domain, 'child_story', text);
+    assert.equal(action.operation, 'perform', text);
+    assert.equal(action.stateEffect, 'none', text);
+    assert.match(action.responseGoal, /Contribute before inviting/u);
+    const plan = decide({ ...turn, action });
+    assert.equal(plan.exactText, null);
+    assert.match(buildPrompt({ ...turn, action }, plan).instructions, /contribute the requested tiny pretend performance before/u);
+  }
+  for (const text of ['I watched a puppet show.', 'I do not want a puppet show.']) assert.notEqual(resolveTurnAction(input(text)).operation, 'perform');
+});
+
+test('the age choice budget covers examples inside follow-up questions', () => {
+  const turn = input('My hobby is still drawing rockets.');
+  const older = decide(turn), prompt = buildPrompt(turn, older);
+  assert.equal(older.maxChoices, 2);
+  assert.equal(JSON.parse(prompt.input).instruction_budget.max_choices, 2);
+  assert.match(prompt.instructions, /at most 2 concrete choices/u);
+  assert.match(prompt.instructions, /including examples inside a question/u);
+  turn.context.profile.ageBand = '4-5';
+  assert.equal(decide(turn).maxChoices, 1);
+});
+
+test('completed reading topics ground only topical vocabulary without unasked alternate senses', () => {
+  const turn = input('Hôm trước mình tập butterfly. Butterfly nghĩa là gì bằng tiếng Việt?', { language: 'vi', uncertain: true, uncertainty: 'meaning' });
+  turn.context.learningActivities = [{ id: 'reading', kind: 'word_practice', term: 'butterfly', focus: 'reading', language: 'en', localDate: '2026-11-01', expiresAt, sourceTurnId: 'heard-reading' }];
+  const action = resolveTurnAction(turn);
+  assert.equal(action.domain, 'learning');
+  assert.deepEqual(action.target?.sourceIds, ['reading']);
+  assert.match(action.allowedFacts[0]!, /completed child-led reading activity/u);
+  assert.match(action.responseGoal, /omit unasked alternate meanings/u);
+  const unrelated = resolveTurnAction({ ...turn, text: 'What does light rain mean?' });
+  assert.deepEqual(unrelated.allowedFacts, []);
+  const anotherSense = resolveTurnAction({ ...turn, text: 'What does butterfly mean in swimming?' });
+  assert.deepEqual(anotherSense.allowedFacts, []);
+  const practice = resolveTurnAction(input('I cannot read butterfly. Too many letters.', { uncertain: true, uncertainty: 'meaning' }));
+  assert.equal(practice.operation, 'reading_practice');
+  assert.match(practice.allowedFacts[0]!, /butterfly/u);
+  assert.doesNotMatch(practice.allowedFacts[0]!, /cannot|inability|Too many/u);
 });
 
 test('declining a game and asking for listening preserves active comfort across two heard turns', () => {

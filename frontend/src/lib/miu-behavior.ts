@@ -12,16 +12,15 @@ const idleDurations: Record<typeof autonomousActivities[number], number> = { loo
 
 // Miu chooses its own little moments. No needs meters, recording, or model calls.
 // A shuffled bag gives variety without repeating one action over and over.
-type IdleMoodFallback = { energy: number; poutChance: number };
-export function createIdleRoutine(random: () => number = Math.random, mood: IdleAffect | IdleMoodFallback = { energy: .6, poutChance: .25 }): IdleRoutine {
-  const affect = 'mood' in mood ? mood : undefined;
+export function createIdleRoutine(random: () => number = Math.random, mood: IdleAffect | { energy: number; poutChance: number } = { energy: .6, poutChance: .25 }): IdleRoutine {
   const routine: [number, CatActivity][] = [[0, 'settled']];
   const choose = () => Math.max(0, Math.min(.999999, random()));
+  const affect = 'mood' in mood ? mood : undefined;
   const energy = Math.max(0, Math.min(1, mood.energy));
   const intervalScale = affect ? 1.75 - 1.1 * energy : 1.25 - Math.max(.25, Math.min(.95, energy)) * .4;
-  const poutChance = 'poutChance' in mood ? Math.max(0, Math.min(.35, mood.poutChance)) : 0;
   const dozeAt = affect ? 72000 + 20000 * energy : 82000;
   const allowed = affect && energy < .3 ? ['look', 'ears', 'groom'] as const : autonomousActivities;
+  const poutChance = 'poutChance' in mood ? Math.max(0, Math.min(.35, mood.poutChance)) : 0;
   let cursor = (4500 + choose() * 2500) * (affect ? intervalScale : 1);
   let previous: CatActivity = 'settled';
   let pouted = false;

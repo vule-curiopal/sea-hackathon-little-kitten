@@ -16,6 +16,7 @@ import { extractMemoryPatches, favoriteColorValue, objectDetails, patchKey, plan
 import { ensureAffectState, commitAffectUpdate, resetAffectAfterForget } from './affect-store.js';
 import { snapshotAffect } from '../character/affect.js';
 import { getPreset } from '../character/presets.js';
+import { extractLearningActivity } from '../character/learning-activity.js';
 import { ensureVectorCapability } from './vector/capability.js';
 import { activateGeneration, ensureGeneration, synchronizeDocuments, type SearchGeneration, type SearchGenerationInput } from './vector/store.js';
 import { projectCanonicalProfile } from './vector/projections.js';
@@ -135,30 +136,52 @@ export class MemoryStore {
     return deleted.rows.map((row) => row.id);
   }
   private async purge(tx: Queryable, profileId: string): Promise<void> {
-    // Only technical presentation/question rows expire. Canonical memories,
-    // correction controls and derived search survive age until explicit forget.
-    await tx.query("DELETE FROM memory_records WHERE profile_id=$1 AND kind IN ('diary','followup') AND expires_at <= $2", [profileId, this.now().toISOString()]);
+    const currentClock = await this.clock(tx, await this.profile(tx, profileId));
+    const expired = await tx.query<{ id: string; personal: boolean }>(`SELECT r.id,
+      (r.kind <> 'diary' OR EXISTS(SELECT 1 FROM memory_dependencies d
+        WHERE d.profile_id=r.profile_id AND (d.source_id=r.id OR d.derived_id=r.id))) personal
+      FROM memory_records r WHERE r.profile_id=$1 AND ((r.kind IN ('diary','followup') AND r.expires_at <= $2) OR EXISTS(
+        SELECT 1 FROM address_preferences a WHERE a.profile_id=r.profile_id AND a.id=r.id
+          AND a.scope='day' AND a.valid_local_date<>$3::date))`, [profileId, this.now().toISOString(), currentClock.localDate]);
+    await this.deleteClosure(tx, profileId, expired.rows.map((row) => row.id));
+    // Canonical sources and correction controls survive age. Technical expiry
+    // and an explicitly ended day permission still revoke dependent presentation
+    // state; independent authored diaries need no personal-data invalidation.
+    if (expired.rows.some((row) => row.personal)) {
+      const clock = await this.clock(tx, await this.profile(tx, profileId));
+      await resetAffectAfterForget(tx, { profileId, effectiveNow: clock.effectiveNow, realNow: this.now().toISOString() });
+      await tx.query('UPDATE profiles SET deletion_epoch=deletion_epoch+1,state_version=state_version+1 WHERE id=$1', [profileId]);
+    }
     await tx.query('DELETE FROM turn_learning WHERE profile_id=$1 AND completed_at < $2', [profileId, new Date(this.now().getTime() - 7 * 86_400_000).toISOString()]);
     await tx.query('DELETE FROM clock_requests WHERE profile_id=$1 AND created_at < $2', [profileId, new Date(this.now().getTime() - 7 * 86_400_000).toISOString()]);
   }
-  async createProfile(input: CreateProfileInput): Promise<ChildProfile> {
-    // Future authenticated registration can use this same profile-creation path.
+  async createProfile(input: CreateProfileInput, finalize?: (tx: Queryable, profile: ChildProfile) => Promise<void>): Promise<ChildProfile> {
     // Assignment is durable configuration, selected only for a newly created profile.
     return this.serial(() => this.db.transaction(async (tx) => {
       if (!/^[a-z0-9_-]{1,64}$/i.test(input.demoKey) || !isSafeProjection(input.displayName) || input.displayName.length > 80 || !['4-5', '6-8'].includes(input.ageBand) || !['vi', 'en', 'follow_child'].includes(input.languageMode)) throw new AppError('invalid_profile');
       try { new Intl.DateTimeFormat('en', { timeZone: input.timezone }).format(this.now()); } catch { throw new AppError('invalid_timezone'); }
       if (!PERSONALITIES.includes(input.personality ?? 'ENFP') || !['friend', 'big_sibling', 'teacher'].includes(input.role ?? 'friend')) throw new AppError('invalid_configuration');
       const previous = (await tx.query('SELECT * FROM profiles WHERE demo_key=$1', [input.demoKey])).rows[0];
-      if (previous) return this.mapProfile(previous);
+      if (previous) {
+        const profile = this.mapProfile(previous);
+        await finalize?.(tx, profile);
+        return profile;
+      }
       const id = randomUUID(); const now = this.now().toISOString();
       const inserted = await tx.query(`INSERT INTO profiles(id,demo_key,display_name,age_band,language_mode,timezone,created_at) VALUES($1,$2,$3,$4,$5,$6,$7) ON CONFLICT(demo_key) DO NOTHING RETURNING id`, [id, input.demoKey, input.displayName.normalize('NFC'), input.ageBand, input.languageMode, input.timezone, now]);
-      if (!inserted.rows.length) return this.mapProfile((await tx.query('SELECT * FROM profiles WHERE demo_key=$1', [input.demoKey])).rows[0]!);
+      if (!inserted.rows.length) {
+        const profile = this.mapProfile((await tx.query('SELECT * FROM profiles WHERE demo_key=$1', [input.demoKey])).rows[0]!);
+        await finalize?.(tx, profile);
+        return profile;
+      }
       await tx.query('INSERT INTO miu_configs(profile_id,personality,role,assigned_story_id) VALUES($1,$2,$3,$4)', [id, input.personality ?? 'ENFP', input.role ?? 'friend', chooseStory().templateId]);
       await tx.query('INSERT INTO demo_clocks(profile_id,mode,effective_anchor,wall_anchor) VALUES($1,$2,$3,$3)', [id, this.clockMode, now]);
       await tx.query('INSERT INTO relationship_states(profile_id) VALUES($1)', [id]);
       const row = await this.profile(tx, id);
       await this.rollover(tx, row, localDate(this.now(), input.timezone));
-      return this.mapProfile((await this.profile(tx, id)));
+      const profile = this.mapProfile((await this.profile(tx, id)));
+      await finalize?.(tx, profile);
+      return profile;
     }));
   }
   async findProfile(demoKey: string): Promise<ChildProfile | null> {
@@ -193,7 +216,7 @@ export class MemoryStore {
       dailyRow = (await tx.query('SELECT * FROM daily_states WHERE profile_id=$1', [id])).rows[0]!;
       profile = await this.profile(tx, id);
     }
-    const [configRows, entityRows, preferenceRows, socialRows, eventRows, storyRows, checkpointRows, friendshipRows, addressRows] = await Promise.all([
+    const [configRows, entityRows, preferenceRows, socialRows, eventRows, storyRows, checkpointRows, friendshipRows, addressRows, activityRows] = await Promise.all([
       tx.query('SELECT * FROM miu_configs WHERE profile_id=$1', [id]),
       tx.query(`SELECT e.*,r.expires_at,
         COALESCE((SELECT array_agg(a.alias) FROM entity_aliases a WHERE a.profile_id=e.profile_id AND a.entity_id=e.id),'{}') aliases,
@@ -210,6 +233,8 @@ export class MemoryStore {
       tx.query('SELECT stage FROM relationship_states WHERE profile_id=$1', [id]),
       tx.query(`SELECT a.*,r.expires_at FROM address_preferences a JOIN memory_records r ON r.profile_id=a.profile_id AND r.id=a.id
         WHERE a.profile_id=$1 AND (a.scope='persistent' OR a.scope='day' AND a.valid_local_date=$2::date OR a.scope='session' AND a.session_id=$3)`, [id, clock.localDate, sessionId ?? null]),
+      tx.query(`SELECT a.*,r.expires_at,r.source_turn_id FROM activity_checkpoints a JOIN memory_records r ON r.profile_id=a.profile_id AND r.id=a.id
+        WHERE a.profile_id=$1 ORDER BY a.local_date DESC,r.created_at DESC,a.id LIMIT 32`, [id]),
     ]);
     const config = configRows.rows[0]!;
     const checkpoint = checkpointRows.rows[0];
@@ -234,6 +259,7 @@ export class MemoryStore {
       storyProgress: checkpoint ? storyAt(str(checkpoint.id), Number(checkpoint.chapter), str(checkpoint.template_id)) : null,
       friendship: friendshipRows.rows[0]!.stage as MemoryContext['friendship'],
       addressPreference: addressRows.rows[0] ? { preferredAddress: str(addressRows.rows[0].preferred_address), allowNickname: Boolean(addressRows.rows[0].allow_nickname), nickname: addressRows.rows[0].nickname === null ? null : str(addressRows.rows[0].nickname), expiresAt: nullableIso(addressRows.rows[0].expires_at), scope: addressRows.rows[0].scope as 'persistent' | 'day' | 'session', ...(addressRows.rows[0].valid_local_date ? { validLocalDate: day(addressRows.rows[0].valid_local_date) } : {}), ...(addressRows.rows[0].session_id ? { sessionId: str(addressRows.rows[0].session_id) } : {}) } : null,
+      learningActivities: [...activityRows.rows].reverse().map(r => ({ id: str(r.id), kind: 'word_practice', term: str(r.term), focus: 'reading', language: r.language as 'vi' | 'en', localDate: day(r.local_date), expiresAt: nullableIso(r.expires_at), sourceTurnId: str(r.source_turn_id) })),
     };
   }
   async getContext(profileId: string, sessionId?: string): Promise<MemoryContext> {
@@ -270,7 +296,8 @@ export class MemoryStore {
       const canonicalKey = slot ? `${slot}:${canonicalValue}` : canonicalValue;
       // Compare stored source values too, so old rows created before canonical
       // keys were introduced are not duplicated. The profile lock serializes this.
-      const existing = (await tx.query('SELECT id,value FROM facts WHERE profile_id=$1 AND category=$2 AND slot IS NOT DISTINCT FROM $3 ORDER BY id', [p, candidate.category, slot])).rows
+      const existing = (await tx.query(`SELECT f.id,f.value FROM facts f JOIN memory_records r ON r.profile_id=f.profile_id AND r.id=f.id
+        WHERE f.profile_id=$1 AND f.category=$2 AND f.slot IS NOT DISTINCT FROM $3 ORDER BY r.created_at,f.id`, [p, candidate.category, slot])).rows
         .find(row => canonicalPreferenceKey(candidate.category, str(row.value)) === canonicalValue);
       if (existing) {
         await this.reconfirm(tx, p, str(existing.id));
@@ -340,6 +367,34 @@ export class MemoryStore {
     for (const reference of references) if (prose.includes(normalized(str(reference.value)))) await this.depend(tx, p, str(reference.id), id);
     return [...cast, id];
   }
+  private async learnActivity(tx: Queryable, input: LearningInput): Promise<string[]> {
+    const activity = input.learningActivity;
+    const sourceText = input.sourceText.normalize('NFC');
+    if (!activity || !isSafeProjection(sourceText) || !isSafeProjection(activity.term)
+      || /\b(?:do not|don['’]?t|never) (?:save|remember)\b|(?:đừng|không (?:được|muốn)) (?:lưu|nhớ)/iu.test(sourceText)) return [];
+    const grounded = extractLearningActivity(sourceText, activity.language);
+    if (!grounded || !isDeepStrictEqual(grounded, activity)) return [];
+    const start = sourceText.indexOf(grounded.term);
+    if (start < 0) return [];
+    // Store the task topic only. Inability/emotion clauses and assistant text
+    // never become a profile trait or part of this checkpoint's prose.
+    const sourceEvidence = { kind: 'child_task_request', term: grounded.term, start, end: start + grounded.term.length, turnId: input.turnId };
+    const previous = (await tx.query(`SELECT id FROM activity_checkpoints WHERE profile_id=$1 AND kind=$2
+      AND normalized_term=$3 AND focus=$4 AND language=$5`, [input.profileId, grounded.kind, normalized(grounded.term), grounded.focus, grounded.language])).rows[0];
+    const id = previous ? str(previous.id) : await this.record(tx, input.profileId, 'checkpoint', input.turnId, 'learning_activity');
+    if (previous) {
+      await tx.query('UPDATE activity_checkpoints SET local_date=$3,source_evidence=$4 WHERE profile_id=$1 AND id=$2', [input.profileId, id, input.localDate, JSON.stringify(sourceEvidence)]);
+      await tx.query('UPDATE memory_records SET source_turn_id=$3 WHERE profile_id=$1 AND id=$2', [input.profileId, id, input.turnId]);
+      await this.reconfirm(tx, input.profileId, id);
+    } else {
+      await tx.query(`INSERT INTO activity_checkpoints(profile_id,id,kind,term,normalized_term,focus,language,local_date,source_evidence)
+        VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)`, [input.profileId, id, grounded.kind, grounded.term, normalized(grounded.term), grounded.focus, grounded.language, input.localDate, JSON.stringify(sourceEvidence)]);
+    }
+    // A practiced personal name must not outlive forgetting that entity.
+    const subjects = (await tx.query('SELECT id FROM entities WHERE profile_id=$1 AND normalized_name=$2', [input.profileId, normalized(grounded.term)])).rows;
+    for (const subject of subjects) await this.depend(tx, input.profileId, str(subject.id), id);
+    return [id];
+  }
   async learn(input: LearningInput): Promise<{ learnedIds: string[]; applied: boolean }> {
     return this.serial(async () => {
       const result = await this.db.transaction(async (tx) => {
@@ -356,6 +411,7 @@ export class MemoryStore {
         const candidates = input.candidates.map((candidate, index) => ({ candidate, index })).filter(({ candidate }) => validateCandidate(candidate) && assertionEvidence(input.sourceText, candidate));
         candidates.sort((a, b) => Number(b.candidate.kind === 'entity') - Number(a.candidate.kind === 'entity'));
         for (const { candidate, index } of candidates) learnedIds.push(...await this.capture(tx, input, candidate, index));
+        if (input.learningActivity) learnedIds.push(...await this.learnActivity(tx, input));
         if (input.storyTransition) learnedIds.push(...await this.commitStory(tx, input));
         let affectChanged = false;
         if (input.affect) {
@@ -501,11 +557,8 @@ export class MemoryStore {
           if (patch.kind === 'relationship') current = (await tx.query('SELECT * FROM social_connections WHERE profile_id=$1 AND id=$2 AND entity_id=$3 AND relation=$4', [profileId, id, patch.entityId, patch.relation])).rows[0];
           else if (patch.kind === 'preference') current = (await tx.query('SELECT * FROM facts WHERE profile_id=$1 AND id=$2 AND slot=$3 AND value=$4', [profileId, id, patch.slot, patch.value])).rows[0];
           else if (patch.kind === 'routine') current = (await tx.query("SELECT * FROM facts WHERE profile_id=$1 AND id=$2 AND category='routine' AND qualifiers @> $3::jsonb", [profileId, id, JSON.stringify(patch.qualifiers)])).rows[0];
-          else {
-            const clock = await this.clock(tx, profile);
-            current = (await tx.query(`SELECT * FROM address_preferences WHERE profile_id=$1 AND id=$2 AND preferred_address=$3 AND allow_nickname=$4 AND nickname IS NOT DISTINCT FROM $5
-              AND (scope='persistent' OR scope='day' AND valid_local_date=$6::date OR scope='session' AND session_id=$7)`, [profileId, id, patch.preferredAddress, patch.allowNickname, patch.nickname, clock.localDate, sessionId ?? null])).rows[0];
-          }
+          else if (patch.scope !== 'session' || patch.sessionId === sessionId) current = (await tx.query(`SELECT * FROM address_preferences WHERE profile_id=$1 AND id=$2 AND preferred_address=$3 AND allow_nickname=$4
+            AND nickname IS NOT DISTINCT FROM $5 AND scope=$6 AND valid_local_date IS NOT DISTINCT FROM $7::date AND session_id IS NOT DISTINCT FROM $8`, [profileId, id, patch.preferredAddress, patch.allowNickname, patch.nickname, patch.scope, patch.validLocalDate ?? null, patch.sessionId ?? null])).rows[0];
           if (!current) return { error: new AppError('stale_state', 409) };
           return { value: { deletedIds: [], deletionEpoch: Number(profile.deletion_epoch), stateVersion: Number(profile.state_version), applied: false, kind: patch.kind, detail: 'The same explicit memory update is already committed and remains current.' } };
         }
@@ -553,10 +606,11 @@ export class MemoryStore {
           targetId = await this.record(tx, profileId, 'preference', turnId, `patch:${key}`);
           // Retain the chosen address and permission, not the withdrawn nickname
           // embedded in the original utterance. The request receipt stores a hash.
-          const addressEvidence = { clause: patch.preferredAddress, start: patch.sourceText.indexOf(patch.preferredAddress), end: patch.sourceText.indexOf(patch.preferredAddress) + patch.preferredAddress.length, speechAct: 'correction', polarity: 'affirmed', turnId, permission: patch.allowNickname ? 'nickname_allowed' : 'nickname_denied' };
-          await tx.query('INSERT INTO address_preferences(profile_id,id,preferred_address,allow_nickname,nickname,source_evidence,scope,valid_local_date,session_id) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)', [profileId, targetId, patch.preferredAddress, patch.allowNickname, patch.nickname, JSON.stringify(addressEvidence), patch.scope, patch.validLocalDate ?? null, patch.sessionId ?? null]);
+          const addressEvidence = { clause: patch.preferredAddress, start: patch.sourceText.indexOf(patch.preferredAddress), end: patch.sourceText.indexOf(patch.preferredAddress) + patch.preferredAddress.length, speechAct: 'correction', polarity: 'affirmed', turnId, permission: patch.allowNickname ? 'nickname_allowed' : 'nickname_denied', scope: patch.scope, ...(patch.validLocalDate ? { validLocalDate: patch.validLocalDate } : {}) };
+          await tx.query(`INSERT INTO address_preferences(profile_id,id,preferred_address,allow_nickname,nickname,source_evidence,scope,valid_local_date,session_id)
+            VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)`, [profileId, targetId, patch.preferredAddress, patch.allowNickname, patch.nickname, JSON.stringify(addressEvidence), patch.scope, patch.validLocalDate ?? null, patch.sessionId ?? null]);
           await tx.query('UPDATE relationship_states SET nickname_reference=$2 WHERE profile_id=$1', [profileId, patch.allowNickname ? targetId : null]);
-          detail = `The child asks to be addressed as ${patch.preferredAddress}. Nickname use is ${patch.allowNickname ? 'explicitly allowed for this chosen address' : 'not allowed'}; the child is not a renamed third-party person.`;
+          detail = `The child asks to be addressed as ${patch.preferredAddress}. Nickname use is ${patch.allowNickname ? `explicitly allowed ${patch.scope === 'day' ? 'only today' : patch.scope === 'session' ? 'only in this session' : 'until withdrawn, within memory retention'}` : 'not allowed'}; the child is not a renamed third-party person.`;
         }
         await this.reconfirm(tx, profileId, targetId);
         await tx.query('UPDATE profiles SET deletion_epoch=deletion_epoch+1,state_version=state_version+1 WHERE id=$1', [profileId]);

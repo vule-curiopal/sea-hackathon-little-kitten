@@ -3,17 +3,18 @@ import { createVoiceClient, isSessionExpired, newRequestId, type CaptureState, t
 import type { Language, TranslationKey } from './i18n';
 import { createPlaybackMeter } from './playback-meter';
 import { engineRequest, type DemoPanelData, type Role } from './engine-api';
-import { readAffectSnapshot, type AffectSnapshot } from './affect';
 import { createVoiceConsole } from './voice-console';
 import { voiceErrorKey } from './voice-errors';
 import { canStartVoice } from './voice-controls';
+import { readAffectSnapshot, type AffectSnapshot } from './affect';
+import { AUTH_CHANGED_EVENT } from './auth-api';
 
 type Options = {
   language: Language;
   profile: string;
   voiceId: string;
-  personality: string;
-  role: Role;
+  personality?: string;
+  role?: Role;
   onState(state: VoiceControllerState): void;
   onTurn(response: TurnResponse): void;
   onInvalidate(): void;
@@ -77,7 +78,8 @@ export function usePipelineVoice(options: Options) {
           const path = new URL(typeof input === 'string' ? input : input instanceof URL ? input.href : input.url, window.location.origin).pathname;
           let response: Response;
           try {
-            response = await fetch(input, init);
+            response = await fetch(input, { ...init, credentials: 'include' });
+            if (active && response.status === 401 && options.profile === 'account') window.dispatchEvent(new Event(AUTH_CHANGED_EVENT));
             if (active) voiceConsole.request(init?.method ?? 'GET', path, response.status, performance.now() - start);
           } catch (reason) {
             const canceled = init?.signal?.aborted || (reason instanceof Error && reason.name === 'AbortError');
@@ -85,10 +87,10 @@ export function usePipelineVoice(options: Options) {
             throw reason;
           }
           if (active && response.ok) {
-            const receipt = path.endsWith('/playback');
-            if (receipt) void response.clone().json().catch(() => null).then(() => { if (active) setRevision(value => value + 1); });
             let status: unknown;
             try { status = typeof init?.body === 'string' ? JSON.parse(init.body).status : undefined; } catch { /* Non-JSON request. */ }
+            const receipt = path.endsWith('/playback');
+            if (receipt) setRevision(value => value + 1);
             const canceled = init?.method === 'DELETE' && /\/turns\/[^/]+$/u.test(path);
             const selected = controller.current?.session;
             if (selected && (canceled || (receipt && (status === 'completed' || status === 'interrupted')))) void refreshAffect(selected);
@@ -105,7 +107,7 @@ export function usePipelineVoice(options: Options) {
       if (!active || controller.current !== client.controller) return;
       showError(reason);
       if (isSessionExpired(reason)) {
-        setSession(null); setAffect(undefined);
+        setSession(null);
         if (connected && !renewing) {
           renewing = true;
           voiceConsole.action('session.expired', { reason: 'reconnecting_without_recording' });
@@ -148,7 +150,11 @@ export function usePipelineVoice(options: Options) {
     // Serialize StrictMode cleanup and profile/config changes so sessions never overlap.
     const opened = teardown.current.then(async () => {
       if (!active) return;
-      const value = await client.controller.openProfile(options.profile, options.language, options.voiceId, { personality: options.personality, role: options.role });
+      const character = {
+        ...(options.personality === undefined ? {} : { personality: options.personality }),
+        ...(options.role === undefined ? {} : { role: options.role }),
+      };
+      const value = await client.controller.openProfile(options.profile, options.language, options.voiceId, character);
       if (active) { connected = true; voiceConsole.session(value); setSession(value); void refreshAffect(value); }
     }).catch(reason => { if (active) { setState('error'); report(reason); } });
     const hide = () => {
