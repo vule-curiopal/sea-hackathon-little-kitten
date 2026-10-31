@@ -37,15 +37,15 @@
   },
   {
     "title": {
-      "vi": "Phần video",
-      "en": "Video segment"
+      "vi": "Trải nghiệm Miu",
+      "en": "Try Miu live"
     },
     "script": {
       "vi": [
-        "Tiếp theo là phần demo. Ở đây, chúng mình muốn minh họa cách trẻ chủ động bắt đầu lượt nói, Miu đáp lại bằng giọng nói và biểu cảm, rồi nối tiếp cuộc trò chuyện một cách tự nhiên từ những chi tiết trẻ đã chia sẻ."
+        "Mọi người có thể quét mã QR lớn trên slide để mở Miu và thử trò chuyện trực tiếp. Hãy kể cho Miu một chuyện nhỏ sau giờ học, rồi quan sát cách Miu lắng nghe, trả lời bằng giọng nói và thể hiện cảm xúc."
       ],
       "en": [
-        "Next is the demo segment. We want to show how a child starts a spoken turn, how Miu responds with voice and expression, and how a shared detail can become a natural follow-up in the next conversation."
+        "Scan the large QR code to open Miu and try a conversation. Share a small after-school story, then see how Miu listens, responds with voice, and expresses emotion."
       ]
     }
   },

@@ -1,15 +1,15 @@
-import { useCallback, useEffect, useRef, useState, type ChangeEvent, type PointerEvent } from 'react';
+import { useCallback, useEffect, useRef, useState, type PointerEvent } from 'react';
 import Dialog from '../components/Dialog';
 import Icon from '../components/Icon';
 import Room from '../components/Room';
 import PresentationShare from '../components/PresentationShare';
 import PresentationNotes, { notesLabels, type NotesLanguage } from '../components/PresentationNotes';
+import { createQr } from '../lib/qr';
 import sourceDeck from './slide/Meet Miu.pptx?url';
 import '../styles/presentation.css';
 
-const demoVideoId = 'yMPZn1eiUbA';
-const demoWatchUrl = `https://www.youtube.com/watch?v=${demoVideoId}`;
-const demoEmbedUrl = `https://www.youtube-nocookie.com/embed/${demoVideoId}?rel=0&playsinline=1`;
+const demoTalkUrl = 'https://miu.curiopal.com/app/talk';
+const demoQr = createQr(demoTalkUrl);
 const notesLanguageKey = 'miu.presentation.notes-language';
 
 function initialNotesLanguage(): NotesLanguage {
@@ -20,7 +20,7 @@ function initialNotesLanguage(): NotesLanguage {
 const slides = [
   { title: 'Small stories deserve a familiar friend', label: 'Why Miu', theme: 'why' },
   { title: 'Meet Miu', label: 'Personality, emotion, memory & growing', theme: 'features' },
-  { title: 'Miu in action', label: 'Video demo', theme: 'demo' },
+  { title: 'Miu in action', label: 'Try Miu live', theme: 'demo' },
   { title: 'A more natural Miu', label: 'Future improvements', theme: 'future' },
 ] as const;
 
@@ -53,12 +53,7 @@ export default function Presentation() {
   const [notesLanguage, setNotesLanguage] = useState<NotesLanguage>(initialNotesLanguage);
   const [fullscreen, setFullscreen] = useState(false);
   const [notice, setNotice] = useState('');
-  const [videoFile, setVideoFile] = useState<File | null>(null);
-  const [videoUrl, setVideoUrl] = useState('');
-  const [videoError, setVideoError] = useState('');
   const pageRef = useRef<HTMLElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const videoInputRef = useRef<HTMLInputElement>(null);
   const pointerStart = useRef<{ x: number; y: number } | null>(null);
 
   useEffect(() => {
@@ -83,8 +78,6 @@ export default function Presentation() {
 
   useEffect(() => {
     window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}#slide-${activeSlide + 1}`);
-    // Native video pauses here; the YouTube iframe unmounts when leaving its slide.
-    if (activeSlide !== 2) videoRef.current?.pause();
   }, [activeSlide]);
 
   useEffect(() => {
@@ -102,7 +95,7 @@ export default function Presentation() {
     const onKey = (event: KeyboardEvent) => {
       if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey || overviewOpen || notesOpen) return;
       const target = event.target;
-      if (target instanceof Element && target.closest('input, textarea, select, video, iframe, dialog, [contenteditable="true"]')) return;
+      if (target instanceof Element && target.closest('input, textarea, select, dialog, [contenteditable="true"]')) return;
       if (event.code === 'Space' && target instanceof Element && target.closest('button, a')) return;
       if (['ArrowRight', 'PageDown'].includes(event.key) || event.code === 'Space') {
         event.preventDefault(); goToSlide(activeSlide + 1);
@@ -118,26 +111,9 @@ export default function Presentation() {
     return () => window.removeEventListener('keydown', onKey);
   }, [activeSlide, goToSlide, notesOpen, overviewOpen, toggleFullscreen]);
 
-  useEffect(() => {
-    if (!videoFile) { setVideoUrl(''); return; }
-    const url = URL.createObjectURL(videoFile);
-    setVideoUrl(url);
-    setVideoError('');
-    return () => URL.revokeObjectURL(url);
-  }, [videoFile]);
-
-  const selectVideo = (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.currentTarget.files?.[0];
-    if (!file) return;
-    if (!file.type.startsWith('video/') && !/\.(mp4|webm|mov|m4v|ogv)$/i.test(file.name)) {
-      setVideoError('Please choose a video file, such as MP4 or WebM.');
-    } else { setVideoFile(file); setVideoError(''); }
-    event.currentTarget.value = '';
-  };
-
   const startSwipe = (event: PointerEvent<HTMLDivElement>) => {
     pointerStart.current = null;
-    if (event.pointerType !== 'touch' || (event.target as Element).closest('video, iframe, button, a, input')) return;
+    if (event.pointerType !== 'touch' || (event.target as Element).closest('button, a, input')) return;
     pointerStart.current = { x: event.clientX, y: event.clientY };
   };
   const finishSwipe = (event: PointerEvent<HTMLDivElement>) => {
@@ -181,9 +157,11 @@ export default function Presentation() {
         <section className="pitch-slide pitch-demo" hidden={activeSlide !== 2} role="group" aria-roledescription="slide" aria-label="3 of 4: Miu in action">
           <h1>Miu in action</h1>
           <span className="pitch-slide-number">03 / 04</span>
-          <div className="pitch-video-frame">
-            {videoUrl && !videoError ? <video key={videoUrl} ref={videoRef} src={videoUrl} controls playsInline preload="metadata" aria-label="Miu demo video" onError={() => setVideoError('This browser could not play the video. Try an MP4 with H.264 video or a WebM file.')} /> : activeSlide === 2 && <iframe src={demoEmbedUrl} title="Miu demo on YouTube" allow="autoplay; encrypted-media; picture-in-picture" allowFullScreen referrerPolicy="strict-origin-when-cross-origin" />}
-          </div>
+          <a className="pitch-demo-invite" href={demoTalkUrl} target="_blank" rel="noopener noreferrer">
+            <svg className="pitch-demo-qr" xmlns="http://www.w3.org/2000/svg" viewBox={`0 0 ${demoQr.size} ${demoQr.size}`} aria-hidden="true" shapeRendering="crispEdges"><rect width={demoQr.size} height={demoQr.size} fill="#ffffff" /><path d={demoQr.path} fill="#102d42" /></svg>
+            <span className="pitch-demo-invite-title">Scan to meet Miu</span>
+            <span className="pitch-demo-invite-url">miu.curiopal.com/app/talk <span aria-hidden="true">↗</span></span>
+          </a>
           <aside className="pitch-demo-aside">
             <h2>A familiar<br />follow-up</h2>
             <img src="/presentation-assets/miu-listening.png" alt="Miu listening with a paw raised" width="800" height="880" draggable="false" />
@@ -208,16 +186,6 @@ export default function Presentation() {
         </div>
         <PresentationShare />
       </div>
-
-      {activeSlide === 2 && <div className="pitch-video-options">
-        <span>{videoFile && !videoError ? videoFile.name : 'YouTube · Miu demo'}</span>
-        <button type="button" onClick={() => videoInputRef.current?.click()}>{videoFile ? 'Change local video' : 'Use local video'}</button>
-        {videoFile && <button type="button" onClick={() => { setVideoFile(null); setVideoError(''); }}>Use YouTube video</button>}
-        <a href={demoWatchUrl} target="_blank" rel="noopener noreferrer">Watch on YouTube ↗</a>
-        <a href="/demo/miu?lang=en" target="_blank" rel="noopener noreferrer">Open live demo ↗</a>
-      </div>}
-      {videoError && activeSlide === 2 && <p className="pitch-notice" role="alert">{videoError}</p>}
-      <input ref={videoInputRef} className="pitch-file-input" tabIndex={-1} type="file" accept="video/*,.mp4,.webm,.mov,.m4v,.ogv" aria-label="Choose a demo video" onChange={selectVideo} />
 
       <footer className="pitch-controls" aria-label="Presentation controls">
         <div className="pitch-tools">

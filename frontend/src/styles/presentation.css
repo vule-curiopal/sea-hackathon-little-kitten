@@ -1,7 +1,6 @@
 ﻿/* Share the app's type, colours, room illustrations and tactile controls. */
 .pitch-page {
   --pitch-reserved-space: 208px;
-  --pitch-video-space: 0px;
   --pitch-qr-size: clamp(44px, 8cqw, 112px);
   --pitch-qr-top: 1.5cqw;
   --pitch-qr-right: 1.5cqw;
@@ -11,7 +10,6 @@
   color: var(--ink);
   font-family: var(--body);
 }
-.pitch-page[data-slide="3"] { --pitch-video-space: 44px; }
 .pitch-header { display: flex; align-items: center; gap: 24px; max-width: 1560px; min-height: 96px; margin: 0 auto; }
 .pitch-brand { display: inline-flex; align-items: center; gap: 10px; color: var(--ink); font: 800 38px/1 var(--display); letter-spacing: -.035em; text-decoration: none; }
 .pitch-brand-dot { color: var(--pop); }
@@ -29,7 +27,7 @@
   position: relative;
   isolation: isolate;
   container-type: inline-size;
-  width: min(100%, calc((100dvh - var(--pitch-reserved-space) - var(--pitch-video-space)) * 16 / 9), 1560px);
+  width: min(100%, calc((100dvh - var(--pitch-reserved-space)) * 16 / 9), 1560px);
   overflow: hidden;
   border: 1px solid var(--line);
   border-radius: clamp(20px, 2.5vw, 36px);
@@ -38,7 +36,6 @@
   touch-action: pan-y pinch-zoom;
 }
 .pitch-slide-deck { position: relative; min-width: 0; aspect-ratio: 16 / 9; container-type: inline-size; }
-.pitch-slide-deck:has(iframe) { min-height: 280px; }
 .pitch-share { position: absolute; z-index: 4; top: var(--pitch-qr-top); right: var(--pitch-qr-right); width: var(--pitch-qr-size); }
 .pitch-share-qr { display: block; width: 100%; aspect-ratio: 1; overflow: hidden; border: 1px solid var(--line); border-radius: 8px; background: var(--pop-ink); box-shadow: 0 2px 0 var(--lip); }
 .pitch-share-qr svg { display: block; width: 100%; height: 100%; }
@@ -73,10 +70,12 @@
 .pitch-demo { --focus-ring: var(--pop-ink); color: var(--on-ocean); background: var(--ocean); }
 .pitch-demo > h1 { position: absolute; top: 5.8%; left: 5%; font-size: 5.1cqw; line-height: 1.1; }
 .pitch-demo .pitch-slide-number { color: var(--pop-ink); }
-.pitch-video-frame { position: absolute; top: 22.22%; left: 5%; width: 75%; aspect-ratio: 16 / 9; overflow: hidden; border: 2px solid var(--pop); border-radius: 2cqw; background: var(--ocean-2); box-shadow: 0 .45cqw 0 var(--pop-deep); }
-.pitch-video-frame:has(> iframe) { min-height: 204px; }
-.pitch-video-frame > video { width: 100%; height: 100%; display: block; object-fit: contain; background: var(--ocean); }
-.pitch-video-frame > iframe { position: absolute; inset: 0; width: 100%; height: 100%; display: block; border: 0; background: var(--ocean); }
+.pitch-demo-invite { position: absolute; top: 22.22%; left: 5%; width: 75%; aspect-ratio: 16 / 9; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1cqw; padding: 2cqw; border: 2px solid var(--pop); border-radius: 2cqw; color: var(--on-ocean); background: var(--ocean-2); box-shadow: 0 .45cqw 0 var(--pop-deep); text-align: center; text-decoration: none; }
+.pitch-demo-qr { display: block; flex: none; width: 29cqw; aspect-ratio: 1; border-radius: 1cqw; background: #ffffff; }
+.pitch-demo-invite-title { font: 800 2.7cqw/1.2 var(--display); }
+.pitch-demo-invite-url { font: 700 1.4cqw/1.5 var(--body); }
+.pitch-demo-invite:hover .pitch-demo-invite-url { text-decoration: underline; text-underline-offset: .2em; }
+.pitch-demo-invite:focus-visible { outline: 3px solid #ffffff; outline-offset: -7px; }
 .pitch-demo-aside { position: absolute; inset: 0 0 0 82.8%; border-radius: 2.8cqw 0 0 2.8cqw; background: var(--pop); }
 .pitch-demo-aside h2 { position: absolute; top: max(16%, calc(var(--pitch-qr-top) + var(--pitch-qr-size) + 1cqw)); left: 10%; color: var(--pop-ink); font-size: 2.6cqw; line-height: 1.15; }
 .pitch-demo-aside img { position: absolute; width: 108%; max-width: none; top: 43%; left: -3%; }
@@ -117,13 +116,8 @@
 .pitch-key-hint kbd { display: inline-grid; place-items: center; width: 22px; height: 22px; border: 1px solid var(--line); border-radius: 5px; background: var(--surface); font: inherit; }
 .pitch-key-hint kbd:last-of-type { margin-right: 4px; }
 .pitch-mobile-count { display: none; }
-.pitch-video-options { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; width: min(100%, 1560px); margin-top: 8px; color: var(--muted); font-size: 12px; }
-.pitch-video-options > span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.pitch-video-options button, .pitch-video-options a { display: inline-flex; align-items: center; min-height: 44px; padding: 6px; border: 0; border-radius: 8px; background: transparent; color: var(--pop-text); font: 800 12px var(--body); text-decoration: none; }
-.pitch-video-options a { margin-left: auto; }
-.pitch-video-options button:hover, .pitch-video-options a:hover { text-decoration: underline; }
 .pitch-notice { max-width: 900px; align-self: flex-start; margin: 8px 0 12px; padding: 12px 16px; border-radius: 12px; background: var(--warn-soft); color: var(--warn); font-size: 13px; }
-.pitch-file-input, .pitch-screen-reader { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+.pitch-screen-reader { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
 .pitch-dialog { width: min(800px, calc(100% - 32px)); border: 1px solid var(--line); background: var(--surface); color: var(--ink); box-shadow: var(--shadow-lg); font-family: var(--body); }
 .pitch-dialog .dialog-heading h2 { color: var(--ink); font: 800 28px/1.15 var(--display); }
 .pitch-dialog .round-button { background: var(--ground); color: var(--pop-text); }
@@ -146,11 +140,10 @@
 .pitch-notes-language > .is-active { color: var(--pop-ink); background: var(--pop); box-shadow: 0 2px 0 var(--pop-deep); }
 .pitch-notes-content h3 { margin: 0 0 22px; color: var(--pop-text); font: 800 26px/1.25 var(--display); }
 .pitch-notes-script p { margin: 0 0 18px; color: var(--ink-2); font: 600 17px/1.85 var(--body); }
-.pitch-page.is-fullscreen { --pitch-video-space: 0px; min-height: 100dvh; padding: 0 12px; display: flex; flex-direction: column; justify-content: center; overflow: auto; }
+.pitch-page.is-fullscreen { min-height: 100dvh; padding: 0 12px; display: flex; flex-direction: column; justify-content: center; overflow: auto; }
 .pitch-page.is-fullscreen .pitch-header { display: none; }
 .pitch-page.is-fullscreen .pitch-stage { width: min(100%, calc((100dvh - 88px) * 16 / 9)); }
 .pitch-page.is-fullscreen .pitch-controls { min-height: 72px; }
-.pitch-page.is-fullscreen .pitch-video-options { display: none; }
 @media (max-width: 1050px) {
   .pitch-page { --pitch-reserved-space: 188px; }
   .pitch-key-hint { display: none; }
@@ -176,8 +169,6 @@
   .pitch-tool > span, .pitch-dots { display: none; }
   .pitch-arrow { width: 44px; height: 44px; }
   .pitch-mobile-count { display: block; padding: 0 6px; color: var(--muted); font: 800 12px var(--body); }
-  .pitch-video-options { gap: 7px; font-size: 11px; }
-  .pitch-video-options > span { flex-basis: 100%; }
 }
 @media (max-width: 700px) and (orientation: portrait) {
   .pitch-page { --pitch-qr-size: 64px; --pitch-qr-top: 18px; --pitch-qr-right: 18px; }
@@ -203,7 +194,10 @@
   .pitch-feature p { margin-top: 10px; font-size: 16px; line-height: 1.5; white-space: normal; }
   .pitch-demo { min-height: 630px; padding: 100px 24px 0; }
   .pitch-demo > h1 { position: static; padding-top: 0; font-size: 38px; }
-  .pitch-video-frame { position: relative; top: auto; left: auto; width: 100%; margin: 28px 0; border-radius: 17px; box-shadow: 0 4px 0 var(--pop-deep); }
+  .pitch-demo-invite { position: relative; top: auto; left: auto; width: 100%; aspect-ratio: auto; gap: 14px; margin: 28px 0; padding: 24px 16px; border-radius: 17px; box-shadow: 0 4px 0 var(--pop-deep); }
+  .pitch-demo-qr { width: min(100%, 280px); border-radius: 12px; }
+  .pitch-demo-invite-title { font-size: 28px; }
+  .pitch-demo-invite-url { font-size: 14px; overflow-wrap: anywhere; }
   .pitch-demo-aside { position: relative; inset: auto; display: flex; align-items: center; justify-content: space-between; gap: 14px; min-height: 240px; margin: 0 -24px; padding: 24px; border-radius: 24px 24px 0 0; }
   .pitch-demo-aside h2 { position: static; font-size: 30px; }
   .pitch-demo-aside img { position: static; width: 48%; max-width: 180px; }
