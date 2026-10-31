@@ -19,7 +19,7 @@ class ContractStore {
   readonly revoked: string[] = [];
   async register(username: unknown, password: unknown): Promise<AuthSession> {
     this.registerCalls++;
-    if (typeof password !== 'string' || password.length < 12) throw new AppError('invalid_password', 400);
+    if (typeof password !== 'string' || password.length === 0) throw new AppError('invalid_password', 400);
     return this.issue({ ...this.user, username: String(username).trim().toLowerCase() });
   }
   async login(username: unknown, password: unknown): Promise<AuthSession> {
@@ -78,16 +78,18 @@ test('offline auth HTTP: seed login accepts password 1, uses a seven-day protect
 
 test('offline auth HTTP: public registration delegates password policy and never returns session credentials', async () => {
   const { http, store } = fixture();
-  const rejected = await http.post('/api/auth/register').set('Host', 'miu.test').set('Origin', origin).send({ username: 'new_family', password: '1' });
+  const rejected = await http.post('/api/auth/register').set('Host', 'miu.test').set('Origin', origin).send({ username: 'new_family', password: '' });
   assert.equal(rejected.status, 400);
   assert.equal(rejected.body.error.code, 'invalid_password');
-  const registered = await http.post('/api/auth/register').set('Host', 'miu.test').set('Origin', origin).send({ username: 'New_Family', password: 'a-long-password' });
+  const registered = await http.post('/api/auth/register').set('Host', 'miu.test').set('Origin', origin).send({ username: 'New_Family', password: '1' });
   assert.equal(registered.status, 201);
   assert.deepEqual(registered.body, { user: { ...store.user, username: 'new_family' } });
   assert.equal(registered.headers['cache-control'], 'no-store');
   assert.ok(registered.headers['set-cookie']);
   assert.equal(Object.hasOwn(registered.body, 'token'), false);
   assert.equal(Object.hasOwn(registered.body, 'expiresAt'), false);
+  const longPassword = await http.post('/api/auth/register').set('Host', 'miu.test').set('Origin', origin).send({ username: 'Long_Family', password: 'a'.repeat(1024) });
+  assert.equal(longPassword.status, 201);
 });
 
 test('offline auth HTTP: credentials require exactly a JSON username/password object and retain the transport size limit', async () => {

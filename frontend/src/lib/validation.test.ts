@@ -11,16 +11,14 @@ test('usernames accept the defined ASCII alphabet and trimmed 3–32 character b
   }
 });
 
-test('registration password length is 12–128 Unicode code points', () => {
-  for (const password of ['a'.repeat(12), 'a'.repeat(128), '🐱'.repeat(12), '🐱'.repeat(128)]) {
+test('registration accepts any nonempty password, including one character', () => {
+  for (const password of ['1', 'a', ' ', '🐱', 'a'.repeat(129), '🐱'.repeat(129)]) {
     assert.deepEqual(validateAuth({ username: 'sam', password }, false), {});
   }
-  for (const password of ['', 'a'.repeat(11), 'a'.repeat(129), '🐱'.repeat(11), '🐱'.repeat(129)]) {
-    assert.equal(validateAuth({ username: 'sam', password }, false).password, 'passwordError');
-  }
+  assert.deepEqual(validateAuth({ username: 'sam', password: '' }, false), { password: 'passwordRequired' });
 });
 
-test('login requires a nonempty password without applying the new registration minimum', () => {
+test('login requires a nonempty password without length or strength rules', () => {
   assert.deepEqual(validateAuth({ username: 'sam', password: '1' }, true), {});
   assert.deepEqual(validateAuth({ username: 'sam', password: ' 1 ' }, true), {});
   assert.deepEqual(validateAuth({ username: 'sam', password: '' }, true), { password: 'passwordRequired' });

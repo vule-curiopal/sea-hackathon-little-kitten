@@ -7,7 +7,6 @@ import { navigate } from '../lib/router';
 import { validateAuth, type AuthErrors, type AuthValues } from '../lib/validation';
 import { AuthApiError, login, register } from '../lib/auth-api';
 import { Brand } from './Landing';
-import { DEMO_ROUTE } from '../lib/demo-buddy';
 
 function errorKey(error: unknown): TranslationKey {
   switch (error instanceof AuthApiError ? error.code : 'unavailable') {
@@ -73,7 +72,7 @@ export default function Auth({ isLogin = false }: { isLogin?: boolean }) {
       <section className="auth-card"><span className="eyebrow">Little Buddy</span><h1>{t(isLogin ? 'signInTitle' : 'createTitle')}</h1><p className="auth-subtitle">{t(isLogin ? 'authLoginSubtitle' : 'authRegisterSubtitle')}</p>
         <form noValidate onSubmit={submit} ref={formRef} aria-busy={pending}>
           {fields.map(field => {
-            const hint = field.name === 'username' ? 'usernameHint' : isLogin ? undefined : 'passwordHint';
+            const hint = field.name === 'username' ? 'usernameHint' : undefined;
             return <div className="form-field" key={field.name}>
               <label htmlFor={field.name}>{t(field.label)}</label>
               <div className="input-wrap">
@@ -91,7 +90,6 @@ export default function Auth({ isLogin = false }: { isLogin?: boolean }) {
           <p className="auth-demo"><Icon name="shield" />{t(isLogin ? 'authDemo' : 'authRegisterDemo')}</p>
         </form>
         <p className="auth-switch">{t(isLogin ? 'newFamily' : 'existing')} <a href={isLogin ? '/register' : '/login'}>{t(isLogin ? 'getStarted' : 'signIn')}</a></p>
-        <a className="auth-demo-link text-link" href={`${DEMO_ROUTE}?lang=${language}`}>{t('demoEntry')}<Icon name="arrow" /></a>
       </section>
     </div>
   </main>;

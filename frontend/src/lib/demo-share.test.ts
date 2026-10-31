@@ -3,12 +3,12 @@ import assert from 'node:assert/strict';
 import jsQR from 'jsqr';
 import { buildDemoUrl, selectLanAddress } from './demo-share.ts';
 import { createQr } from './qr.ts';
-import { DEMO_BUDDY, DEMO_ROUTE, demoLanguage } from './demo-buddy.ts';
+import { DEMO_BUDDY, demoLanguage } from './demo-buddy.ts';
 import { getDemoReply } from './demo.ts';
 
-test('the phone link opens the preset room directly and carries only the language', () => {
+test('the phone link opens the account conversation and carries only the language', () => {
   const url = new URL(buildDemoUrl('http://192.168.225.72:5173/app/talk?secret=example#old', 'vi'));
-  assert.equal(url.pathname, DEMO_ROUTE);
+  assert.equal(url.pathname, '/app/talk');
   assert.equal(url.search, '?lang=vi');
   assert.equal(url.hash, '');
   assert.equal(url.origin, 'http://192.168.225.72:5173');
@@ -40,8 +40,8 @@ test('the prepared personality is consistent in English and Vietnamese without U
   assert.equal(demoLanguage('?lang=fr'), null);
 });
 
-test('an independent scanner decodes the exact SVG modules for local and HTTPS demo links', () => {
-  for (const origin of ['http://192.168.225.72:5173', 'https://little-buddy-curiopal.gauzymacaw.chatgpt.site']) {
+test('an independent scanner decodes the exact SVG modules for local and HTTPS conversation links', () => {
+  for (const origin of ['http://192.168.225.72:5173', 'https://miu.curiopal.com']) {
     for (const language of ['en', 'vi'] as const) {
       const url = buildDemoUrl(origin, language);
       const qr = createQr(url);

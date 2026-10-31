@@ -5,9 +5,9 @@ import { hashPassword, hashSeedPassword, PASSWORD_KDF_LIMITS, SCRYPT_PARAMETERS,
 
 // Offline cryptographic/input/resource-boundary contracts. No character engine,
 // provider, model request, or behavioral evaluation is involved.
-test('password policy counts Unicode codepoints and preserves spaces and null bytes', async () => {
-  for (const valid of ['🚀'.repeat(12), '🚀'.repeat(128), '  mèo🚀 password\0 ']) assert.doesNotThrow(() => validatePassword(valid));
-  for (const invalid of [undefined, 123, '', '🚀'.repeat(11), '🚀'.repeat(129), 'a'.repeat(129), 'a'.repeat(11) + '\uD800']) {
+test('password policy accepts every nonempty string without length or content rules', async () => {
+  for (const valid of ['1', 'a', ' ', '\0', '🚀', '🚀'.repeat(129), 'a'.repeat(4096), '\uD800', '  mèo🚀 password\0 ']) assert.doesNotThrow(() => validatePassword(valid));
+  for (const invalid of [undefined, null, 123, false, {}, [], '']) {
     assert.throws(() => validatePassword(invalid), error => error instanceof AppError && error.code === 'invalid_password');
   }
   const password = '  mèo🚀 password\0 ';
@@ -37,12 +37,22 @@ test('unsupported stored versions, resource parameters, and malformed hashes nev
   }
 });
 
-test('only explicit test seeding can hash a short password; verification supports its stored credential', async () => {
-  await assert.rejects(hashPassword('1'), error => error instanceof AppError && error.code === 'invalid_password');
+test('public registration and demo seeding both hash one-character passwords', async () => {
+  const registered = await hashPassword('1');
+  assert.equal(await verifyPassword('1', registered), true);
+  assert.equal(await verifyPassword('2', registered), false);
   const encoded = await hashSeedPassword('1');
   assert.equal(await verifyPassword('1', encoded), true);
   assert.equal(await verifyPassword('2', encoded), false);
   await assert.rejects(hashSeedPassword(''), /invalid_password/u);
+  await assert.rejects(hashPassword(''), /invalid_password/u);
+});
+
+test('password hashing and verification support a password beyond the former maximum', async () => {
+  const password = '🚀'.repeat(256);
+  const encoded = await hashPassword(password);
+  assert.equal(await verifyPassword(password, encoded), true);
+  assert.equal(await verifyPassword(password.slice(0, -2), encoded), false);
 });
 
 test('password KDFs bound active work and queued requests, then release their slots', async () => {

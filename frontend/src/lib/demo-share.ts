@@ -1,5 +1,3 @@
-import { DEMO_ROUTE } from './demo-buddy.ts';
-
 export function isLoopbackHost(host: string) {
   return host === 'localhost' || host.endsWith('.localhost') || host === '[::1]' || host === '::1' || /^127\./.test(host) || host === '0.0.0.0';
 }
@@ -9,7 +7,7 @@ export function buildDemoUrl(origin: string, language: 'en' | 'vi') {
   if (!['http:', 'https:'].includes(base.protocol) || base.username || base.password || isLoopbackHost(base.hostname)) {
     throw new Error('Use an HTTP or HTTPS address that attendees can open on their phones.');
   }
-  const url = new URL(DEMO_ROUTE, base.origin);
+  const url = new URL('/app/talk', base.origin);
   url.searchParams.set('lang', language);
   return url.href;
 }

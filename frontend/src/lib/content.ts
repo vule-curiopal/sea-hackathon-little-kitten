@@ -21,7 +21,7 @@ export function getContent(language: Language): { steps: Step[]; safety: Feature
       { q: 'Con có cần giữ nút khi nói không?', a: 'Có. Nhấn giữ nút trong lúc nói, rồi thả tay để kết thúc và gửi một lượt trò chuyện. Một khoảng ngừng khi vẫn giữ nút không làm gửi tin nhắn.' },
       { q: 'Miu nói được ngôn ngữ nào?', a: 'Tiếng Việt và tiếng Anh. Dùng nút ngôn ngữ trong phòng để đổi ngôn ngữ cho câu trả lời tiếp theo.' },
       { q: 'Website có dùng được trên điện thoại và máy tính bảng không?', a: 'Có. Căn phòng vừa với iPhone, mở rộng trên iPad và có bảng trò chuyện bên cạnh trên màn hình rộng.' },
-      { q: 'Có thể thử trước không?', a: 'Có. Bản demo tương tác có sẵn để làm quen với Miu. Hiện tại câu trả lời là mẫu, chưa kết nối dịch vụ AI hoặc tạo tài khoản thật.' },
+      { q: 'Làm sao để bắt đầu trò chuyện với Miu?', a: 'Tạo tài khoản hoặc đăng nhập để mở góc riêng cùng Miu. Sau đó, bạn có thể nói hoặc nhập tin nhắn để bắt đầu trò chuyện.' },
       { q: 'Nếu trình duyệt chưa hỗ trợ giọng nói thì sao?', a: 'Mở nút trò chuyện để nhập tin nhắn. Tin nhắn của bạn và câu trả lời của Miu cùng xuất hiện trong lịch sử được lưu trên thiết bị.' },
     ],
   } : {
@@ -40,7 +40,7 @@ export function getContent(language: Language): { steps: Step[]; safety: Feature
       { q: 'Does my child have to hold the button?', a: 'Yes. Hold the button while speaking, then release to finish and send one conversation turn. A pause while still holding does not send the message.' },
       { q: 'Which languages does Miu speak?', a: 'Vietnamese and English. Use the language button in Miu’s room to choose the language for the next answer.' },
       { q: 'Can we use it on a phone or tablet?', a: 'Yes. Miu’s room fits your iPhone, opens up on an iPad, and gives the conversation its own space on wider screens.' },
-      { q: 'Can we try it first?', a: 'Absolutely. The interactive demo lets you get to know Miu. Replies are samples for now, with live AI and real accounts to come.' },
+      { q: 'How do we start talking with Miu?', a: 'Create an account or sign in to open your own space with Miu. Then speak or type a message to start the conversation.' },
       { q: 'What if my browser doesn’t support voice?', a: 'Open the conversation button to type a message. Your message and Miu’s reply both appear in the history saved on this device.' },
     ],
   };

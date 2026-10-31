@@ -31,7 +31,7 @@ export async function createIntegratedApp(environment: Record<string, string | u
   try {
     const auth = new AuthStore(bridge.application.memory);
     // This explicitly requested fixture is linked to the existing test profile.
-    // Disable it outside demo installations; regular signup rejects short passwords.
+    // Disable it outside installations that need this shared test account.
     if (env.MIU_SEED_TEST_USER === 'true' || (env.MIU_SEED_TEST_USER !== 'false' && env.DEMO_MODE === 'true')) {
       await auth.seedTestAccount({ username: 'sam', password: '1', profileKey: 'an' });
     }

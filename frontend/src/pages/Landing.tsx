@@ -67,7 +67,7 @@ export default function Landing() {
 
       <section className="section container offline-section">
         <Room className="offline-room"><div className="little-bubble"><Icon name="heart" /></div><Miu emotion="curious" /><div className="toy-block block-one" aria-hidden="true">M</div><div className="toy-block block-two" aria-hidden="true">i</div><div className="toy-block block-three" aria-hidden="true">u</div></Room>
-        <div className="offline-copy"><span className="eyebrow">{t('offlineEyebrow')}</span><h2>{t('offlineTitle')}</h2><p>{t('offlineBody')}</p><ul className="check-list">{(['offlinePointOne', 'offlinePointTwo', 'offlinePointThree'] as const).map(key => <li key={key}><span><Icon name="check" /></span>{t(key)}</li>)}</ul><a className="text-link" href="/app/talk">{t('demoEntry')}<Icon name="arrow" /></a></div>
+        <div className="offline-copy"><span className="eyebrow">{t('offlineEyebrow')}</span><h2>{t('offlineTitle')}</h2><p>{t('offlineBody')}</p><ul className="check-list">{(['offlinePointOne', 'offlinePointTwo', 'offlinePointThree'] as const).map(key => <li key={key}><span><Icon name="check" /></span>{t(key)}</li>)}</ul></div>
       </section>
 
       <section id="safety" className="section container" aria-labelledby="safety-title">
@@ -79,6 +79,6 @@ export default function Landing() {
 
       <section className="cta-section container"><div className="cta-inner wall"><Miu emotion="wink" /><div><span className="eyebrow">Little Buddy</span><h2>{t('ctaTitle')}</h2><p>{t('ctaBody')}</p></div><a className="button button-primary button-large" href="/register">{t('getStarted')}<Icon name="arrow" /></a></div></section>
     </main>
-    <footer className="site-footer container"><div><Brand /><p>{t('footer')}</p><small>{t('footerNote')}</small></div><div className="footer-links"><a href="#safety">{t('safety')}</a><a href="#faq">{t('faq')}</a><a href="/app/talk">{t('demoEntry')}</a></div><span className="footer-year">© {new Date().getFullYear()} Little Buddy</span></footer>
+    <footer className="site-footer container"><div><Brand /><p>{t('footer')}</p><small>{t('footerNote')}</small></div><div className="footer-links"><a href="#safety">{t('safety')}</a><a href="#faq">{t('faq')}</a></div><span className="footer-year">© {new Date().getFullYear()} Little Buddy</span></footer>
   </>;
 }

@@ -53,7 +53,7 @@ test('public input validation is separate from generic login credential failures
     assert.throws(() => normalizeUsername(invalid), failure('invalid_username'));
     await assert.rejects(h.auth.register(invalid, PASSWORD), failure('invalid_username'));
   }
-  await assert.rejects(h.auth.register('valid_user', '1'), failure('invalid_password'));
+  for (const invalid of ['', null, 1]) await assert.rejects(h.auth.register('valid_user', invalid), failure('invalid_password'));
   const registered = await h.auth.register('valid_user', PASSWORD);
   for (const [name, password] of [['valid_user', 'wrong'], ['not_registered', PASSWORD], ['bad username', PASSWORD], ['valid_user', undefined]] as const) {
     await assert.rejects(h.auth.login(name, password), failure('invalid_credentials'));
@@ -62,6 +62,16 @@ test('public input validation is separate from generic login credential failures
   assert.deepEqual(loggedIn.user, registered.user);
   assert.notEqual(loggedIn.token, registered.token);
   assert.equal((await h.memory.db.query('SELECT id FROM user_accounts')).rows.length, 1);
+});
+
+test('regular accounts register and log in with one-character and unrestricted-length passwords', async t => {
+  const h = await fixture(); t.after(() => h.memory.db.close());
+  for (const [username, password] of [['short_user', '1'], ['long_user', 'a'.repeat(1024)]] as const) {
+    const registered = await h.auth.register(username, password);
+    assert.deepEqual((await h.auth.login(username, password)).user, registered.user);
+    await assert.rejects(h.auth.login(username, password + 'x'), failure('invalid_credentials'));
+  }
+  assert.equal((await h.memory.db.query('SELECT id FROM user_accounts')).rows.length, 2);
 });
 
 test('opaque sessions revoke independently and expire at seven wall-clock days without sliding', async t => {
@@ -129,7 +139,7 @@ test('explicit sam/1 seed links the existing test profile without resetting data
   assert.deepEqual(await h.auth.seedTestAccount({ username: 'SAM', password: 'changed seed password', profileKey: 'an' }), seeded);
   await assert.rejects(h.auth.login('sam', 'changed seed password'), failure('invalid_credentials'));
   assert.deepEqual((await h.auth.login('sam', '1')).user, seeded);
-  await assert.rejects(h.auth.register('another_user', '1'), failure('invalid_password'));
+  await assert.rejects(h.auth.register('another_user', ''), failure('invalid_password'));
   await assert.rejects(h.auth.seedTestAccount({ username: 'other_account', password: '1', profileKey: 'an' }), failure('username_in_use'));
   const after = await h.memory.getContext(profile.id);
   assert.deepEqual(after.profile, before.profile);

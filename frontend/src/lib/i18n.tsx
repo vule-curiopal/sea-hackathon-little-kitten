@@ -24,11 +24,11 @@ const en = {
   footer: 'Made for small voices and big imaginations.', footerNote: 'Miu is an AI kitten. Its adventures and feelings are make-believe.',
   createTitle: 'Create your account', signInTitle: 'Welcome back', authBlurb: 'One little friend. So many things to discover.',
   family: 'Family name', familyPlaceholder: 'For example: The Nguyen family', yourName: 'Your name', namePlaceholder: 'What should we call you?',
-  email: 'Email', emailPlaceholder: 'you@example.com', password: 'Password', passwordHint: '12–128 characters',
+  email: 'Email', emailPlaceholder: 'you@example.com', password: 'Password',
   create: 'Create account', continue: 'Sign in', existing: 'Already have an account?', newFamily: 'New to Little Buddy?',
   authDemo: 'Your account opens your own space with Miu.',
-  authRegisterDemo: 'Creating an account opens your own space with Miu. You can also try the guest demo below.',
-  familyError: 'Please enter your family name.', nameError: 'Please enter your name.', emailError: 'That email doesn’t look right.', passwordError: 'Use 12–128 characters.',
+  authRegisterDemo: 'Creating an account opens your own space with Miu.',
+  familyError: 'Please enter your family name.', nameError: 'Please enter your name.', emailError: 'That email doesn’t look right.',
   username: 'Username', usernamePlaceholder: 'Choose a username', usernameHint: '3–32 letters, numbers, _, . or -. Start with a letter, number or _.',
   usernameError: 'Use 3–32 letters, numbers, _, . or -. Start with a letter, number or _.', passwordRequired: 'Enter your password.',
   authLoginSubtitle: 'Sign in with your username and password.', authRegisterSubtitle: 'Choose a username and password for your own space with Miu.',
@@ -71,10 +71,10 @@ const en = {
   welcome: 'Hi! I’m Miu, your AI kitten. Shall we dream up a little adventure together?',
   restingNote: 'The microphone is off while Miu rests.', showPassword: 'Show password', hidePassword: 'Hide password',
   skip: 'Skip to content', notFound: 'This little path leads home.', home: 'Back to Little Buddy',
-  demoEntry: 'Try the demo', parentSpace: 'Your little corner of wonder', characterLabel: 'Miu the kitten',
+  parentSpace: 'Your little corner of wonder', characterLabel: 'Miu the kitten',
   readyBuddy: 'One ready-to-play buddy', scanToMeet: 'Scan to meet Miu',
   scanDescription: 'Open your camera, scan, and start your own little adventure.',
-  qrLabel: 'QR code to open Miu’s ready-to-play demo', qrLoading: 'Getting your demo link…',
+  qrLabel: 'QR code to open your conversation with Miu', qrLoading: 'Getting your conversation link…',
   qrUnavailable: 'Connect this laptop to Wi-Fi to create a link for phones.',
   friendRole: 'Friend', openDemo: 'Try Miu',
   noSetup: 'No sign-in. No setup. A fresh conversation on every device.',
@@ -128,11 +128,11 @@ const vi: Record<TranslationKey, string> = {
   footer: 'Dành cho giọng nói nhỏ và trí tưởng tượng lớn.', footerNote: 'Miu là mèo AI. Những cảm xúc và cuộc phiêu lưu của Miu là tưởng tượng.',
   createTitle: 'Tạo tài khoản của bạn', signInTitle: 'Chào mừng trở lại', authBlurb: 'Một người bạn nhỏ. Bao điều để khám phá.',
   family: 'Tên gia đình', familyPlaceholder: 'Ví dụ: Gia đình Nguyễn', yourName: 'Tên của bạn', namePlaceholder: 'Miu nên gọi bạn là gì?',
-  email: 'Email', emailPlaceholder: 'ban@example.com', password: 'Mật khẩu', passwordHint: '12–128 ký tự',
+  email: 'Email', emailPlaceholder: 'ban@example.com', password: 'Mật khẩu',
   create: 'Tạo tài khoản', continue: 'Đăng nhập', existing: 'Đã có tài khoản?', newFamily: 'Mới đến Little Buddy?',
   authDemo: 'Tài khoản mở góc riêng của bạn cùng Miu.',
-  authRegisterDemo: 'Tạo tài khoản để có góc riêng cùng Miu. Bạn cũng có thể thử bản demo bên dưới.',
-  familyError: 'Vui lòng nhập tên gia đình.', nameError: 'Vui lòng nhập tên của bạn.', emailError: 'Email này có vẻ chưa đúng.', passwordError: 'Hãy dùng 12–128 ký tự.',
+  authRegisterDemo: 'Tạo tài khoản để có góc riêng cùng Miu.',
+  familyError: 'Vui lòng nhập tên gia đình.', nameError: 'Vui lòng nhập tên của bạn.', emailError: 'Email này có vẻ chưa đúng.',
   username: 'Tên đăng nhập', usernamePlaceholder: 'Chọn tên đăng nhập', usernameHint: '3–32 ký tự không dấu: chữ, số, _, . hoặc -. Bắt đầu bằng chữ, số hoặc _.',
   usernameError: 'Dùng 3–32 ký tự không dấu: chữ, số, _, . hoặc -. Bắt đầu bằng chữ, số hoặc _.', passwordRequired: 'Nhập mật khẩu của bạn.',
   authLoginSubtitle: 'Đăng nhập bằng tên đăng nhập và mật khẩu.', authRegisterSubtitle: 'Chọn tên đăng nhập và mật khẩu để có góc riêng cùng Miu.',
@@ -172,10 +172,10 @@ const vi: Record<TranslationKey, string> = {
   settings: 'Cài đặt của Miu', sound: 'Đọc câu trả lời', soundHint: 'Dùng giọng đọc có sẵn trên thiết bị.', talkLang: 'Ngôn ngữ trò chuyện', languageHint: 'Miu sẽ trả lời bằng ngôn ngữ này.',
   vietnamese: 'Tiếng Việt', english: 'English', profileHint: 'Các tùy chọn này được lưu trên thiết bị.', done: 'Xong rồi', pet: 'Vuốt ve Miu', purr: 'Rừ rừ…', talkFooter: 'Góc nhỏ để trò chuyện, khám phá và là chính mình.',
   welcome: 'Chào bạn! Miu là chú mèo AI của bạn. Mình cùng tưởng tượng một cuộc phiêu lưu nhỏ nhé?', restingNote: 'Micrô tắt khi Miu nghỉ.', showPassword: 'Hiện mật khẩu', hidePassword: 'Ẩn mật khẩu',
-  skip: 'Đến nội dung chính', notFound: 'Con đường nhỏ này dẫn về nhà.', home: 'Về với Little Buddy', demoEntry: 'Thử bản demo', parentSpace: 'Góc nhỏ đầy điều diệu kỳ', characterLabel: 'Miu, chú mèo nhỏ',
+  skip: 'Đến nội dung chính', notFound: 'Con đường nhỏ này dẫn về nhà.', home: 'Về với Little Buddy', parentSpace: 'Góc nhỏ đầy điều diệu kỳ', characterLabel: 'Miu, chú mèo nhỏ',
   readyBuddy: 'Người bạn đã sẵn sàng', scanToMeet: 'Quét mã để gặp Miu',
   scanDescription: 'Mở camera, quét mã và bắt đầu cuộc phiêu lưu riêng của bạn.',
-  qrLabel: 'Mã QR mở bản demo của Miu, không cần thiết lập', qrLoading: 'Đang tạo liên kết demo…',
+  qrLabel: 'Mã QR mở cuộc trò chuyện của bạn cùng Miu', qrLoading: 'Đang tạo liên kết trò chuyện…',
   qrUnavailable: 'Kết nối máy tính với Wi-Fi để tạo liên kết cho điện thoại.',
   friendRole: 'Bạn bè', openDemo: 'Chơi với Miu',
   noSetup: 'Không cần đăng nhập hay thiết lập. Mỗi thiết bị có cuộc trò chuyện riêng.',
@@ -216,7 +216,10 @@ export function savePreference(key: string, value: string) {
 }
 const LanguageContext = createContext({ language: 'en' as Language, setLanguage: (_: Language) => {}, t: (key: TranslationKey): string => en[key] });
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguage] = useState<Language>(() => readPreference('miu.language', 'en') === 'vi' ? 'vi' : 'en');
+  const [language, setLanguage] = useState<Language>(() => {
+    const sharedLanguage = new URLSearchParams(window.location.search).get('lang');
+    return sharedLanguage === 'en' || sharedLanguage === 'vi' ? sharedLanguage : readPreference('miu.language', 'en') === 'vi' ? 'vi' : 'en';
+  });
   useEffect(() => { document.documentElement.lang = language; savePreference('miu.language', language); }, [language]);
   return <LanguageContext.Provider value={{ language, setLanguage, t: (key) => (language === 'vi' ? vi : en)[key] }}>{children}</LanguageContext.Provider>;
 }
