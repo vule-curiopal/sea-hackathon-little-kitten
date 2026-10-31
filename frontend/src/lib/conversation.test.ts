@@ -12,19 +12,19 @@ test('pausing blocks an in-flight answer and waking preserves earlier answers', 
   assert.equal(reduce(paused, { type: 'reply', answer: { ...answer, id: 2 }, speaking: true }), paused);
   const awake = reduce(paused, { type: 'wake' });
   assert.equal(awake.phase, 'answered');
-  assert.deepEqual(awake.answers, [answer]);
+  assert.deepEqual(awake.messages, [{ ...answer, role: 'miu' }]);
 });
 
 test('a new conversation clears answers without waking a paused Miu', () => {
-  const reset = reduce({ phase: 'resting', emotion: 'sleepy', answers: [{ id: 1, text: 'A story', emotion: 'curious' }] }, { type: 'reset' });
-  assert.deepEqual(reset, { phase: 'resting', emotion: 'sleepy', answers: [] });
+  const reset = reduce({ phase: 'resting', emotion: 'sleepy', messages: [{ id: 1, role: 'miu', text: 'A story', emotion: 'curious' }] }, { type: 'reset' });
+  assert.deepEqual(reset, { phase: 'resting', emotion: 'sleepy', messages: [] });
 });
 
 test('voice lifecycle does not start listening while speaking or thinking', () => {
   const thinking = reduce(initialConversation, { type: 'think' });
-  assert.equal(reduce(thinking, { type: 'listen' }), thinking);
+  assert.equal(reduce(thinking, { type: 'listen', requestId: 2 }), thinking);
   const speaking = reduce(thinking, { type: 'reply', answer: { id: 1, text: 'Hi!', emotion: 'happy' }, speaking: true });
-  assert.equal(reduce(speaking, { type: 'listen' }), speaking);
+  assert.equal(reduce(speaking, { type: 'listen', requestId: 2 }), speaking);
   assert.equal(reduce(speaking, { type: 'finish' }).phase, 'answered');
 });
 
@@ -32,7 +32,7 @@ test('voice captions can arrive before audio; only playback starts the speaking 
   const pending = reduce(initialConversation, { type: 'think' });
   const caption = reduce(pending, { type: 'reply', answer: { id: 2, text: 'Reference audio', emotion: 'neutral', source: 'reference' }, speaking: false });
   assert.equal(caption.phase, 'answered');
-  assert.equal(caption.answers[0].source, 'reference');
+  assert.equal(caption.messages[0].source, 'reference');
   const playing = reduce(caption, { type: 'speak' });
   assert.equal(playing.phase, 'speaking');
   assert.equal(reduce(playing, { type: 'finish' }).phase, 'answered');
@@ -40,11 +40,14 @@ test('voice captions can arrive before audio; only playback starts the speaking 
   assert.equal(reduce(paused, { type: 'speak' }), paused);
 });
 
-test('the state stores only authored Miu answers, never the question', () => {
-  const privateWords = 'Secret child message 12345';
-  const reply = getDemoReply(privateWords, 'en');
-  const next = reduce(reduce(initialConversation, { type: 'think' }), { type: 'reply', answer: { id: 1, ...reply }, speaking: false });
-  assert.ok(!JSON.stringify(next).includes(privateWords));
+test('typed messages appear immediately, followed by Miu’s reply in the same history', () => {
+  const text = 'What do cats dream about?';
+  const user = { id: 1, role: 'user' as const, text, source: 'typed' as const };
+  const waiting = reduce(initialConversation, { type: 'think', requestId: 1, user });
+  assert.deepEqual(waiting.messages, [user]);
+  const reply = getDemoReply(text, 'en');
+  const next = reduce(waiting, { type: 'reply', answer: { id: 1, ...reply }, speaking: false });
+  assert.deepEqual(next.messages, [user, { id: 1, ...reply, role: 'miu' }]);
 });
 
 test('demo answers follow the chosen language and emotion', () => {

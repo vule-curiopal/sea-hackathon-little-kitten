@@ -11,6 +11,7 @@ export type CaptureEvent =
   | { type: 'state'; state: CaptureState }
   | { type: 'meter'; snapshot: MeterSnapshot }
   | { type: 'stream_meter'; levelDbfs: number; elapsedMs: number }
+  | { type: 'complete'; mimeType: string; bytes: number; durationMs: number; reason: CapturedAudio['reason']; peakLevelDbfs: number | null; sampleRate: number | null; channelCount: number | null }
   | { type: 'manual_only'; code: 'METER_UNAVAILABLE' }
   | { type: 'error'; error: VoiceClientError };
 export interface CapturedAudio {
@@ -55,6 +56,8 @@ export function browserCaptureEnvironment(): CaptureEnvironment {
 }
 
 export interface CaptureOptions {
+  /** Manual endpointing records until send/cancel; silence never submits a turn. */
+  endpointing?: 'automatic' | 'manual';
   environment?: CaptureEnvironment;
   detector?: Partial<AdaptiveSilenceConfig>;
   microphone?: MediaTrackConstraints;
@@ -83,6 +86,7 @@ interface ActiveCapture {
   startedAt: number;
   endedAt: number;
   settings: MediaTrackSettings;
+  peakLevelDbfs: number | null;
   reason: CapturedAudio['reason'];
   cleanups: (() => void)[];
   stopMeter?: () => void;
@@ -128,7 +132,7 @@ export class BrowserVoiceCapture {
     return new Promise<CapturedAudio>((resolve, reject) => {
       const active: ActiveCapture = {
         id, phase: 'permission', resolve, reject, chunks: [], bytes: 0, startedAt: 0, endedAt: 0,
-        settings: {}, reason: 'manual', cleanups: [],
+        settings: {}, peakLevelDbfs: null, reason: 'manual', cleanups: [],
       };
       this.active = active;
       this.setState('requesting_permission');
@@ -137,8 +141,13 @@ export class BrowserVoiceCapture {
     });
   }
 
-  /** Manual Send intentionally bypasses the detector's signal decision. */
-  send(): boolean { return this.finalize('manual'); }
+  /** Releasing before permission resolves cancels instead of recording after the gesture ended. */
+  send(): boolean {
+    if (this.options.endpointing === 'manual' && this.active?.phase === 'permission') {
+      this.cancel(); return false;
+    }
+    return this.finalize('manual');
+  }
 
   cancel(code = 'CANCELED'): void {
     const active = this.active;
@@ -214,9 +223,10 @@ export class BrowserVoiceCapture {
     active.startedAt = env.now();
     active.phase = 'recording';
     active.detector = new AdaptiveSilenceDetector(this.detectorConfig, active.startedAt);
-    this.setState(meterAvailable ? 'calibrating' : 'recording');
+    this.setState(meterAvailable && this.options.endpointing !== 'manual' ? 'calibrating' : 'recording');
     active.stopDeadline = env.timeout(() => {
       if (!this.isCurrent(active)) return;
+      if (this.options.endpointing === 'manual') { this.cancel('RECORDING_LIMIT'); return; }
       if (active.detector?.snapshot.hasSignal) this.finalize('max_duration');
       else this.fail(active, new VoiceClientError('NO_SIGNAL', 'No signal was detected before the recording limit.', true));
     }, this.detectorConfig.maxRecordingMs);
@@ -231,12 +241,19 @@ export class BrowserVoiceCapture {
         if (!this.isCurrent(active) || active.phase !== 'recording') return;
         try {
           active.analyser!.getFloatTimeDomainData(samples);
-          const snapshot = active.detector!.update(rmsDbfs(samples), env.now());
+          const now = env.now();
+          const levelDbfs = rmsDbfs(samples);
+          active.peakLevelDbfs = Math.max(active.peakLevelDbfs ?? -Infinity, levelDbfs);
+          const detected = active.detector!.update(levelDbfs, now);
+          // The automatic detector may have reached a decision; a held recording's meter must keep updating.
+          const snapshot: MeterSnapshot = this.options.endpointing === 'manual'
+            ? { ...detected, phase: detected.hasSignal ? 'signal' : 'waiting', decision: null, elapsedMs: now - active.startedAt, timeMs: now, levelDbfs }
+            : detected;
           notify(this.listeners, { type: 'meter', snapshot });
           if (!this.isCurrent(active)) return;
           if (snapshot.phase === 'waiting' && this.state === 'calibrating') this.setState('recording');
-          if (snapshot.decision?.action === 'submit') this.finalize(snapshot.decision.reason);
-          else if (snapshot.decision?.action === 'cancel') {
+          if (this.options.endpointing !== 'manual' && snapshot.decision?.action === 'submit') this.finalize(snapshot.decision.reason);
+          else if (this.options.endpointing !== 'manual' && snapshot.decision?.action === 'cancel') {
             this.fail(active, new VoiceClientError(snapshot.decision.reason === 'no_signal' ? 'NO_SIGNAL' : 'CAPTURE_INTERRUPTED',
               'The recording could not be finalized automatically.', true));
           }
@@ -282,6 +299,8 @@ export class BrowserVoiceCapture {
     const result: CapturedAudio = { blob, mimeType, durationMs, reason: active.reason, settings: { ...active.settings } };
     this.active = null;
     this.cleanup(active);
+    notify(this.listeners, { type: 'complete', mimeType, bytes: blob.size, durationMs, reason: active.reason,
+      peakLevelDbfs: active.peakLevelDbfs, sampleRate: active.settings.sampleRate ?? null, channelCount: active.settings.channelCount ?? null });
     this.setState('idle');
     active.resolve(result);
   }

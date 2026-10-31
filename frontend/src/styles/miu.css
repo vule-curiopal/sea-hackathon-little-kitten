@@ -34,6 +34,12 @@
 .miu[data-emotion="sulky"] .miu-head { animation: cat-pout-turn 2.4s ease-in-out both; }
 .miu[data-emotion="sulky"] .miu-puffed-cheeks { transform-origin: 200px 219px; animation: cat-puff-cheeks 2.4s ease-in-out both; }
 .miu[data-emotion="sulky"] .miu-tail { animation-duration: 6s; }
+.miu[data-expression-only="true"]:not(.is-tracking) .miu-head { transform: rotate(var(--miu-head-lean, 0deg)); }
+.miu.is-alive:not(.is-speaking)[data-expression-only="true"] .miu-body { animation-duration: var(--miu-breath-period, 3.2s); }
+.miu.is-alive:not(.is-speaking)[data-expression-only="true"]:is([data-emotion="happy"], [data-emotion="excited"], [data-emotion="laughing"]) .miu-body { animation: cat-feeling-bounce var(--miu-breath-period, 3.2s) ease-in-out infinite; }
+.miu.is-alive[data-expression-only="true"]:is([data-emotion="happy"], [data-emotion="excited"], [data-emotion="laughing"], [data-emotion="curious"], [data-emotion="love"], [data-emotion="surprised"], [data-emotion="wink"]) .miu-tail { animation: cat-feeling-tail var(--miu-tail-period, 3s) ease-in-out infinite; }
+.miu.is-alive[data-emotion="sad"] .miu-tail { animation-duration: 6.5s; }
+.miu.is-alive:not(.is-speaking)[data-emotion="sad"] .miu-body { animation-duration: 5s; }
 
 .cat-companion { position: relative; width: min(340px, 62%); flex-shrink: 0; }
 .companion-stage { position: relative; display: flex; align-items: flex-end; justify-content: center; }
@@ -83,7 +89,9 @@
 @keyframes cat-cuddle { 50% { transform: scale(1.02, .985); } }
 @keyframes cat-nom { 50% { transform: rotate(-3deg) translateY(3px); } }
 @keyframes cat-yarn-wiggle { 0%, 100% { transform: rotate(-12deg); } 50% { transform: translate(-3px, -3px) rotate(15deg); } }
-@keyframes cat-pout-turn { 0% { transform: rotate(0); } 30%, 75%, 100% { transform: rotate(-6deg) translateX(-3px); } }
+@keyframes cat-pout-turn { 0% { transform: rotate(0); } 30%, 75%, 100% { transform: rotate(var(--miu-head-lean, -6deg)) translateX(var(--miu-pout-shift, -3px)); } }
+@keyframes cat-feeling-bounce { 50% { transform: translateY(var(--miu-bob-y, -3px)) scaleY(var(--miu-body-stretch, 1.01)); } }
+@keyframes cat-feeling-tail { 50% { transform: rotate(var(--miu-tail-swing, 7deg)); } }
 @keyframes cat-puff-cheeks { 0% { transform: scale(.92); } 35%, 75% { transform: scale(1.04); } 100% { transform: scale(1); } }
 @keyframes cat-touch-feedback { 0% { opacity: 0; transform: translate(-50%, -10%) scale(.5); } 20% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -170%) scale(1.2) rotate(10deg); } }
 
@@ -95,7 +103,7 @@
 @media (hover: none) and (pointer: coarse) { .touch-toy { width: 58px; height: 58px; } }
 @media (prefers-reduced-motion: reduce) {
   .miu[data-activity] *, .miu[data-emotion="sulky"] *, .cat-companion .yarn-toy, .touch-toy, .touch-toy svg, .touch-feedback { animation: none !important; transition: none !important; }
-  .miu[data-emotion="sulky"] .miu-head { transform: rotate(-6deg) translateX(-3px); }
+  .miu[data-emotion="sulky"] .miu-head { transform: rotate(var(--miu-head-lean, -6deg)) translateX(var(--miu-pout-shift, -3px)); }
   .miu[data-activity="sleep"] .miu-body { transform: scale(1.05, .74); }
   .touch-feedback { transform: translate(-50%, -80%); }
 }

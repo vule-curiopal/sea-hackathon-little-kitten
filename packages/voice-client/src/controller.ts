@@ -1,7 +1,7 @@
 import { type Language, type SessionResponse, type TurnResponse } from '@miu/voice-contracts';
 import { VoiceApiClient, type VoiceApiOptions, type CharacterConfiguration } from './api.js';
 import { BrowserVoiceCapture, type CaptureEvent, type CaptureOptions, type CapturedAudio } from './capture.js';
-import { asClientError, canceledError, isCanceled, notify, VoiceClientError } from './errors.js';
+import { asClientError, canceledError, isCanceled, isSessionExpired, notify, VoiceClientError } from './errors.js';
 import { VoicePlayback, type PlaybackEvent, type PlaybackOptions, type PlaybackResult, type ReceiptSender } from './playback.js';
 import { RealtimeVoiceCapture } from './realtime/capture.js';
 
@@ -84,10 +84,10 @@ export class VoiceController {
     this.setState('initializing');
     let created: SessionResponse | null = null;
     try {
-      await stopped;
+      await stopped.catch(error => { if (!isSessionExpired(error)) throw error; });
       await this.ports.playback.flushReceipts();
       if (abort.signal.aborted || generation !== this.setupGeneration) throw canceledError();
-      if (previous) await this.ports.api.endSession(previous);
+      if (previous) await this.ports.api.endSession(previous).catch(error => { if (!isSessionExpired(error)) throw error; });
       if (abort.signal.aborted || generation !== this.setupGeneration) throw canceledError();
       created = await this.ports.api.createSession(demoProfileKey, abort.signal);
       if (abort.signal.aborted || generation !== this.setupGeneration) throw canceledError();
@@ -157,15 +157,20 @@ export class VoiceController {
   async acknowledgeText(): Promise<void> {
     const active = this.active;
     if (!active?.response || active.response.audio !== null) return;
-    await this.ports.api.playback(active.session, active.id, {
-      request_id: this.ports.api.createRequestId(), status: 'started', played_ms: 0, state_version: active.response.state_version,
-    });
-    this.assertCurrent(active);
-    await this.ports.api.playback(active.session, active.id, {
-      request_id: this.ports.api.createRequestId(), status: 'completed', played_ms: 0, state_version: active.response.state_version,
-    });
-    this.assertCurrent(active);
-    this.active = null; this.setState('idle');
+    try {
+      await this.ports.api.playback(active.session, active.id, {
+        request_id: this.ports.api.createRequestId(), status: 'started', played_ms: 0, state_version: active.response.state_version,
+      });
+      this.assertCurrent(active);
+      await this.ports.api.playback(active.session, active.id, {
+        request_id: this.ports.api.createRequestId(), status: 'completed', played_ms: 0, state_version: active.response.state_version,
+      });
+      this.assertCurrent(active);
+      this.active = null; this.setState('idle');
+    } catch (error) {
+      if (this.expireSession(active.session, error)) this.handleError(error);
+      throw asClientError(error);
+    }
   }
 
   private async processText(kind: 'utterance' | 'greeting', text: string | undefined, textOnly: boolean): Promise<TurnResponse> {
@@ -211,7 +216,12 @@ export class VoiceController {
       const result = Promise.all([previous, cancellation]).then(() => {});
       this.pendingCancellation = result.catch(() => {});
       // Observers can surface a cancellation failure, without an unhandled rejection on local Stop.
-      void result.catch(error => notify(this.listeners, { type: 'error', error: asClientError(error, 'CANCEL_FAILED') }));
+      void result.catch(error => {
+        const failure = asClientError(error, 'CANCEL_FAILED');
+        if (isSessionExpired(failure)) {
+          if (this.expireSession(active.session, failure)) this.handleError(failure);
+        } else notify(this.listeners, { type: 'error', error: failure });
+      });
       return result;
     }
     return this.pendingCancellation;
@@ -267,7 +277,10 @@ export class VoiceController {
       this.assertCurrent(active);
       if (response.audio === null) { this.setState('playback_blocked'); return response; }
       const result = await this.ports.playback.play(response,
-        receipt => this.ports.api.playback(active.session, active.id, receipt), active.abort.signal);
+        receipt => this.ports.api.playback(active.session, active.id, receipt).catch(error => {
+          if (this.expireSession(active.session, error)) this.handleError(error);
+          throw error;
+        }), active.abort.signal);
       // A very short clip can finish before play() settles. Natural completion is not cancellation.
       if (this.active === null && !active.abort.signal.aborted && result === 'playing') return response;
       this.assertCurrent(active);
@@ -283,9 +296,25 @@ export class VoiceController {
         this.ports.capture.cancel();
         this.ports.realtime?.cancel();
         this.ports.playback.stop();
-        void this.ports.api.cancelTurn(active.session, active.id).catch(() => {});
+        if (!isSessionExpired(error)) {
+          void this.ports.api.cancelTurn(active.session, active.id).catch(reason => {
+            if (this.expireSession(active.session, reason)) this.handleError(reason);
+          });
+        } else this.expireSession(active.session, error);
         this.handleError(error);
       }
+  }
+
+  /** Never keep recording or reuse a token the server has rejected. Stale cleanup cannot clear a replacement session. */
+  private expireSession(session: SessionResponse, error: unknown): boolean {
+    if (!isSessionExpired(error) || this.currentSession?.session_id !== session.session_id) return false;
+    this.currentSession = null;
+    const active = this.active;
+    if (active?.session.session_id === session.session_id) {
+      this.active = null; active.abort.abort();
+      this.ports.capture.cancel(); this.ports.realtime?.cancel(); this.ports.playback.stop();
+    }
+    return true;
   }
 
   private assertCurrent(active: ActiveTurn): void { if (this.active !== active || active.abort.signal.aborted) throw canceledError(); }

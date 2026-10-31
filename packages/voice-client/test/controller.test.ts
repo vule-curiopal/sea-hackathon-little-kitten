@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from 'vitest';
 import { VoiceController, type CapturePort, type PlaybackPort, type VoiceApiPort } from '../src/controller.js';
-import { canceledError } from '../src/errors.js';
+import { canceledError, isSessionExpired, VoiceClientError } from '../src/errors.js';
 import { captured, session, turn } from './fixtures.js';
-import type { CapturedAudio, TurnResponse } from '../src/index.js';
+import type { CapturedAudio, PlaybackEvent, TurnResponse } from '../src/index.js';
 
 function deferred<T>() {
   let resolve!: (value: T) => void;
@@ -12,6 +12,7 @@ function deferred<T>() {
 }
 async function settle() { for (let index = 0; index < 8; index++) await Promise.resolve(); }
 function setup() {
+  const playbackListeners = new Set<(event: PlaybackEvent) => void>();
   let recording = deferred<CapturedAudio>();
   recording.resolve(captured()); // No capture is active before start() is called.
   const capture = {
@@ -21,19 +22,132 @@ function setup() {
   const playback = {
     play: vi.fn<PlaybackPort['play']>().mockResolvedValue('playing'),
     resume: vi.fn<PlaybackPort['resume']>().mockResolvedValue('playing'), stop: vi.fn(), flushReceipts: vi.fn(async () => {}),
+    subscribe: (listener: (event: PlaybackEvent) => void) => { playbackListeners.add(listener); return () => { playbackListeners.delete(listener); }; },
   } satisfies PlaybackPort;
   const api = {
     createRequestId: vi.fn(() => turn().turn_id),
     createSession: vi.fn<VoiceApiPort['createSession']>().mockResolvedValue(session()),
     configure: vi.fn<VoiceApiPort['configure']>().mockResolvedValue({ configuration: session().configuration, clock_version: 1, state_version: 1 }),
     submitTurn: vi.fn<VoiceApiPort['submitTurn']>().mockResolvedValue(turn()),
+    submitText: vi.fn<NonNullable<VoiceApiPort['submitText']>>().mockResolvedValue({ ...turn(), input_mode: 'text', audio: null }),
     cancelTurn: vi.fn(async () => {}), playback: vi.fn(async () => {}), endSession: vi.fn(async () => {}),
   } satisfies VoiceApiPort;
   const controller = new VoiceController({ api, capture, playback });
-  return { controller, api, capture, playback, recording: () => recording };
+  return { controller, api, capture, playback, recording: () => recording, emitPlayback: (event: PlaybackEvent) => { for (const listener of playbackListeners) listener(event); } };
 }
 
 describe('voice controller', () => {
+  it('drops an unauthorized session, avoids another DELETE, and requires a fresh session before recording again', async () => {
+    const fake = setup();
+    await fake.controller.openProfile('an', 'vi');
+    fake.api.submitTurn.mockRejectedValueOnce(new VoiceClientError('unauthorized', 'Session rejected', false, 401));
+    const pending = fake.controller.talk({ fixtureId: 'voice_sample_vi' });
+    const rejected = expect(pending).rejects.toMatchObject({ status: 401 });
+    fake.recording().resolve(captured());
+    await rejected;
+    expect(fake.controller.session).toBeNull();
+    expect(fake.controller.state).toBe('error');
+    expect(fake.api.cancelTurn).not.toHaveBeenCalled();
+    await expect(fake.controller.talk()).rejects.toMatchObject({ code: 'SESSION_REQUIRED' });
+    expect(fake.capture.start).toHaveBeenCalledOnce();
+    expect(fake.api.submitTurn).toHaveBeenCalledOnce();
+
+    await fake.controller.openProfile('an', 'vi');
+    expect(fake.api.createSession).toHaveBeenCalledTimes(2);
+    expect(fake.capture.start).toHaveBeenCalledOnce(); // Recovery never reopens the microphone.
+    const next = fake.controller.talk({ fixtureId: 'voice_sample_vi' });
+    fake.recording().resolve(captured());
+    await next;
+    expect(fake.capture.start).toHaveBeenCalledTimes(2);
+    await fake.controller.close();
+  });
+
+  it('invalidates a session rejected during Stop and still permits a clean reconnect', async () => {
+    const fake = setup();
+    await fake.controller.openProfile('an', 'vi');
+    const pending = fake.controller.talk();
+    const canceled = expect(pending).rejects.toMatchObject({ code: 'CANCELED' });
+    fake.api.cancelTurn.mockRejectedValueOnce(new VoiceClientError('unauthorized', 'Session rejected', false, 401));
+    await expect(fake.controller.stop()).rejects.toMatchObject({ status: 401 });
+    await canceled;
+    expect(fake.controller.session).toBeNull();
+    await fake.controller.openProfile('an', 'en');
+    expect(fake.controller.state).toBe('idle');
+    expect(fake.api.cancelTurn).toHaveBeenCalledOnce();
+    expect(fake.capture.start).toHaveBeenCalledOnce();
+    await fake.controller.close();
+  });
+
+  it('does not block a new session when cleanup of the old session is unauthorized', async () => {
+    const fake = setup();
+    await fake.controller.openProfile('an', 'vi');
+    fake.api.endSession.mockRejectedValueOnce(new VoiceClientError('unauthorized', 'Old token expired', false, 401));
+    await fake.controller.openProfile('binh', 'en');
+    expect(fake.api.createSession).toHaveBeenCalledTimes(2);
+    expect(fake.controller.state).toBe('idle');
+    expect(fake.capture.start).not.toHaveBeenCalled();
+    await fake.controller.close();
+  });
+
+  it('recognizes HTTP authentication failures even if the response body has a different code', () => {
+    expect(isSessionExpired(new VoiceClientError('INVALID_RESPONSE', 'Non-JSON response', false, 401))).toBe(true);
+    expect(isSessionExpired({ code: 'session_closed', status: 409 })).toBe(true);
+    expect(isSessionExpired({ code: 'provider_quota', status: 503 })).toBe(false);
+    expect(isSessionExpired(canceledError())).toBe(false);
+  });
+
+  it('an expired text delivery discards the old session without sending another cancellation request', async () => {
+    const fake = setup();
+    await fake.controller.openProfile('an', 'vi');
+    await fake.controller.text('A question', { textOnly: true });
+    fake.api.playback.mockRejectedValueOnce(new VoiceClientError('unauthorized', 'Session expired', false, 401));
+    await expect(fake.controller.acknowledgeText()).rejects.toMatchObject({ status: 401 });
+    expect(fake.controller.session).toBeNull();
+    expect(fake.controller.state).toBe('error');
+    expect(fake.api.cancelTurn).not.toHaveBeenCalled();
+    await fake.controller.close();
+  });
+
+  it('a late unauthorized cleanup from an older session cannot clear its replacement', async () => {
+    const fake = setup();
+    await fake.controller.openProfile('an', 'vi');
+    const cleanup = deferred<void>();
+    fake.api.cancelTurn.mockReturnValueOnce(cleanup.promise);
+    fake.api.submitTurn.mockRejectedValueOnce(new VoiceClientError('NETWORK_ERROR', 'Request failed', true));
+    const pending = fake.controller.talk({ fixtureId: 'voice_sample_vi' });
+    const failed = expect(pending).rejects.toMatchObject({ code: 'NETWORK_ERROR' });
+    fake.recording().resolve(captured());
+    await failed;
+    const fresh = { ...session(), session_id: 'replacement-session', demo_token: 'replacement-token' };
+    fake.api.createSession.mockResolvedValueOnce(fresh);
+    await fake.controller.openProfile('an', 'en');
+    cleanup.reject(new VoiceClientError('unauthorized', 'Old cleanup rejected', false, 401));
+    await settle();
+    expect(fake.controller.session?.session_id).toBe(fresh.session_id);
+    expect(fake.controller.state).toBe('idle');
+    expect(fake.capture.start).toHaveBeenCalledOnce();
+    await fake.controller.close();
+  });
+
+  it('leaves the microphone off on setup and after playback until another explicit Talk', async () => {
+    const fake = setup();
+    await fake.controller.openProfile('an', 'en');
+    expect(fake.capture.start).not.toHaveBeenCalled();
+    const first = fake.controller.talk();
+    fake.recording().resolve(captured());
+    await first;
+    fake.emitPlayback({ type: 'state', state: 'idle' });
+    await settle();
+    expect(fake.controller.state).toBe('idle');
+    expect(fake.capture.start).toHaveBeenCalledOnce();
+    expect(fake.api.submitTurn).toHaveBeenCalledOnce();
+    const second = fake.controller.talk();
+    expect(fake.capture.start).toHaveBeenCalledTimes(2);
+    fake.recording().resolve(captured());
+    await second;
+    await fake.controller.close();
+  });
+
   it('selects language before recording and runs capture/upload/playback through the canonical API', async () => {
     const fake = setup();
     await fake.controller.openProfile('an', 'vi');

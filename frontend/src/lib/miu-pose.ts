@@ -51,9 +51,20 @@ const looks: Record<Emotion, Partial<Face>> = {
   sleepy: { eyes: 'closed', line: null, fill: 'tiny', ear: [-15, 15], arm: [8, -8], extra: 'zzz' },
 };
 
-export function getMiuPose(emotion: string, activity?: CatActivity, gaze?: { x: number; y: number }) {
+function softenBrow(calm: string, target: string, strength: number) {
+  if (strength >= 1) return target;
+  const points = target.match(/-?\d+(?:\.\d+)?/g)!;
+  let index = 0;
+  return calm.replace(/-?\d+(?:\.\d+)?/g, value => {
+    const start = Number(value);
+    return String(Math.round((start + (Number(points[index++]) - start) * strength) * 100) / 100);
+  });
+}
+
+export function getMiuPose(emotion: string, activity?: CatActivity, gaze?: { x: number; y: number }, intensity = 1) {
+  const feeling = (emotions as readonly string[]).includes(emotion) ? emotion as Emotion : 'neutral';
   const base: Face = { eyes: 'open', lx: 0, ly: 0, pupil: 14, wide: false, brow: 'calm', line: 'w', fill: null, ear: [0, 0], arm: [15, -15], blush: 0, puff: 0, extra: null };
-  const f = { ...base, ...(looks[emotion as Emotion] ?? {}) };
+  const f = { ...base, ...looks[feeling] };
   if (activity === 'look') { f.lx = 9; f.ly = -3; f.ear = [-6, 5]; }
   if (activity === 'groom') { f.arm = [155, -15]; f.ear = [-8, 8]; }
   if (activity === 'stretch' || activity === 'wake') { f.arm = [155, -155]; f.eyes = 'closed'; f.line = 'small'; f.fill = null; }
@@ -64,28 +75,51 @@ export function getMiuPose(emotion: string, activity?: CatActivity, gaze?: { x: 
   if (activity === 'highfive') { f.arm = [15, -155]; f.ear = [-5, 5]; }
   if (activity === 'cuddle') { f.arm = [-42, 42]; f.ear = [-12, 12]; }
   if (activity === 'snack') { f.arm = [150, -15]; f.line = null; f.fill = 'tiny'; }
+  const strength = Math.max(0, Math.min(1, Number.isFinite(intensity) ? intensity : 1));
+  const expressionScale = .15 + strength * .85;
+  const keepClosed = activity === 'sleep' || activity === 'doze' || activity === 'stretch' || activity === 'wake';
+  if (!keepClosed) {
+    if (f.eyes === 'happy' && strength < .45) f.eyes = 'open';
+    if (f.eyes === 'heart' && strength < .55) f.eyes = 'open';
+    if (feeling === 'sleepy' && strength < .5) f.eyes = 'open';
+  }
+  if (feeling === 'happy' && strength < .4 && f.fill === 'smile') { f.fill = null; f.line = 'small'; }
+  if ((feeling === 'excited' || feeling === 'laughing') && strength < .65 && f.fill === 'laugh') f.fill = 'smile';
+  if (feeling === 'surprised' && strength < .4 && f.fill === 'o') f.fill = 'tiny';
+  f.blush *= expressionScale;
+  f.puff *= expressionScale;
+  f.pupil = 14 + (f.pupil - 14) * expressionScale;
+  // Touch gestures keep their full reach; emotional poses vary in strength.
+  if (!activity || activity === 'settled' || activity === 'pout') {
+    f.arm = [15 + (f.arm[0] - 15) * expressionScale, -15 + (f.arm[1] + 15) * expressionScale];
+    f.ear = f.ear.map(angle => angle * expressionScale);
+    f.lx *= expressionScale; f.ly *= expressionScale;
+  }
   if (gaze) { f.lx = Math.max(-8, Math.min(8, gaze.x)); f.ly = Math.max(-6, Math.min(6, gaze.y)); }
   const fill = f.fill ? fills[f.fill] : null;
   const on = (yes: unknown) => yes ? 1 : 0;
   const irisY = 168 + f.ly;
+  const eyeHeight = f.wide ? 38 + 6 * strength : feeling === 'sulky' ? 38 - 9 * strength : feeling === 'neutral' ? 38 - 7 * strength : feeling === 'sleepy' && f.eyes === 'open' ? 38 - 24 * strength : 38;
+  const sadMouth = `M184 ${234 + 8 * strength} Q 200 ${234 - 6 * strength} 216 ${234 + 8 * strength}`;
   return {
-    btnGlow: emotion === 'listening' ? .9 : .45,
+    btnGlow: feeling === 'listening' ? .9 : .45,
     earL: `rotate(${f.ear[0]} 125 115)`, earR: `rotate(${f.ear[1]} 275 115)`,
     armL: `rotate(${f.arm[0]} 132 288)`, armR: `rotate(${f.arm[1]} 268 288)`,
     openL: on(f.eyes === 'open' || f.eyes === 'wink'), openR: on(f.eyes === 'open'),
     happyL: on(f.eyes === 'happy'), happyR: on(f.eyes === 'happy' || f.eyes === 'wink'),
     closed: on(f.eyes === 'closed'), heart: on(f.eyes === 'heart'),
-    rx: f.wide ? 36 : 33, ry: f.wide ? 44 : emotion === 'sulky' ? 29 : 38, pupil: f.pupil,
+    rx: f.wide ? 33 + 3 * strength : 33, ry: eyeHeight, pupil: f.pupil,
     irisLx: 152 + f.lx, irisRx: 248 + f.lx, irisY,
     hiLx: 160 + f.lx, hiRx: 256 + f.lx, hiY: irisY - 9,
     hi2Lx: 145 + f.lx, hi2Rx: 241 + f.lx, hi2Y: irisY + 8,
-    browL: brows[f.brow][0], browR: brows[f.brow][1],
-    mouthLine: f.line ? lines[f.line] : 'M200 226 L200 226', lineOp: on(f.line),
+    browL: softenBrow(brows.calm[0], brows[f.brow][0], expressionScale), browR: softenBrow(brows.calm[1], brows[f.brow][1], expressionScale),
+    mouthLine: feeling === 'sad' && f.line === 'frown' ? sadMouth : f.line ? lines[f.line] : 'M200 226 L200 226', lineOp: on(f.line),
     mouthFill: fill ? fill[0] : 'M200 226 Z', fillOp: on(fill),
     tongue: on(fill && fill[1]), tongueY: fill?.[1] || 240, blush: f.blush,
     puff: f.puff, cheekRx: 18 + 6 * f.puff, cheekRy: 10 + 4 * f.puff,
-    sparkle: on(f.extra === 'sparkle'), love: on(f.extra === 'love'),
-    question: on(f.extra === 'question'), zzz: on(f.extra === 'zzz'),
-    dots: on(f.extra === 'dots'), waves: on(f.extra === 'waves'), tear: on(f.extra === 'tear'),
+    mouthScale: .55 + strength * .45, mouthScaleX: .55 + strength * .45, mouthScaleY: .35 + strength * .65,
+    sparkle: on(f.extra === 'sparkle') * strength, love: on(f.extra === 'love') * strength,
+    question: on(f.extra === 'question') * expressionScale, zzz: on(f.extra === 'zzz' && (strength >= .5 || keepClosed)) * strength,
+    dots: on(f.extra === 'dots') * strength, waves: on(f.extra === 'waves') * expressionScale, tear: on(f.extra === 'tear') * Math.max(0, (strength - .65) / .35),
   };
 }

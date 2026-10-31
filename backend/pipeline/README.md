@@ -16,6 +16,8 @@ Real mode now defaults to **ElevenLabs realtime STT with provider VAD, backgroun
 
 Requires Node **22.19+**. MP4/WebM input and real MP3 output probing also require `ffprobe` on PATH (or `FFPROBE_PATH`); WAV fixtures are inspected in memory. No user audio is written to disk.
 
+On Windows, set `FFPROBE_PATH` in the existing root `.env` to the full path of `ffprobe.exe` (forward slashes work), then restart the backend. Installing the npm dependencies does not install this native tool. `audio_probe_unavailable` means the backend could not launch the executable; it is not a microphone-permission or transcription error. Use the integrated app (`npm run dev`) for character and memory behavior; `npm run dev:voice` runs the standalone voice transport.
+
 ```powershell
 npm ci
 npm run build

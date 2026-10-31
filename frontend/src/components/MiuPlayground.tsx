@@ -12,8 +12,8 @@ type Toy = 'yarn' | 'fish';
 type Stroke = { id: number; zone: TouchZone; last: Point; distance: number; started: number; lastReaction: number; emitted: boolean; held: boolean };
 const toyHome: Record<Toy, Point> = { yarn: { x: 358, y: 365 }, fish: { x: 43, y: 382 } };
 
-export default function MiuPlayground({ emotion, activity, alive, speaking, mouthLevel, comfort = false, canInteract, resting, sleeping, label, t, onReact, onWake, onCancel }: {
-  emotion: Emotion; activity: CatActivity; alive: boolean; speaking: boolean;
+export default function MiuPlayground({ emotion, intensity = 1, activity, alive, speaking, mouthLevel, comfort = false, canInteract, resting, sleeping, label, t, onReact, onWake, onCancel }: {
+  emotion: Emotion; intensity?: number; activity: CatActivity; alive: boolean; speaking: boolean;
   mouthLevel?: number; comfort?: boolean;
   canInteract: boolean; resting: boolean; sleeping: boolean; label: string;
   t: (key: TranslationKey) => string; onReact: (reaction: CatReaction) => void; onWake: () => void; onCancel: () => void;
@@ -168,7 +168,7 @@ export default function MiuPlayground({ emotion, activity, alive, speaking, mout
         onContextMenu={event => event.preventDefault()}
         onClick={() => { if (performance.now() < ignoreClickUntil.current) return; if (sleeping || resting) onWake(); else if (canInteract) react('purr'); }}
         onKeyDown={event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); if (sleeping || resting) onWake(); else if (canInteract) react('purr'); } }}>
-        <Miu emotion={dragging ? 'neutral' : emotion} activity={activity} alive={alive} speaking={speaking} mouthLevel={mouthLevel} gaze={gaze} className={dragging ? 'is-tracking' : ''} label={label} />
+        <Miu emotion={dragging ? 'neutral' : emotion} intensity={intensity} activity={activity} alive={alive} speaking={speaking} mouthLevel={mouthLevel} gaze={gaze} className={dragging ? 'is-tracking' : ''} label={label} />
       </button>
       {(['yarn', 'fish'] as const).map(toy => <button key={toy} className={`touch-toy touch-toy-${toy}`} style={{ left: `${positions[toy].x / 4}%`, top: `${positions[toy].y / 4.4}%` }} aria-label={t(toy === 'yarn' ? 'dragYarn' : 'offerFish')} disabled={!canInteract || resting || comfort}
         onPointerDown={event => beginToy(event, toy)} onPointerMove={moveToy} onPointerUp={endToy} onPointerCancel={cancelPointer} onLostPointerCapture={cancelPointer} onContextMenu={event => event.preventDefault()} onClick={() => toyClick(toy)}>

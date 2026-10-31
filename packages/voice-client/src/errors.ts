@@ -20,6 +20,12 @@ export function isCanceled(error: unknown): boolean {
     || (error instanceof Error && error.name === 'AbortError');
 }
 
+export function isSessionExpired(error: unknown): boolean {
+  if (!error || typeof error !== 'object') return false;
+  const value = error as { code?: unknown; status?: unknown };
+  return value.status === 401 || ['unauthorized', 'session_closed', 'session_not_found'].includes(String(value.code));
+}
+
 export function asClientError(error: unknown, code = 'VOICE_FAILED'): VoiceClientError {
   if (error instanceof VoiceClientError) return error;
   if (isCanceled(error)) return canceledError();

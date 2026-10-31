@@ -1,0 +1,72 @@
+[
+  {
+    "title": {
+      "vi": "Vì sao có Miu?",
+      "en": "Why Miu?"
+    },
+    "script": {
+      "vi": [
+        "Với trẻ nhỏ, một chú chó vừa nghịch bẩn hay một trò chơi mới cũng có thể là câu chuyện rất lớn. Chúng mình tạo Miu để những câu chuyện nhỏ ấy có một người bạn quen thuộc lắng nghe.",
+        "Miu là mèo AI trò chuyện bằng tiếng Việt và tiếng Anh, dành cho trẻ từ 4 đến 8 tuổi. Trẻ giữ nút để nói, thả tay để gửi và nghe Miu đáp lại. Chúng mình hướng tới những cuộc trò chuyện có thể tiếp nối qua từng ngày, đồng thời vẫn khuyến khích trẻ chơi ngoài đời và gắn kết với gia đình."
+      ],
+      "en": [
+        "For a child, a muddy dog or a new game can be a big story. We created Miu so those small stories have a familiar friend to listen.",
+        "Miu is an AI kitten for children aged four to eight, speaking Vietnamese and English. Children hold a button to talk, release to send, and hear Miu reply. We want conversations to continue across days, while encouraging offline play and connections with family."
+      ]
+    }
+  },
+  {
+    "title": {
+      "vi": "Điều gì làm Miu trở nên quen thuộc?",
+      "en": "What makes Miu familiar?"
+    },
+    "script": {
+      "vi": [
+        "Chúng mình thiết kế Miu quanh bốn yếu tố. Đầu tiên là Personality: 16 phong cách biểu đạt để phụ huynh lựa chọn, nhưng vẫn là một Miu tử tế và tò mò.",
+        "Thứ hai là Emotion: biểu cảm theo từng lượt trò chuyện, bên cạnh tâm trạng trong ngày. Khi trẻ cần được an ủi, Miu ưu tiên phản hồi dịu dàng.",
+        "Thứ ba là Memory: ghi nhớ có chọn lọc những chi tiết trẻ chia sẻ để hỏi tiếp tự nhiên, thay vì tự bịa kết quả. Trẻ có thể yêu cầu sửa hoặc quên thông tin.",
+        "Cuối cùng là Growing: tình bạn dần thân quen qua trải nghiệm chung và sự đón nhận của trẻ. Sự phát triển này không dựa vào thời gian sử dụng hay số lần quay lại. Miu vẫn ấm áp khi trẻ vắng mặt và luôn dành chỗ cho gia đình, bạn bè ngoài đời."
+      ],
+      "en": [
+        "We design Miu around four elements. Personality offers parents 16 expressive styles, with the same kind, curious Miu underneath.",
+        "Emotion combines reactions to each conversation turn with a mood for the day. When a child needs comfort, Miu responds gently.",
+        "Memory selectively keeps shared details for natural follow-ups, without inventing outcomes. Children can ask Miu to correct or forget information.",
+        "Growing builds familiarity through shared experiences that the child welcomes, rather than time spent or return visits. Miu stays warm after an absence and always leaves room for real family and friends."
+      ]
+    }
+  },
+  {
+    "title": {
+      "vi": "Phần video",
+      "en": "Video segment"
+    },
+    "script": {
+      "vi": [
+        "Tiếp theo là phần demo. Ở đây, chúng mình muốn minh họa cách trẻ chủ động bắt đầu lượt nói, Miu đáp lại bằng giọng nói và biểu cảm, rồi nối tiếp cuộc trò chuyện một cách tự nhiên từ những chi tiết trẻ đã chia sẻ."
+      ],
+      "en": [
+        "Next is the demo segment. We want to show how a child starts a spoken turn, how Miu responds with voice and expression, and how a shared detail can become a natural follow-up in the next conversation."
+      ]
+    }
+  },
+  {
+    "title": {
+      "vi": "Một Miu tự nhiên và gần gũi hơn",
+      "en": "A more natural, familiar Miu"
+    },
+    "script": {
+      "vi": [
+        "Tiếp theo, chúng mình đề xuất ba hướng phát triển. Về Voice, ưu tiên tiếng Việt rõ hơn, phản hồi nhanh hơn và nhiều giọng nói, giọng điệu dễ thương phù hợp với trẻ nhỏ.",
+        "Thứ hai là robot hình mèo, với khuôn mặt LCD thể hiện cảm xúc của Miu. Ý tưởng là đưa người bạn trên màn hình đến gần hơn với không gian chơi của trẻ.",
+        "Thứ ba là ứng dụng Smart TV, kết hợp webcam hoặc camera và micro tích hợp, tạo không gian ảo để trẻ trò chuyện, chơi và tương tác với Miu trên màn hình lớn.",
+        "Đây là các hướng phát triển tiếp theo. Mục tiêu vẫn là một Miu quen thuộc, gần gũi và để trẻ chủ động dẫn dắt cuộc chơi."
+      ],
+      "en": [
+        "Next, we propose three directions. For voice, we want clearer Vietnamese, faster replies, and more cute, child-friendly voices and tones.",
+        "Second, a cat-shaped robot with an LCD face showing Miu’s emotions could bring this screen companion into the child’s play space.",
+        "Third, a Smart TV app combining a webcam or camera with a built-in microphone could create a virtual space for children to talk, play, and interact with Miu on a larger screen.",
+        "These are future directions. Our goal remains a familiar Miu, with the child leading the play."
+      ]
+    }
+  }
+]

@@ -2,6 +2,7 @@ import { loadEnvFile } from 'node:process';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { createConnection } from 'node:net';
+import { setTimeout as delay } from 'node:timers/promises';
 import pg from 'pg';
 import { executeSsh, type SshEnvironment } from '../integration/ssh.js';
 
@@ -62,7 +63,18 @@ export async function ensureDatabaseTunnel(environment: SshEnvironment = process
       await verifyTarget(databaseUrl);
       return { ...result, started: false };
     }
-    await executeSsh(environment, ['-f', '-N', '-o', 'ExitOnForwardFailure=yes', '-L', `127.0.0.1:${localPort}:127.0.0.1:${remotePort}`], { timeoutMs: 30_000 });
+    await executeSsh(environment, ['-f', '-N', '-o', 'ExitOnForwardFailure=yes', '-L', `127.0.0.1:${localPort}:127.0.0.1:${remotePort}`], {
+      timeoutMs: 30_000,
+      backgroundReady: async signal => {
+        const deadline = Date.now() + 25_000;
+        while (Date.now() < deadline) {
+          signal.throwIfAborted();
+          if (await listening('127.0.0.1', localPort)) { await verifyTarget(databaseUrl); return; }
+          await delay(100, undefined, { signal });
+        }
+        throw new Error('database_tunnel_not_ready');
+      },
+    });
     await verifyTarget(databaseUrl);
     return { ...result, started: true };
   })();

@@ -46,6 +46,22 @@
 .talk-controls { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); }
 .talk-controls > .microphone-button { grid-column: 2; }
 .talk-controls > .round-button { grid-column: 3; justify-self: start; }
+.panel-heading-actions { display: flex; align-items: center; gap: 8px; }
+.microphone-button { flex-direction: column; gap: 2px; touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+.microphone-button > span { font: 800 11px var(--body); }
+.answer > div { min-width: 0; max-width: 100%; }
+.answer p { white-space: pre-wrap; }
+.answer.user-message { justify-content: flex-end; padding-left: 30px; }
+.user-message > div { background: var(--ground); border-radius: 18px 0 18px 18px; }
+.user-message > div > span { color: var(--ink-2); }
+.user-message small { display: block; color: var(--muted); font-size: 10px; margin-top: 6px; }
+.talk-bubble p { overflow-wrap: anywhere; white-space: pre-wrap; }
+.talk-bubble .sent-message { color: var(--ink); padding-bottom: 12px; margin-bottom: 12px; border-bottom: 1px solid var(--line); }
+.talk-bubble .sent-message p { font-weight: 500; }
+.talk-bubble .sent-message .speech-byline { color: var(--ink-2); }
+.talk-bubble .sent-message small { display: block; color: var(--muted); font-size: 10px; margin-top: 6px; }
+.conversation-turn { scroll-margin-top: 8px; }
+.answers { scroll-behavior: auto; }
 .talk-controls > .voice-stop { grid-column: 1; grid-row: 1; justify-self: end; min-height: 48px; padding: 10px 14px; border: 0; border-radius: 999px; background: var(--surface); color: var(--ink); display: flex; align-items: center; gap: 6px; font: 800 13px var(--body); box-shadow: 0 4px 0 var(--lip); }
 .talk-controls > .microphone-button, .talk-controls > .round-button { grid-row: 1; }
 .voice-stop svg { width: 18px; height: 18px; }
