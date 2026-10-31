@@ -20,12 +20,18 @@ export function isGenericPreferenceQuery(text: string): boolean {
 export function isPetIdentityQuery(text: string): boolean {
   const query = normalized(text);
   if (/\btoy rabbit\b|thỏ bông/iu.test(query) || !/\b(?:dog|cat|pet|rabbit|puppy|kitten)\b|(?:chó|mèo|thú cưng|thỏ)/iu.test(query)) return false;
-  const explicitName = /\b(?:name|called|named)\b|tên/iu.test(query);
-  const asks = /[?？]|\b(?:what|who|remember|recall|remind|know)\b|(?:nhớ|biết|gì|nào)/iu.test(query);
+  const explicitName = /\bname\b|(?<![\p{L}\p{M}])tên(?!\s+lửa)(?![\p{L}\p{M}])/iu.test(query)
+    || /\bwhat\b.{0,80}\b(?:called|named)(?:\s+(?:now|again|today|before))?[.!?。！？\s]*$/iu.test(query);
+  // A relative "who" or "called" inside a story assertion is not a request
+  // for a real pet's identity. Questions may follow a return greeting.
+  const asks = /[?？]|(?:^|[.!。]\s*)(?:what|who|which|do you|can you|could you|would you|remember|recall|remind me)\b|(?:nhớ|biết).{0,20}(?:chó|mèo|thú cưng|thỏ)|(?:chó|mèo|thú cưng|thỏ).{0,20}tên (?:là )?(?:gì|nào)/iu.test(query);
   if (explicitName && asks) return true;
-  const directRecall = /\b(?:remember|recall|know) (?:my|our|the) (?:dog|cat|pet|rabbit|puppy|kitten)\b|(?:nhớ|biết).{0,12}(?:chó|mèo|thú cưng|thỏ)(?: của (?:mình|tớ|tôi))?/iu.test(query);
-  const eventQuestion = /\b(?:bath|bathed|washed|fell|puddle|ate|eaten|eating|fed|food|went|got|died|lost|sick|injured|hurt|happened)\b|(?:tắm|vũng nước|rơi|ngã|ăn|bị ốm|bị đau|đi đâu|chuyện gì)/iu.test(query);
-  return directRecall && !eventQuestion;
+  // Bare identity recall must end at the entity or a bounded identity tail.
+  // An arbitrary following activity belongs to episodic retrieval regardless
+  // of whether its verb happens to appear in an event-keyword dictionary.
+  const directRecall = /\b(?:remember|recall|know) (?:my|our|the) (?:dog|cat|pet|rabbit|puppy|kitten)(?:\s+(?:again|still|now|today|from before|from last time|(?:that )?(?:i|we) (?:told you about|mentioned)))?[.!?。！？\s]*$/iu.test(query)
+    || /(?:nhớ|biết)\s+(?:(?:con|bé)\s+)?(?:chó|mèo|thú cưng|thỏ)(?:\s+(?:nhà|của)\s+(?:mình|tớ|tôi|con))?(?:\s+(?:hôm trước|lần trước))?(?:\s+(?:không|chưa|nhỉ|ạ))?[.!?。！？\s]*$/iu.test(query);
+  return asks && directRecall;
 }
 
 export function petIdentityMatches(context: MemoryContext, text: string): Entity[] {
@@ -40,9 +46,10 @@ export function petIdentityMatches(context: MemoryContext, text: string): Entity
 
 export function isStoryTitleQuery(text: string): boolean {
   const query = normalized(text);
+  if (/\bstory character\b|nhân vật/iu.test(query)) return false;
   return /\b(?:story|adventure)\b|truyện|câu chuyện|chuyện (?:mình|của|đang)/iu.test(query)
     && /\b(?:name|title|called|named)\b|tên|gọi là/iu.test(query)
-    && /\?|\b(?:what|which|tell|remember)\b|(?:tên (?:là )?gì|gọi là gì|nhớ|cho.*biết)/iu.test(query);
+    && /\?|\b(?:what|which|tell|remember|want|give|only|just)\b|(?:tên (?:là )?gì|gọi là gì|nhớ|muốn|cho.*biết)/iu.test(query);
 }
 
 export function storyMetadata(context: MemoryContext): { title: { en: string; vi: string }; chapter: number | null; status: string; scope: 'fictional' } | null {
@@ -59,6 +66,14 @@ export function storyMetadata(context: MemoryContext): { title: { en: string; vi
 export function relevantEntities(context: MemoryContext, text: string, history: SessionExchange[] = []): Entity[] {
   const current = namedEntities(context, text);
   if (current.length) return current.slice(0, 2);
+  if (/\bstory character\b|nhân vật (?:trong )?(?:truyện|câu chuyện)/iu.test(text)) {
+    const characters = context.entities.filter(entity => entity.kind === 'story_character');
+    if (characters.length === 1) return characters;
+  }
+  if (/\b(?:toy rabbit|plush|stuffed toy|my toy)\b|thỏ bông|gấu bông|đồ chơi (?:của )?(?:mình|tớ|tôi)/iu.test(text)) {
+    const objects = context.entities.filter(entity => entity.kind === 'object');
+    if (objects.length === 1) return objects;
+  }
   if (!/(?:\b(?:his|her|their|its|that|the) name\b|\b(?:name|accents?|diacritics?|spelling)\b|tên (?:bạn ấy|người bạn|nó)|đừng bỏ dấu|giữ.*dấu|bạn ấy)/iu.test(text)) return [];
   for (const exchange of history.slice(-4).reverse()) {
     const previous = namedEntities(context, exchange.user);
@@ -66,6 +81,70 @@ export function relevantEntities(context: MemoryContext, text: string, history: 
     if (previous.length > 1) return [];
   }
   return [];
+}
+
+export interface MemoryQueryResolution {
+  targetKind: 'pet' | 'object' | 'story_character' | 'child_story' | 'routine' | 'preferred_address' | 'preference';
+  slot: 'name' | 'kind' | 'fictional_scope' | 'title' | 'routine' | 'exact_time' | 'address' | 'value';
+  status: 'resolved' | 'missing' | 'ambiguous';
+  sourceIds: string[];
+  facts: string[];
+}
+
+/** Resolve the requested domain/slot before a similarly worded catalog-title or
+ * generic preference lookup. Sources remain literal; speech may translate
+ * ordinary vocabulary while preserving names and quoted story titles. */
+export function resolveMemoryQuery(context: MemoryContext, text: string, history: SessionExchange[] = []): MemoryQueryResolution | null {
+  const asks = isStoryTitleQuery(text) || /[?？]|\b(?:what|which|who|remember|recall|remind|know|repeat|preserve|spell)\b|(?:nhớ|là gì|tên gì|gọi.*gì|đừng bỏ dấu|giữ.*dấu)/iu.test(text);
+  if (!asks) return null;
+  const resolution = (targetKind: MemoryQueryResolution['targetKind'], slot: MemoryQueryResolution['slot'], records: { id: string; fact: string }[]): MemoryQueryResolution => ({
+    targetKind, slot, status: records.length === 1 ? 'resolved' : records.length ? 'ambiguous' : 'missing', sourceIds: records.map(record => record.id).filter(Boolean), facts: records.map(record => record.fact),
+  });
+  if (isPetIdentityQuery(text)) return resolution('pet', 'name', petIdentityMatches(context, text).map(entity => ({
+    id: entity.id, fact: `The child's explicitly reported ${entity.species ?? 'pet'} is named ${JSON.stringify(entity.name)}. Preserve this canonical spelling and identity. A name does not establish an event or outcome.`,
+  })));
+  if (/\b(?:what.*(?:call me|want.*called)|(?:name|address).*(?:asked|wanted|preferred)|how.*address me)\b|(?:muốn được gọi|được gọi tên gì|gọi (?:mình|tớ|tôi).*(?:gì|đã nói))/iu.test(text)) {
+    const address = context.addressPreference;
+    return resolution('preferred_address', 'address', address ? [{ id: '', fact: `The child chose the form of address ${JSON.stringify(address.preferredAddress)}; nickname permission is ${address.allowNickname ? 'granted only for the explicitly stored nickname' : 'withdrawn'}. Do not restore a nickname merely because a story resumes.` }] : []);
+  }
+  const mentioned = namedEntities(context, text);
+  const characterQuestion = /\bstory character\b|nhân vật/iu.test(text) || mentioned.some(entity => entity.kind === 'story_character');
+  if (characterQuestion) {
+    const characters = mentioned.filter(entity => entity.kind === 'story_character');
+    const chosen = characters.length ? characters : context.entities.filter(entity => entity.kind === 'story_character');
+    const scope = /\b(?:real|really|above|house|dog|person|visit)\b|(?:thật|trên trời|nhà|chó|người)/iu.test(text);
+    return resolution('story_character', scope ? 'fictional_scope' : 'name', chosen.map(entity => ({ id: entity.id, fact: `The child introduced ${JSON.stringify(entity.name)} as a fictional story character. It belongs to pretend stories, not the real social circle or a physical animal at the child's home.${entity.represents ? ` The child-described fictional form is ${JSON.stringify(entity.represents)}.` : ''}` })));
+  }
+  const objectQuestion = /\b(?:toy rabbit|plush|stuffed|my toy|my object)\b|(?:thỏ bông|gấu bông|đồ chơi)/iu.test(text) || mentioned.some(entity => entity.kind === 'object');
+  if (objectQuestion) {
+    const objects = mentioned.filter(entity => entity.kind === 'object');
+    let chosen = objects.length ? objects : context.entities.filter(entity => entity.kind === 'object');
+    if (!objects.length && /\b(?:rabbit|bunny)\b|thỏ/iu.test(text)) chosen = chosen.filter(entity => /\b(?:rabbit|bunny)\b|thỏ/iu.test(`${entity.objectType ?? ''} ${entity.represents ?? ''}`));
+    if (!objects.length && /\b(?:bear|teddy)\b|gấu/iu.test(text)) chosen = chosen.filter(entity => /\b(?:bear|teddy)\b|gấu/iu.test(`${entity.objectType ?? ''} ${entity.represents ?? ''}`));
+    return resolution('object', /\b(?:kind|real|eat|food|living)\b|(?:là gì|ăn|thật|con gì)/iu.test(text) ? 'kind' : 'name', chosen.map(entity => ({ id: entity.id, fact: `The child introduced the object ${JSON.stringify(entity.name)}${entity.objectType ? ` as ${JSON.stringify(entity.objectType)}` : ''}${entity.represents ? `, representing ${JSON.stringify(entity.represents)}` : ''}. It is a toy/object, not a real pet, and pretend care does not create biological needs.` })));
+  }
+  const ownTitle = isStoryTitleQuery(text) && /\b(?:my story|story i (?:made|wrote|told)|i made|i wrote)\b|(?:truyện|câu chuyện).{0,16}(?:mình|tớ|tôi).{0,12}(?:kể|bịa|viết)|truyện của (?:mình|tớ|tôi)/iu.test(text);
+  if (ownTitle) {
+    const matches = context.stories.filter(story => mentions(text, story.title));
+    const chosen = matches.length ? matches : context.stories;
+    return resolution('child_story', 'title', chosen.map(story => ({ id: story.id, fact: `The child-authored fictional story is titled ${JSON.stringify(story.title)}. Its reported premise is ${JSON.stringify(story.summary)}; named fictional cast: ${story.castNames.map(name => JSON.stringify(name)).join(', ') || 'not supplied'}. This is not Miu's assigned catalog story.` })));
+  }
+  if (/\b(?:routine|after dinner|before bed|exact time.*read|time i read)\b|(?:thói quen|sau (?:bữa )?tối|trước (?:giờ )?ngủ|giờ.*đọc)/iu.test(text)) {
+    let routines = context.preferences.filter(preference => preference.category === 'routine');
+    if (/\b(?:read|reading|book)\b|đọc/iu.test(text)) {
+      const reading = routines.filter(preference => /\b(?:read|reading|book)\b|đọc/iu.test(preference.value));
+      if (reading.length) routines = reading;
+    }
+    if (/\bafter dinner\b|sau (?:bữa )?tối/iu.test(text)) routines = routines.filter(preference => /\bafter dinner\b|sau (?:bữa )?tối/iu.test(`${preference.value} ${preference.qualifiers?.timeRelation ?? ''}`));
+    if (/\bbefore bed\b|trước (?:giờ )?ngủ/iu.test(text)) routines = routines.filter(preference => /\bbefore bed\b|trước (?:giờ )?ngủ/iu.test(`${preference.value} ${preference.qualifiers?.timeRelation ?? ''}`));
+    const exact = /\b(?:exact|clock|what time|yesterday)\b|(?:chính xác|mấy giờ|hôm qua)/iu.test(text);
+    return resolution('routine', exact ? 'exact_time' : 'routine', routines.map(preference => ({ id: preference.id, fact: `The volunteered routine is ${JSON.stringify(preference.value)}.${preference.qualifiers?.frequency ? ` Its reported frequency is ${preference.qualifiers.frequency}; this is not another person's guaranteed promise.` : ''}${preference.qualifiers?.timeRelation ? ` Only this relative timing was volunteered: ${JSON.stringify(preference.qualifiers.timeRelation)}.` : ''} ${preference.qualifiers?.exactTime ? `The child volunteered clock time ${JSON.stringify(preference.qualifiers.exactTime)}; it does not prove what happened yesterday.` : 'No exact clock time was volunteered; do not invent one or treat a routine as evidence of a particular day.'}` })));
+  }
+  if (/\b(?:favou?rite (?:colou?r)|colou?r.*favou?rite)\b|(?:màu.*(?:thích nhất|đứng đầu|yêu thích nhất)|màu (?:mình|tớ|tôi).*thích)/iu.test(text)) {
+    const colors = context.preferences.filter(preference => preference.slot === 'favorite_color');
+    return resolution('preference', 'value', colors.map(preference => ({ id: preference.id, fact: `The child's explicitly current favorite-color preference is ${JSON.stringify(preference.value)}. This favorite_color slot is distinct from unrelated likes or hobbies. Translate its ordinary color vocabulary naturally while preserving the source value in storage.` })));
+  }
+  return null;
 }
 
 /** Minimal directly asserted candidate facts. Values stay source excerpts and
@@ -122,6 +201,8 @@ export function recallFromProfile(context: MemoryContext, text: string): RecallH
   const asks = reactiveName || isPetIdentityQuery(query) || /\?|\b(?:what|who|remember|recall|remind)\b|(?:nhớ|tên gì|là ai|sở thích)/iu.test(query);
   if (!asks) return null;
   const hook = (id: string, en: string, vi: string): RecallHook => ({ id, sourceIds: [id], evidenceKind: 'child_reported', fact: en, question: null, claim: { en, vi } });
+  const typed = resolveMemoryQuery(context, text);
+  if (typed?.status === 'resolved' && typed.sourceIds[0] && typed.facts[0]) return hook(typed.sourceIds[0], typed.facts[0], typed.facts[0]);
   if (isGenericPreferenceQuery(query)) {
     if (context.preferences.length !== 1) return null;
     const preference = context.preferences[0]!;
@@ -203,14 +284,16 @@ export function turnGrounding(input: DirectorInput, plan: DirectorPlan) {
       uncertainty: input.observation.uncertainty ?? (input.observation.uncertain ? 'meaning' : null),
       question_is_not_an_assertion: true,
     },
-    relevant_entities: entities.map(entity => ({ kind: entity.kind, canonical_name: entity.name, species: entity.species, evidence_kind: 'child_reported' })),
+    relevant_entities: entities.map(entity => ({ kind: entity.kind, canonical_name: entity.name, species: entity.species, object_type: entity.objectType ?? null, represents: entity.represents ?? null, scope: entity.kind === 'story_character' ? 'fictional' : 'reported_real', evidence_kind: 'child_reported' })),
     relevant_relationships: input.context.socialCircle.filter(connection => entityIds.has(connection.entityId)).slice(0, 3)
       .map(connection => ({ name: connection.name, relation: connection.relation, evidence_kind: 'child_reported' })),
     relevant_event_reports: input.context.events.filter(event => !!event.subjectId && entityIds.has(event.subjectId)).slice(0, 3)
       .map(event => ({ subject: event.subjectName, local_date: event.localDate, evidence_kind: event.evidenceKind, report: event.value })),
     selected_memory: selected ? { fact: selected.fact, claim: selected.claim ?? null, question: selected.question, evidence_kind: selected.evidenceKind } : null,
     historical_correction_facts: correctionGrounding(input.context, input.text),
-    story: isStoryTitleQuery(input.text) || plan.purpose === 'story' ? storyMetadata(input.context) : null,
+    story: plan.action ? plan.action.domain === 'catalog_story' ? storyMetadata(input.context) : null : isStoryTitleQuery(input.text) || plan.purpose === 'story' ? storyMetadata(input.context) : null,
+    requested_memory: resolveMemoryQuery(input.context, input.text, input.history),
+    address_preference: input.context.addressPreference ? { preferredAddress: input.context.addressPreference.preferredAddress, allowNickname: input.context.addressPreference.allowNickname, nickname: input.context.addressPreference.allowNickname ? input.context.addressPreference.nickname : null } : null,
     preference_recall: isGenericPreferenceQuery(input.text) ? { eligible_count: input.context.preferences.length, ambiguous: input.context.preferences.length > 1 } : null,
     pet_identity: isPetIdentityQuery(input.text) ? { eligible_count: petIdentityMatches(input.context, input.text).length } : null,
     memory_operation: input.operation ?? null,

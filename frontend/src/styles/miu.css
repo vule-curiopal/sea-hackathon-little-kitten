@@ -66,16 +66,16 @@
 .touch-feedback.is-heart { color: var(--bad); }
 .touch-feedback svg { width: 29px; height: 29px; stroke-width: 2.5px; }
 
-@keyframes cat-look { 0%, 100% { transform: rotate(0); } 30%, 60% { transform: rotate(7deg); } 80% { transform: rotate(-4deg); } }
-@keyframes cat-ear-left { 15%, 45% { transform: rotate(-15deg); } 30%, 60%, 100% { transform: rotate(0); } }
-@keyframes cat-ear-right { 15%, 45% { transform: rotate(12deg); } 30%, 60%, 100% { transform: rotate(0); } }
-@keyframes cat-groom-head { 50% { transform: rotate(-12deg) translate(-4px, 10px); } }
-@keyframes cat-groom-paw { 0%, 100% { transform: rotate(145deg); } 50% { transform: rotate(161deg) translateY(-3px); } }
-@keyframes cat-stretch { 0%, 100% { transform: scale(1); } 40%, 65% { transform: scale(.96, 1.05) translateY(-4px); } }
-@keyframes cat-tail-stretch { 50% { transform: rotate(-12deg); } }
-@keyframes cat-pounce { 0%, 100% { transform: translateX(-5px) rotate(-2deg); } 45% { transform: translate(12px, -6px) rotate(3deg); } 65% { transform: translate(10px, 1px) rotate(2deg); } }
-@keyframes cat-follow-yarn { 50% { transform: rotate(8deg); } }
-@keyframes cat-bat-yarn { 0%, 100% { transform: rotate(-35deg); } 45%, 65% { transform: rotate(-85deg); } }
+@keyframes cat-look { 0%, 100% { transform: rotate(0); } 30%, 60% { transform: rotate(calc(7deg * var(--miu-motion-scale, 1))); } 80% { transform: rotate(calc(-4deg * var(--miu-motion-scale, 1))); } }
+@keyframes cat-ear-left { 15%, 45% { transform: rotate(calc(-15deg * var(--miu-motion-scale, 1))); } 30%, 60%, 100% { transform: rotate(0); } }
+@keyframes cat-ear-right { 15%, 45% { transform: rotate(calc(12deg * var(--miu-motion-scale, 1))); } 30%, 60%, 100% { transform: rotate(0); } }
+@keyframes cat-groom-head { 50% { transform: rotate(calc(-12deg * var(--miu-motion-scale, 1))) translate(calc(-4px * var(--miu-motion-scale, 1)), calc(10px * var(--miu-motion-scale, 1))); } }
+@keyframes cat-groom-paw { 0%, 100% { transform: rotate(145deg); } 50% { transform: rotate(calc(145deg + 16deg * var(--miu-motion-scale, 1))) translateY(calc(-3px * var(--miu-motion-scale, 1))); } }
+@keyframes cat-stretch { 0%, 100% { transform: scale(1); } 40%, 65% { transform: scale(calc(1 - .04 * var(--miu-motion-scale, 1)), calc(1 + .05 * var(--miu-motion-scale, 1))) translateY(calc(-4px * var(--miu-motion-scale, 1))); } }
+@keyframes cat-tail-stretch { 50% { transform: rotate(calc(-12deg * var(--miu-motion-scale, 1))); } }
+@keyframes cat-pounce { 0%, 100% { transform: translateX(calc(-5px * var(--miu-motion-scale, 1))) rotate(calc(-2deg * var(--miu-motion-scale, 1))); } 45% { transform: translate(calc(12px * var(--miu-motion-scale, 1)), calc(-6px * var(--miu-motion-scale, 1))) rotate(calc(3deg * var(--miu-motion-scale, 1))); } 65% { transform: translate(calc(10px * var(--miu-motion-scale, 1)), calc(1px * var(--miu-motion-scale, 1))) rotate(calc(2deg * var(--miu-motion-scale, 1))); } }
+@keyframes cat-follow-yarn { 50% { transform: rotate(calc(8deg * var(--miu-motion-scale, 1))); } }
+@keyframes cat-bat-yarn { 0%, 100% { transform: rotate(-35deg); } 45%, 65% { transform: rotate(calc(-35deg - 50deg * var(--miu-motion-scale, 1))); } }
 @keyframes cat-nod { 0%, 100% { transform: scaleY(.96); } 60% { transform: scaleY(.90) rotate(-3deg); } }
 @keyframes cat-sleep { 0%, 100% { transform: scale(1.05, .73); } 50% { transform: scale(1.06, .75); } }
 @keyframes cat-dream { 50% { transform: translate(-35px, 88px); } }

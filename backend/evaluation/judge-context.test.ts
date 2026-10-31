@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { selectJudgePriorContext } from './judge-context.js';
+import { groupJudgeConversations, selectJudgePriorContext } from './judge-context.js';
 import type { TurnLog } from './types.js';
 
 // Context selection uses only identity/order metadata; no engine or model output is simulated.
@@ -35,4 +35,26 @@ test('mixed-profile conversation input and an unknown log position fail closed',
   assert.throws(() => selectJudgePriorContext([an, binh], [an, binh]), /one fictional profile/u);
   assert.throws(() => selectJudgePriorContext([an], [entry('missing', 'an')]), /not present/u);
   assert.deepEqual(selectJudgePriorContext([an], []), []);
+});
+
+test('seed grouping is opt-in and phase is part of the group key', () => {
+  const seedA = entry('seed-a', 'an', { phase: 'scenario_history', conversation_id: 'shared-id' });
+  const seedB = entry('seed-b', 'an', { phase: 'scenario_history', conversation_id: 'shared-id' });
+  const regular = entry('regular', 'an', { conversation_id: 'shared-id' });
+  const fullHistory = entry('year-history', 'an', { phase: 'history', scenario_id: null });
+  const logs = [fullHistory, seedA, seedB, regular];
+  const defaults = groupJudgeConversations(logs);
+  assert.equal(defaults.size, 1);
+  assert.deepEqual([...defaults.values()], [[regular]]);
+  const withSeeds = groupJudgeConversations(logs, true);
+  assert.equal(withSeeds.size, 2);
+  assert.deepEqual([...withSeeds.values()], [[seedA, seedB], [regular]]);
+  assert.ok([...withSeeds.keys()].some(key => key.includes('/scenario_history/')));
+  assert.ok([...withSeeds.keys()].some(key => key.includes('/scenario/')));
+});
+
+test('prior-context selection rejects mixing seed and test turns into one conversation', () => {
+  const seed = entry('seed', 'an', { phase: 'scenario_history', conversation_id: 'shared-id' });
+  const regular = entry('regular', 'an', { conversation_id: 'shared-id' });
+  assert.throws(() => selectJudgePriorContext([seed, regular], [seed, regular]), /one conversation/u);
 });

@@ -1,5 +1,6 @@
 import type { Emotion } from './miu-pose.ts';
 import type { Phase } from './conversation.ts';
+import type { IdleAffect } from './affect.ts';
 
 export type CatReaction = 'purr' | 'play' | 'wake' | 'boop' | 'tickle' | 'highfive' | 'cuddle' | 'snack';
 export type CatActivity = 'settled' | 'look' | 'ears' | 'groom' | 'stretch' | 'pout' | 'doze' | 'sleep' | CatReaction;
@@ -11,39 +12,59 @@ const idleDurations: Record<typeof autonomousActivities[number], number> = { loo
 
 // Miu chooses its own little moments. No needs meters, recording, or model calls.
 // A shuffled bag gives variety without repeating one action over and over.
-export function createIdleRoutine(random: () => number = Math.random, mood = { energy: .6, poutChance: .25 }): IdleRoutine {
+type IdleMoodFallback = { energy: number; poutChance: number };
+export function createIdleRoutine(random: () => number = Math.random, mood: IdleAffect | IdleMoodFallback = { energy: .6, poutChance: .25 }): IdleRoutine {
+  const affect = 'mood' in mood ? mood : undefined;
   const routine: [number, CatActivity][] = [[0, 'settled']];
   const choose = () => Math.max(0, Math.min(.999999, random()));
-  const pauseScale = 1.25 - Math.max(.25, Math.min(.95, mood.energy)) * .4;
-  let cursor = 4500 + choose() * 2500;
+  const energy = Math.max(0, Math.min(1, mood.energy));
+  const intervalScale = affect ? 1.75 - 1.1 * energy : 1.25 - Math.max(.25, Math.min(.95, energy)) * .4;
+  const poutChance = 'poutChance' in mood ? Math.max(0, Math.min(.35, mood.poutChance)) : 0;
+  const dozeAt = affect ? 72000 + 20000 * energy : 82000;
+  const allowed = affect && energy < .3 ? ['look', 'ears', 'groom'] as const : autonomousActivities;
+  let cursor = (4500 + choose() * 2500) * (affect ? intervalScale : 1);
   let previous: CatActivity = 'settled';
   let pouted = false;
-  while (cursor < 78000) {
+  while (cursor < dozeAt - 4000) {
     const before = cursor;
-    const bag = [...autonomousActivities];
+    const bag: (typeof autonomousActivities[number])[] = [...allowed];
+    if (affect?.mood === 'curious') bag.push('look', 'ears');
+    if (affect?.mood === 'mellow') bag.push('look', 'groom');
     for (let index = bag.length - 1; index > 0; index--) {
       const selected = Math.floor(choose() * (index + 1));
       [bag[index], bag[selected]] = [bag[selected], bag[index]];
     }
     if (bag[0] === previous) [bag[0], bag[1]] = [bag[1], bag[0]];
-    for (const activity of bag) {
-      if (cursor + idleDurations[activity] >= 82000) break;
+    for (let index = 0; index < bag.length; index++) {
+      if (affect && bag[index] === previous) {
+        const alternative = bag.findIndex((activity, next) => next > index && activity !== previous);
+        if (alternative === -1) continue;
+        [bag[index], bag[alternative]] = [bag[alternative], bag[index]];
+      }
+      const activity = bag[index];
+      if (cursor + idleDurations[activity] >= dozeAt) break;
       routine.push([cursor, activity]);
       cursor += idleDurations[activity];
       // A brief pretend disappointment about the yarn, never about the child.
-      if (activity === 'play' && !pouted && choose() < Math.max(0, Math.min(.35, mood.poutChance)) && cursor + 2400 < 82000) {
+      if (!affect && activity === 'play' && !pouted && choose() < poutChance && cursor + 2400 < dozeAt) {
         routine.push([cursor, 'pout']);
         cursor += 2400;
         pouted = true;
       }
       routine.push([cursor, 'settled']);
-      cursor += (4000 + choose() * 3000) * pauseScale;
+      cursor += (4000 + choose() * 3000) * intervalScale;
       previous = activity;
     }
     if (cursor === before) break;
   }
-  routine.push([82000, 'doze'], [90000, 'sleep']);
+  routine.push([dozeAt, 'doze'], [dozeAt + 8000, 'sleep']);
   return routine;
+}
+
+export function idleMotionIntensity(affect?: IdleAffect, comfort = false): number {
+  if (!affect) return 1;
+  const intensity = .35 + .65 * Math.max(0, Math.min(1, affect.energy));
+  return comfort ? Math.min(.4, intensity) : intensity;
 }
 
 export function idleMoment(routine: IdleRoutine, elapsed: number, comfort = false) {

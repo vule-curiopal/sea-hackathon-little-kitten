@@ -72,6 +72,23 @@ test('judge can read structured output content without the convenience output_te
   assert.equal(results[0]!.overall.status, 'pass');
 });
 
+test('uniform seed warm-ups receive overall-only review without cloning phases or changing evidence', async () => {
+  const logs = [log('seed-1'), log('seed-2')];
+  for (const turn of logs) { turn.phase = 'scenario_history'; turn.rubric = []; }
+  const originalEvidence = JSON.stringify(logs);
+  const originalHashes = logs.map(reviewEvidenceHash);
+  const transport = mocked({ status: 'completed', output_text: JSON.stringify(verdict(logs)) });
+  const reviews = await judgeConversation(logs, [], options(transport.client));
+  assert.equal(reviews.length, 2);
+  assert.ok(reviews.every(review => review.criteria.length === 0 && review.overall.status === 'pass'));
+  assert.deepEqual(reviews.map(review => review.key), logs.map(reviewKey));
+  assert.deepEqual(reviews.map(review => review.evidence_sha256), originalHashes);
+  assert.equal(JSON.stringify(logs), originalEvidence);
+  const input = JSON.parse(String(transport.calls[0]!.body.input));
+  assert.ok(input.conversation.every((turn: { phase: string; criteria: unknown[] }) => turn.phase === 'scenario_history' && turn.criteria.length === 0));
+  assert.match(String(transport.calls[0]!.body.instructions), /an empty rubric is not evidence of a pass/u);
+});
+
 test('incomplete, refused, empty, malformed and extra-field judge outputs fail closed', async () => {
   const turn = log();
   const responses = [
@@ -143,6 +160,7 @@ test('judge rejects mixed conversations or runs before any API request', async (
   const first = log('turn-1');
   for (const mutate of [
     (turn: TurnLog) => { turn.phase = 'history'; },
+    (turn: TurnLog) => { turn.phase = 'scenario_history'; },
     (turn: TurnLog) => { turn.scenario_id = 'SC-002'; },
     (turn: TurnLog) => { turn.conversation_id = 'other-conversation'; },
     (turn: TurnLog) => { turn.run_id = 'other-run'; },

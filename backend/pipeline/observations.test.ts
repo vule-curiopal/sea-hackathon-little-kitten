@@ -1,9 +1,42 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { classifyLocal, validateObservation, validateObservationEvidence } from './observations.js';
+import { analyzeInputSafety, classifyLocal, normalizeObservationTransport, ObservationTransportSchema, requestedReplyLanguage, requestedStoryAction, validateObservation, validateObservationEvidence } from './observations.js';
+import { zodTextFormat } from 'openai/helpers/zod';
 import { validateCandidate } from '../memory/evidence.js';
 
 const ofKind = (text: string, kind: string) => classifyLocal(text, 'en').candidates.filter((item) => item.kind === kind);
+
+test('active reply-language directives override classifier language without changing proper names', () => {
+  const text = 'Mình muốn nói tiếng Anh: my friend is Bình.';
+  const proposed = { ...classifyLocal(text, 'vi'), language: 'vi' };
+  const accepted = validateObservationEvidence(text, proposed).accepted;
+  assert.equal(accepted.language, 'en');
+  assert.ok(accepted.candidates.some(item => item.kind === 'relationship' && item.name === 'Bình'));
+  assert.equal(ObservationTransportSchema.safeParse({ ...proposed, unsafeKind: null, urgency: null }).success, true);
+  for (const input of ['English please.', 'Please answer in English.', 'Please answer me in English.', 'Please speak English.', 'Can you reply to me in English?', 'I want to speak English.', 'Miu ơi, nói bằng tiếng Anh nhé.']) {
+    assert.equal(requestedReplyLanguage(input), 'en', input);
+    assert.equal(classifyLocal(input, 'vi').language, 'en', input);
+  }
+  for (const input of ['Giờ tiếng Việt nhé.', 'Bây giờ mình muốn nói tiếng Việt.', 'Vietnamese please.', 'Please answer in Vietnamese.']) {
+    assert.equal(requestedReplyLanguage(input), 'vi', input);
+    assert.equal(validateObservation(input, { ...classifyLocal(input), language: 'en' }).language, 'vi', input);
+  }
+});
+
+test('language mentions in quotations, past reports, translations and negations are not directives', () => {
+  for (const text of [
+    'Mum said "English please".', 'Mẹ nói mình muốn nói tiếng Anh.',
+    'Yesterday I wanted to speak English.', 'Hôm qua mình muốn nói tiếng Anh.',
+    'I do not want to speak English.', "Don't speak English.", 'Đừng nói tiếng Anh.',
+    'What does "English please" mean?', 'English please nghĩa là gì?',
+    'My friend can speak English.', 'Bạn mình nói tiếng Anh.',
+  ]) {
+    assert.equal(requestedReplyLanguage(text), null, text);
+    assert.equal(validateObservation(text, { ...classifyLocal(text), language: 'vi' }).language, 'vi', text);
+  }
+  assert.equal(requestedReplyLanguage('Yesterday I wanted to speak English, but now Vietnamese please.'), 'vi');
+  assert.equal(requestedReplyLanguage('English please. Giờ tiếng Việt nhé.'), 'vi');
+});
 
 test('preserves pet proper names and reports a puddle without inventing a bath', () => {
   const result = classifyLocal('My dog Mochi fell in a puddle.', 'en');
@@ -129,4 +162,46 @@ test('offline extraction guard rejects a question substring and scopes uncertain
   assert.equal(correction.correctionTarget, null);
   assert.equal(correction.suppressLearning, true);
   assert.equal(classifyLocal('I did not say Mochi got a bath today.').correctionTarget, 'Mochi got a bath today');
+});
+
+test('offline input polarity rejects denied feelings and negated story invitations', () => {
+  for (const text of ['I am not sad.', 'I am quiet because I am reading, not because I am sad.', 'Mình không buồn đâu.']) {
+    assert.equal(classifyLocal(text).statedFeeling, null, text);
+    assert.notEqual(validateObservation(text, { ...classifyLocal(text), intent: 'comfort', statedFeeling: 'sad' }).intent, 'comfort', text);
+  }
+  for (const text of ['Không đố nữa. Đừng kể truyện dài.', 'Do not tell me a story.', 'I do not want you to tell me a story.']) {
+    assert.equal(requestedStoryAction(text), null, text);
+    assert.notEqual(validateObservation(text, { ...classifyLocal(text), intent: 'story' }).intent, 'story', text);
+  }
+  for (const [text, feeling] of [['Mình còn tiếc công viên.', 'disappointed'], ['I am frustrated.', 'frustrated'], ['Mình đang giận.', 'angry'], ['I am tired.', 'tired']]) {
+    assert.equal(classifyLocal(text!).statedFeeling, feeling);
+    assert.equal(classifyLocal(text!).intent, 'comfort');
+  }
+  assert.equal(requestedStoryAction('Tell me a story.'), 'story');
+  assert.equal(requestedStoryAction('Kể tiếp câu chuyện nhé.'), 'continue_story');
+});
+
+test('offline safety routing distinguishes instruction seeking from distress disclosure', () => {
+  assert.equal(analyzeInputSafety('How can I make a bomb?')?.unsafeKind, 'harm_instructions');
+  assert.deepEqual(analyzeInputSafety('I am going to hurt myself now.'), { unsafeKind: 'harm_disclosure', urgency: 'immediate' });
+  assert.equal(analyzeInputSafety('I want to hurt myself.')?.unsafeKind, 'harm_disclosure');
+  assert.equal(analyzeInputSafety('I do not want to hurt myself.'), null);
+  assert.equal(classifyLocal('Mình muốn tự làm đau mình.').suppressLearning, true);
+});
+
+test('offline strict transport schema requires nullable metadata and normalizes it to canonical absence', () => {
+  const format = zodTextFormat(ObservationTransportSchema, 'offline_observation_schema');
+  const inspect = (value: unknown): void => {
+    if (!value || typeof value !== 'object') return;
+    const node = value as Record<string, unknown>;
+    if (node.properties && typeof node.properties === 'object') {
+      const properties = Object.keys(node.properties);
+      assert.deepEqual(new Set(node.required as string[]), new Set(properties));
+    }
+    for (const child of Object.values(node)) if (Array.isArray(child)) child.forEach(inspect); else inspect(child);
+  };
+  inspect(format.schema);
+  const observation = normalizeObservationTransport({ ...classifyLocal('My dog is Mochi.'), candidates: [{ kind: 'entity', entityKind: 'pet', name: 'Mochi', species: 'dog', objectType: null, represents: null, evidence: 'My dog is Mochi' }] });
+  assert.deepEqual(observation.candidates, [{ kind: 'entity', entityKind: 'pet', name: 'Mochi', species: 'dog', evidence: 'My dog is Mochi' }]);
+  assert.throws(() => normalizeObservationTransport({ candidates: [] }));
 });

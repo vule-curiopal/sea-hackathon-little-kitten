@@ -1,0 +1,60 @@
+{
+  "plan": {
+    "version": "vector-pet-router-focused-real-v1",
+    "cases": [
+      {
+        "name": "capture_dog_fall",
+        "text": "My dog is named Moki. Moki fell in a puddle.",
+        "kind": "event"
+      },
+      {
+        "name": "capture_cat_pot",
+        "text": "Mèo nhà mình tên là Bông. Bông làm đổ chậu cây.",
+        "kind": "event"
+      },
+      {
+        "name": "capture_child_story",
+        "text": "My story is called Pip and the Pillow Planet. Pip is a pretend rabbit who lands on a pillow planet.",
+        "kind": "story"
+      },
+      {
+        "name": "typed_explicit_dog_name",
+        "text": "What is my dog's name?",
+        "kind": "resolved"
+      },
+      {
+        "name": "typed_bare_dog",
+        "text": "Do you remember my dog?",
+        "kind": "resolved"
+      },
+      {
+        "name": "typed_ambiguous_pet_name",
+        "text": "Do you remember my pet's name?",
+        "kind": "ambiguous"
+      },
+      {
+        "name": "semantic_known_dog_fall",
+        "text": "Do you remember the pet tumble involving water that I told you about?",
+        "kind": "available"
+      },
+      {
+        "name": "semantic_unknown_dog_swim",
+        "text": "Do you recall my dog swimming across a lake?",
+        "kind": "unresolved"
+      }
+    ],
+    "plannedDialogueTurns": 8,
+    "maximumDraftsUnderExistingSingleRepairPolicy": 16,
+    "maxEmbeddingRequests": 12,
+    "model": "text-embedding-3-large",
+    "dimensions": 1536,
+    "minDenseSimilarity": 0.3,
+    "projectionVersion": "atomic-memory-v2",
+    "normalizerVersion": "nfc-lexical-v2",
+    "backend": "pgvector",
+    "queryTimeoutMs": 5000,
+    "scope": "Focused pet identity versus event routing regression, not a full v3 29-case rerun.",
+    "provenance": "Transparent delegation records every actual provider.reply draft and provider.check result with its own matching API metadata; returned values, arguments, errors and approval policy are unmodified."
+  },
+  "sha256": "4c7d6713f06382c612a3544db6e4f21c1ac8b1b8de2a4c30e4b677694fb3ea09"
+}

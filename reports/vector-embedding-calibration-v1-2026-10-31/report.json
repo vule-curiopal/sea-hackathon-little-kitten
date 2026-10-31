@@ -1,0 +1,1685 @@
+{
+  "run_kind": "real_embedding_calibration_not_held_out",
+  "status": "completed",
+  "source_report": "/Users/canon193/Desktop/Projects/shoppee-hackathon-vector/reports/vector-real-v2-2026-10-31T0900/report.json",
+  "source_report_sha256": "f25d4d4abb1dbfdb6a304a339a9e415e103d0cd01058c2fcc32299d88646f219",
+  "source_benchmark_sha256": "f23789d1047847367da6829f20ac78bcec054529dac57c24c60ce1389117730d",
+  "source_sha256": {
+    "backend/pipeline/embeddings.ts": "575389b9e61d0a7d631b42701b99c08077b34ac0006a3ffa7cd9a64d57dc067b",
+    "backend/scripts/calibrate-vector-embeddings-real.ts": "bc0b32516387c7b121e60cb6cfe62b3148f39f4ddef4c6e73ebd96ab66a348a3"
+  },
+  "provider_requested": "real",
+  "production_accessed": false,
+  "dialogue_requests": 0,
+  "database_connections": 0,
+  "actual_embedding_requests": 2,
+  "model_request_cap": 2,
+  "inputs_per_request": 19,
+  "dimensions": 1536,
+  "threshold": 0.35,
+  "k": 3,
+  "design": "Within each model, one batch contains the same six full canonical JSON documents, six literal-only variants, six fixed labeled queries and one unknown query. Query vectors are shared between the two projection comparisons.",
+  "compact_projection_policy": "Join complete subject/literal_title/literal_text/literal_value/conditions and full JSON qualifiers with newlines; no translation, summary, guessed predicate, or truncation.",
+  "documents": [
+    {
+      "sourceId": "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+      "fullJson": "{\"kind\":\"preference\",\"scope\":\"reported_real\",\"evidence_kind\":\"child_reported\",\"category\":\"like\",\"qualifiers\":{},\"literal_value\":\"drawing little rockets\"}",
+      "compactLiteral": "drawing little rockets\n{}"
+    },
+    {
+      "sourceId": "51cf894d-af56-4c85-b4ee-94c548f68917",
+      "fullJson": "{\"kind\":\"preference\",\"scope\":\"reported_real\",\"evidence_kind\":\"child_reported\",\"category\":\"hobby\",\"qualifiers\":{},\"literal_value\":\"drawing little rockets\"}",
+      "compactLiteral": "drawing little rockets\n{}"
+    },
+    {
+      "sourceId": "56626c26-8b58-4105-ae92-3b54ca105f2c",
+      "fullJson": "{\"kind\":\"event\",\"scope\":\"reported_real\",\"evidence_kind\":\"child_reported\",\"event_type\":\"fell_in_puddle\",\"subject\":\"Moki\",\"local_date\":\"2026-11-01\",\"conditions\":[],\"literal_value\":\"Moki fell in a puddle.\"}",
+      "compactLiteral": "Moki\nMoki fell in a puddle."
+    },
+    {
+      "sourceId": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+      "fullJson": "{\"kind\":\"preference\",\"scope\":\"reported_real\",\"evidence_kind\":\"child_reported\",\"category\":\"like\",\"qualifiers\":{},\"literal_value\":\"xếp mô hình bằng giấy\"}",
+      "compactLiteral": "xếp mô hình bằng giấy\n{}"
+    },
+    {
+      "sourceId": "c5cfc887-079b-4e26-ab34-70e3a56aadc1",
+      "fullJson": "{\"kind\":\"child_story\",\"scope\":\"fictional\",\"evidence_kind\":\"child_reported\",\"literal_title\":\"Pip and the Pillow Planet\",\"literal_text\":\"Pip is a pretend rabbit who lands on a pillow planet.\",\"cast\":[\"Pip\"]}",
+      "compactLiteral": "Pip and the Pillow Planet\nPip is a pretend rabbit who lands on a pillow planet."
+    },
+    {
+      "sourceId": "ee74bdfd-b044-48db-8054-2df9e664af89",
+      "fullJson": "{\"kind\":\"event\",\"scope\":\"reported_real\",\"evidence_kind\":\"child_reported\",\"event_type\":\"reported_event\",\"subject\":\"Bông\",\"local_date\":\"2026-11-01\",\"conditions\":[],\"literal_value\":\"Bông làm đổ chậu cây.\"}",
+      "compactLiteral": "Bông\nBông làm đổ chậu cây."
+    }
+  ],
+  "queries": [
+    {
+      "key": "en_event_paraphrase",
+      "input": "Do you remember the pet tumble involving water that I told you about?",
+      "expectedSourceIds": [
+        "56626c26-8b58-4105-ae92-3b54ca105f2c"
+      ]
+    },
+    {
+      "key": "en_hobby_paraphrase",
+      "input": "Recall what I said about sketching tiny spacecraft.",
+      "expectedSourceIds": [
+        "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+        "51cf894d-af56-4c85-b4ee-94c548f68917"
+      ]
+    },
+    {
+      "key": "vi_hobby_paraphrase",
+      "input": "Nhắc lại điều mình kể về việc làm đồ chơi bằng giấy.",
+      "expectedSourceIds": [
+        "622c299b-c230-47d2-9976-48b0fadb5c9e"
+      ]
+    },
+    {
+      "key": "vi_to_en_event",
+      "input": "Bạn còn nhớ chuyện con chó ngã vào nước mình đã kể không?",
+      "expectedSourceIds": [
+        "56626c26-8b58-4105-ae92-3b54ca105f2c"
+      ]
+    },
+    {
+      "key": "en_to_vi_event",
+      "input": "Recall the plant-container mishap I told you about.",
+      "expectedSourceIds": [
+        "ee74bdfd-b044-48db-8054-2df9e664af89"
+      ]
+    },
+    {
+      "key": "fictional_story_paraphrase",
+      "input": "Can you recall the make-believe rabbit’s landing place I told you about?",
+      "expectedSourceIds": [
+        "c5cfc887-079b-4e26-ab34-70e3a56aadc1"
+      ]
+    },
+    {
+      "key": "unknown_no_answer",
+      "input": "Do you remember what I told you about my underwater chess tournament?",
+      "expectedSourceIds": []
+    }
+  ],
+  "input_sha256": [
+    "72584f7618b8a837a93a158128b827579ed73cddace56e24c30e1225abba1eed",
+    "c81be3296696bd807c963d064fbb9b0872ef4211073e8b68afdbf9af2b20921f",
+    "d30ebc1faf784517be0184bb9cef167e866f4af21b2754a413cda182aee104fd",
+    "b138580f25bb8a683ae57c786482d3036fe07767da1c8e07f26e4d7dde95f7b4",
+    "2a99570a2c3c61d9cc1684c3e611f908bbe9f1877abce65adfdbe2fb5cc42325",
+    "935900b2fa958d828d7632f47e35816f26d1479e969529750d7ce13d0df9f55e",
+    "ba26c5436a911e83c8af73b727cbfdbbf847c86e626c508224fd20fe8a5b3a61",
+    "ba26c5436a911e83c8af73b727cbfdbbf847c86e626c508224fd20fe8a5b3a61",
+    "ee2280f8798b1c3cfed2348d7d8af4a61b0c8c390b872486d79d0dd0ea8e119c",
+    "9cc1e6b6f86fe27f40ca00cf21f82888b78499f2d0080831737fb99b0c79e917",
+    "7401f235d05b0dea0553bbabba41f6fbf7b542def1e4c2e7640dfd9a3cbd23b0",
+    "3d966e991a1aa8107e78809dd9a4ec641a03b69ed4093102c31f57b1936a8bdf",
+    "97202ecddc0a5667d87b24da9b326dbc44449cb5b0593fe9b816b125bf827e92",
+    "586cea027c2da0553b5ae1860a7e1e2a5adb4898df742ca3e5f2df2f00aed9f4",
+    "9dc94c7d448b2355335b573128a69a83fc96207ce5f44a799554e1e8c05e9140",
+    "6e1077d03598f1aac3db6cd5127b8ee51aaeee3d99111a6e3ecfc221bfbf3d47",
+    "14a6813ba58d6a50c6bd5d20c4f498e4cc65e07c4554cb8400b95674bc9404e3",
+    "7b6a114a2c4d1168d8842168abeffda1fc1cd4e324210dbc53ec086f02882319",
+    "d3a2e1697fde0e40d7243f746facb83ce12a8f5ec823bf05c6d2cd0b19fa558a"
+  ],
+  "input_bytes": [
+    153,
+    154,
+    203,
+    160,
+    205,
+    211,
+    25,
+    25,
+    27,
+    32,
+    79,
+    35,
+    69,
+    51,
+    75,
+    76,
+    51,
+    74,
+    69
+  ],
+  "bindings": [
+    {
+      "type": "full_json",
+      "sourceId": "4937309e-e695-4b5a-9ab0-28a4683a8beb"
+    },
+    {
+      "type": "full_json",
+      "sourceId": "51cf894d-af56-4c85-b4ee-94c548f68917"
+    },
+    {
+      "type": "full_json",
+      "sourceId": "56626c26-8b58-4105-ae92-3b54ca105f2c"
+    },
+    {
+      "type": "full_json",
+      "sourceId": "622c299b-c230-47d2-9976-48b0fadb5c9e"
+    },
+    {
+      "type": "full_json",
+      "sourceId": "c5cfc887-079b-4e26-ab34-70e3a56aadc1"
+    },
+    {
+      "type": "full_json",
+      "sourceId": "ee74bdfd-b044-48db-8054-2df9e664af89"
+    },
+    {
+      "type": "compact_literal",
+      "sourceId": "4937309e-e695-4b5a-9ab0-28a4683a8beb"
+    },
+    {
+      "type": "compact_literal",
+      "sourceId": "51cf894d-af56-4c85-b4ee-94c548f68917"
+    },
+    {
+      "type": "compact_literal",
+      "sourceId": "56626c26-8b58-4105-ae92-3b54ca105f2c"
+    },
+    {
+      "type": "compact_literal",
+      "sourceId": "622c299b-c230-47d2-9976-48b0fadb5c9e"
+    },
+    {
+      "type": "compact_literal",
+      "sourceId": "c5cfc887-079b-4e26-ab34-70e3a56aadc1"
+    },
+    {
+      "type": "compact_literal",
+      "sourceId": "ee74bdfd-b044-48db-8054-2df9e664af89"
+    },
+    {
+      "type": "query",
+      "sourceId": "en_event_paraphrase"
+    },
+    {
+      "type": "query",
+      "sourceId": "en_hobby_paraphrase"
+    },
+    {
+      "type": "query",
+      "sourceId": "vi_hobby_paraphrase"
+    },
+    {
+      "type": "query",
+      "sourceId": "vi_to_en_event"
+    },
+    {
+      "type": "query",
+      "sourceId": "en_to_vi_event"
+    },
+    {
+      "type": "query",
+      "sourceId": "fictional_story_paraphrase"
+    },
+    {
+      "type": "query",
+      "sourceId": "unknown_no_answer"
+    }
+  ],
+  "models": [
+    {
+      "model": "text-embedding-3-small",
+      "status": "completed",
+      "vectorHashes": [
+        "90977f2306b0158e8a61cd1af7d0e6673fdd29ab8868f5dc1dafc28838c19653",
+        "68eb802d82eb462780a661b409e9512eac84be61c7f9a28fb084db1ba44feccc",
+        "a941691d7eb94f84128e924f8eed3541540fe588a7c557e3701989c76fe87e87",
+        "7d1f169942e2800d23c8cd7654379282dbf677e7d14b2ec64958e244c6b0f881",
+        "be7383ac3ed15db8b7431e1bf97e62ccb98119596af0498ba1f22a48fda1445d",
+        "3dea5b663362d2e24e4c867d6c10aa3f8969bf6537bc6e868500fa63901d14a7",
+        "2cee5445eaa5dedd886ec62a80062944047c46810e532ae7366e706035c61cfb",
+        "2cee5445eaa5dedd886ec62a80062944047c46810e532ae7366e706035c61cfb",
+        "484182e14a0e2b2f18ebe29426a7a6ce988083c954400345413b556dde420cd1",
+        "1672837b1e7ece7ecc4a958b2edb1ba0b96fe773013e84b9d1956eafc45d60de",
+        "9bf9f0137975417cf3e00e81691ac9a0bb6c330bb169d73b781e435f16da5bc1",
+        "fc873b83bddd10604ee398292785e25b6b5ade0d05ff5ff9c7c3df019cafd90d",
+        "cf74512a19d963d7e785bbe67500f1be192c2f0f81f55b8be25caedc809ed9ac",
+        "84c30e21e8e00928d72ffd4ceba88faecbdac12729d1a399006734801d487ef6",
+        "f6c56014fa26aa08ab1de1188b45163bc54382b2575b4b068662ded266e871da",
+        "c9ef9e9b17e7c07fcc4930c4c3fe7a2515438839c2d12294d49b0bb015cd12f0",
+        "f7e69d2aa1a9e666484f2259177056c08eaf67a990a3971258d7cc04c90d025e",
+        "97654ebe7eb57337dab047f02ff1c81e184cfefbeff9221605b9626b7fb35cb1",
+        "7cbf5d9a211f897a19c47a48a151ddd1d73ad8486e7d170785c2d4542723f53f"
+      ],
+      "variants": [
+        {
+          "variant": "full_json",
+          "hits": 4,
+          "positives": 6,
+          "crossLanguageHits": 0,
+          "crossLanguageQueries": 2,
+          "unknownHighestSimilarity": 0.1758817393931779,
+          "unknownAccepted": 0,
+          "unknownCorrect": true,
+          "queries": [
+            {
+              "key": "en_event_paraphrase",
+              "expectedSourceIds": [
+                "56626c26-8b58-4105-ae92-3b54ca105f2c"
+              ],
+              "ranked": [
+                {
+                  "sourceId": "56626c26-8b58-4105-ae92-3b54ca105f2c",
+                  "score": 0.35870995895319535
+                },
+                {
+                  "sourceId": "c5cfc887-079b-4e26-ab34-70e3a56aadc1",
+                  "score": 0.25829910408838036
+                },
+                {
+                  "sourceId": "51cf894d-af56-4c85-b4ee-94c548f68917",
+                  "score": 0.17747931895299318
+                },
+                {
+                  "sourceId": "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+                  "score": 0.17309794011407773
+                },
+                {
+                  "sourceId": "ee74bdfd-b044-48db-8054-2df9e664af89",
+                  "score": 0.15965544567901246
+                },
+                {
+                  "sourceId": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+                  "score": 0.08773149735213014
+                }
+              ],
+              "targets": [
+                {
+                  "sourceId": "56626c26-8b58-4105-ae92-3b54ca105f2c",
+                  "rank": 1,
+                  "score": 0.35870995895319535
+                }
+              ],
+              "accepted": [
+                {
+                  "sourceId": "56626c26-8b58-4105-ae92-3b54ca105f2c",
+                  "score": 0.35870995895319535
+                }
+              ],
+              "hitAt3": true,
+              "sourceRecallAt3": 1,
+              "precisionAmongAccepted": 1,
+              "unknownCorrect": null
+            },
+            {
+              "key": "en_hobby_paraphrase",
+              "expectedSourceIds": [
+                "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+                "51cf894d-af56-4c85-b4ee-94c548f68917"
+              ],
+              "ranked": [
+                {
+                  "sourceId": "51cf894d-af56-4c85-b4ee-94c548f68917",
+                  "score": 0.35624292049536077
+                },
+                {
+                  "sourceId": "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+                  "score": 0.3167406805479744
+                },
+                {
+                  "sourceId": "c5cfc887-079b-4e26-ab34-70e3a56aadc1",
+                  "score": 0.16999049955343895
+                },
+                {
+                  "sourceId": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+                  "score": 0.14032404892295197
+                },
+                {
+                  "sourceId": "56626c26-8b58-4105-ae92-3b54ca105f2c",
+                  "score": 0.10258581447945402
+                },
+                {
+                  "sourceId": "ee74bdfd-b044-48db-8054-2df9e664af89",
+                  "score": 0.06844354990825406
+                }
+              ],
+              "targets": [
+                {
+                  "sourceId": "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+                  "rank": 2,
+                  "score": 0.3167406805479744
+                },
+                {
+                  "sourceId": "51cf894d-af56-4c85-b4ee-94c548f68917",
+                  "rank": 1,
+                  "score": 0.35624292049536077
+                }
+              ],
+              "accepted": [
+                {
+                  "sourceId": "51cf894d-af56-4c85-b4ee-94c548f68917",
+                  "score": 0.35624292049536077
+                }
+              ],
+              "hitAt3": true,
+              "sourceRecallAt3": 0.5,
+              "precisionAmongAccepted": 1,
+              "unknownCorrect": null
+            },
+            {
+              "key": "vi_hobby_paraphrase",
+              "expectedSourceIds": [
+                "622c299b-c230-47d2-9976-48b0fadb5c9e"
+              ],
+              "ranked": [
+                {
+                  "sourceId": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+                  "score": 0.37094637238730843
+                },
+                {
+                  "sourceId": "ee74bdfd-b044-48db-8054-2df9e664af89",
+                  "score": 0.2637634272776323
+                },
+                {
+                  "sourceId": "51cf894d-af56-4c85-b4ee-94c548f68917",
+                  "score": 0.1633268843064428
+                },
+                {
+                  "sourceId": "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+                  "score": 0.11994670243337381
+                },
+                {
+                  "sourceId": "c5cfc887-079b-4e26-ab34-70e3a56aadc1",
+                  "score": 0.10359640691381458
+                },
+                {
+                  "sourceId": "56626c26-8b58-4105-ae92-3b54ca105f2c",
+                  "score": 0.081494843275759
+                }
+              ],
+              "targets": [
+                {
+                  "sourceId": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+                  "rank": 1,
+                  "score": 0.37094637238730843
+                }
+              ],
+              "accepted": [
+                {
+                  "sourceId": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+                  "score": 0.37094637238730843
+                }
+              ],
+              "hitAt3": true,
+              "sourceRecallAt3": 1,
+              "precisionAmongAccepted": 1,
+              "unknownCorrect": null
+            },
+            {
+              "key": "vi_to_en_event",
+              "expectedSourceIds": [
+                "56626c26-8b58-4105-ae92-3b54ca105f2c"
+              ],
+              "ranked": [
+                {
+                  "sourceId": "ee74bdfd-b044-48db-8054-2df9e664af89",
+                  "score": 0.32098062881306716
+                },
+                {
+                  "sourceId": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+                  "score": 0.22812208597158817
+                },
+                {
+                  "sourceId": "56626c26-8b58-4105-ae92-3b54ca105f2c",
+                  "score": 0.20056047021537457
+                },
+                {
+                  "sourceId": "c5cfc887-079b-4e26-ab34-70e3a56aadc1",
+                  "score": 0.09955858437588262
+                },
+                {
+                  "sourceId": "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+                  "score": 0.055720135605048966
+                },
+                {
+                  "sourceId": "51cf894d-af56-4c85-b4ee-94c548f68917",
+                  "score": 0.04723443936099237
+                }
+              ],
+              "targets": [
+                {
+                  "sourceId": "56626c26-8b58-4105-ae92-3b54ca105f2c",
+                  "rank": 3,
+                  "score": 0.20056047021537457
+                }
+              ],
+              "accepted": [],
+              "hitAt3": false,
+              "sourceRecallAt3": 0,
+              "precisionAmongAccepted": null,
+              "unknownCorrect": null
+            },
+            {
+              "key": "en_to_vi_event",
+              "expectedSourceIds": [
+                "ee74bdfd-b044-48db-8054-2df9e664af89"
+              ],
+              "ranked": [
+                {
+                  "sourceId": "56626c26-8b58-4105-ae92-3b54ca105f2c",
+                  "score": 0.28580471738072405
+                },
+                {
+                  "sourceId": "c5cfc887-079b-4e26-ab34-70e3a56aadc1",
+                  "score": 0.22354111537028443
+                },
+                {
+                  "sourceId": "ee74bdfd-b044-48db-8054-2df9e664af89",
+                  "score": 0.18959129969680158
+                },
+                {
+                  "sourceId": "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+                  "score": 0.15537809406206662
+                },
+                {
+                  "sourceId": "51cf894d-af56-4c85-b4ee-94c548f68917",
+                  "score": 0.15117887987578313
+                },
+                {
+                  "sourceId": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+                  "score": 0.13624265339612188
+                }
+              ],
+              "targets": [
+                {
+                  "sourceId": "ee74bdfd-b044-48db-8054-2df9e664af89",
+                  "rank": 3,
+                  "score": 0.18959129969680158
+                }
+              ],
+              "accepted": [],
+              "hitAt3": false,
+              "sourceRecallAt3": 0,
+              "precisionAmongAccepted": null,
+              "unknownCorrect": null
+            },
+            {
+              "key": "fictional_story_paraphrase",
+              "expectedSourceIds": [
+                "c5cfc887-079b-4e26-ab34-70e3a56aadc1"
+              ],
+              "ranked": [
+                {
+                  "sourceId": "c5cfc887-079b-4e26-ab34-70e3a56aadc1",
+                  "score": 0.42333449589386773
+                },
+                {
+                  "sourceId": "56626c26-8b58-4105-ae92-3b54ca105f2c",
+                  "score": 0.3105884041086484
+                },
+                {
+                  "sourceId": "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+                  "score": 0.2101958808799919
+                },
+                {
+                  "sourceId": "51cf894d-af56-4c85-b4ee-94c548f68917",
+                  "score": 0.20831209194313094
+                },
+                {
+                  "sourceId": "ee74bdfd-b044-48db-8054-2df9e664af89",
+                  "score": 0.18849805780085024
+                },
+                {
+                  "sourceId": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+                  "score": 0.09841616214383418
+                }
+              ],
+              "targets": [
+                {
+                  "sourceId": "c5cfc887-079b-4e26-ab34-70e3a56aadc1",
+                  "rank": 1,
+                  "score": 0.42333449589386773
+                }
+              ],
+              "accepted": [
+                {
+                  "sourceId": "c5cfc887-079b-4e26-ab34-70e3a56aadc1",
+                  "score": 0.42333449589386773
+                }
+              ],
+              "hitAt3": true,
+              "sourceRecallAt3": 1,
+              "precisionAmongAccepted": 1,
+              "unknownCorrect": null
+            },
+            {
+              "key": "unknown_no_answer",
+              "expectedSourceIds": [],
+              "ranked": [
+                {
+                  "sourceId": "56626c26-8b58-4105-ae92-3b54ca105f2c",
+                  "score": 0.1758817393931779
+                },
+                {
+                  "sourceId": "51cf894d-af56-4c85-b4ee-94c548f68917",
+                  "score": 0.12078307787862383
+                },
+                {
+                  "sourceId": "c5cfc887-079b-4e26-ab34-70e3a56aadc1",
+                  "score": 0.12049639740266971
+                },
+                {
+                  "sourceId": "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+                  "score": 0.10038939113645151
+                },
+                {
+                  "sourceId": "ee74bdfd-b044-48db-8054-2df9e664af89",
+                  "score": 0.059219397290820715
+                },
+                {
+                  "sourceId": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+                  "score": 0.04515567062899008
+                }
+              ],
+              "targets": [],
+              "accepted": [],
+              "hitAt3": null,
+              "sourceRecallAt3": null,
+              "precisionAmongAccepted": null,
+              "unknownCorrect": true
+            }
+          ]
+        },
+        {
+          "variant": "compact_literal",
+          "hits": 4,
+          "positives": 6,
+          "crossLanguageHits": 0,
+          "crossLanguageQueries": 2,
+          "unknownHighestSimilarity": 0.16243555557804967,
+          "unknownAccepted": 0,
+          "unknownCorrect": true,
+          "queries": [
+            {
+              "key": "en_event_paraphrase",
+              "expectedSourceIds": [
+                "56626c26-8b58-4105-ae92-3b54ca105f2c"
+              ],
+              "ranked": [
+                {
+                  "sourceId": "56626c26-8b58-4105-ae92-3b54ca105f2c",
+                  "score": 0.3891931010978774
+                },
+                {
+                  "sourceId": "c5cfc887-079b-4e26-ab34-70e3a56aadc1",
+                  "score": 0.2523390803980734
+                },
+                {
+                  "sourceId": "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+                  "score": 0.16861322244718016
+                },
+                {
+                  "sourceId": "51cf894d-af56-4c85-b4ee-94c548f68917",
+                  "score": 0.16861322244718016
+                },
+                {
+                  "sourceId": "ee74bdfd-b044-48db-8054-2df9e664af89",
+                  "score": 0.07929154874196193
+                },
+                {
+                  "sourceId": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+                  "score": 0.030409298490991117
+                }
+              ],
+              "targets": [
+                {
+                  "sourceId": "56626c26-8b58-4105-ae92-3b54ca105f2c",
+                  "rank": 1,
+                  "score": 0.3891931010978774
+                }
+              ],
+              "accepted": [
+                {
+                  "sourceId": "56626c26-8b58-4105-ae92-3b54ca105f2c",
+                  "score": 0.3891931010978774
+                }
+              ],
+              "hitAt3": true,
+              "sourceRecallAt3": 1,
+              "precisionAmongAccepted": 1,
+              "unknownCorrect": null
+            },
+            {
+              "key": "en_hobby_paraphrase",
+              "expectedSourceIds": [
+                "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+                "51cf894d-af56-4c85-b4ee-94c548f68917"
+              ],
+              "ranked": [
+                {
+                  "sourceId": "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+                  "score": 0.52176613611179
+                },
+                {
+                  "sourceId": "51cf894d-af56-4c85-b4ee-94c548f68917",
+                  "score": 0.52176613611179
+                },
+                {
+                  "sourceId": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+                  "score": 0.20329082529713546
+                },
+                {
+                  "sourceId": "c5cfc887-079b-4e26-ab34-70e3a56aadc1",
+                  "score": 0.17202047123604017
+                },
+                {
+                  "sourceId": "56626c26-8b58-4105-ae92-3b54ca105f2c",
+                  "score": 0.14925092941028031
+                },
+                {
+                  "sourceId": "ee74bdfd-b044-48db-8054-2df9e664af89",
+                  "score": 0.05056825053269567
+                }
+              ],
+              "targets": [
+                {
+                  "sourceId": "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+                  "rank": 1,
+                  "score": 0.52176613611179
+                },
+                {
+                  "sourceId": "51cf894d-af56-4c85-b4ee-94c548f68917",
+                  "rank": 2,
+                  "score": 0.52176613611179
+                }
+              ],
+              "accepted": [
+                {
+                  "sourceId": "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+                  "score": 0.52176613611179
+                },
+                {
+                  "sourceId": "51cf894d-af56-4c85-b4ee-94c548f68917",
+                  "score": 0.52176613611179
+                }
+              ],
+              "hitAt3": true,
+              "sourceRecallAt3": 1,
+              "precisionAmongAccepted": 1,
+              "unknownCorrect": null
+            },
+            {
+              "key": "vi_hobby_paraphrase",
+              "expectedSourceIds": [
+                "622c299b-c230-47d2-9976-48b0fadb5c9e"
+              ],
+              "ranked": [
+                {
+                  "sourceId": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+                  "score": 0.5115422007014714
+                },
+                {
+                  "sourceId": "ee74bdfd-b044-48db-8054-2df9e664af89",
+                  "score": 0.32394410200077384
+                },
+                {
+                  "sourceId": "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+                  "score": 0.18438277836774628
+                },
+                {
+                  "sourceId": "51cf894d-af56-4c85-b4ee-94c548f68917",
+                  "score": 0.18438277836774628
+                },
+                {
+                  "sourceId": "56626c26-8b58-4105-ae92-3b54ca105f2c",
+                  "score": 0.11461936909784984
+                },
+                {
+                  "sourceId": "c5cfc887-079b-4e26-ab34-70e3a56aadc1",
+                  "score": 0.08447986484075018
+                }
+              ],
+              "targets": [
+                {
+                  "sourceId": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+                  "rank": 1,
+                  "score": 0.5115422007014714
+                }
+              ],
+              "accepted": [
+                {
+                  "sourceId": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+                  "score": 0.5115422007014714
+                }
+              ],
+              "hitAt3": true,
+              "sourceRecallAt3": 1,
+              "precisionAmongAccepted": 1,
+              "unknownCorrect": null
+            },
+            {
+              "key": "vi_to_en_event",
+              "expectedSourceIds": [
+                "56626c26-8b58-4105-ae92-3b54ca105f2c"
+              ],
+              "ranked": [
+                {
+                  "sourceId": "ee74bdfd-b044-48db-8054-2df9e664af89",
+                  "score": 0.32116925331210855
+                },
+                {
+                  "sourceId": "56626c26-8b58-4105-ae92-3b54ca105f2c",
+                  "score": 0.25161454011936035
+                },
+                {
+                  "sourceId": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+                  "score": 0.2008859380107099
+                },
+                {
+                  "sourceId": "c5cfc887-079b-4e26-ab34-70e3a56aadc1",
+                  "score": 0.07362679300936208
+                },
+                {
+                  "sourceId": "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+                  "score": 0.052797970618892756
+                },
+                {
+                  "sourceId": "51cf894d-af56-4c85-b4ee-94c548f68917",
+                  "score": 0.052797970618892756
+                }
+              ],
+              "targets": [
+                {
+                  "sourceId": "56626c26-8b58-4105-ae92-3b54ca105f2c",
+                  "rank": 2,
+                  "score": 0.25161454011936035
+                }
+              ],
+              "accepted": [],
+              "hitAt3": false,
+              "sourceRecallAt3": 0,
+              "precisionAmongAccepted": null,
+              "unknownCorrect": null
+            },
+            {
+              "key": "en_to_vi_event",
+              "expectedSourceIds": [
+                "ee74bdfd-b044-48db-8054-2df9e664af89"
+              ],
+              "ranked": [
+                {
+                  "sourceId": "56626c26-8b58-4105-ae92-3b54ca105f2c",
+                  "score": 0.27501143874011974
+                },
+                {
+                  "sourceId": "c5cfc887-079b-4e26-ab34-70e3a56aadc1",
+                  "score": 0.19467210676882732
+                },
+                {
+                  "sourceId": "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+                  "score": 0.14714525375001308
+                },
+                {
+                  "sourceId": "51cf894d-af56-4c85-b4ee-94c548f68917",
+                  "score": 0.14714525375001308
+                },
+                {
+                  "sourceId": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+                  "score": 0.10496343414700096
+                },
+                {
+                  "sourceId": "ee74bdfd-b044-48db-8054-2df9e664af89",
+                  "score": 0.10077791733528285
+                }
+              ],
+              "targets": [
+                {
+                  "sourceId": "ee74bdfd-b044-48db-8054-2df9e664af89",
+                  "rank": 6,
+                  "score": 0.10077791733528285
+                }
+              ],
+              "accepted": [],
+              "hitAt3": false,
+              "sourceRecallAt3": 0,
+              "precisionAmongAccepted": null,
+              "unknownCorrect": null
+            },
+            {
+              "key": "fictional_story_paraphrase",
+              "expectedSourceIds": [
+                "c5cfc887-079b-4e26-ab34-70e3a56aadc1"
+              ],
+              "ranked": [
+                {
+                  "sourceId": "c5cfc887-079b-4e26-ab34-70e3a56aadc1",
+                  "score": 0.45506012736112456
+                },
+                {
+                  "sourceId": "56626c26-8b58-4105-ae92-3b54ca105f2c",
+                  "score": 0.2977946823998514
+                },
+                {
+                  "sourceId": "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+                  "score": 0.21957354461043177
+                },
+                {
+                  "sourceId": "51cf894d-af56-4c85-b4ee-94c548f68917",
+                  "score": 0.21957354461043177
+                },
+                {
+                  "sourceId": "ee74bdfd-b044-48db-8054-2df9e664af89",
+                  "score": 0.08734477416822337
+                },
+                {
+                  "sourceId": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+                  "score": 0.03670657940613875
+                }
+              ],
+              "targets": [
+                {
+                  "sourceId": "c5cfc887-079b-4e26-ab34-70e3a56aadc1",
+                  "rank": 1,
+                  "score": 0.45506012736112456
+                }
+              ],
+              "accepted": [
+                {
+                  "sourceId": "c5cfc887-079b-4e26-ab34-70e3a56aadc1",
+                  "score": 0.45506012736112456
+                }
+              ],
+              "hitAt3": true,
+              "sourceRecallAt3": 1,
+              "precisionAmongAccepted": 1,
+              "unknownCorrect": null
+            },
+            {
+              "key": "unknown_no_answer",
+              "expectedSourceIds": [],
+              "ranked": [
+                {
+                  "sourceId": "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+                  "score": 0.16243555557804967
+                },
+                {
+                  "sourceId": "51cf894d-af56-4c85-b4ee-94c548f68917",
+                  "score": 0.16243555557804967
+                },
+                {
+                  "sourceId": "56626c26-8b58-4105-ae92-3b54ca105f2c",
+                  "score": 0.1609638434307145
+                },
+                {
+                  "sourceId": "c5cfc887-079b-4e26-ab34-70e3a56aadc1",
+                  "score": 0.10478101285871472
+                },
+                {
+                  "sourceId": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+                  "score": 0.03432017555001061
+                },
+                {
+                  "sourceId": "ee74bdfd-b044-48db-8054-2df9e664af89",
+                  "score": -0.013791518580550208
+                }
+              ],
+              "targets": [],
+              "accepted": [],
+              "hitAt3": null,
+              "sourceRecallAt3": null,
+              "precisionAmongAccepted": null,
+              "unknownCorrect": true
+            }
+          ]
+        }
+      ],
+      "telemetry": [
+        {
+          "sequence": 1,
+          "api": "embeddings",
+          "requestedModel": "text-embedding-3-small",
+          "returnedModel": "text-embedding-3-small",
+          "dimensions": 1536,
+          "batchSize": 19,
+          "requestId": "req_d0d7f8e25f9c4d9d8b7a4828afe0e372",
+          "startedAt": "2026-10-31T08:20:34.491Z",
+          "elapsedMs": 3218.577292,
+          "outcome": "completed",
+          "promptTokens": 472,
+          "totalTokens": 472,
+          "errorCode": null,
+          "httpStatus": 200
+        }
+      ]
+    },
+    {
+      "model": "text-embedding-3-large",
+      "status": "completed",
+      "vectorHashes": [
+        "36f5b208b2b1fdef5687bdba84d322cde2fe45d70bbc22d16026c1c448c9ea19",
+        "a1fab81d5a7cb4ea09f3423e7778f1bd9f91486835949b6bccd4698fffcc421e",
+        "926c75d7f480950adc03523b6ef48cdf784a69ecd0360396a14e751833802460",
+        "382e30c4c840215fef80a4bc39835be45e2c0969fb0d19b8f07cacfd45d40832",
+        "ece3fde63839593799ef9a0a161737c8fb6754f4274c26b0d2795198c3923ccd",
+        "7261651558ac4edecf3c0fc4873ce020ffb647e226d750c8e6cf42659349ec09",
+        "64e1d3cc726e3511ac0f0b09be9b163d3b148c5361e83854fd1f1767c9727f83",
+        "64e1d3cc726e3511ac0f0b09be9b163d3b148c5361e83854fd1f1767c9727f83",
+        "e2a428112c0363be8416587e14d93eba1ad81d99b1437b1376b439b54e89efbd",
+        "1c4636a0abb540cf53d7df5fefbac0a14a87867be0d0ed95e037ee1a80dc171b",
+        "19a8e6021f694e0f5d6e5a5e7e286016e1817ec19f1e1ebb5b71defc9acbaf82",
+        "52ebae86abab1345554ddbe8e1e85f3c753a0363df41eb6098681b6efeecd108",
+        "019db570b118aa4b6683548b4fc35f58739e9f4613e36100edf0120c40f2812a",
+        "a27d47a522abaaf7586e8e7e68878e5b59f98792c0475f16696bc7f9195ef745",
+        "144b8400516dca355f8bc09dd8c7b56b4a5281f6a92d2bc1a2bd8fc63464f849",
+        "c54493545c689983193bb39c9fb8d4638fcd765fddbd4bec27132f2ac398687b",
+        "bf4d9ad767087d47d1e33ff9408197488038941b96519fa47d7d814c259bff07",
+        "0125a722dbeb18f7ec01485653c6e54e075344a52508bfa7bc1505bbc0e97203",
+        "9bf60893c1f02b8de5ddccb49cc4808cc2706ffd4aaa818bc51b50cfa5ab14ee"
+      ],
+      "variants": [
+        {
+          "variant": "full_json",
+          "hits": 4,
+          "positives": 6,
+          "crossLanguageHits": 0,
+          "crossLanguageQueries": 2,
+          "unknownHighestSimilarity": 0.14943260839142505,
+          "unknownAccepted": 0,
+          "unknownCorrect": true,
+          "queries": [
+            {
+              "key": "en_event_paraphrase",
+              "expectedSourceIds": [
+                "56626c26-8b58-4105-ae92-3b54ca105f2c"
+              ],
+              "ranked": [
+                {
+                  "sourceId": "56626c26-8b58-4105-ae92-3b54ca105f2c",
+                  "score": 0.37054174281912683
+                },
+                {
+                  "sourceId": "ee74bdfd-b044-48db-8054-2df9e664af89",
+                  "score": 0.2419095492386112
+                },
+                {
+                  "sourceId": "c5cfc887-079b-4e26-ab34-70e3a56aadc1",
+                  "score": 0.2235215943164243
+                },
+                {
+                  "sourceId": "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+                  "score": 0.13371754027716118
+                },
+                {
+                  "sourceId": "51cf894d-af56-4c85-b4ee-94c548f68917",
+                  "score": 0.1303816065493578
+                },
+                {
+                  "sourceId": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+                  "score": 0.1045145907107338
+                }
+              ],
+              "targets": [
+                {
+                  "sourceId": "56626c26-8b58-4105-ae92-3b54ca105f2c",
+                  "rank": 1,
+                  "score": 0.37054174281912683
+                }
+              ],
+              "accepted": [
+                {
+                  "sourceId": "56626c26-8b58-4105-ae92-3b54ca105f2c",
+                  "score": 0.37054174281912683
+                }
+              ],
+              "hitAt3": true,
+              "sourceRecallAt3": 1,
+              "precisionAmongAccepted": 1,
+              "unknownCorrect": null
+            },
+            {
+              "key": "en_hobby_paraphrase",
+              "expectedSourceIds": [
+                "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+                "51cf894d-af56-4c85-b4ee-94c548f68917"
+              ],
+              "ranked": [
+                {
+                  "sourceId": "51cf894d-af56-4c85-b4ee-94c548f68917",
+                  "score": 0.37738447628133936
+                },
+                {
+                  "sourceId": "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+                  "score": 0.34517091730710087
+                },
+                {
+                  "sourceId": "c5cfc887-079b-4e26-ab34-70e3a56aadc1",
+                  "score": 0.18736633596794336
+                },
+                {
+                  "sourceId": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+                  "score": 0.18644140648978916
+                },
+                {
+                  "sourceId": "56626c26-8b58-4105-ae92-3b54ca105f2c",
+                  "score": 0.05702351284355371
+                },
+                {
+                  "sourceId": "ee74bdfd-b044-48db-8054-2df9e664af89",
+                  "score": 0.04872942576044807
+                }
+              ],
+              "targets": [
+                {
+                  "sourceId": "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+                  "rank": 2,
+                  "score": 0.34517091730710087
+                },
+                {
+                  "sourceId": "51cf894d-af56-4c85-b4ee-94c548f68917",
+                  "rank": 1,
+                  "score": 0.37738447628133936
+                }
+              ],
+              "accepted": [
+                {
+                  "sourceId": "51cf894d-af56-4c85-b4ee-94c548f68917",
+                  "score": 0.37738447628133936
+                }
+              ],
+              "hitAt3": true,
+              "sourceRecallAt3": 0.5,
+              "precisionAmongAccepted": 1,
+              "unknownCorrect": null
+            },
+            {
+              "key": "vi_hobby_paraphrase",
+              "expectedSourceIds": [
+                "622c299b-c230-47d2-9976-48b0fadb5c9e"
+              ],
+              "ranked": [
+                {
+                  "sourceId": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+                  "score": 0.4665960820202118
+                },
+                {
+                  "sourceId": "ee74bdfd-b044-48db-8054-2df9e664af89",
+                  "score": 0.2769232752464451
+                },
+                {
+                  "sourceId": "51cf894d-af56-4c85-b4ee-94c548f68917",
+                  "score": 0.23583266023679966
+                },
+                {
+                  "sourceId": "c5cfc887-079b-4e26-ab34-70e3a56aadc1",
+                  "score": 0.21722232224278173
+                },
+                {
+                  "sourceId": "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+                  "score": 0.20742116663689436
+                },
+                {
+                  "sourceId": "56626c26-8b58-4105-ae92-3b54ca105f2c",
+                  "score": 0.06929269522467016
+                }
+              ],
+              "targets": [
+                {
+                  "sourceId": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+                  "rank": 1,
+                  "score": 0.4665960820202118
+                }
+              ],
+              "accepted": [
+                {
+                  "sourceId": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+                  "score": 0.4665960820202118
+                }
+              ],
+              "hitAt3": true,
+              "sourceRecallAt3": 1,
+              "precisionAmongAccepted": 1,
+              "unknownCorrect": null
+            },
+            {
+              "key": "vi_to_en_event",
+              "expectedSourceIds": [
+                "56626c26-8b58-4105-ae92-3b54ca105f2c"
+              ],
+              "ranked": [
+                {
+                  "sourceId": "56626c26-8b58-4105-ae92-3b54ca105f2c",
+                  "score": 0.3007346880407536
+                },
+                {
+                  "sourceId": "ee74bdfd-b044-48db-8054-2df9e664af89",
+                  "score": 0.299036020151502
+                },
+                {
+                  "sourceId": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+                  "score": 0.21444702659327236
+                },
+                {
+                  "sourceId": "c5cfc887-079b-4e26-ab34-70e3a56aadc1",
+                  "score": 0.12409953691487556
+                },
+                {
+                  "sourceId": "51cf894d-af56-4c85-b4ee-94c548f68917",
+                  "score": 0.046757277861547694
+                },
+                {
+                  "sourceId": "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+                  "score": 0.045649676231518097
+                }
+              ],
+              "targets": [
+                {
+                  "sourceId": "56626c26-8b58-4105-ae92-3b54ca105f2c",
+                  "rank": 1,
+                  "score": 0.3007346880407536
+                }
+              ],
+              "accepted": [],
+              "hitAt3": false,
+              "sourceRecallAt3": 0,
+              "precisionAmongAccepted": null,
+              "unknownCorrect": null
+            },
+            {
+              "key": "en_to_vi_event",
+              "expectedSourceIds": [
+                "ee74bdfd-b044-48db-8054-2df9e664af89"
+              ],
+              "ranked": [
+                {
+                  "sourceId": "ee74bdfd-b044-48db-8054-2df9e664af89",
+                  "score": 0.2893067198633354
+                },
+                {
+                  "sourceId": "56626c26-8b58-4105-ae92-3b54ca105f2c",
+                  "score": 0.22082958473801395
+                },
+                {
+                  "sourceId": "c5cfc887-079b-4e26-ab34-70e3a56aadc1",
+                  "score": 0.18466517071283112
+                },
+                {
+                  "sourceId": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+                  "score": 0.1468848976038297
+                },
+                {
+                  "sourceId": "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+                  "score": 0.12696158677037822
+                },
+                {
+                  "sourceId": "51cf894d-af56-4c85-b4ee-94c548f68917",
+                  "score": 0.12343764698780546
+                }
+              ],
+              "targets": [
+                {
+                  "sourceId": "ee74bdfd-b044-48db-8054-2df9e664af89",
+                  "rank": 1,
+                  "score": 0.2893067198633354
+                }
+              ],
+              "accepted": [],
+              "hitAt3": false,
+              "sourceRecallAt3": 0,
+              "precisionAmongAccepted": null,
+              "unknownCorrect": null
+            },
+            {
+              "key": "fictional_story_paraphrase",
+              "expectedSourceIds": [
+                "c5cfc887-079b-4e26-ab34-70e3a56aadc1"
+              ],
+              "ranked": [
+                {
+                  "sourceId": "c5cfc887-079b-4e26-ab34-70e3a56aadc1",
+                  "score": 0.45831922203488307
+                },
+                {
+                  "sourceId": "51cf894d-af56-4c85-b4ee-94c548f68917",
+                  "score": 0.22865143723018894
+                },
+                {
+                  "sourceId": "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+                  "score": 0.22332697231636978
+                },
+                {
+                  "sourceId": "56626c26-8b58-4105-ae92-3b54ca105f2c",
+                  "score": 0.16337164015862654
+                },
+                {
+                  "sourceId": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+                  "score": 0.13749256906027355
+                },
+                {
+                  "sourceId": "ee74bdfd-b044-48db-8054-2df9e664af89",
+                  "score": 0.12779243724331982
+                }
+              ],
+              "targets": [
+                {
+                  "sourceId": "c5cfc887-079b-4e26-ab34-70e3a56aadc1",
+                  "rank": 1,
+                  "score": 0.45831922203488307
+                }
+              ],
+              "accepted": [
+                {
+                  "sourceId": "c5cfc887-079b-4e26-ab34-70e3a56aadc1",
+                  "score": 0.45831922203488307
+                }
+              ],
+              "hitAt3": true,
+              "sourceRecallAt3": 1,
+              "precisionAmongAccepted": 1,
+              "unknownCorrect": null
+            },
+            {
+              "key": "unknown_no_answer",
+              "expectedSourceIds": [],
+              "ranked": [
+                {
+                  "sourceId": "51cf894d-af56-4c85-b4ee-94c548f68917",
+                  "score": 0.14943260839142505
+                },
+                {
+                  "sourceId": "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+                  "score": 0.13023460619789043
+                },
+                {
+                  "sourceId": "c5cfc887-079b-4e26-ab34-70e3a56aadc1",
+                  "score": 0.12571221979144184
+                },
+                {
+                  "sourceId": "56626c26-8b58-4105-ae92-3b54ca105f2c",
+                  "score": 0.10876743329573912
+                },
+                {
+                  "sourceId": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+                  "score": 0.10866090322869754
+                },
+                {
+                  "sourceId": "ee74bdfd-b044-48db-8054-2df9e664af89",
+                  "score": 0.0532818859361482
+                }
+              ],
+              "targets": [],
+              "accepted": [],
+              "hitAt3": null,
+              "sourceRecallAt3": null,
+              "precisionAmongAccepted": null,
+              "unknownCorrect": true
+            }
+          ]
+        },
+        {
+          "variant": "compact_literal",
+          "hits": 4,
+          "positives": 6,
+          "crossLanguageHits": 0,
+          "crossLanguageQueries": 2,
+          "unknownHighestSimilarity": 0.14528191327518797,
+          "unknownAccepted": 0,
+          "unknownCorrect": true,
+          "queries": [
+            {
+              "key": "en_event_paraphrase",
+              "expectedSourceIds": [
+                "56626c26-8b58-4105-ae92-3b54ca105f2c"
+              ],
+              "ranked": [
+                {
+                  "sourceId": "56626c26-8b58-4105-ae92-3b54ca105f2c",
+                  "score": 0.3741562529100546
+                },
+                {
+                  "sourceId": "c5cfc887-079b-4e26-ab34-70e3a56aadc1",
+                  "score": 0.20332426744170778
+                },
+                {
+                  "sourceId": "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+                  "score": 0.11963090372831336
+                },
+                {
+                  "sourceId": "51cf894d-af56-4c85-b4ee-94c548f68917",
+                  "score": 0.11963090372831336
+                },
+                {
+                  "sourceId": "ee74bdfd-b044-48db-8054-2df9e664af89",
+                  "score": 0.08018426836244619
+                },
+                {
+                  "sourceId": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+                  "score": 0.040229179222004564
+                }
+              ],
+              "targets": [
+                {
+                  "sourceId": "56626c26-8b58-4105-ae92-3b54ca105f2c",
+                  "rank": 1,
+                  "score": 0.3741562529100546
+                }
+              ],
+              "accepted": [
+                {
+                  "sourceId": "56626c26-8b58-4105-ae92-3b54ca105f2c",
+                  "score": 0.3741562529100546
+                }
+              ],
+              "hitAt3": true,
+              "sourceRecallAt3": 1,
+              "precisionAmongAccepted": 1,
+              "unknownCorrect": null
+            },
+            {
+              "key": "en_hobby_paraphrase",
+              "expectedSourceIds": [
+                "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+                "51cf894d-af56-4c85-b4ee-94c548f68917"
+              ],
+              "ranked": [
+                {
+                  "sourceId": "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+                  "score": 0.45509003508933843
+                },
+                {
+                  "sourceId": "51cf894d-af56-4c85-b4ee-94c548f68917",
+                  "score": 0.45509003508933843
+                },
+                {
+                  "sourceId": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+                  "score": 0.19521760380871708
+                },
+                {
+                  "sourceId": "c5cfc887-079b-4e26-ab34-70e3a56aadc1",
+                  "score": 0.17916846693679964
+                },
+                {
+                  "sourceId": "56626c26-8b58-4105-ae92-3b54ca105f2c",
+                  "score": 0.0742767580025224
+                },
+                {
+                  "sourceId": "ee74bdfd-b044-48db-8054-2df9e664af89",
+                  "score": 0.07368296225509517
+                }
+              ],
+              "targets": [
+                {
+                  "sourceId": "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+                  "rank": 1,
+                  "score": 0.45509003508933843
+                },
+                {
+                  "sourceId": "51cf894d-af56-4c85-b4ee-94c548f68917",
+                  "rank": 2,
+                  "score": 0.45509003508933843
+                }
+              ],
+              "accepted": [
+                {
+                  "sourceId": "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+                  "score": 0.45509003508933843
+                },
+                {
+                  "sourceId": "51cf894d-af56-4c85-b4ee-94c548f68917",
+                  "score": 0.45509003508933843
+                }
+              ],
+              "hitAt3": true,
+              "sourceRecallAt3": 1,
+              "precisionAmongAccepted": 1,
+              "unknownCorrect": null
+            },
+            {
+              "key": "vi_hobby_paraphrase",
+              "expectedSourceIds": [
+                "622c299b-c230-47d2-9976-48b0fadb5c9e"
+              ],
+              "ranked": [
+                {
+                  "sourceId": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+                  "score": 0.49033038154720887
+                },
+                {
+                  "sourceId": "ee74bdfd-b044-48db-8054-2df9e664af89",
+                  "score": 0.3134177132266965
+                },
+                {
+                  "sourceId": "c5cfc887-079b-4e26-ab34-70e3a56aadc1",
+                  "score": 0.1728346164718752
+                },
+                {
+                  "sourceId": "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+                  "score": 0.1702103194382537
+                },
+                {
+                  "sourceId": "51cf894d-af56-4c85-b4ee-94c548f68917",
+                  "score": 0.1702103194382537
+                },
+                {
+                  "sourceId": "56626c26-8b58-4105-ae92-3b54ca105f2c",
+                  "score": 0.04968837810413081
+                }
+              ],
+              "targets": [
+                {
+                  "sourceId": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+                  "rank": 1,
+                  "score": 0.49033038154720887
+                }
+              ],
+              "accepted": [
+                {
+                  "sourceId": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+                  "score": 0.49033038154720887
+                }
+              ],
+              "hitAt3": true,
+              "sourceRecallAt3": 1,
+              "precisionAmongAccepted": 1,
+              "unknownCorrect": null
+            },
+            {
+              "key": "vi_to_en_event",
+              "expectedSourceIds": [
+                "56626c26-8b58-4105-ae92-3b54ca105f2c"
+              ],
+              "ranked": [
+                {
+                  "sourceId": "56626c26-8b58-4105-ae92-3b54ca105f2c",
+                  "score": 0.3143187525754387
+                },
+                {
+                  "sourceId": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+                  "score": 0.21746599409280623
+                },
+                {
+                  "sourceId": "ee74bdfd-b044-48db-8054-2df9e664af89",
+                  "score": 0.21550637482937351
+                },
+                {
+                  "sourceId": "c5cfc887-079b-4e26-ab34-70e3a56aadc1",
+                  "score": 0.07670628507899674
+                },
+                {
+                  "sourceId": "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+                  "score": 0.05187649626845489
+                },
+                {
+                  "sourceId": "51cf894d-af56-4c85-b4ee-94c548f68917",
+                  "score": 0.05187649626845489
+                }
+              ],
+              "targets": [
+                {
+                  "sourceId": "56626c26-8b58-4105-ae92-3b54ca105f2c",
+                  "rank": 1,
+                  "score": 0.3143187525754387
+                }
+              ],
+              "accepted": [],
+              "hitAt3": false,
+              "sourceRecallAt3": 0,
+              "precisionAmongAccepted": null,
+              "unknownCorrect": null
+            },
+            {
+              "key": "en_to_vi_event",
+              "expectedSourceIds": [
+                "ee74bdfd-b044-48db-8054-2df9e664af89"
+              ],
+              "ranked": [
+                {
+                  "sourceId": "ee74bdfd-b044-48db-8054-2df9e664af89",
+                  "score": 0.23557174278559642
+                },
+                {
+                  "sourceId": "56626c26-8b58-4105-ae92-3b54ca105f2c",
+                  "score": 0.22741814242187006
+                },
+                {
+                  "sourceId": "c5cfc887-079b-4e26-ab34-70e3a56aadc1",
+                  "score": 0.16568999120688843
+                },
+                {
+                  "sourceId": "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+                  "score": 0.14647371107427
+                },
+                {
+                  "sourceId": "51cf894d-af56-4c85-b4ee-94c548f68917",
+                  "score": 0.14647371107427
+                },
+                {
+                  "sourceId": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+                  "score": 0.10537000571950357
+                }
+              ],
+              "targets": [
+                {
+                  "sourceId": "ee74bdfd-b044-48db-8054-2df9e664af89",
+                  "rank": 1,
+                  "score": 0.23557174278559642
+                }
+              ],
+              "accepted": [],
+              "hitAt3": false,
+              "sourceRecallAt3": 0,
+              "precisionAmongAccepted": null,
+              "unknownCorrect": null
+            },
+            {
+              "key": "fictional_story_paraphrase",
+              "expectedSourceIds": [
+                "c5cfc887-079b-4e26-ab34-70e3a56aadc1"
+              ],
+              "ranked": [
+                {
+                  "sourceId": "c5cfc887-079b-4e26-ab34-70e3a56aadc1",
+                  "score": 0.47762318570404555
+                },
+                {
+                  "sourceId": "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+                  "score": 0.20384160895290684
+                },
+                {
+                  "sourceId": "51cf894d-af56-4c85-b4ee-94c548f68917",
+                  "score": 0.20384160895290684
+                },
+                {
+                  "sourceId": "56626c26-8b58-4105-ae92-3b54ca105f2c",
+                  "score": 0.19193193373880094
+                },
+                {
+                  "sourceId": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+                  "score": 0.06026243468034747
+                },
+                {
+                  "sourceId": "ee74bdfd-b044-48db-8054-2df9e664af89",
+                  "score": 0.04919443140811195
+                }
+              ],
+              "targets": [
+                {
+                  "sourceId": "c5cfc887-079b-4e26-ab34-70e3a56aadc1",
+                  "rank": 1,
+                  "score": 0.47762318570404555
+                }
+              ],
+              "accepted": [
+                {
+                  "sourceId": "c5cfc887-079b-4e26-ab34-70e3a56aadc1",
+                  "score": 0.47762318570404555
+                }
+              ],
+              "hitAt3": true,
+              "sourceRecallAt3": 1,
+              "precisionAmongAccepted": 1,
+              "unknownCorrect": null
+            },
+            {
+              "key": "unknown_no_answer",
+              "expectedSourceIds": [],
+              "ranked": [
+                {
+                  "sourceId": "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+                  "score": 0.14528191327518797
+                },
+                {
+                  "sourceId": "51cf894d-af56-4c85-b4ee-94c548f68917",
+                  "score": 0.14528191327518797
+                },
+                {
+                  "sourceId": "56626c26-8b58-4105-ae92-3b54ca105f2c",
+                  "score": 0.12454948960243357
+                },
+                {
+                  "sourceId": "c5cfc887-079b-4e26-ab34-70e3a56aadc1",
+                  "score": 0.11247678033166077
+                },
+                {
+                  "sourceId": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+                  "score": 0.059548575891599925
+                },
+                {
+                  "sourceId": "ee74bdfd-b044-48db-8054-2df9e664af89",
+                  "score": -0.023810698092891814
+                }
+              ],
+              "targets": [],
+              "accepted": [],
+              "hitAt3": null,
+              "sourceRecallAt3": null,
+              "precisionAmongAccepted": null,
+              "unknownCorrect": true
+            }
+          ]
+        }
+      ],
+      "telemetry": [
+        {
+          "sequence": 1,
+          "api": "embeddings",
+          "requestedModel": "text-embedding-3-large",
+          "returnedModel": "text-embedding-3-large",
+          "dimensions": 1536,
+          "batchSize": 19,
+          "requestId": "req_f3c02c5610ff4ab3bbda92c32bed230a",
+          "startedAt": "2026-10-31T08:20:37.725Z",
+          "elapsedMs": 1272.495292,
+          "outcome": "completed",
+          "promptTokens": 472,
+          "totalTokens": 472,
+          "errorCode": null,
+          "httpStatus": 200
+        }
+      ]
+    }
+  ],
+  "blocker": null,
+  "elapsed_ms": 4515,
+  "limitations": [
+    "Calibration on already observed v2 failures, not held-out accuracy or acceptance.",
+    "Six source records represent five captured statements; two preference IDs support one hobby statement.",
+    "Dense cosine comparison only; no lexical fusion, dialogue, source-eligibility, deletion, native PostgreSQL, or production behavior is reevaluated.",
+    "Compact texts exclude metadata tags from the embedding input. Production evidence must continue preserving scope, category, dates and all guards outside this experiment."
+  ]
+}

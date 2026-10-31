@@ -8,6 +8,7 @@ import { MiuApplication } from './application.js';
 import { createMemoryStore } from './memory/index.js';
 import { createProvider } from './pipeline/providers.js';
 import { AppError, PERSONALITIES } from './shared/types.js';
+import { createVectorMemoryFromEnv, vectorBackend, vectorSearchEnabled } from './memory/vector/service.js';
 
 const BODY_LIMIT = 16 * 1_024;
 const PREFIX = '/api/engine';
@@ -186,8 +187,13 @@ export async function startEngineServer(environment?: Record<string, string | un
   if (!['127.0.0.1', '::1', 'localhost'].includes(host)) throw new AppError('loopback_host_required', 503);
   const port = z.coerce.number().int().min(1).max(65_535).parse(env.PORT ?? '3001');
   const provider = createProvider(env);
-  const memory = await createMemoryStore({ databaseUrl: env.DATABASE_URL, dataDir: env.DATABASE_URL ? undefined : env.MIU_DATA_DIR ?? resolve('.miu-data'), clockMode: 'demo' });
-  const app = new MiuApplication(memory, provider);
+  if (vectorSearchEnabled(env) && provider.mode !== 'real') throw new AppError('real_model_required', 503);
+  const memory = await createMemoryStore({ databaseUrl: env.DATABASE_URL, dataDir: env.DATABASE_URL ? undefined : env.MIU_DATA_DIR ?? resolve('.miu-data'), clockMode: 'demo',
+    vectorExtension: vectorSearchEnabled(env) && vectorBackend(env) === 'pgvector' });
+  let retrieval;
+  try { retrieval = await createVectorMemoryFromEnv(memory, env); }
+  catch (error) { await memory.close(); throw error; }
+  const app = new MiuApplication(memory, provider, Date.now, { retrieval, evaluateRealModel: provider.mode === 'real' });
   const server = createEngineServer(app, { demoMode: true });
   try {
     await new Promise<void>((resolveListening, reject) => {

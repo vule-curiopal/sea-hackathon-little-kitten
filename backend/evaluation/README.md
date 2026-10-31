@@ -1,6 +1,6 @@
 # Miu engine evaluation
 
-This environment runs synthetic conversations through the actual `MiuApplication`, character director, provider, memory store, and playback-receipt lifecycle. The catalog contains **102 scenarios, 207 conversations, and 550 scenario turns**. Every scenario has multiple conversations, and every scenario turn has explicit assertions and a semantic acceptance rubric.
+This environment runs synthetic conversations through the actual `MiuApplication`, character director, provider, memory store, and playback-receipt lifecycle. The catalog contains **203 scenarios, 421 conversations, and 998 scenario turns**, including the 100 additional cases SC-104 through SC-203. Every scenario has multiple conversations, and every scenario turn has explicit assertions and a semantic acceptance rubric.
 
 **Character and memory evaluation requires the real provider and actual model requests.** This is the user's project policy, recorded in [AGENTS.md](../../AGENTS.md). The fake provider is reserved for frontend and pipeline development. Offline unit or harness doubles can check local logic, but their output is not character, memory, or model-quality evidence.
 
@@ -15,7 +15,7 @@ npm run eval:catalog
 node --env-file=.env --import tsx backend/scripts/run-engine-evaluation.ts --provider real --history full --output backend/evaluation/runs/my-real-run
 ```
 
-`eval:catalog` validates the authored cases and exports [scenarios/catalog.v1.json](scenarios/catalog.v1.json). The core cases cover everyday questions, games, nonsense, language switching, names, tâm sự, mood, memory, correction, deletion, and privacy. The advanced cases add configuration, fictional life, story resumption, stopping, retries, clocks, expiry, and relationship boundaries. See [core.ts](scenarios/core.ts) and [advanced.ts](scenarios/advanced.ts) for the actual inputs and expected behavior.
+`eval:catalog` validates the authored cases and exports [scenarios/catalog.v3.json](scenarios/catalog.v3.json). The core cases cover everyday questions, games, nonsense, language switching, names, tâm sự, mood, memory, correction, deletion, and privacy. The advanced cases add configuration, fictional life, story resumption, stopping, retries, clocks, expiry, and relationship boundaries. See [core.ts](scenarios/core.ts), [advanced.ts](scenarios/advanced.ts), and the additional scenario sources below for the actual inputs and expected behavior.
 
 The evaluation CLI defaults to `real` and rejects `--provider fake`; the runner also enforces the real-provider requirement. Real runs call the configured classification, reply, and safety services while using an isolated **in-memory PGlite database**. They do not connect through `DATABASE_URL` or modify production memories. A generic acknowledgement does not satisfy a scenario that requires arithmetic, a game move, a correction, or a specific answer. A blocked real request remains a recorded failure rather than receiving a substitute fake answer.
 
@@ -32,7 +32,7 @@ node --env-file=.env --import tsx backend/scripts/run-engine-evaluation.ts --pro
 
 `--history full` first replays all 365 daily historical conversations as one standalone chronological history. It then resets state before each isolated scenario and replays only that scenario's declared `history_dates` before its test conversations. State persists between conversations within a scenario and stays isolated from every other scenario.
 
-`--history none` is the default and skips the standalone year replay. It **does not skip scenario-specific historical seeds**. Both modes load and validate the historical fixture because selected scenarios can depend on it. Use `--history full` explicitly when the standalone year should also be replayed. Consequently, a full run's total conversations and turn records exceed the catalog's 207 conversations and 550 scenario turns.
+`--history none` is the default and skips the standalone year replay. It **does not skip scenario-specific historical seeds**. Both modes load and validate the historical fixture because selected scenarios can depend on it. Use `--history full` explicitly when the standalone year should also be replayed. Consequently, a full run's total conversations and turn records exceed the catalog's own conversation and turn totals.
 
 Serving and evaluation share classification instructions, assertion-scope validation, and persistence guards. Evaluation additionally requires a real reply request for exact authored plans and records provider provenance. [SC-101 and SC-102](scenarios/memory-regressions.ts) cover mixed statements/questions, negation, affirmative reports, retraction after reload, and legacy-state repair. SC-102's `initial_memory` is deliberately corrupt authored state with no assertion provenance, labeled `synthetic_legacy_fixture_not_learning_evidence` in both its definition and the run manifest. Its initial records establish the repair precondition only; they cannot establish successful learning. All responses and correction behavior still run through the real provider and application.
 
@@ -41,6 +41,24 @@ node --env-file=.env --import tsx backend/scripts/run-engine-evaluation.ts --pro
 ```
 
 With credentials already supplied to the process, the npm entry point is `npm run eval:run -- --provider real --history full --output NEW_DIRECTORY`. For the separate continuous daily-growth evaluation, see the [real-model growth workflow](../README.md#evaluate-daily-growth-with-real-openai-models): `npm run eval:growth -- --provider real --output NEW_DIRECTORY`. That workflow also requires actual model requests; its former fake baseline is diagnostic material only.
+
+## Additional 100 scenarios
+
+The version 3 catalog preserves SC-001 through SC-103 and adds **100 cases with 212 conversations and 441 turns** of authored test inputs and acceptance criteria:
+
+| IDs | Cases | Source | Coverage |
+| --- | --- | --- | --- |
+| SC-104–SC-138 | 35 | [extended-memory.ts](scenarios/extended-memory.ts) | Subject attribution, uncertain and quoted reports, precise corrections, memory lifecycle, and fiction/language boundaries |
+| SC-139–SC-173 | 35 | [extended-dialogue.ts](scenarios/extended-dialogue.ts) | Rule-based games, everyday reasoning, language precision, bounded creativity, and needs/autonomy |
+| SC-174–SC-203 | 30 | [extended-lifecycle.ts](scenarios/extended-lifecycle.ts) | Delivery atomicity, clock/privacy boundaries, settings/affect, authority/capability boundaries, and selective deletion/recovery |
+
+Regenerate the complete [catalog.v3.json](scenarios/catalog.v3.json) with `npm run eval:catalog`. The export records `execution_status: not_run` and `character_memory_quality_evidence: false`: generating or validating test definitions does not run the character engine or establish model quality. Existing versioned catalog exports and evaluation evidence are preserved.
+
+Run an individual new case using the existing real-provider workflow, for example:
+
+```sh
+npm run eval:run -- --provider real --history none --scenario SC-104 --output backend/evaluation/runs/extended-sc104-real
+```
 
 ## Delivery, time, and state
 

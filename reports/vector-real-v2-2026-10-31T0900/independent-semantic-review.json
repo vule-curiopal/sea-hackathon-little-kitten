@@ -1,0 +1,66 @@
+{
+  "review_kind": "independent_automated_semantic_review",
+  "source": "turns.jsonl",
+  "reviewed_turns": 20,
+  "new_provider_requests": 0,
+  "published_text_matches_logged_real_model_reply": true,
+  "raw_harness_score_overridden": false,
+  "dialogue_findings": [
+    {
+      "case": "capture_child_story",
+      "severity": "task_routing",
+      "finding": "The declarative child-authored Pip/rabbit story triggers an unrelated pet/name missing-slot response. The first sentence says “I don’t know your pet’s name.” even though no pet-identity question was asked. The subsequent story acknowledgment preserves fiction.",
+      "frozen_action": "memory/recall, pet/name, missing"
+    }
+  ],
+  "retrieval_misses": [
+    {
+      "case": "vi_to_en_event",
+      "expected_source": "English Moki/puddle report",
+      "expected_source_dense_rank": 3,
+      "expected_source_cosine": 0.1996784305622561,
+      "threshold": 0.35,
+      "published_behavior": "Honest reminder request with no replacement fact; this is a retrieval miss, not successful recall or age-based forgetting."
+    },
+    {
+      "case": "en_to_vi_event",
+      "expected_source": "Vietnamese Bông/plant-container report",
+      "expected_source_dense_rank": 3,
+      "expected_source_cosine": 0.18943555000953638,
+      "threshold": 0.35,
+      "published_behavior": "Honest reminder request with no replacement fact; this is a retrieval miss, not successful recall or age-based forgetting."
+    }
+  ],
+  "evidence_precision_findings": [
+    {
+      "case": "vi_hobby_paraphrase",
+      "relevant_cards": 1,
+      "returned_cards": 2,
+      "case_precision": 0.5,
+      "finding": "The paper-model preference is relevant; the Bông/plant event is unrelated but enters via lexical score 0.14666666666666667. The actual reply uses only the relevant preference, so no incorrect spoken fact is observed."
+    }
+  ],
+  "observed_successes": [
+    "Same-language event and hobby paraphrases use the relevant canonical source.",
+    "Pip landing recall explicitly remains child-authored pretend fiction.",
+    "The unknown underwater-chess topic receives honest uncertainty without invented prior knowledge.",
+    "Missing favorite color and ambiguous pet identity keep typed precedence and make no query-embedding request.",
+    "Canceled/no-save disclosures do not receive false saved-memory acknowledgments in their words.",
+    "The name correction acknowledges Mochi as the corrected dog; scoped forgetting receives a brief applied-operation acknowledgment.",
+    "After deletion, water-tumble recall does not revive the forgotten dog or substitute another event.",
+    "The 365-day hobby query uses the original durable canonical hobby source and preserves its literal meaning."
+  ],
+  "limits": [
+    "This is automated semantic review of twenty typed fictional inputs for one selected age/style, not human preference or physical listening evidence.",
+    "Dialogue wording alone does not prove cancellation, deletion, source revisions, worker races, provider retention, or database durability; those require the separate recorded state/mechanical evidence.",
+    "No wrong-profile or fictional-as-real published claim was observed, but this is not broad profile-isolation or fictional-scope coverage.",
+    "No planned-event example appears in these twenty real replies; planned-versus-completed preservation is not established by this semantic review.",
+    "Proper-name anchor heuristics and sparse bilingual examples are not general entity-resolution or multilingual-recall guarantees.",
+    "No randomized age gate is implemented; the two cross-language misses must not be relabeled intentional forgetting.",
+    "The original harness score remains unchanged; the story-routing and extra-card findings supplement its asserted criteria."
+  ],
+  "next_lexical_experiment": {
+    "proposal": "Measure removal/downweighting of common Vietnamese function/verb tokens such as việc/làm/bằng; or predeclare a lexical threshold experiment (for example 0.20 versus 0.10) with held-out short-topic recall controls.",
+    "caution": "Do not silently retune the completed benchmark. Lowering the global dense threshold cannot rescue cross-language recall safely here: the wrong event ranks above the desired source in both directions."
+  }
+}

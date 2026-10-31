@@ -1,0 +1,447 @@
+{
+  "review_kind": "independent_automated_semantic_review",
+  "source_report": "report.json",
+  "source_turns": "turns.jsonl",
+  "source_sha256": {
+    "report.json": "d4f7b7b4042d4d2e6190c97130e9bb9bf7e8261cfa6c5ba936fb3e4f40176992",
+    "turns.jsonl": "ac68e047f6c046fd357e527ea1c9e8984d091cb998415a37bb1edc341305b07c"
+  },
+  "reviewer_provider_requests": 0,
+  "runtime_source_edits": false,
+  "reviewed_published_replies": 26,
+  "raw_harness_score_overridden": false,
+  "raw_harness_coverage": {
+    "passed": 28,
+    "failed": 1,
+    "blocked": 0,
+    "not_attempted": 0
+  },
+  "findings": {
+    "routing_coverage_failures": 1,
+    "concrete_unsupported_published_fact_findings": 0,
+    "irrelevant_final_card_findings": 0,
+    "subjective_dialogue_concerns": 1
+  },
+  "positive_recall_coverage": {
+    "queries": 8,
+    "correct_single_final_card": 8,
+    "selected_qualifying_dense_support": 8,
+    "lexical_also_supported": [
+      "vi_hobby_paraphrase"
+    ],
+    "not_a_broad_quality_rate": true
+  },
+  "summary": [
+    "All eight positive recall queries publish the expected historical fact from one relevant canonical card, including both original cross-language event misses and two new cross-language hobby paraphrases.",
+    "No unsupported break, bath, swim or real-rabbit assertion was observed in the published negative replies. The swimming negative is a typed-route failure and is not successful vector-guard coverage.",
+    "Story capture no longer denies knowing an unrelated pet name. Fiction recall stays fictional. Post-forget recall returns no evidence and does not revive the dog or substitute the cat event.",
+    "All 26 published texts match the logged final actual model reply. Capture_vi_pet_event has one extra model attempt whose rejected words are not retained."
+  ],
+  "limits": [
+    "This is independent review of actual words and cards, not a second paid model-judge request or human usability study.",
+    "Fixed tiny typed English/Vietnamese corpus, age 6-8, friend/ENFP; six original queries informed calibration and only the six added exact query texts were held out from calibration requests.",
+    "The added questions overlap calibration target facts and some near-negative concepts. They are exact-phrasing holdouts, not an independent topic, corpus or domain holdout.",
+    "Simulated playback receipts, fresh PGlite pgvector database and controlled 365-day clock advance; no physical microphone/audio, native PostgreSQL deployment or operational year-long soak.",
+    "No actual planned-event dialogue query occurs among these 26 replies. Plan-versus-completed behavior is covered separately by bounded pure policy tests, not proven by these words.",
+    "The rejected first VI pet-capture draft and checker rationale are unavailable; their correctness cannot be judged from request metadata alone.",
+    "Zero observed wrong-profile/unsupported claims here is not a universal privacy, entailment or retrieval-quality guarantee."
+  ],
+  "turn_reviews": [
+    {
+      "case": "capture_en_pet_event",
+      "finding": "no_concrete_semantic_problem_observed",
+      "details": [],
+      "input": "My dog is named Moki. Moki fell in a puddle.",
+      "published_reply": "Oh, Moki took an unexpected puddle tumble! What did Moki do next?",
+      "source_ids": [],
+      "selected_methods": [],
+      "embedding_requested": false,
+      "delivery": "completed_simulated",
+      "actual_model_reply_response_id": "resp_0b651773e2b18e2a016ae5a90213ec87d288540ccf9cfae396",
+      "published_text_matches_logged_final_model_reply": true
+    },
+    {
+      "case": "capture_en_hobby",
+      "finding": "no_concrete_semantic_problem_observed",
+      "details": [],
+      "input": "I enjoy drawing little rockets.",
+      "published_reply": "Little rockets—tiny drawings with big adventures! What do you like to add to yours?",
+      "source_ids": [],
+      "selected_methods": [],
+      "embedding_requested": false,
+      "delivery": "completed_simulated",
+      "actual_model_reply_response_id": "resp_0aa574db137f9272016ae5a9090ccc87d2ab208fb278524366",
+      "published_text_matches_logged_final_model_reply": true
+    },
+    {
+      "case": "capture_child_story",
+      "finding": "no_concrete_semantic_problem_observed",
+      "details": [
+        "Correct child_story route; no false missing-pet-name claim. Fictional rabbit remains explicitly pretend."
+      ],
+      "input": "My story is called Pip and the Pillow Planet. Pip is a pretend rabbit who lands on a pillow planet.",
+      "published_reply": "Pip and the Pillow Planet sounds like a wonderfully cozy story! Your pretend rabbit Pip lands on a whole planet of pillows—what a fun idea.",
+      "source_ids": [],
+      "selected_methods": [],
+      "embedding_requested": false,
+      "delivery": "completed_simulated",
+      "actual_model_reply_response_id": "resp_0fc85065542d8a92016ae5a91118f887d2949e937b83cc4695",
+      "published_text_matches_logged_final_model_reply": true
+    },
+    {
+      "case": "capture_vi_hobby",
+      "finding": "no_concrete_semantic_problem_observed",
+      "details": [],
+      "input": "Mình thích xếp mô hình bằng giấy.",
+      "published_reply": "Từ một tờ giấy mà xếp thành mô hình, nghe như phép biến hình nho nhỏ ấy! Bạn thích xếp mô hình gì nhất?",
+      "source_ids": [],
+      "selected_methods": [],
+      "embedding_requested": false,
+      "delivery": "completed_simulated",
+      "actual_model_reply_response_id": "resp_0573ee69dc4be784016ae5a918850c87d2b2de190bf2b2ddb6",
+      "published_text_matches_logged_final_model_reply": true
+    },
+    {
+      "case": "capture_vi_pet_event",
+      "finding": "no_concrete_semantic_problem_observed",
+      "details": [
+        "The published breakage advice is conditional (Nếu chậu bị vỡ), not a historical assertion that the pot broke.",
+        "Telemetry shows two reply/check attempts. Only the final candidate is present; the earlier rejected words/check rationale cannot be independently assessed."
+      ],
+      "input": "Mèo nhà mình tên là Bông. Bông làm đổ chậu cây.",
+      "published_reply": "Ôi, Bông làm đổ chậu cây rồi! Nếu chậu bị vỡ, bạn tránh chạm vào mảnh vỡ và nhờ người lớn giúp nhé. Bông có sao không?",
+      "source_ids": [],
+      "selected_methods": [],
+      "embedding_requested": false,
+      "delivery": "completed_simulated",
+      "actual_model_reply_response_id": "resp_0a19e69e37e50a70016ae5a927924887d2aee348d62b541d7a",
+      "published_text_matches_logged_final_model_reply": true
+    },
+    {
+      "case": "en_event_paraphrase",
+      "finding": "no_concrete_semantic_problem_observed",
+      "details": [],
+      "input": "Do you remember the pet tumble involving water that I told you about?",
+      "published_reply": "Yes, you told me that Moki, your dog, fell in a puddle.",
+      "source_ids": [
+        "a15e064b-fea4-40ab-8b2d-f2cfe6d752fd"
+      ],
+      "selected_methods": [
+        "dense"
+      ],
+      "embedding_requested": true,
+      "delivery": "completed_simulated",
+      "actual_model_reply_response_id": "resp_05f1a50802f689d4016ae5a9307bf887d29f77693b722756c6",
+      "published_text_matches_logged_final_model_reply": true
+    },
+    {
+      "case": "en_hobby_paraphrase",
+      "finding": "no_concrete_semantic_problem_observed",
+      "details": [],
+      "input": "Recall what I said about sketching tiny spacecraft.",
+      "published_reply": "You told me you like drawing little rockets!",
+      "source_ids": [
+        "b797a19d-505c-44df-a971-a864ede4aedd"
+      ],
+      "selected_methods": [
+        "dense"
+      ],
+      "embedding_requested": true,
+      "delivery": "completed_simulated",
+      "actual_model_reply_response_id": "resp_01cc378a3a68b1bb016ae5a937801087d287275a2f79e82425",
+      "published_text_matches_logged_final_model_reply": true
+    },
+    {
+      "case": "vi_hobby_paraphrase",
+      "finding": "no_concrete_semantic_problem_observed",
+      "details": [],
+      "input": "Nhắc lại điều mình kể về việc làm đồ chơi bằng giấy.",
+      "published_reply": "Bạn đã kể với Miu rằng bạn thích xếp mô hình bằng giấy.",
+      "source_ids": [
+        "799effd6-e929-408b-8215-0937af453f9d"
+      ],
+      "selected_methods": [
+        "dense",
+        "lexical"
+      ],
+      "embedding_requested": true,
+      "delivery": "completed_simulated",
+      "actual_model_reply_response_id": "resp_00d572709b3ea054016ae5a940897887d2b13f499656634da8",
+      "published_text_matches_logged_final_model_reply": true
+    },
+    {
+      "case": "vi_to_en_event",
+      "finding": "no_concrete_semantic_problem_observed",
+      "details": [],
+      "input": "Bạn còn nhớ chuyện con chó ngã vào nước mình đã kể không?",
+      "published_reply": "Miu nhớ chứ! Bạn đã kể rằng chú chó Moki ngã vào một vũng nước.",
+      "source_ids": [
+        "a15e064b-fea4-40ab-8b2d-f2cfe6d752fd"
+      ],
+      "selected_methods": [
+        "dense"
+      ],
+      "embedding_requested": true,
+      "delivery": "completed_simulated",
+      "actual_model_reply_response_id": "resp_073fcbc89a539a0b016ae5a9477db487d29f9e33a7e623260d",
+      "published_text_matches_logged_final_model_reply": true
+    },
+    {
+      "case": "en_to_vi_event",
+      "finding": "no_concrete_semantic_problem_observed",
+      "details": [],
+      "input": "Recall the plant-container mishap I told you about.",
+      "published_reply": "You told me that Bông, your cat, knocked over a plant pot.",
+      "source_ids": [
+        "5bc5b62e-68a3-4389-99a5-4e1e96f12681"
+      ],
+      "selected_methods": [
+        "dense"
+      ],
+      "embedding_requested": true,
+      "delivery": "completed_simulated",
+      "actual_model_reply_response_id": "resp_05be15edd58dae4f016ae5a94f2aa087d29e7dc72cda397c33",
+      "published_text_matches_logged_final_model_reply": true
+    },
+    {
+      "case": "fictional_story_paraphrase",
+      "finding": "no_concrete_semantic_problem_observed",
+      "details": [
+        "Reply explicitly locates the rabbit and pillow planet in the child’s story."
+      ],
+      "input": "Can you recall the make-believe rabbit’s landing place I told you about?",
+      "published_reply": "Yes! In your story, Pip the pretend rabbit lands on a pillow planet.",
+      "source_ids": [
+        "49784d72-f87f-4fbe-83f4-bf97bc7364ce"
+      ],
+      "selected_methods": [
+        "dense"
+      ],
+      "embedding_requested": true,
+      "delivery": "completed_simulated",
+      "actual_model_reply_response_id": "resp_0951480e6a2bc4a2016ae5a955fd4c87d2a3b2d53d90896742",
+      "published_text_matches_logged_final_model_reply": true
+    },
+    {
+      "case": "new_vi_rocket_recall",
+      "finding": "subjective_dialogue_concern",
+      "details": [
+        "The first sentence correctly recalls the rocket-drawing hobby from the sole relevant card.",
+        "The second sentence asks for a specific drawing episode although the broad recall request did not require that clarification. This is a usability concern, not an unsupported fact or retrieval miss."
+      ],
+      "input": "Nhớ lại chuyện vẽ tàu vũ trụ nhỏ mình từng kể.",
+      "published_reply": "Miu nhớ bạn từng kể là thích vẽ những chiếc tên lửa nhỏ. Miu chưa có chi tiết về một lần vẽ cụ thể; bạn muốn nhắc lại lần nào vậy?",
+      "source_ids": [
+        "b797a19d-505c-44df-a971-a864ede4aedd"
+      ],
+      "selected_methods": [
+        "dense"
+      ],
+      "embedding_requested": true,
+      "delivery": "completed_simulated",
+      "actual_model_reply_response_id": "resp_001ff506238e8bf9016ae5a95e518087d2acf05323fc4bc085",
+      "published_text_matches_logged_final_model_reply": true
+    },
+    {
+      "case": "new_en_paper_recall",
+      "finding": "no_concrete_semantic_problem_observed",
+      "details": [],
+      "input": "Recall the paper folding pastime I shared.",
+      "published_reply": "You told me you like folding paper into models!",
+      "source_ids": [
+        "799effd6-e929-408b-8215-0937af453f9d"
+      ],
+      "selected_methods": [
+        "dense"
+      ],
+      "embedding_requested": true,
+      "delivery": "completed_simulated",
+      "actual_model_reply_response_id": "resp_08bf91c65c324e82016ae5a9677a9087d2828308d92710a9a3",
+      "published_text_matches_logged_final_model_reply": true
+    },
+    {
+      "case": "new_unsupported_cat_break",
+      "finding": "no_concrete_semantic_problem_observed",
+      "details": [],
+      "input": "Do you remember Bông breaking the flower pot I told you about?",
+      "published_reply": "I can’t bring that moment with Bông and the flower pot to mind. Could you remind me what happened?",
+      "source_ids": [],
+      "selected_methods": [],
+      "embedding_requested": true,
+      "delivery": "completed_simulated",
+      "actual_model_reply_response_id": "resp_0680cb58da3614e3016ae5a971ce7c87d2a4bcaf0aaed7fd36",
+      "published_text_matches_logged_final_model_reply": true
+    },
+    {
+      "case": "new_unsupported_dog_swim",
+      "finding": "routing_coverage_failure_with_safe_reply",
+      "details": [
+        "The event question was routed to the typed pet-name slot. It made no embedding request, so this turn cannot verify vector outcome rejection.",
+        "The actual reply denies recalling swimming and does not assert that it happened. Preserve the harness failure."
+      ],
+      "input": "Do you recall my dog swimming across a lake?",
+      "published_reply": "I remember your dog’s name is Moki, but I don’t recall a story about Moki swimming across a lake.",
+      "source_ids": [],
+      "selected_methods": [],
+      "embedding_requested": false,
+      "delivery": "prepared",
+      "actual_model_reply_response_id": "resp_0eee1832ba92ec58016ae5a97a404487d2b4c13699aa4213af",
+      "published_text_matches_logged_final_model_reply": true
+    },
+    {
+      "case": "new_unsupported_dog_bath",
+      "finding": "no_concrete_semantic_problem_observed",
+      "details": [],
+      "input": "Do you remember my dog getting a bath after the puddle?",
+      "published_reply": "I can’t bring that moment to mind right now. Can you remind me what happened after the puddle?",
+      "source_ids": [],
+      "selected_methods": [],
+      "embedding_requested": true,
+      "delivery": "completed_simulated",
+      "actual_model_reply_response_id": "resp_0f30c8b0da48c6ac016ae5a98081b887d2be36735e60fc9e79",
+      "published_text_matches_logged_final_model_reply": true
+    },
+    {
+      "case": "new_unsupported_real_rabbit",
+      "finding": "no_concrete_semantic_problem_observed",
+      "details": [],
+      "input": "Do you recall a real rabbit landing on a pillow planet at my home?",
+      "published_reply": "I can’t bring that episode to mind. Can you give me one little reminder about it?",
+      "source_ids": [],
+      "selected_methods": [],
+      "embedding_requested": true,
+      "delivery": "completed_simulated",
+      "actual_model_reply_response_id": "resp_04bfa87661943b8d016ae5a987d67487d2a8ab91a29f1bc2c1",
+      "published_text_matches_logged_final_model_reply": true
+    },
+    {
+      "case": "unknown_no_answer",
+      "finding": "no_concrete_semantic_problem_observed",
+      "details": [],
+      "input": "Do you remember what I told you about my underwater chess tournament?",
+      "published_reply": "I can’t bring that underwater chess tournament to mind right now. Could you remind me of one thing you told me about it?",
+      "source_ids": [],
+      "selected_methods": [],
+      "embedding_requested": true,
+      "delivery": "completed_simulated",
+      "actual_model_reply_response_id": "resp_00ef59fb6ecb64a1016ae5a98ed73487d2a70316dee840608b",
+      "published_text_matches_logged_final_model_reply": true
+    },
+    {
+      "case": "typed_missing_app",
+      "finding": "no_concrete_semantic_problem_observed",
+      "details": [],
+      "input": "What is my favorite color?",
+      "published_reply": "I don’t know your favorite color yet. Which color do you like best?",
+      "source_ids": [],
+      "selected_methods": [],
+      "embedding_requested": false,
+      "delivery": "completed_simulated",
+      "actual_model_reply_response_id": "resp_0ef62a19418a735d016ae5a9964a1c87d2bb771b85e2409685",
+      "published_text_matches_logged_final_model_reply": true
+    },
+    {
+      "case": "typed_ambiguous_app",
+      "finding": "no_concrete_semantic_problem_observed",
+      "details": [],
+      "input": "Do you remember my pet's name?",
+      "published_reply": "Do you mean your dog or your cat?",
+      "source_ids": [],
+      "selected_methods": [],
+      "embedding_requested": false,
+      "delivery": "completed_simulated",
+      "actual_model_reply_response_id": "resp_09b950c737b76adb016ae5a99d8a1887d2af10b3d9e5c0b58a",
+      "published_text_matches_logged_final_model_reply": true
+    },
+    {
+      "case": "canceled_capture",
+      "finding": "no_concrete_semantic_problem_observed",
+      "details": [
+        "Prepared reply contains no saved-memory assertion; delivery is canceled before started. State checks, rather than words alone, establish nonlearning."
+      ],
+      "input": "I enjoy pottery.",
+      "published_reply": "Pottery turns a lump of clay into all sorts of treasures! What do you enjoy making?",
+      "source_ids": [],
+      "selected_methods": [],
+      "embedding_requested": false,
+      "delivery": "canceled_before_started",
+      "actual_model_reply_response_id": "resp_0d13b91ad47bcaeb016ae5a9a7978487d294d1bf1177fadf45",
+      "published_text_matches_logged_final_model_reply": true
+    },
+    {
+      "case": "no_save_capture",
+      "finding": "no_concrete_semantic_problem_observed",
+      "details": [
+        "Acknowledges suppression of this disclosure without claiming deletion of earlier memories."
+      ],
+      "input": "Don't remember this. I like knitting.",
+      "published_reply": "I won’t save that as a memory. Knitting turns yarn into something new, one little loop at a time!",
+      "source_ids": [],
+      "selected_methods": [],
+      "embedding_requested": false,
+      "delivery": "completed_simulated",
+      "actual_model_reply_response_id": "resp_04d376e7fec34d89016ae5a9ae592087d2a5a19c86a63e4b18",
+      "published_text_matches_logged_final_model_reply": true
+    },
+    {
+      "case": "stale_embedding_after_correction",
+      "finding": "no_concrete_semantic_problem_observed",
+      "details": [],
+      "input": "I said the name wrong. My dog is Mochi, not Moki. Please correct it.",
+      "published_reply": "Thanks for clearing that up! I’ve corrected your dog’s name to Mochi.",
+      "source_ids": [],
+      "selected_methods": [],
+      "embedding_requested": false,
+      "delivery": "completed_simulated",
+      "actual_model_reply_response_id": "resp_0a7b101e1ffb7d97016ae5a9b5b9ec87d28479c624c146a5a7",
+      "published_text_matches_logged_final_model_reply": true
+    },
+    {
+      "case": "forget_cascade",
+      "finding": "no_concrete_semantic_problem_observed",
+      "details": [],
+      "input": "Forget Mochi.",
+      "published_reply": "Miu has forgotten that.",
+      "source_ids": [],
+      "selected_methods": [],
+      "embedding_requested": false,
+      "delivery": "completed_simulated",
+      "actual_model_reply_response_id": "resp_003005fbcd18d26c016ae5a9bc042487d288217f343a63b8b8",
+      "published_text_matches_logged_final_model_reply": true
+    },
+    {
+      "case": "after_forget_no_answer",
+      "finding": "no_concrete_semantic_problem_observed",
+      "details": [
+        "No dog name/event or replacement cat event is resurrected; final evidence is empty."
+      ],
+      "input": "Do you remember the pet tumble involving water that I told you about?",
+      "published_reply": "I can’t bring that tumble to mind right now. Could you remind me which pet it happened to?",
+      "source_ids": [],
+      "selected_methods": [],
+      "embedding_requested": true,
+      "delivery": "completed_simulated",
+      "actual_model_reply_response_id": "resp_0843078318772ac3016ae5a9c2712487d2a4b7c6928685143f",
+      "published_text_matches_logged_final_model_reply": true
+    },
+    {
+      "case": "durability_365_days",
+      "finding": "no_concrete_semantic_problem_observed",
+      "details": [
+        "Reply recalls the original hobby source/revision after the controlled clock advance. This is not a year-long operational soak."
+      ],
+      "input": "Recall what I said about sketching tiny spacecraft.",
+      "published_reply": "You told me you like drawing little rockets!",
+      "source_ids": [
+        "b797a19d-505c-44df-a971-a864ede4aedd"
+      ],
+      "selected_methods": [
+        "dense"
+      ],
+      "embedding_requested": true,
+      "delivery": "completed_simulated",
+      "actual_model_reply_response_id": "resp_0fe9c232fe901955016ae5a9c9e71487d28c04645fbeb910e9",
+      "published_text_matches_logged_final_model_reply": true
+    }
+  ]
+}

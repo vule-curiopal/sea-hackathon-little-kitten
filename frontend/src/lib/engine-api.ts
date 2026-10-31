@@ -1,4 +1,5 @@
 import { VoiceClientError, type SessionResponse } from '@miu/voice-client';
+import type { AffectPresentation, AffectSnapshot } from './affect';
 
 export const PERSONALITIES = ['ISTJ', 'ISFJ', 'INFJ', 'INTJ', 'ISTP', 'ISFP', 'INFP', 'INTP', 'ESTP', 'ESFP', 'ENFP', 'ENTP', 'ESTJ', 'ESFJ', 'ENFJ', 'ENTJ'] as const;
 export type Role = 'friend' | 'big_sibling' | 'teacher';
@@ -6,17 +7,19 @@ export type Presentation = {
   emotion?: string; purpose?: string; rhythm?: string; dailyMood?: string; delivery?: string;
   comfortActive?: boolean; allowPurr?: boolean; allowGiggle?: boolean;
   face?: { expression?: string; gesture?: string };
+  affect?: AffectPresentation;
 };
 export type DemoContext = {
+  affect?: AffectSnapshot;
   profile: { displayName: string; ageBand: string; timezone: string };
   config: { personality: string; role: string; voiceId: string };
   clock: { effectiveNow: string; localDate: string; timezone: string; version: number; mode: string };
   daily: { localDate: string; mood: string; growthDays: number; growthTheme: string; diary: { en: string; vi: string }; storyEpisode: { chapter: number; en: string; vi: string } };
   friendship: string;
-  entities: { id: string; kind: string; name: string; species: string | null; aliases: string[]; expiresAt: string }[];
-  preferences: { id: string; category: string; value: string; expiresAt: string }[];
-  socialCircle: { id: string; name: string; relation: string; expiresAt: string }[];
-  events: { id: string; subjectName: string | null; value: string; evidenceKind: string; localDate: string; expiresAt: string }[];
+  entities: { id: string; kind: string; name: string; species: string | null; aliases: string[]; expiresAt: string | null }[];
+  preferences: { id: string; category: string; value: string; expiresAt: string | null }[];
+  socialCircle: { id: string; name: string; relation: string; expiresAt: string | null }[];
+  events: { id: string; subjectName: string | null; value: string; evidenceKind: string; localDate: string; expiresAt: string | null }[];
   stories: { id: string; title: string; summary: string; castNames: string[] }[];
   storyProgress: { title: { en: string; vi: string }; chapter: number; status: string } | null;
 };

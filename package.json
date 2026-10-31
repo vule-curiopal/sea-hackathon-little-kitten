@@ -41,7 +41,9 @@
     "typecheck:voice": "tsc -b --pretty false",
     "typecheck:engine": "tsc --noEmit -p tsconfig.engine.json",
     "test:engine": "tsx --test backend/*.test.ts backend/**/*.test.ts backend/evaluation/growth/*.test.ts",
-    "test:voice": "vitest run"
+    "test:voice": "vitest run",
+    "memory:index": "tsx backend/scripts/index-vector-memory.ts",
+    "verify:vector": "tsx backend/scripts/verify-vector-real.ts"
   },
   "engines": {
     "node": ">=22.19.0"

@@ -1,0 +1,1556 @@
+{
+  "run_kind": "isolated_vector_real_provider_verification",
+  "status": "completed_with_unresolved_failures",
+  "provider_requested": "real",
+  "database": "fresh_in_memory_pglite_pgvector",
+  "production_accessed": false,
+  "fake_provider_constructed": false,
+  "benchmark": {
+    "version": "vector-tiny-real-v2",
+    "captures": [
+      {
+        "key": "en_pet_event",
+        "kind": "event",
+        "text": "My dog is named Moki. Moki fell in a puddle.",
+        "literal": "puddle"
+      },
+      {
+        "key": "en_hobby",
+        "kind": "preference",
+        "text": "I enjoy drawing little rockets.",
+        "literal": "rockets"
+      },
+      {
+        "key": "child_story",
+        "kind": "story",
+        "text": "My story is called Pip and the Pillow Planet. Pip is a pretend rabbit who lands on a pillow planet.",
+        "literal": "Pip"
+      },
+      {
+        "key": "vi_hobby",
+        "kind": "preference",
+        "text": "Mình thích xếp mô hình bằng giấy.",
+        "literal": "giấy"
+      },
+      {
+        "key": "vi_pet_event",
+        "kind": "event",
+        "text": "Mèo nhà mình tên là Bông. Bông làm đổ chậu cây.",
+        "literal": "chậu cây"
+      }
+    ],
+    "queries": [
+      {
+        "key": "en_event_paraphrase",
+        "capture": "en_pet_event",
+        "language": "en",
+        "text": "Do you remember the pet tumble involving water that I told you about?"
+      },
+      {
+        "key": "en_hobby_paraphrase",
+        "capture": "en_hobby",
+        "language": "en",
+        "text": "Recall what I said about sketching tiny spacecraft."
+      },
+      {
+        "key": "vi_hobby_paraphrase",
+        "capture": "vi_hobby",
+        "language": "vi",
+        "text": "Nhắc lại điều mình kể về việc làm đồ chơi bằng giấy."
+      },
+      {
+        "key": "vi_to_en_event",
+        "capture": "en_pet_event",
+        "language": "vi",
+        "text": "Bạn còn nhớ chuyện con chó ngã vào nước mình đã kể không?"
+      },
+      {
+        "key": "en_to_vi_event",
+        "capture": "vi_pet_event",
+        "language": "en",
+        "text": "Recall the plant-container mishap I told you about."
+      },
+      {
+        "key": "fictional_story_paraphrase",
+        "capture": "child_story",
+        "language": "en",
+        "text": "Can you recall the make-believe rabbit’s landing place I told you about?"
+      }
+    ],
+    "unknownQuery": "Do you remember what I told you about my underwater chess tournament?",
+    "plannedDialogueTurns": 20,
+    "maxEmbeddingRequests": 32,
+    "embeddingModel": "text-embedding-3-small",
+    "dimensions": 1536,
+    "backend": "pgvector",
+    "minDenseSimilarity": 0.35,
+    "queryTimeoutMs": 5000,
+    "k": 3,
+    "labelPolicy": "Bind capture keys to persisted canonical IDs from the actual completed capture turn, independent of assistant wording and retrieval selection.",
+    "lifecycle": {
+      "canceled": "I enjoy pottery.",
+      "noSave": "Don't remember this. I like knitting.",
+      "correction": "I said the name wrong. My dog is Mochi, not Moki. Please correct it.",
+      "forget": "Forget Mochi.",
+      "advanceControlledWallDays": 365
+    },
+    "typedQueries": {
+      "missing": "What is my favorite color?",
+      "ambiguous": "Do you remember my pet's name?"
+    },
+    "limitations": [
+      "Fixed tiny integration benchmark; no held-out split or 95% retrieval-quality claim.",
+      "Typed synthetic EN/VI inputs, age 6-8, friend/ENFP. Receipts are simulated; no physical voice, TTS or browser.",
+      "PGlite pgvector only. No native PostgreSQL or production session/connection.",
+      "The 365-day step is a controlled clock advance, not a year-long operational soak.",
+      "Stale-worker control evicts one derived vector only, then uses a genuine embedding of the old approved projection.",
+      "Model replies and source-grounding semantics need separate review; scores and engine approval alone are insufficient."
+    ]
+  },
+  "benchmark_sha256": "f23789d1047847367da6829f20ac78bcec054529dac57c24c60ce1389117730d",
+  "labels": {
+    "en_pet_event": {
+      "captureTurnId": "11a692db-5f9f-47e5-98b4-87cfeaafdd54",
+      "kind": "event",
+      "sourceIds": [
+        "56626c26-8b58-4105-ae92-3b54ca105f2c"
+      ]
+    },
+    "en_hobby": {
+      "captureTurnId": "7cba4184-eb2a-4deb-bfab-0ebc96d97ce3",
+      "kind": "preference",
+      "sourceIds": [
+        "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+        "51cf894d-af56-4c85-b4ee-94c548f68917"
+      ]
+    },
+    "child_story": {
+      "captureTurnId": "383b78eb-ee82-4c56-a214-32fe41464f47",
+      "kind": "story",
+      "sourceIds": [
+        "c5cfc887-079b-4e26-ab34-70e3a56aadc1"
+      ]
+    },
+    "vi_hobby": {
+      "captureTurnId": "0f8d405c-1349-49d1-b860-395e03fa70a9",
+      "kind": "preference",
+      "sourceIds": [
+        "622c299b-c230-47d2-9976-48b0fadb5c9e"
+      ]
+    },
+    "vi_pet_event": {
+      "captureTurnId": "f590d634-47c9-499d-ac38-98d1981c9c83",
+      "kind": "event",
+      "sourceIds": [
+        "ee74bdfd-b044-48db-8054-2df9e664af89"
+      ]
+    }
+  },
+  "generation": {
+    "id": "9bec4223dd98c17105889d28da548901adfaee01894201ab29acb78be714099a",
+    "model": "text-embedding-3-small",
+    "dimensions": 1536,
+    "projectionVersion": "atomic-memory-v1",
+    "normalizerVersion": "nfc-lexical-v1",
+    "distance": "cosine",
+    "backend": "pgvector",
+    "status": "active"
+  },
+  "source_sha256": {
+    "backend/application.ts": "fe7d45608aa04c929fc86b1e77fcfc0878eda92b7a183f15b51fadb0c28928c1",
+    "backend/character/action-plan.ts": "0d417468b2698c864872a32af5c793dd4bde4727caf413bc066ccf6f0f28336e",
+    "backend/character/affect.ts": "c97e307bf941e9a420c1d858448ff4fa30e888ee793eb372a0f7e5e53b264731",
+    "backend/character/director.ts": "d49bfb0fc4b2eabc6263765bb399c9abbc54cd6b66c97e07b3335e48b5419d70",
+    "backend/character/index.ts": "26130a2e35c7b40866e8b5acf2edeeb839aa3f040139d4dab65fcd05100cc257",
+    "backend/character/presets.ts": "62fb8fe31d6d6000193c2c720cd9b87ba7cf310dace045e294d2de8a7ca8197f",
+    "backend/character/profile.ts": "2df94a643ecd452e3691186c0daa7099ab63dfcfd1b6f4599b9060ebf21ac75f",
+    "backend/character/prompt.ts": "96f5fc806cabdc1e48366c16ffdd775caecfc027691b0667d2a7839fae941ace",
+    "backend/character/templates.ts": "6cca7f615610b5d60a5f37af190a2aeb817bda0ac2d6d75e7466f04043fae337",
+    "backend/character/validation.ts": "24036cfa50c68f8046ada78f101f9caebafd2d5cb80cac66a90aa48340380ed6",
+    "backend/memory/affect-store.ts": "fee113a40493399a0b9a8b381b219680bc0f390c4547d7ea4cf97f72026fe0cf",
+    "backend/memory/assertions.ts": "4a4dfe2a59bcc76b6ae7ff3fec6a3fd62b3f7fb2aeb1c961d960a27ae2c880b0",
+    "backend/memory/authored-life.ts": "eaf10c9b197135056009439d96efec0b95f796534ebbcb5662c321d79662c712",
+    "backend/memory/clock.ts": "c28b44dc5168a6078282b8930981f23e8731c670b427aedb7bd1e0cd985edaf2",
+    "backend/memory/database.ts": "c24ad0a32378e87390f4d102ab6766ef42d096a04217ac05fc4601e56c3e332f",
+    "backend/memory/evidence.ts": "fc8571109b022dc1ac5b46176d8496b5aba654645eebc8add3297683f82314e8",
+    "backend/memory/import-history.ts": "68dbf610d2f11bb6a0daecaced2df962f8f0429caefd68f5a8b7129d61a1f302",
+    "backend/memory/index.ts": "ffb842c70ecfe6d405d852618d203d35947a21fcba87681b3c7837e2dc6e542a",
+    "backend/memory/migrations/001_character_memory.sql": "313b3a4d165310132aaf83881109bb6db518cf4a200f0637e2864b343e5d0290",
+    "backend/memory/migrations/002_story_assignments.sql": "f591d9d4421d04f783a06a4d0f2acaf956575a21b8b6af09b4b37fa00ac3bc1a",
+    "backend/memory/migrations/003_synthetic_history.sql": "6a47d3be966d9a4a8ac2fcda51123e1193203f4c0f65f649db387bac9e74fd34",
+    "backend/memory/migrations/004_event_assertions.sql": "1bd1d0237ce6feacb8d3caed0497548174b4f0bbe99e8d1adcf660f2431e774d",
+    "backend/memory/migrations/005_memory_operation_receipts.sql": "8f08ea7b5e1fd846e7b7e93d2cbe7ddf277f1cfe6a00e991c360d18c10f3cf4c",
+    "backend/memory/migrations/006_correction_continuity.sql": "a4d9eb5ba104ff3e7fd77381e81b72c59e43711bc588d98797eba09fff4a9481",
+    "backend/memory/migrations/007_typed_memory_updates.sql": "c9c79f11561b6622905022952beeaded455eacb5452d9981c33080ab992171a1",
+    "backend/memory/migrations/008_character_affect.sql": "494bee3defcf66fa2ba8a22fe3741c1767923a6c2226b554947f0c00f4c1ce3e",
+    "backend/memory/migrations/009_scoped_permissions_and_learning_activities.sql": "24f08961e9d3e32ae7693dcfc42f305f7ae68d0f6544a794fcab7be29770d5ba",
+    "backend/memory/migrations/010_vector_memory.sql": "eb95596fc0dc29025821c4e274edcbb35afe6d02c4d7cf2c0acb7b8451005ac6",
+    "backend/memory/migrations/011_durable_memories.sql": "afdba31ff0402895ef6d883f847fa36e9ea029d861ee97299f5ad7c9a73373cb",
+    "backend/memory/normalization.ts": "7d8598a9eb8ef44de7f4b3b30ee51a3271507e9c01f940ee552eb0b78f2c19e8",
+    "backend/memory/patches.ts": "364f856c6b184c9bbdcc602115690f637055a82227a213efb6b04c571ea8bc60",
+    "backend/memory/vector/capability.ts": "99ba13aea6be930f996823b3613ef55e2eeaa1ca02fec6f1f7e4a70d1fdfa255",
+    "backend/memory/vector/projections.ts": "7620182294dfa2c3ff87ce28d98b4a957d2b0063ee23a7918e882dc19980d794",
+    "backend/memory/vector/ranking.ts": "ca4bccfe12e96d4bb55786c60863aa2c05c48de45eaf03e92d7a4e7435427ff7",
+    "backend/memory/vector/service.ts": "196ab40730fdeb44a84c67783e433b8874e42b4055f50759ecf562203a90574f",
+    "backend/memory/vector/store.ts": "709b6c9a06e5e0b36f5e94427236a5b88554f7b50cb1af4fdfb062d4ab946188",
+    "backend/memory/vector/types.ts": "afb6b66400bd826c3ea9269d078f3913fccfeedcf722edaaaa81c01d8ee9e852",
+    "backend/pipeline/embeddings.ts": "575389b9e61d0a7d631b42701b99c08077b34ac0006a3ffa7cd9a64d57dc067b",
+    "backend/pipeline/observations.ts": "66e5b781d8ddda3ba8ed83ce2f9a8240acc63cbf3dc1d71879b323c4b6e7c5f9",
+    "backend/pipeline/providers.ts": "38410ee30c48b97e50ebc70acc21bd41a65367ea3be96d99074fa4222c287544",
+    "backend/recall.ts": "7c7f0fdf4d869361361fd3b1555c0b2632f001489be0a08b2c1df8b5b368f242",
+    "backend/scripts/verify-vector-real.ts": "5ad8e25bbe90600f8501769e032dd569c2846d327e8e481318b83c2e20af6448",
+    "backend/shared/affect.ts": "4b177e95d7a540bbb62cf49bc8151f6c4b82d416f9aabcaa974f843934b9b31a",
+    "backend/shared/semantic-speech.ts": "d662fa57486b11ee932af59a5075eba883fec28a76f92b6cda7233e26c33b800",
+    "backend/shared/types.ts": "2a4ee9413d453e6f84a3722cb07c48161478953840c7232edac66bf470dea5d6"
+  },
+  "changed_source_paths_at_completion": [],
+  "models": {
+    "classify": "gpt-6-astra",
+    "reply": "gpt-6-astra",
+    "check": "gpt-6-astra",
+    "moderation": "omni-moderation-latest"
+  },
+  "embedding_model": "text-embedding-3-small",
+  "embedding_dimensions": 1536,
+  "actual_dialogue_api_requests": 100,
+  "actual_embedding_api_requests": 12,
+  "completed_model_reply_ids": [
+    "resp_0bec31990897af60016ae5a3aab24087d2a1f96fa13edaec04",
+    "resp_0dc5d31db17d1105016ae5a3b30d6c87d2a92d55f3a183a795",
+    "resp_0a82324088a6e3cb016ae5a3ba611887d29883ea20eab3b094",
+    "resp_02f15cd9cc4262da016ae5a3c0a0a887d2ab62d40690704ee6",
+    "resp_0ea3c788933e2bd1016ae5a3c77b2087d2b34553d72f651f28",
+    "resp_07d52ec1817733b7016ae5a3d2ccb487d2b38bd4b91465a09e",
+    "resp_0c87531d6015c546016ae5a3d9f30c87d2912557bc4083dbe6",
+    "resp_05bcc4de55eea05a016ae5a3dff8ac87d2b48e64af7c11969e",
+    "resp_09e04190a45759dd016ae5a3e5ce3487d289c5274a4569697f",
+    "resp_0ac2364a8c2b722c016ae5a3ee6ccc87d2a4497fc9a1ebf563",
+    "resp_06453252c9c42a28016ae5a3f57d6487d2bf7806715d71ffd8",
+    "resp_0aafd7cdda8b729b016ae5a3fc28f487d28f597d580d22ebfe",
+    "resp_01826829fda74bd7016ae5a4022fac87d2b6a3afca992d6742",
+    "resp_0e7df53fa9ee4066016ae5a40790ec87d28b908713d254172a",
+    "resp_01a0aba0e4456dac016ae5a40dcc7c87d2950ea9423418b071",
+    "resp_075b0b9e9e3f165f016ae5a413b6b487d2931351d878e77221",
+    "resp_0d5845e11ca4622b016ae5a419b42887d2a7e29b2350afc223",
+    "resp_09d39125ac03c4c0016ae5a4203a0087d28de060b96907e7e8",
+    "resp_07f80c4f3fa199ed016ae5a4258c8487d2a63a7d655151ff3b",
+    "resp_034cf73a7053bdae016ae5a42cfa8c87d2862073378f05f664"
+  ],
+  "completed_embedding_request_ids": [
+    "req_bf55e5efc3884b538c39634dc92613e7",
+    "req_d5af29aed35b48acac9c81e5cab84a53",
+    "req_6313afaa8d14444e830f33168a645802",
+    "req_413b734848b54bc5becb749a27b1f1fd",
+    "req_6d92d287be0349468b9110f5a46752fc",
+    "req_4ca660b8058c426c8e11178aff5e81fe",
+    "req_624c458ab9ab48dab5db5073db77611e",
+    "req_3c3a3b01c93f4e4abc0a219c02e92b20",
+    "req_e6446c40024248299766f9b4ce7a4b5b",
+    "req_deb197474387455ea9aee2b2405bda5a",
+    "req_ba8510ced66d49978afd2afa1b76130e",
+    "req_7ba29993519f467fa3d7e07e4b707ebd"
+  ],
+  "coverage": {
+    "passed": 21,
+    "failed": 2,
+    "blocked": 0,
+    "not_attempted": 0
+  },
+  "cases": [
+    {
+      "name": "capture_en_pet_event",
+      "status": "passed",
+      "evidence": {
+        "canonical_source_ids": [
+          "56626c26-8b58-4105-ae92-3b54ca105f2c"
+        ]
+      },
+      "elapsed_ms": 9323
+    },
+    {
+      "name": "capture_en_hobby",
+      "status": "passed",
+      "evidence": {
+        "canonical_source_ids": [
+          "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+          "51cf894d-af56-4c85-b4ee-94c548f68917"
+        ]
+      },
+      "elapsed_ms": 6020
+    },
+    {
+      "name": "capture_child_story",
+      "status": "passed",
+      "evidence": {
+        "canonical_source_ids": [
+          "c5cfc887-079b-4e26-ab34-70e3a56aadc1"
+        ]
+      },
+      "elapsed_ms": 7479
+    },
+    {
+      "name": "capture_vi_hobby",
+      "status": "passed",
+      "evidence": {
+        "canonical_source_ids": [
+          "622c299b-c230-47d2-9976-48b0fadb5c9e"
+        ]
+      },
+      "elapsed_ms": 6912
+    },
+    {
+      "name": "capture_vi_pet_event",
+      "status": "passed",
+      "evidence": {
+        "canonical_source_ids": [
+          "ee74bdfd-b044-48db-8054-2df9e664af89"
+        ]
+      },
+      "elapsed_ms": 6885
+    },
+    {
+      "name": "index_corpus",
+      "status": "passed",
+      "evidence": {
+        "work": {
+          "processed": 6,
+          "committed": 6,
+          "discarded": 0,
+          "failed": 0
+        },
+        "canonical_label_count": 6,
+        "documents": 6,
+        "vectors": 6
+      },
+      "elapsed_ms": 4341
+    },
+    {
+      "name": "en_event_paraphrase",
+      "status": "passed",
+      "evidence": {
+        "metrics": {
+          "lexical": {
+            "sourceIds": [],
+            "relevantReturned": 0,
+            "returned": 0,
+            "relevantEligible": 1,
+            "hitAt3": false,
+            "recallAt3": 0,
+            "precisionAmongReturned": null,
+            "noAnswerCorrect": null
+          },
+          "dense": {
+            "sourceIds": [
+              "56626c26-8b58-4105-ae92-3b54ca105f2c"
+            ],
+            "relevantReturned": 1,
+            "returned": 1,
+            "relevantEligible": 1,
+            "hitAt3": true,
+            "recallAt3": 1,
+            "precisionAmongReturned": 1,
+            "noAnswerCorrect": null
+          },
+          "fusion": {
+            "sourceIds": [
+              "56626c26-8b58-4105-ae92-3b54ca105f2c"
+            ],
+            "relevantReturned": 1,
+            "returned": 1,
+            "relevantEligible": 1,
+            "hitAt3": true,
+            "recallAt3": 1,
+            "precisionAmongReturned": 1,
+            "noAnswerCorrect": null
+          },
+          "finalCards": {
+            "sourceIds": [
+              "56626c26-8b58-4105-ae92-3b54ca105f2c"
+            ],
+            "relevantReturned": 1,
+            "returned": 1,
+            "relevantEligible": 1,
+            "hitAt3": true,
+            "recallAt3": 1,
+            "precisionAmongReturned": 1,
+            "noAnswerCorrect": null
+          }
+        },
+        "retrieval_status": "available"
+      },
+      "elapsed_ms": 6234
+    },
+    {
+      "name": "en_hobby_paraphrase",
+      "status": "passed",
+      "evidence": {
+        "metrics": {
+          "lexical": {
+            "sourceIds": [],
+            "relevantReturned": 0,
+            "returned": 0,
+            "relevantEligible": 2,
+            "hitAt3": false,
+            "recallAt3": 0,
+            "precisionAmongReturned": null,
+            "noAnswerCorrect": null
+          },
+          "dense": {
+            "sourceIds": [
+              "51cf894d-af56-4c85-b4ee-94c548f68917"
+            ],
+            "relevantReturned": 1,
+            "returned": 1,
+            "relevantEligible": 2,
+            "hitAt3": true,
+            "recallAt3": 0.5,
+            "precisionAmongReturned": 1,
+            "noAnswerCorrect": null
+          },
+          "fusion": {
+            "sourceIds": [
+              "51cf894d-af56-4c85-b4ee-94c548f68917"
+            ],
+            "relevantReturned": 1,
+            "returned": 1,
+            "relevantEligible": 2,
+            "hitAt3": true,
+            "recallAt3": 0.5,
+            "precisionAmongReturned": 1,
+            "noAnswerCorrect": null
+          },
+          "finalCards": {
+            "sourceIds": [
+              "51cf894d-af56-4c85-b4ee-94c548f68917"
+            ],
+            "relevantReturned": 1,
+            "returned": 1,
+            "relevantEligible": 2,
+            "hitAt3": true,
+            "recallAt3": 0.5,
+            "precisionAmongReturned": 1,
+            "noAnswerCorrect": null
+          }
+        },
+        "retrieval_status": "available"
+      },
+      "elapsed_ms": 7050
+    },
+    {
+      "name": "vi_hobby_paraphrase",
+      "status": "passed",
+      "evidence": {
+        "metrics": {
+          "lexical": {
+            "sourceIds": [
+              "622c299b-c230-47d2-9976-48b0fadb5c9e",
+              "ee74bdfd-b044-48db-8054-2df9e664af89"
+            ],
+            "relevantReturned": 1,
+            "returned": 2,
+            "relevantEligible": 1,
+            "hitAt3": true,
+            "recallAt3": 1,
+            "precisionAmongReturned": 0.5,
+            "noAnswerCorrect": null
+          },
+          "dense": {
+            "sourceIds": [
+              "622c299b-c230-47d2-9976-48b0fadb5c9e"
+            ],
+            "relevantReturned": 1,
+            "returned": 1,
+            "relevantEligible": 1,
+            "hitAt3": true,
+            "recallAt3": 1,
+            "precisionAmongReturned": 1,
+            "noAnswerCorrect": null
+          },
+          "fusion": {
+            "sourceIds": [
+              "622c299b-c230-47d2-9976-48b0fadb5c9e",
+              "ee74bdfd-b044-48db-8054-2df9e664af89"
+            ],
+            "relevantReturned": 1,
+            "returned": 2,
+            "relevantEligible": 1,
+            "hitAt3": true,
+            "recallAt3": 1,
+            "precisionAmongReturned": 0.5,
+            "noAnswerCorrect": null
+          },
+          "finalCards": {
+            "sourceIds": [
+              "622c299b-c230-47d2-9976-48b0fadb5c9e",
+              "ee74bdfd-b044-48db-8054-2df9e664af89"
+            ],
+            "relevantReturned": 1,
+            "returned": 2,
+            "relevantEligible": 1,
+            "hitAt3": true,
+            "recallAt3": 1,
+            "precisionAmongReturned": 0.5,
+            "noAnswerCorrect": null
+          }
+        },
+        "retrieval_status": "available"
+      },
+      "elapsed_ms": 5878
+    },
+    {
+      "name": "vi_to_en_event",
+      "status": "failed",
+      "error": {
+        "code": "expected_source_not_retrieved"
+      },
+      "elapsed_ms": 6854
+    },
+    {
+      "name": "en_to_vi_event",
+      "status": "failed",
+      "error": {
+        "code": "expected_source_not_retrieved"
+      },
+      "elapsed_ms": 8116
+    },
+    {
+      "name": "fictional_story_paraphrase",
+      "status": "passed",
+      "evidence": {
+        "metrics": {
+          "lexical": {
+            "sourceIds": [
+              "c5cfc887-079b-4e26-ab34-70e3a56aadc1"
+            ],
+            "relevantReturned": 1,
+            "returned": 1,
+            "relevantEligible": 1,
+            "hitAt3": true,
+            "recallAt3": 1,
+            "precisionAmongReturned": 1,
+            "noAnswerCorrect": null
+          },
+          "dense": {
+            "sourceIds": [
+              "c5cfc887-079b-4e26-ab34-70e3a56aadc1"
+            ],
+            "relevantReturned": 1,
+            "returned": 1,
+            "relevantEligible": 1,
+            "hitAt3": true,
+            "recallAt3": 1,
+            "precisionAmongReturned": 1,
+            "noAnswerCorrect": null
+          },
+          "fusion": {
+            "sourceIds": [
+              "c5cfc887-079b-4e26-ab34-70e3a56aadc1"
+            ],
+            "relevantReturned": 1,
+            "returned": 1,
+            "relevantEligible": 1,
+            "hitAt3": true,
+            "recallAt3": 1,
+            "precisionAmongReturned": 1,
+            "noAnswerCorrect": null
+          },
+          "finalCards": {
+            "sourceIds": [
+              "c5cfc887-079b-4e26-ab34-70e3a56aadc1"
+            ],
+            "relevantReturned": 1,
+            "returned": 1,
+            "relevantEligible": 1,
+            "hitAt3": true,
+            "recallAt3": 1,
+            "precisionAmongReturned": 1,
+            "noAnswerCorrect": null
+          }
+        },
+        "retrieval_status": "available"
+      },
+      "elapsed_ms": 7499
+    },
+    {
+      "name": "unknown_no_answer",
+      "status": "passed",
+      "evidence": {
+        "metrics": {
+          "lexical": {
+            "sourceIds": [],
+            "relevantReturned": 0,
+            "returned": 0,
+            "relevantEligible": 0,
+            "hitAt3": null,
+            "recallAt3": null,
+            "precisionAmongReturned": null,
+            "noAnswerCorrect": true
+          },
+          "dense": {
+            "sourceIds": [],
+            "relevantReturned": 0,
+            "returned": 0,
+            "relevantEligible": 0,
+            "hitAt3": null,
+            "recallAt3": null,
+            "precisionAmongReturned": null,
+            "noAnswerCorrect": true
+          },
+          "fusion": {
+            "sourceIds": [],
+            "relevantReturned": 0,
+            "returned": 0,
+            "relevantEligible": 0,
+            "hitAt3": null,
+            "recallAt3": null,
+            "precisionAmongReturned": null,
+            "noAnswerCorrect": true
+          },
+          "finalCards": {
+            "sourceIds": [],
+            "relevantReturned": 0,
+            "returned": 0,
+            "relevantEligible": 0,
+            "hitAt3": null,
+            "recallAt3": null,
+            "precisionAmongReturned": null,
+            "noAnswerCorrect": true
+          }
+        },
+        "retrieval_status": "unresolved"
+      },
+      "elapsed_ms": 6386
+    },
+    {
+      "name": "typed_precedence",
+      "status": "passed",
+      "evidence": {
+        "actual_embedding_requests": 0,
+        "results": [
+          {
+            "typedDisposition": "resolved",
+            "result": {
+              "status": "skipped",
+              "cards": [],
+              "reason": "typed_lane",
+              "diagnostics": {
+                "generationId": "9bec4223dd98c17105889d28da548901adfaee01894201ab29acb78be714099a",
+                "backend": "pgvector",
+                "mode": "lexical",
+                "embeddingRequested": false,
+                "lexicalCandidates": 0,
+                "denseCandidates": 0,
+                "returned": 0,
+                "elapsedMs": 0
+              }
+            }
+          },
+          {
+            "typedDisposition": "missing",
+            "result": {
+              "status": "skipped",
+              "cards": [],
+              "reason": "typed_lane",
+              "diagnostics": {
+                "generationId": "9bec4223dd98c17105889d28da548901adfaee01894201ab29acb78be714099a",
+                "backend": "pgvector",
+                "mode": "lexical",
+                "embeddingRequested": false,
+                "lexicalCandidates": 0,
+                "denseCandidates": 0,
+                "returned": 0,
+                "elapsedMs": 0
+              }
+            }
+          },
+          {
+            "typedDisposition": "ambiguous",
+            "result": {
+              "status": "skipped",
+              "cards": [],
+              "reason": "typed_lane",
+              "diagnostics": {
+                "generationId": "9bec4223dd98c17105889d28da548901adfaee01894201ab29acb78be714099a",
+                "backend": "pgvector",
+                "mode": "lexical",
+                "embeddingRequested": false,
+                "lexicalCandidates": 0,
+                "denseCandidates": 0,
+                "returned": 0,
+                "elapsedMs": 0
+              }
+            }
+          }
+        ]
+      },
+      "elapsed_ms": 0
+    },
+    {
+      "name": "typed_missing_app",
+      "status": "passed",
+      "evidence": {
+        "exact_lane_status": "missing",
+        "actual_embedding_requests": 0
+      },
+      "elapsed_ms": 5493
+    },
+    {
+      "name": "typed_ambiguous_app",
+      "status": "passed",
+      "evidence": {
+        "exact_lane_status": "ambiguous",
+        "actual_embedding_requests": 0
+      },
+      "elapsed_ms": 5496
+    },
+    {
+      "name": "profile_isolation",
+      "status": "passed",
+      "evidence": {
+        "result": {
+          "status": "unresolved",
+          "cards": [],
+          "reason": "no_indexed_evidence",
+          "diagnostics": {
+            "generationId": "9bec4223dd98c17105889d28da548901adfaee01894201ab29acb78be714099a",
+            "backend": "pgvector",
+            "mode": "lexical",
+            "embeddingRequested": false,
+            "lexicalCandidates": 0,
+            "denseCandidates": 0,
+            "returned": 0,
+            "elapsedMs": 5
+          }
+        },
+        "trace": {
+          "lexical": [],
+          "dense": [],
+          "ranked": [],
+          "status": "unresolved",
+          "reason": "no_indexed_evidence"
+        }
+      },
+      "elapsed_ms": 5
+    },
+    {
+      "name": "canceled_capture",
+      "status": "passed",
+      "evidence": {
+        "canonical_sources": 0,
+        "indexed_sources": 0
+      },
+      "elapsed_ms": 6204
+    },
+    {
+      "name": "no_save_capture",
+      "status": "passed",
+      "evidence": {
+        "canonical_sources": 0,
+        "indexed_sources": 0
+      },
+      "elapsed_ms": 5803
+    },
+    {
+      "name": "stale_embedding_after_correction",
+      "status": "passed",
+      "evidence": {
+        "mechanics_control": "derived_vector_eviction_only",
+        "same_entity_id": true,
+        "late_commit": {
+          "applied": false,
+          "status": "missing"
+        },
+        "actual_embedding": {
+          "requestId": "req_e6446c40024248299766f9b4ce7a4b5b",
+          "model": "text-embedding-3-small",
+          "dimensions": 1536,
+          "usage": {
+            "promptTokens": 56,
+            "totalTokens": 56
+          },
+          "vector_sha256": "a48d44470520ba14834b50cd22ab18bf88574a8757c36cfb1d6914e75c0be422"
+        }
+      },
+      "elapsed_ms": 6617
+    },
+    {
+      "name": "forget_cascade",
+      "status": "passed",
+      "evidence": {
+        "deleted_source_ids": [
+          "56626c26-8b58-4105-ae92-3b54ca105f2c"
+        ],
+        "removed_document_ids": [
+          "9e60bdba-4573-4ac6-bc7a-d96b1efb1cbf"
+        ]
+      },
+      "elapsed_ms": 5530
+    },
+    {
+      "name": "after_forget_no_answer",
+      "status": "passed",
+      "evidence": {
+        "metrics": {
+          "lexical": {
+            "sourceIds": [],
+            "relevantReturned": 0,
+            "returned": 0,
+            "relevantEligible": 0,
+            "hitAt3": null,
+            "recallAt3": null,
+            "precisionAmongReturned": null,
+            "noAnswerCorrect": true
+          },
+          "dense": {
+            "sourceIds": [],
+            "relevantReturned": 0,
+            "returned": 0,
+            "relevantEligible": 0,
+            "hitAt3": null,
+            "recallAt3": null,
+            "precisionAmongReturned": null,
+            "noAnswerCorrect": true
+          },
+          "fusion": {
+            "sourceIds": [],
+            "relevantReturned": 0,
+            "returned": 0,
+            "relevantEligible": 0,
+            "hitAt3": null,
+            "recallAt3": null,
+            "precisionAmongReturned": null,
+            "noAnswerCorrect": true
+          },
+          "finalCards": {
+            "sourceIds": [],
+            "relevantReturned": 0,
+            "returned": 0,
+            "relevantEligible": 0,
+            "hitAt3": null,
+            "recallAt3": null,
+            "precisionAmongReturned": null,
+            "noAnswerCorrect": true
+          }
+        },
+        "retrieval_status": "unresolved"
+      },
+      "elapsed_ms": 5702
+    },
+    {
+      "name": "durability_365_days",
+      "status": "passed",
+      "evidence": {
+        "controlled_wall_days_advanced": 365,
+        "metrics": {
+          "lexical": {
+            "sourceIds": [],
+            "relevantReturned": 0,
+            "returned": 0,
+            "relevantEligible": 2,
+            "hitAt3": false,
+            "recallAt3": 0,
+            "precisionAmongReturned": null,
+            "noAnswerCorrect": null
+          },
+          "dense": {
+            "sourceIds": [
+              "51cf894d-af56-4c85-b4ee-94c548f68917"
+            ],
+            "relevantReturned": 1,
+            "returned": 1,
+            "relevantEligible": 2,
+            "hitAt3": true,
+            "recallAt3": 0.5,
+            "precisionAmongReturned": 1,
+            "noAnswerCorrect": null
+          },
+          "fusion": {
+            "sourceIds": [
+              "51cf894d-af56-4c85-b4ee-94c548f68917"
+            ],
+            "relevantReturned": 1,
+            "returned": 1,
+            "relevantEligible": 2,
+            "hitAt3": true,
+            "recallAt3": 0.5,
+            "precisionAmongReturned": 1,
+            "noAnswerCorrect": null
+          },
+          "finalCards": {
+            "sourceIds": [
+              "51cf894d-af56-4c85-b4ee-94c548f68917"
+            ],
+            "relevantReturned": 1,
+            "returned": 1,
+            "relevantEligible": 2,
+            "hitAt3": true,
+            "recallAt3": 0.5,
+            "precisionAmongReturned": 1,
+            "noAnswerCorrect": null
+          }
+        },
+        "retrieval_status": "available"
+      },
+      "elapsed_ms": 8310
+    }
+  ],
+  "snapshots": {
+    "indexed": {
+      "canonical": [
+        {
+          "id": "40333088-e9b8-4ea3-8ed3-ab1b64719c3a",
+          "kind": "entity",
+          "content_revision": 2,
+          "scope": "reported_real",
+          "learned_local_date": "2026-11-01",
+          "last_reconfirmed_local_date": "2026-11-01"
+        },
+        {
+          "id": "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+          "kind": "preference",
+          "content_revision": 2,
+          "scope": "reported_real",
+          "learned_local_date": "2026-11-01",
+          "last_reconfirmed_local_date": "2026-11-01"
+        },
+        {
+          "id": "51cf894d-af56-4c85-b4ee-94c548f68917",
+          "kind": "preference",
+          "content_revision": 2,
+          "scope": "reported_real",
+          "learned_local_date": "2026-11-01",
+          "last_reconfirmed_local_date": "2026-11-01"
+        },
+        {
+          "id": "56626c26-8b58-4105-ae92-3b54ca105f2c",
+          "kind": "event",
+          "content_revision": 3,
+          "scope": "reported_real",
+          "learned_local_date": "2026-11-01",
+          "last_reconfirmed_local_date": "2026-11-01"
+        },
+        {
+          "id": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+          "kind": "preference",
+          "content_revision": 2,
+          "scope": "reported_real",
+          "learned_local_date": "2026-11-01",
+          "last_reconfirmed_local_date": "2026-11-01"
+        },
+        {
+          "id": "6a9480d8-dd1f-4c45-9d49-bc30c580d43a",
+          "kind": "diary",
+          "content_revision": 1,
+          "scope": "fictional",
+          "learned_local_date": "2026-11-01",
+          "last_reconfirmed_local_date": "2026-11-01"
+        },
+        {
+          "id": "c5cfc887-079b-4e26-ab34-70e3a56aadc1",
+          "kind": "story",
+          "content_revision": 3,
+          "scope": "fictional",
+          "learned_local_date": "2026-11-01",
+          "last_reconfirmed_local_date": "2026-11-01"
+        },
+        {
+          "id": "d0efe3d5-43ca-4ede-9067-dedf95ed0013",
+          "kind": "entity",
+          "content_revision": 2,
+          "scope": "reported_real",
+          "learned_local_date": "2026-11-01",
+          "last_reconfirmed_local_date": "2026-11-01"
+        },
+        {
+          "id": "e203cb16-691b-4813-93d3-5d70ff03edf8",
+          "kind": "entity",
+          "content_revision": 2,
+          "scope": "fictional",
+          "learned_local_date": "2026-11-01",
+          "last_reconfirmed_local_date": "2026-11-01"
+        },
+        {
+          "id": "ee74bdfd-b044-48db-8054-2df9e664af89",
+          "kind": "event",
+          "content_revision": 3,
+          "scope": "reported_real",
+          "learned_local_date": "2026-11-01",
+          "last_reconfirmed_local_date": "2026-11-01"
+        }
+      ],
+      "documents": [
+        {
+          "id": "bc0a5abf-2850-46f3-b23d-f06b222cb74f",
+          "source_id": "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+          "source_revision": 2,
+          "content_hash": "c68665a35ba558640ac08e8c13ae1ee3b96970c8afb85f4f2808e49ee9efad71",
+          "kind": "preference",
+          "scope": "reported_real",
+          "document_text": "{\"kind\":\"preference\",\"scope\":\"reported_real\",\"evidence_kind\":\"child_reported\",\"category\":\"like\",\"qualifiers\":{},\"literal_value\":\"drawing little rockets\"}"
+        },
+        {
+          "id": "8b232e1d-844e-4023-a238-b5329f0190bd",
+          "source_id": "51cf894d-af56-4c85-b4ee-94c548f68917",
+          "source_revision": 2,
+          "content_hash": "cb195ff3619e945af0c35e7defba6fb3c2c395fa303ae7a5a735b569210e1810",
+          "kind": "preference",
+          "scope": "reported_real",
+          "document_text": "{\"kind\":\"preference\",\"scope\":\"reported_real\",\"evidence_kind\":\"child_reported\",\"category\":\"hobby\",\"qualifiers\":{},\"literal_value\":\"drawing little rockets\"}"
+        },
+        {
+          "id": "9fd3b8f6-bf30-44bd-bace-c10c8dcf4145",
+          "source_id": "56626c26-8b58-4105-ae92-3b54ca105f2c",
+          "source_revision": 3,
+          "content_hash": "5453a23dde6f82512307767019b70d10700a1794edb17d8ad437c7e0f5ee151c",
+          "kind": "event",
+          "scope": "reported_real",
+          "document_text": "{\"kind\":\"event\",\"scope\":\"reported_real\",\"evidence_kind\":\"child_reported\",\"event_type\":\"fell_in_puddle\",\"subject\":\"Moki\",\"local_date\":\"2026-11-01\",\"conditions\":[],\"literal_value\":\"Moki fell in a puddle.\"}"
+        },
+        {
+          "id": "292bc388-f2dd-4f65-95d5-28be2a55dea0",
+          "source_id": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+          "source_revision": 2,
+          "content_hash": "c04ed8eab745adcf9f874218b124d81d3a489e0330784e38879406fb31889c9f",
+          "kind": "preference",
+          "scope": "reported_real",
+          "document_text": "{\"kind\":\"preference\",\"scope\":\"reported_real\",\"evidence_kind\":\"child_reported\",\"category\":\"like\",\"qualifiers\":{},\"literal_value\":\"xếp mô hình bằng giấy\"}"
+        },
+        {
+          "id": "b19f0494-0771-4e00-8cb0-3d177fdb2d71",
+          "source_id": "c5cfc887-079b-4e26-ab34-70e3a56aadc1",
+          "source_revision": 3,
+          "content_hash": "cbcef1d336a73864673cc74807da08e00cd996ef2de69dae6a5fed4d4a290239",
+          "kind": "child_story",
+          "scope": "fictional",
+          "document_text": "{\"kind\":\"child_story\",\"scope\":\"fictional\",\"evidence_kind\":\"child_reported\",\"literal_title\":\"Pip and the Pillow Planet\",\"literal_text\":\"Pip is a pretend rabbit who lands on a pillow planet.\",\"cast\":[\"Pip\"]}"
+        },
+        {
+          "id": "8ae0eb13-a633-4639-89a4-99ea916bbac1",
+          "source_id": "ee74bdfd-b044-48db-8054-2df9e664af89",
+          "source_revision": 3,
+          "content_hash": "7dbe9acfda6c01d224c79f94c2916b58fabc1efa27b52bd640083b11024ae80b",
+          "kind": "event",
+          "scope": "reported_real",
+          "document_text": "{\"kind\":\"event\",\"scope\":\"reported_real\",\"evidence_kind\":\"child_reported\",\"event_type\":\"reported_event\",\"subject\":\"Bông\",\"local_date\":\"2026-11-01\",\"conditions\":[],\"literal_value\":\"Bông làm đổ chậu cây.\"}"
+        }
+      ],
+      "embeddings": [
+        {
+          "document_id": "292bc388-f2dd-4f65-95d5-28be2a55dea0",
+          "source_revision": 2,
+          "content_hash": "c04ed8eab745adcf9f874218b124d81d3a489e0330784e38879406fb31889c9f",
+          "dimensions": 1536
+        },
+        {
+          "document_id": "8ae0eb13-a633-4639-89a4-99ea916bbac1",
+          "source_revision": 3,
+          "content_hash": "7dbe9acfda6c01d224c79f94c2916b58fabc1efa27b52bd640083b11024ae80b",
+          "dimensions": 1536
+        },
+        {
+          "document_id": "8b232e1d-844e-4023-a238-b5329f0190bd",
+          "source_revision": 2,
+          "content_hash": "cb195ff3619e945af0c35e7defba6fb3c2c395fa303ae7a5a735b569210e1810",
+          "dimensions": 1536
+        },
+        {
+          "document_id": "9fd3b8f6-bf30-44bd-bace-c10c8dcf4145",
+          "source_revision": 3,
+          "content_hash": "5453a23dde6f82512307767019b70d10700a1794edb17d8ad437c7e0f5ee151c",
+          "dimensions": 1536
+        },
+        {
+          "document_id": "b19f0494-0771-4e00-8cb0-3d177fdb2d71",
+          "source_revision": 3,
+          "content_hash": "cbcef1d336a73864673cc74807da08e00cd996ef2de69dae6a5fed4d4a290239",
+          "dimensions": 1536
+        },
+        {
+          "document_id": "bc0a5abf-2850-46f3-b23d-f06b222cb74f",
+          "source_revision": 2,
+          "content_hash": "c68665a35ba558640ac08e8c13ae1ee3b96970c8afb85f4f2808e49ee9efad71",
+          "dimensions": 1536
+        }
+      ]
+    },
+    "before_forget": {
+      "canonical": [
+        {
+          "id": "40333088-e9b8-4ea3-8ed3-ab1b64719c3a",
+          "kind": "entity",
+          "content_revision": 2,
+          "scope": "reported_real",
+          "learned_local_date": "2026-11-01",
+          "last_reconfirmed_local_date": "2026-11-01"
+        },
+        {
+          "id": "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+          "kind": "preference",
+          "content_revision": 2,
+          "scope": "reported_real",
+          "learned_local_date": "2026-11-01",
+          "last_reconfirmed_local_date": "2026-11-01"
+        },
+        {
+          "id": "51cf894d-af56-4c85-b4ee-94c548f68917",
+          "kind": "preference",
+          "content_revision": 2,
+          "scope": "reported_real",
+          "learned_local_date": "2026-11-01",
+          "last_reconfirmed_local_date": "2026-11-01"
+        },
+        {
+          "id": "56626c26-8b58-4105-ae92-3b54ca105f2c",
+          "kind": "event",
+          "content_revision": 4,
+          "scope": "reported_real",
+          "learned_local_date": "2026-11-01",
+          "last_reconfirmed_local_date": "2026-11-01"
+        },
+        {
+          "id": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+          "kind": "preference",
+          "content_revision": 2,
+          "scope": "reported_real",
+          "learned_local_date": "2026-11-01",
+          "last_reconfirmed_local_date": "2026-11-01"
+        },
+        {
+          "id": "6a9480d8-dd1f-4c45-9d49-bc30c580d43a",
+          "kind": "diary",
+          "content_revision": 1,
+          "scope": "fictional",
+          "learned_local_date": "2026-11-01",
+          "last_reconfirmed_local_date": "2026-11-01"
+        },
+        {
+          "id": "c5cfc887-079b-4e26-ab34-70e3a56aadc1",
+          "kind": "story",
+          "content_revision": 3,
+          "scope": "fictional",
+          "learned_local_date": "2026-11-01",
+          "last_reconfirmed_local_date": "2026-11-01"
+        },
+        {
+          "id": "d0efe3d5-43ca-4ede-9067-dedf95ed0013",
+          "kind": "entity",
+          "content_revision": 4,
+          "scope": "reported_real",
+          "learned_local_date": "2026-11-01",
+          "last_reconfirmed_local_date": "2026-11-01"
+        },
+        {
+          "id": "e203cb16-691b-4813-93d3-5d70ff03edf8",
+          "kind": "entity",
+          "content_revision": 2,
+          "scope": "fictional",
+          "learned_local_date": "2026-11-01",
+          "last_reconfirmed_local_date": "2026-11-01"
+        },
+        {
+          "id": "ee74bdfd-b044-48db-8054-2df9e664af89",
+          "kind": "event",
+          "content_revision": 3,
+          "scope": "reported_real",
+          "learned_local_date": "2026-11-01",
+          "last_reconfirmed_local_date": "2026-11-01"
+        }
+      ],
+      "documents": [
+        {
+          "id": "bc0a5abf-2850-46f3-b23d-f06b222cb74f",
+          "source_id": "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+          "source_revision": 2,
+          "content_hash": "c68665a35ba558640ac08e8c13ae1ee3b96970c8afb85f4f2808e49ee9efad71",
+          "kind": "preference",
+          "scope": "reported_real",
+          "document_text": "{\"kind\":\"preference\",\"scope\":\"reported_real\",\"evidence_kind\":\"child_reported\",\"category\":\"like\",\"qualifiers\":{},\"literal_value\":\"drawing little rockets\"}"
+        },
+        {
+          "id": "8b232e1d-844e-4023-a238-b5329f0190bd",
+          "source_id": "51cf894d-af56-4c85-b4ee-94c548f68917",
+          "source_revision": 2,
+          "content_hash": "cb195ff3619e945af0c35e7defba6fb3c2c395fa303ae7a5a735b569210e1810",
+          "kind": "preference",
+          "scope": "reported_real",
+          "document_text": "{\"kind\":\"preference\",\"scope\":\"reported_real\",\"evidence_kind\":\"child_reported\",\"category\":\"hobby\",\"qualifiers\":{},\"literal_value\":\"drawing little rockets\"}"
+        },
+        {
+          "id": "9e60bdba-4573-4ac6-bc7a-d96b1efb1cbf",
+          "source_id": "56626c26-8b58-4105-ae92-3b54ca105f2c",
+          "source_revision": 4,
+          "content_hash": "29d5be28fa8d7df504ac7e17e6010795cf36f8342e5242be96fc95a6da72e85b",
+          "kind": "event",
+          "scope": "reported_real",
+          "document_text": "{\"kind\":\"event\",\"scope\":\"reported_real\",\"evidence_kind\":\"child_reported\",\"event_type\":\"fell_in_puddle\",\"subject\":\"Mochi\",\"local_date\":\"2026-11-01\",\"conditions\":[],\"literal_value\":\"Mochi fell in a puddle.\"}"
+        },
+        {
+          "id": "292bc388-f2dd-4f65-95d5-28be2a55dea0",
+          "source_id": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+          "source_revision": 2,
+          "content_hash": "c04ed8eab745adcf9f874218b124d81d3a489e0330784e38879406fb31889c9f",
+          "kind": "preference",
+          "scope": "reported_real",
+          "document_text": "{\"kind\":\"preference\",\"scope\":\"reported_real\",\"evidence_kind\":\"child_reported\",\"category\":\"like\",\"qualifiers\":{},\"literal_value\":\"xếp mô hình bằng giấy\"}"
+        },
+        {
+          "id": "b19f0494-0771-4e00-8cb0-3d177fdb2d71",
+          "source_id": "c5cfc887-079b-4e26-ab34-70e3a56aadc1",
+          "source_revision": 3,
+          "content_hash": "cbcef1d336a73864673cc74807da08e00cd996ef2de69dae6a5fed4d4a290239",
+          "kind": "child_story",
+          "scope": "fictional",
+          "document_text": "{\"kind\":\"child_story\",\"scope\":\"fictional\",\"evidence_kind\":\"child_reported\",\"literal_title\":\"Pip and the Pillow Planet\",\"literal_text\":\"Pip is a pretend rabbit who lands on a pillow planet.\",\"cast\":[\"Pip\"]}"
+        },
+        {
+          "id": "8ae0eb13-a633-4639-89a4-99ea916bbac1",
+          "source_id": "ee74bdfd-b044-48db-8054-2df9e664af89",
+          "source_revision": 3,
+          "content_hash": "7dbe9acfda6c01d224c79f94c2916b58fabc1efa27b52bd640083b11024ae80b",
+          "kind": "event",
+          "scope": "reported_real",
+          "document_text": "{\"kind\":\"event\",\"scope\":\"reported_real\",\"evidence_kind\":\"child_reported\",\"event_type\":\"reported_event\",\"subject\":\"Bông\",\"local_date\":\"2026-11-01\",\"conditions\":[],\"literal_value\":\"Bông làm đổ chậu cây.\"}"
+        }
+      ],
+      "embeddings": [
+        {
+          "document_id": "292bc388-f2dd-4f65-95d5-28be2a55dea0",
+          "source_revision": 2,
+          "content_hash": "c04ed8eab745adcf9f874218b124d81d3a489e0330784e38879406fb31889c9f",
+          "dimensions": 1536
+        },
+        {
+          "document_id": "8ae0eb13-a633-4639-89a4-99ea916bbac1",
+          "source_revision": 3,
+          "content_hash": "7dbe9acfda6c01d224c79f94c2916b58fabc1efa27b52bd640083b11024ae80b",
+          "dimensions": 1536
+        },
+        {
+          "document_id": "8b232e1d-844e-4023-a238-b5329f0190bd",
+          "source_revision": 2,
+          "content_hash": "cb195ff3619e945af0c35e7defba6fb3c2c395fa303ae7a5a735b569210e1810",
+          "dimensions": 1536
+        },
+        {
+          "document_id": "9e60bdba-4573-4ac6-bc7a-d96b1efb1cbf",
+          "source_revision": 4,
+          "content_hash": "29d5be28fa8d7df504ac7e17e6010795cf36f8342e5242be96fc95a6da72e85b",
+          "dimensions": 1536
+        },
+        {
+          "document_id": "b19f0494-0771-4e00-8cb0-3d177fdb2d71",
+          "source_revision": 3,
+          "content_hash": "cbcef1d336a73864673cc74807da08e00cd996ef2de69dae6a5fed4d4a290239",
+          "dimensions": 1536
+        },
+        {
+          "document_id": "bc0a5abf-2850-46f3-b23d-f06b222cb74f",
+          "source_revision": 2,
+          "content_hash": "c68665a35ba558640ac08e8c13ae1ee3b96970c8afb85f4f2808e49ee9efad71",
+          "dimensions": 1536
+        }
+      ]
+    },
+    "after_forget": {
+      "canonical": [
+        {
+          "id": "40333088-e9b8-4ea3-8ed3-ab1b64719c3a",
+          "kind": "entity",
+          "content_revision": 2,
+          "scope": "reported_real",
+          "learned_local_date": "2026-11-01",
+          "last_reconfirmed_local_date": "2026-11-01"
+        },
+        {
+          "id": "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+          "kind": "preference",
+          "content_revision": 2,
+          "scope": "reported_real",
+          "learned_local_date": "2026-11-01",
+          "last_reconfirmed_local_date": "2026-11-01"
+        },
+        {
+          "id": "51cf894d-af56-4c85-b4ee-94c548f68917",
+          "kind": "preference",
+          "content_revision": 2,
+          "scope": "reported_real",
+          "learned_local_date": "2026-11-01",
+          "last_reconfirmed_local_date": "2026-11-01"
+        },
+        {
+          "id": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+          "kind": "preference",
+          "content_revision": 2,
+          "scope": "reported_real",
+          "learned_local_date": "2026-11-01",
+          "last_reconfirmed_local_date": "2026-11-01"
+        },
+        {
+          "id": "6a9480d8-dd1f-4c45-9d49-bc30c580d43a",
+          "kind": "diary",
+          "content_revision": 1,
+          "scope": "fictional",
+          "learned_local_date": "2026-11-01",
+          "last_reconfirmed_local_date": "2026-11-01"
+        },
+        {
+          "id": "c5cfc887-079b-4e26-ab34-70e3a56aadc1",
+          "kind": "story",
+          "content_revision": 3,
+          "scope": "fictional",
+          "learned_local_date": "2026-11-01",
+          "last_reconfirmed_local_date": "2026-11-01"
+        },
+        {
+          "id": "e203cb16-691b-4813-93d3-5d70ff03edf8",
+          "kind": "entity",
+          "content_revision": 2,
+          "scope": "fictional",
+          "learned_local_date": "2026-11-01",
+          "last_reconfirmed_local_date": "2026-11-01"
+        },
+        {
+          "id": "ee74bdfd-b044-48db-8054-2df9e664af89",
+          "kind": "event",
+          "content_revision": 3,
+          "scope": "reported_real",
+          "learned_local_date": "2026-11-01",
+          "last_reconfirmed_local_date": "2026-11-01"
+        }
+      ],
+      "documents": [
+        {
+          "id": "bc0a5abf-2850-46f3-b23d-f06b222cb74f",
+          "source_id": "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+          "source_revision": 2,
+          "content_hash": "c68665a35ba558640ac08e8c13ae1ee3b96970c8afb85f4f2808e49ee9efad71",
+          "kind": "preference",
+          "scope": "reported_real",
+          "document_text": "{\"kind\":\"preference\",\"scope\":\"reported_real\",\"evidence_kind\":\"child_reported\",\"category\":\"like\",\"qualifiers\":{},\"literal_value\":\"drawing little rockets\"}"
+        },
+        {
+          "id": "8b232e1d-844e-4023-a238-b5329f0190bd",
+          "source_id": "51cf894d-af56-4c85-b4ee-94c548f68917",
+          "source_revision": 2,
+          "content_hash": "cb195ff3619e945af0c35e7defba6fb3c2c395fa303ae7a5a735b569210e1810",
+          "kind": "preference",
+          "scope": "reported_real",
+          "document_text": "{\"kind\":\"preference\",\"scope\":\"reported_real\",\"evidence_kind\":\"child_reported\",\"category\":\"hobby\",\"qualifiers\":{},\"literal_value\":\"drawing little rockets\"}"
+        },
+        {
+          "id": "292bc388-f2dd-4f65-95d5-28be2a55dea0",
+          "source_id": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+          "source_revision": 2,
+          "content_hash": "c04ed8eab745adcf9f874218b124d81d3a489e0330784e38879406fb31889c9f",
+          "kind": "preference",
+          "scope": "reported_real",
+          "document_text": "{\"kind\":\"preference\",\"scope\":\"reported_real\",\"evidence_kind\":\"child_reported\",\"category\":\"like\",\"qualifiers\":{},\"literal_value\":\"xếp mô hình bằng giấy\"}"
+        },
+        {
+          "id": "b19f0494-0771-4e00-8cb0-3d177fdb2d71",
+          "source_id": "c5cfc887-079b-4e26-ab34-70e3a56aadc1",
+          "source_revision": 3,
+          "content_hash": "cbcef1d336a73864673cc74807da08e00cd996ef2de69dae6a5fed4d4a290239",
+          "kind": "child_story",
+          "scope": "fictional",
+          "document_text": "{\"kind\":\"child_story\",\"scope\":\"fictional\",\"evidence_kind\":\"child_reported\",\"literal_title\":\"Pip and the Pillow Planet\",\"literal_text\":\"Pip is a pretend rabbit who lands on a pillow planet.\",\"cast\":[\"Pip\"]}"
+        },
+        {
+          "id": "8ae0eb13-a633-4639-89a4-99ea916bbac1",
+          "source_id": "ee74bdfd-b044-48db-8054-2df9e664af89",
+          "source_revision": 3,
+          "content_hash": "7dbe9acfda6c01d224c79f94c2916b58fabc1efa27b52bd640083b11024ae80b",
+          "kind": "event",
+          "scope": "reported_real",
+          "document_text": "{\"kind\":\"event\",\"scope\":\"reported_real\",\"evidence_kind\":\"child_reported\",\"event_type\":\"reported_event\",\"subject\":\"Bông\",\"local_date\":\"2026-11-01\",\"conditions\":[],\"literal_value\":\"Bông làm đổ chậu cây.\"}"
+        }
+      ],
+      "embeddings": [
+        {
+          "document_id": "292bc388-f2dd-4f65-95d5-28be2a55dea0",
+          "source_revision": 2,
+          "content_hash": "c04ed8eab745adcf9f874218b124d81d3a489e0330784e38879406fb31889c9f",
+          "dimensions": 1536
+        },
+        {
+          "document_id": "8ae0eb13-a633-4639-89a4-99ea916bbac1",
+          "source_revision": 3,
+          "content_hash": "7dbe9acfda6c01d224c79f94c2916b58fabc1efa27b52bd640083b11024ae80b",
+          "dimensions": 1536
+        },
+        {
+          "document_id": "8b232e1d-844e-4023-a238-b5329f0190bd",
+          "source_revision": 2,
+          "content_hash": "cb195ff3619e945af0c35e7defba6fb3c2c395fa303ae7a5a735b569210e1810",
+          "dimensions": 1536
+        },
+        {
+          "document_id": "b19f0494-0771-4e00-8cb0-3d177fdb2d71",
+          "source_revision": 3,
+          "content_hash": "cbcef1d336a73864673cc74807da08e00cd996ef2de69dae6a5fed4d4a290239",
+          "dimensions": 1536
+        },
+        {
+          "document_id": "bc0a5abf-2850-46f3-b23d-f06b222cb74f",
+          "source_revision": 2,
+          "content_hash": "c68665a35ba558640ac08e8c13ae1ee3b96970c8afb85f4f2808e49ee9efad71",
+          "dimensions": 1536
+        }
+      ]
+    },
+    "after_365_days": {
+      "canonical": [
+        {
+          "id": "40333088-e9b8-4ea3-8ed3-ab1b64719c3a",
+          "kind": "entity",
+          "content_revision": 2,
+          "scope": "reported_real",
+          "learned_local_date": "2026-11-01",
+          "last_reconfirmed_local_date": "2026-11-01"
+        },
+        {
+          "id": "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+          "kind": "preference",
+          "content_revision": 2,
+          "scope": "reported_real",
+          "learned_local_date": "2026-11-01",
+          "last_reconfirmed_local_date": "2026-11-01"
+        },
+        {
+          "id": "51cf894d-af56-4c85-b4ee-94c548f68917",
+          "kind": "preference",
+          "content_revision": 2,
+          "scope": "reported_real",
+          "learned_local_date": "2026-11-01",
+          "last_reconfirmed_local_date": "2026-11-01"
+        },
+        {
+          "id": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+          "kind": "preference",
+          "content_revision": 2,
+          "scope": "reported_real",
+          "learned_local_date": "2026-11-01",
+          "last_reconfirmed_local_date": "2026-11-01"
+        },
+        {
+          "id": "811d741b-a02e-4c1d-bace-359addb28414",
+          "kind": "diary",
+          "content_revision": 1,
+          "scope": "fictional",
+          "learned_local_date": "2027-11-01",
+          "last_reconfirmed_local_date": "2027-11-01"
+        },
+        {
+          "id": "c5cfc887-079b-4e26-ab34-70e3a56aadc1",
+          "kind": "story",
+          "content_revision": 3,
+          "scope": "fictional",
+          "learned_local_date": "2026-11-01",
+          "last_reconfirmed_local_date": "2026-11-01"
+        },
+        {
+          "id": "e203cb16-691b-4813-93d3-5d70ff03edf8",
+          "kind": "entity",
+          "content_revision": 2,
+          "scope": "fictional",
+          "learned_local_date": "2026-11-01",
+          "last_reconfirmed_local_date": "2026-11-01"
+        },
+        {
+          "id": "ee74bdfd-b044-48db-8054-2df9e664af89",
+          "kind": "event",
+          "content_revision": 3,
+          "scope": "reported_real",
+          "learned_local_date": "2026-11-01",
+          "last_reconfirmed_local_date": "2026-11-01"
+        }
+      ],
+      "documents": [
+        {
+          "id": "bc0a5abf-2850-46f3-b23d-f06b222cb74f",
+          "source_id": "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+          "source_revision": 2,
+          "content_hash": "c68665a35ba558640ac08e8c13ae1ee3b96970c8afb85f4f2808e49ee9efad71",
+          "kind": "preference",
+          "scope": "reported_real",
+          "document_text": "{\"kind\":\"preference\",\"scope\":\"reported_real\",\"evidence_kind\":\"child_reported\",\"category\":\"like\",\"qualifiers\":{},\"literal_value\":\"drawing little rockets\"}"
+        },
+        {
+          "id": "8b232e1d-844e-4023-a238-b5329f0190bd",
+          "source_id": "51cf894d-af56-4c85-b4ee-94c548f68917",
+          "source_revision": 2,
+          "content_hash": "cb195ff3619e945af0c35e7defba6fb3c2c395fa303ae7a5a735b569210e1810",
+          "kind": "preference",
+          "scope": "reported_real",
+          "document_text": "{\"kind\":\"preference\",\"scope\":\"reported_real\",\"evidence_kind\":\"child_reported\",\"category\":\"hobby\",\"qualifiers\":{},\"literal_value\":\"drawing little rockets\"}"
+        },
+        {
+          "id": "292bc388-f2dd-4f65-95d5-28be2a55dea0",
+          "source_id": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+          "source_revision": 2,
+          "content_hash": "c04ed8eab745adcf9f874218b124d81d3a489e0330784e38879406fb31889c9f",
+          "kind": "preference",
+          "scope": "reported_real",
+          "document_text": "{\"kind\":\"preference\",\"scope\":\"reported_real\",\"evidence_kind\":\"child_reported\",\"category\":\"like\",\"qualifiers\":{},\"literal_value\":\"xếp mô hình bằng giấy\"}"
+        },
+        {
+          "id": "b19f0494-0771-4e00-8cb0-3d177fdb2d71",
+          "source_id": "c5cfc887-079b-4e26-ab34-70e3a56aadc1",
+          "source_revision": 3,
+          "content_hash": "cbcef1d336a73864673cc74807da08e00cd996ef2de69dae6a5fed4d4a290239",
+          "kind": "child_story",
+          "scope": "fictional",
+          "document_text": "{\"kind\":\"child_story\",\"scope\":\"fictional\",\"evidence_kind\":\"child_reported\",\"literal_title\":\"Pip and the Pillow Planet\",\"literal_text\":\"Pip is a pretend rabbit who lands on a pillow planet.\",\"cast\":[\"Pip\"]}"
+        },
+        {
+          "id": "8ae0eb13-a633-4639-89a4-99ea916bbac1",
+          "source_id": "ee74bdfd-b044-48db-8054-2df9e664af89",
+          "source_revision": 3,
+          "content_hash": "7dbe9acfda6c01d224c79f94c2916b58fabc1efa27b52bd640083b11024ae80b",
+          "kind": "event",
+          "scope": "reported_real",
+          "document_text": "{\"kind\":\"event\",\"scope\":\"reported_real\",\"evidence_kind\":\"child_reported\",\"event_type\":\"reported_event\",\"subject\":\"Bông\",\"local_date\":\"2026-11-01\",\"conditions\":[],\"literal_value\":\"Bông làm đổ chậu cây.\"}"
+        }
+      ],
+      "embeddings": [
+        {
+          "document_id": "292bc388-f2dd-4f65-95d5-28be2a55dea0",
+          "source_revision": 2,
+          "content_hash": "c04ed8eab745adcf9f874218b124d81d3a489e0330784e38879406fb31889c9f",
+          "dimensions": 1536
+        },
+        {
+          "document_id": "8ae0eb13-a633-4639-89a4-99ea916bbac1",
+          "source_revision": 3,
+          "content_hash": "7dbe9acfda6c01d224c79f94c2916b58fabc1efa27b52bd640083b11024ae80b",
+          "dimensions": 1536
+        },
+        {
+          "document_id": "8b232e1d-844e-4023-a238-b5329f0190bd",
+          "source_revision": 2,
+          "content_hash": "cb195ff3619e945af0c35e7defba6fb3c2c395fa303ae7a5a735b569210e1810",
+          "dimensions": 1536
+        },
+        {
+          "document_id": "b19f0494-0771-4e00-8cb0-3d177fdb2d71",
+          "source_revision": 3,
+          "content_hash": "cbcef1d336a73864673cc74807da08e00cd996ef2de69dae6a5fed4d4a290239",
+          "dimensions": 1536
+        },
+        {
+          "document_id": "bc0a5abf-2850-46f3-b23d-f06b222cb74f",
+          "source_revision": 2,
+          "content_hash": "c68665a35ba558640ac08e8c13ae1ee3b96970c8afb85f4f2808e49ee9efad71",
+          "dimensions": 1536
+        }
+      ]
+    }
+  },
+  "blocker": null,
+  "cleanup": "closed",
+  "elapsed_ms": 138785,
+  "controlled_time": "2027-11-01T03:00:00.000Z",
+  "semantics": {
+    "status": "needs_separate_review"
+  }
+}

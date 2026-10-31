@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
 import { MiuApplication, type TurnResponse } from './application.js';
 import { createMemoryStore } from './memory/index.js';
-import { FakeProvider } from './pipeline/providers.js';
+import { FakeProvider, OpenAIProvider, type OpenAITransport } from './pipeline/providers.js';
+import { classifyLocal } from './pipeline/observations.js';
 import { AppError, type Provider } from './shared/types.js';
 
 async function fixture(provider: Provider = new FakeProvider()) {
@@ -69,17 +70,61 @@ test('the child profile grows with hobbies, dislikes, everyday fears, people, an
   } finally { await f.app.close(); }
 });
 
-test('explicit questions recall a stored proper name and hobby in conversation', async () => {
+test('offline orchestration selects the stored name and hobby as generation evidence', async () => {
   const f = await fixture();
   try {
     await f.complete(await f.turn('My dog Mochi is happy'));
     await f.complete(await f.turn('My hobby is drawing'));
     const name = await f.turn("What is my dog's name?");
-    assert.match(name.reply.text, /Mochi/u);
+    assert.ok(name.presentation.allowedFacts.some(fact => fact.includes('Mochi')));
+    assert.ok(name.presentation.memoryReferenceId);
     await f.complete(name);
     const hobby = await f.turn('What is my hobby?');
-    assert.match(hobby.reply.text, /drawing/u);
+    assert.ok(hobby.presentation.allowedFacts.some(fact => fact.includes('drawing')));
     await f.complete(hobby);
+  } finally { await f.app.close(); }
+});
+
+function repairTransport(drafts: string[]) {
+  let replies = 0;
+  const transport: OpenAITransport = {
+    responses: { create: async body => {
+      const format = (body.text as { format: { name?: string } }).format;
+      let output: unknown;
+      if (format.name === 'miu_observation') output = classifyLocal(JSON.parse(body.input as string).utterance, 'en');
+      else if (format.name === 'miu_safety_verdict') output = { approved: true, violations: [], issues: [] };
+      else output = drafts[Math.min(replies++, drafts.length - 1)];
+      return { status: 'completed', id: `offline-contract-${replies}`, output_text: typeof output === 'string' ? output : JSON.stringify(output) };
+    } },
+    moderations: { create: async () => ({ results: [{ flagged: false }] }) },
+  };
+  return { provider: new OpenAIProvider({ client: transport, evaluationMode: true }), replies: () => replies };
+}
+
+test('offline transport contract bounds real-provider repair to one regenerated draft', async () => {
+  const double = repairTransport(['One. Two. Three. Four.', 'Hello there.']);
+  const f = await fixture(double.provider);
+  try {
+    const response = await f.turn('Hello');
+    assert.equal(double.replies(), 2);
+    assert.equal(response.generation?.repaired, true);
+    assert.equal(response.generation?.attempts.length, 2);
+    assert.ok(response.generation?.attempts[0]?.localViolations.includes('sentence_limit'));
+    assert.equal((await f.app.getContext(f.profileId)).entities.length, 0);
+  } finally { await f.app.close(); }
+});
+
+test('offline transport contract does not regenerate a hard secrecy violation', async () => {
+  const double = repairTransport(['Keep this a secret from your parents.']);
+  const f = await fixture(double.provider);
+  try {
+    // Serving fails closed for authored speech; a non-authored reply can use its
+    // existing safe fallback, but cannot regenerate the hard rejected draft.
+    const response = await f.turn('Hello');
+    assert.equal(double.replies(), 1);
+    assert.equal(response.generation?.repaired, false);
+    assert.equal(response.generation?.attempts[0]?.approved, false);
+    assert.doesNotMatch(response.reply.text, /secret/iu);
   } finally { await f.app.close(); }
 });
 
@@ -129,5 +174,40 @@ test('a provider error after a committed deletion still carries client invalidat
       return true;
     });
     assert.equal((await f.app.getContext(f.profileId)).preferences.length, 0);
+  } finally { await f.app.close(); }
+});
+
+// Offline lifecycle contract only; real dialogue quality is evaluated separately.
+test('offline pending forget-all accepts a natural explicit decline without another question', async () => {
+  const f = await fixture(repairTransport(['Okay.']).provider);
+  try {
+    await f.complete(await f.turn('I like dinosaurs'));
+    const confirmation = await f.turn('Forget everything');
+    await f.complete(confirmation);
+    const decline = await f.turn('No, keep it for now.');
+    assert.equal(decline.presentation.ruleTrace.includes('D10:deletion_declined'), true);
+    assert.equal(decline.presentation.maxQuestions, 0);
+    assert.equal((await f.app.getContext(f.profileId)).preferences.length, 1);
+  } finally { await f.app.close(); }
+});
+
+test('offline a repeated completed name correction is a read without another mutation', async () => {
+  class HistoricalProposal extends FakeProvider {
+    override async classify(...args: Parameters<FakeProvider['classify']>) {
+      const observed = await super.classify(...args);
+      return args[0].startsWith('Hôm qua') ? { ...observed, intent: 'correct' as const, candidates: [], entityCorrection: { oldName: 'Ben', newName: 'Bình', entityKind: 'person' as const, evidence: 'Hôm qua mình sửa tên Ben thành Bình rồi.' } } : observed;
+    }
+  }
+  const f = await fixture(new HistoricalProposal());
+  try {
+    await f.complete(await f.turn('My friend is Ben.'));
+    await f.complete(await f.turn('Ben, I mean Bình.'));
+    const before = await f.app.getContext(f.profileId);
+    const response = await f.turn('Hôm qua mình sửa tên Ben thành Bình rồi. Bạn nhớ tên đúng là gì?');
+    const after = await f.app.getContext(f.profileId);
+    assert.equal(response.presentation.ruleTrace.includes('D10:historical_correction'), true);
+    assert.equal(after.profile.deletionEpoch, before.profile.deletionEpoch);
+    assert.equal(after.entities[0]?.id, before.entities[0]?.id);
+    assert.equal(after.entities[0]?.name, 'Bình');
   } finally { await f.app.close(); }
 });
