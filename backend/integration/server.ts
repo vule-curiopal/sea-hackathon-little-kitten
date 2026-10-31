@@ -1,5 +1,5 @@
 import express from 'express';
-import { existsSync } from 'node:fs';
+import { existsSync, realpathSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { loadEnvFile } from 'node:process';
 import { pathToFileURL } from 'node:url';
@@ -97,7 +97,10 @@ export async function startIntegratedServer(environment?: Record<string, string 
   } catch (error) { await integrated.close(); throw error; }
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
+// Release entrypoints are invoked through /opt/miu/current, a deployment symlink.
+const entrypoint = process.argv[1] && existsSync(process.argv[1])
+  ? pathToFileURL(realpathSync(process.argv[1])).href : undefined;
+if (import.meta.url === entrypoint) {
   void startIntegratedServer().then(runtime => {
     process.stdout.write(`Miu integrated app listening at ${runtime.url}\n`);
     let closing = false;

@@ -30,10 +30,15 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { promisify } from 'node:util';
 const base = 'http://127.0.0.1:' + payload.port;
+const preferredLogging = process.env.STT_LOGGING?.trim() || undefined;
+const legacyLogging = process.env.ELEVENLABS_ENABLE_LOGGING?.trim() || undefined;
+const configuredLogging = preferredLogging !== undefined ? preferredLogging === '1' : legacyLogging !== undefined ? legacyLogging === 'true' : null;
 const report = { run_kind: 'production_real_voice_probe', status: 'running', started_at: new Date().toISOString(),
-  input: { source: 'local_recorded_test_wav_uploaded_over_ssh_stdin', sha256: payload.sha256, bytes: Buffer.from(payload.audio, 'base64').length },
+  input_source: 'synthetic_actual_tts_test_wav',
+  input: { transport: 'encrypted_ssh_stdin', sha256: payload.sha256, bytes: Buffer.from(payload.audio, 'base64').length },
   configuration: { provider_mode: process.env.MIU_PROVIDER === 'real' ? 'real' : 'other',
-    elevenlabs_enable_logging: process.env.ELEVENLABS_ENABLE_LOGGING === 'true',
+    elevenlabs_enable_logging: configuredLogging,
+    logging_source: preferredLogging !== undefined ? 'STT_LOGGING' : legacyLogging !== undefined ? 'ELEVENLABS_ENABLE_LOGGING' : 'service_default',
     model: /^[A-Za-z0-9_.-]{1,100}$/.test(process.env.OPENAI_MODEL || '') ? process.env.OPENAI_MODEL : null,
     dns_ipv4first_configured: /(?:^|\s)--dns-result-order=ipv4first(?:\s|$)/.test(process.env.NODE_OPTIONS || '') },
   stages: [], completed_receipt_sent: false, playback_receipts_sent: 0,
@@ -67,9 +72,12 @@ async function request(stage, method, path, body, authorized = true) {
 }
 try {
   check(process.env.MIU_PROVIDER === 'real', 'real_provider_required');
-  check(['true', 'false'].includes(process.env.ELEVENLABS_ENABLE_LOGGING), 'invalid_logging_configuration');
+  check(preferredLogging === undefined || ['1', '0'].includes(preferredLogging), 'invalid_logging_configuration');
+  check(legacyLogging === undefined || ['true', 'false'].includes(legacyLogging), 'invalid_logging_configuration');
+  check(preferredLogging === undefined || legacyLogging === undefined || (preferredLogging === '1') === (legacyLogging === 'true'), 'conflicting_logging_configuration');
   const health = await request('health', 'GET', '/api/health', undefined, false);
   check(health.provider_mode === 'real', 'live_service_is_not_real');
+  report.configuration.elevenlabs_enable_logging = configuredLogging ?? (health.engine_mode !== 'character_memory');
   report.health = { status: health.status, provider_mode: health.provider_mode, engine_mode: health.engine_mode };
   const opened = await request('create_own_binh_session', 'POST', '/api/sessions', { demo_profile_key: 'binh', request_id: randomUUID() }, false);
   check(typeof opened.session_id === 'string' && typeof opened.demo_token === 'string', 'invalid_session_response');
