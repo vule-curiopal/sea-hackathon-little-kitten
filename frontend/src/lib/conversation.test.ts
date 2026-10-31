@@ -57,9 +57,12 @@ test('demo answers follow the chosen language and emotion', () => {
   assert.equal(getDemoReply('I love you', 'en').emotion, 'love');
 });
 
-test('account validation needs only email and password', () => {
-  assert.deepEqual(validateAuth({ email: 'lan@example', password: '123' }), { email: 'emailError', password: 'passwordError' });
-  assert.deepEqual(validateAuth({ email: 'lan@example.com', password: 'demo1234' }), {});
+test('account validation needs only username and password', () => {
+  assert.deepEqual(validateAuth({ username: '', password: '123' }), { username: 'usernameError', password: 'passwordError' });
+  assert.deepEqual(validateAuth({ username: 'lan.nguyen', password: 'demo1234' }), {});
+  assert.deepEqual(validateAuth({ username: 'bé_mèo', password: 'demo1234' }), {});
+  assert.deepEqual(validateAuth({ username: '   ', password: 'demo1234' }), { username: 'usernameError' });
+  assert.deepEqual(validateAuth({ username: 'x'.repeat(81), password: 'demo1234' }), { username: 'usernameError' });
 });
 
 test('all fifteen expressions have valid SVG values and unknown emotions are neutral', () => {

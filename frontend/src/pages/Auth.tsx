@@ -10,13 +10,13 @@ import { DEMO_ROUTE } from '../lib/demo-buddy';
 
 export default function Auth({ isLogin = false }: { isLogin?: boolean }) {
   const { t, language, setLanguage } = useLanguage();
-  const [values, setValues] = useState<AuthValues>({ email: '', password: '' });
+  const [values, setValues] = useState<AuthValues>({ username: '', password: '' });
   const [errors, setErrors] = useState<AuthErrors>({});
   const [showPassword, setShowPassword] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
-  useEffect(() => { setErrors({}); setShowPassword(false); setValues({ email: '', password: '' }); }, [isLogin]);
+  useEffect(() => { setErrors({}); setShowPassword(false); setValues({ username: '', password: '' }); }, [isLogin]);
   const fields: { name: keyof AuthValues; label: TranslationKey; placeholder?: TranslationKey; type: string; autocomplete: string }[] = [
-    { name: 'email', label: 'email', placeholder: 'emailPlaceholder', type: 'email', autocomplete: 'email' },
+    { name: 'username', label: 'username', placeholder: 'usernamePlaceholder', type: 'text', autocomplete: 'username' },
     { name: 'password', label: 'password', type: showPassword ? 'text' : 'password', autocomplete: isLogin ? 'current-password' : 'new-password' },
   ];
   function submit(event: FormEvent) {
@@ -28,7 +28,7 @@ export default function Auth({ isLogin = false }: { isLogin?: boolean }) {
       return;
     }
     // Auth is a frontend preview. Never send or persist credentials.
-    setValues({ email: '', password: '' });
+    setValues({ username: '', password: '' });
     setShowPassword(false);
     navigate(isLogin ? '/app/talk' : `${DEMO_ROUTE}?lang=${language}`);
   }
@@ -38,7 +38,7 @@ export default function Auth({ isLogin = false }: { isLogin?: boolean }) {
       <Room className="auth-room"><div className="auth-room-copy"><span className="eyebrow-pill">{t('parentSpace')}</span><h2>{t('authBlurb')}</h2></div><div className="auth-bubble">{t('happyToMeet')}<span className="speech-tail" /></div><Miu emotion={isLogin ? 'happy' : 'excited'} /><div className="room-nameplate"><span className="small-dot" />Miu</div></Room>
       <section className="auth-card"><span className="eyebrow">Little Buddy</span><h1>{t(isLogin ? 'signInTitle' : 'createTitle')}</h1><p className="auth-subtitle">{t('authBlurb')}</p>
         <form noValidate onSubmit={submit} ref={formRef}>
-          {fields.map(field => <div className="form-field" key={field.name}><label htmlFor={field.name}>{t(field.label)}</label><div className="input-wrap"><input id={field.name} name={field.name} type={field.type} autoComplete={field.autocomplete} inputMode={field.name === 'email' ? 'email' : undefined} autoCapitalize="none" spellCheck={false} placeholder={field.placeholder ? t(field.placeholder) : undefined} value={values[field.name]} onChange={event => { setValues({ ...values, [field.name]: event.target.value }); if (errors[field.name]) setErrors({ ...errors, [field.name]: undefined }); }} required aria-invalid={!!errors[field.name]} aria-describedby={errors[field.name] ? `${field.name}-error` : field.name === 'password' ? 'password-hint' : undefined} />{field.name === 'password' && <button className="password-toggle" type="button" onClick={() => setShowPassword(!showPassword)} aria-label={t(showPassword ? 'hidePassword' : 'showPassword')}><Icon name={showPassword ? 'lock' : 'check'} /></button>}</div>{errors[field.name] ? <span className="field-error" id={`${field.name}-error`} role="alert">{t(errors[field.name]!)}</span> : field.name === 'password' && <span className="field-hint" id="password-hint">{t('passwordHint')}</span>}</div>)}
+          {fields.map(field => <div className="form-field" key={field.name}><label htmlFor={field.name}>{t(field.label)}</label><div className="input-wrap"><input id={field.name} name={field.name} type={field.type} autoComplete={field.autocomplete} autoCapitalize="none" spellCheck={false} placeholder={field.placeholder ? t(field.placeholder) : undefined} value={values[field.name]} onChange={event => { setValues({ ...values, [field.name]: event.target.value }); if (errors[field.name]) setErrors({ ...errors, [field.name]: undefined }); }} required aria-invalid={!!errors[field.name]} aria-describedby={errors[field.name] ? `${field.name}-error` : field.name === 'password' ? 'password-hint' : undefined} />{field.name === 'password' && <button className="password-toggle" type="button" onClick={() => setShowPassword(!showPassword)} aria-label={t(showPassword ? 'hidePassword' : 'showPassword')}><Icon name={showPassword ? 'lock' : 'check'} /></button>}</div>{errors[field.name] ? <span className="field-error" id={`${field.name}-error`} role="alert">{t(errors[field.name]!)}</span> : field.name === 'password' && <span className="field-hint" id="password-hint">{t('passwordHint')}</span>}</div>)}
           <button className="button button-primary auth-submit" type="submit">{t(isLogin ? 'continue' : 'create')}<Icon name="arrow" /></button>
           <p className="auth-demo"><Icon name="shield" />{t(isLogin ? 'authDemo' : 'authRegisterDemo')}</p>
         </form>

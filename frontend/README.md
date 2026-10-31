@@ -30,7 +30,7 @@ For an iPhone or iPad on the same Wi-Fi, open the **Wi-Fi Network URL** printed 
 | Path | Screen |
 | --- | --- |
 | `/` | Landing page, expression picker, FAQ |
-| `/register` | Frontend registration preview with email and password validation |
+| `/register` | Frontend registration preview with username and password validation |
 | `/login` | Sign-in form with validation |
 | `/app/talk` | Miu's interactive room |
 | `/demo/miu?lang=en` | Direct, no-sign-in room with the prepared demo buddy |
@@ -121,7 +121,7 @@ The visible mode comes from the server. The integrated `character_memory` respon
 
 Typed messages use the same session coordinator and server endpoint as microphone turns. By default, typed answers use approved server TTS. Turning off **Read answers aloud** requests `audio:null`: after reading the visible answer, explicitly select **Done reading** to finish the turn. This sends text-delivery receipts with `played_ms:0`, and never claims audible playback. Stop discards a pending text delivery. Saved memories and story progress commit only after the appropriate delivery completion. A deletion response, including deletion followed by a provider failure, clears old captions and cached reply metadata.
 
-The standalone voice pipeline’s fake mode remains a frontend/pipeline development option. It is labeled reference audio and never counts as evidence of character, memory, or model quality. No local sample-reply or browser speech-synthesis path is used by the room. Registration at `/register` is a frontend-only preview with email and password validation. Valid submission clears the form and opens the guest demo in the selected language, without creating an account. Sign-in remains a visual demonstration. Email and password values are not persisted or sent.
+The standalone voice pipeline’s fake mode remains a frontend/pipeline development option. It is labeled reference audio and never counts as evidence of character, memory, or model quality. No local sample-reply or browser speech-synthesis path is used by the room. Registration at `/register` is a frontend-only preview with username and password validation. Valid submission clears the form and opens the guest demo in the selected language, without creating an account. Sign-in remains a visual demonstration. Username and password values are not persisted or sent.
 
 Production can serve `frontend/dist` from the integrated Express app. Otherwise route `/api` to that backend, or build with `VITE_VOICE_API_URL` and configure the allowed HTTPS origin. Keep provider secrets server-side. The previous static Sites deployment cannot host the Node/Express service by itself; it needs a reachable API.
 
