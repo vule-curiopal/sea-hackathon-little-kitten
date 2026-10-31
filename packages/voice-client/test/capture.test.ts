@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { BrowserVoiceCapture, type CaptureEnvironment } from '../src/capture.js';
+import { BrowserVoiceCapture, type CaptureEnvironment, type CaptureEvent } from '../src/capture.js';
 import type { MeterSnapshot } from '../src/detector.js';
 
 function deferred<T>() {
@@ -65,6 +65,28 @@ function environment(permission?: Promise<MediaStream>) {
 describe('browser capture lifecycle', () => {
   beforeEach(() => { vi.useFakeTimers(); vi.setSystemTime(0); });
   afterEach(() => { vi.useRealTimers(); });
+
+  it('reports the finalized clip metadata including the last flushed bytes without exposing audio or device IDs', async () => {
+    const fake = environment();
+    fake.track.getSettings = () => ({ sampleRate: 48000, channelCount: 1, deviceId: 'private-device' });
+    const capture = new BrowserVoiceCapture({ environment: fake.env, endpointing: 'manual' });
+    const events: CaptureEvent[] = [];
+    capture.subscribe(event => events.push(event));
+    const result = capture.start();
+    await settle();
+    fake.context.analyser.level = -32;
+    await vi.advanceTimersByTimeAsync(200);
+    fake.recorder.emitData('first');
+    capture.send();
+    expect(events.some(event => event.type === 'complete')).toBe(false);
+    fake.recorder.flush('last');
+    expect((await result).blob.size).toBe(9);
+    const complete = events.filter(event => event.type === 'complete');
+    expect(complete).toEqual([{ type: 'complete', mimeType: 'audio/mp4', bytes: 9, durationMs: 200, reason: 'manual',
+      peakLevelDbfs: expect.closeTo(-32, 1), sampleRate: 48000, channelCount: 1 }]);
+    expect(JSON.stringify(complete)).not.toMatch(/private-device|first|last|blob/);
+    expect(fake.track.stop).toHaveBeenCalledOnce();
+  });
 
   it('keeps recording through silence in hold mode and sends only when released', async () => {
     const fake = environment();

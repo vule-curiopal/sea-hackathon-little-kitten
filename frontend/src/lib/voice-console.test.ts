@@ -64,6 +64,18 @@ test('meter messages are limited to once per second and reset on a new recording
   assert.equal(rows.filter(row => row.name === 'capture.level').length, 3);
 });
 
+test('final recording diagnostics distinguish quiet input from container and duration issues', () => {
+  const { logger, rows } = setup();
+  logger.event({ type: 'capture', event: { type: 'complete', mimeType: 'audio/mp4', bytes: 79818, durationMs: 6182.9,
+    reason: 'manual', peakLevelDbfs: -29.6, sampleRate: 48000, channelCount: 1 } });
+  logger.event({ type: 'capture', event: { type: 'complete', mimeType: 'audio/webm', bytes: 1000, durationMs: 200,
+    reason: 'manual', peakLevelDbfs: null, sampleRate: null, channelCount: null } });
+  assert.equal(rows[0].name, 'capture.complete');
+  assert.deepEqual(rows[0].data, { elapsedMs: 0, mimeType: 'audio/mp4', bytes: 79818, recordingMs: 6183,
+    reason: 'manual', peakLevelDbfs: -30, sampleRate: 48000, channelCount: 1 });
+  assert.equal((rows[1].data as Record<string, unknown>).peakLevelDbfs, null);
+});
+
 test('errors are deduplicated and normal cancellation is informational', () => {
   const { logger, rows } = setup();
   const failure = { code: 'MIC_PERMISSION_DENIED', retryable: true };

@@ -10,6 +10,7 @@ export type CaptureState = 'idle' | 'requesting_permission' | 'calibrating' | 'r
 export type CaptureEvent =
   | { type: 'state'; state: CaptureState }
   | { type: 'meter'; snapshot: MeterSnapshot }
+  | { type: 'complete'; mimeType: string; bytes: number; durationMs: number; reason: CapturedAudio['reason']; peakLevelDbfs: number | null; sampleRate: number | null; channelCount: number | null }
   | { type: 'manual_only'; code: 'METER_UNAVAILABLE' }
   | { type: 'error'; error: VoiceClientError };
 export interface CapturedAudio {
@@ -84,6 +85,7 @@ interface ActiveCapture {
   startedAt: number;
   endedAt: number;
   settings: MediaTrackSettings;
+  peakLevelDbfs: number | null;
   reason: CapturedAudio['reason'];
   cleanups: (() => void)[];
   stopMeter?: () => void;
@@ -129,7 +131,7 @@ export class BrowserVoiceCapture {
     return new Promise<CapturedAudio>((resolve, reject) => {
       const active: ActiveCapture = {
         id, phase: 'permission', resolve, reject, chunks: [], bytes: 0, startedAt: 0, endedAt: 0,
-        settings: {}, reason: 'manual', cleanups: [],
+        settings: {}, peakLevelDbfs: null, reason: 'manual', cleanups: [],
       };
       this.active = active;
       this.setState('requesting_permission');
@@ -240,6 +242,7 @@ export class BrowserVoiceCapture {
           active.analyser!.getFloatTimeDomainData(samples);
           const now = env.now();
           const levelDbfs = rmsDbfs(samples);
+          active.peakLevelDbfs = Math.max(active.peakLevelDbfs ?? -Infinity, levelDbfs);
           const detected = active.detector!.update(levelDbfs, now);
           // The automatic detector may have reached a decision; a held recording's meter must keep updating.
           const snapshot: MeterSnapshot = this.options.endpointing === 'manual'
@@ -295,6 +298,8 @@ export class BrowserVoiceCapture {
     const result: CapturedAudio = { blob, mimeType, durationMs, reason: active.reason, settings: { ...active.settings } };
     this.active = null;
     this.cleanup(active);
+    notify(this.listeners, { type: 'complete', mimeType, bytes: blob.size, durationMs, reason: active.reason,
+      peakLevelDbfs: active.peakLevelDbfs, sampleRate: active.settings.sampleRate ?? null, channelCount: active.settings.channelCount ?? null });
     this.setState('idle');
     active.resolve(result);
   }

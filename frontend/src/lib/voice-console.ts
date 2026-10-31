@@ -36,6 +36,9 @@ export function createVoiceConsole(sink: ConsoleSink = console, now: () => numbe
         if (now() - lastMeter < 1000) return;
         lastMeter = now();
         write('log', 'capture.level', { recordingMs: Math.round(capture.snapshot.elapsedMs), levelDbfs: Math.round(capture.snapshot.levelDbfs), hasSignal: capture.snapshot.hasSignal });
+      } else if (capture.type === 'complete') {
+        write('log', 'capture.complete', { mimeType: capture.mimeType, bytes: capture.bytes, recordingMs: Math.round(capture.durationMs), reason: capture.reason,
+          peakLevelDbfs: capture.peakLevelDbfs === null ? null : Math.round(capture.peakLevelDbfs), sampleRate: capture.sampleRate, channelCount: capture.channelCount });
       } else if (capture.type === 'manual_only') write('warn', 'capture.meter_unavailable', { code: capture.code });
       else if (capture.type === 'error') error(capture.error, 'capture.error');
     } else if (event.type === 'playback') {
