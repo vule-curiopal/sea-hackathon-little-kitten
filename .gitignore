@@ -16,3 +16,6 @@ dist/
 *.tsbuildinfo
 coverage/
 .cache/voice-test-audio/
+
+# Local checkout and packaging for hosted deployments
+.site-deploy/

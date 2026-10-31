@@ -1,0 +1,77 @@
+.talk-room {
+  container: buddy-room / inline-size;
+  --room-window-left: 32px;
+  --room-window-top: 115px;
+  --room-window-width: 95px;
+  --room-window-height: 110px;
+  --room-qr-size: 88px;
+  --room-fixture-gap: 12px;
+}
+.talk-room > .night-window {
+  left: var(--room-window-left);
+  top: var(--room-window-top);
+  width: var(--room-window-width);
+  height: var(--room-window-height);
+}
+.room-demo-qr {
+  position: absolute;
+  z-index: 2;
+  top: var(--room-window-top);
+  left: calc(var(--room-window-left) + var(--room-window-width) + var(--room-fixture-gap));
+  width: var(--room-qr-size);
+  aspect-ratio: 1;
+  padding: 4px;
+  display: block;
+  border-radius: 12px;
+  background: var(--pop-ink);
+  box-shadow: 0 3px 0 var(--lip);
+}
+.demo-qr { display: block; width: 100%; height: auto; border-radius: 8px; }
+.qr-loading { display: flex; align-items: center; justify-content: center; color: var(--ocean); }
+.qr-loading svg { width: 24px; height: 24px; }
+.talk-room .talk-scene { padding-top: 165px; }
+.personality-tag { display: inline-flex; width: fit-content; align-items: center; gap: 8px; border-radius: 999px; padding: 5px 10px; background: var(--pop-soft); color: var(--pop-text); font: 800 11px var(--body); }
+.personality-tag > span { border-left: 1px solid var(--glow); padding-left: 8px; font-weight: 700; }
+.preset-summary { margin: 0 0 10px; }
+.preset-summary strong { font: 800 19px var(--display); }
+.preset-summary p { color: var(--muted); font-size: 12px; margin-top: 5px; line-height: 1.6; }
+.settings-avatar .personality-tag { margin-top: 8px; }
+.demo-starters { width: 100%; display: flex; flex-direction: column; gap: 9px; }
+.demo-starters button { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 44px; background: var(--pop-soft); border: 1px solid var(--line); color: var(--pop-text); padding: 10px 13px; border-radius: 14px; text-align: left; font-size: 12px; font-weight: 800; }
+.demo-starters svg { width: 16px; height: 16px; }
+@media (min-width: 600px) and (max-width: 899px) {
+  .talk-room {
+    --room-window-width: 105px;
+    --room-window-height: 125px;
+    --room-window-top: 135px;
+  }
+  .talk-room .talk-scene { padding-top: 200px; }
+}
+@media (max-width: 599px) {
+  .talk-room {
+    --room-window-left: 23px;
+    --room-window-top: 94px;
+    --room-window-width: 77px;
+    --room-window-height: 90px;
+    --room-qr-size: 72px;
+  }
+  .talk-room .talk-scene { padding-top: 120px; }
+}
+@media (max-width: 599px) and (max-height: 760px) {
+  .talk-room {
+    --room-window-top: 90px;
+    --room-window-width: 64px;
+    --room-window-height: 75px;
+    --room-qr-size: 64px;
+  }
+  .talk-room .talk-scene { padding-top: 110px; }
+}
+@container buddy-room (min-width: 600px) {
+  .talk-room .talk-scene { padding-top: 40px; }
+  .talk-room .talk-bubble, .talk-room .talk-bubble.is-quiet {
+    align-self: flex-end;
+    width: min(340px, calc(100% - 350px));
+    margin: 0 80px 0 0;
+    left: auto;
+  }
+}

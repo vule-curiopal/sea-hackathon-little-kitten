@@ -1,0 +1,21 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import { networkInterfaces } from 'node:os';
+import { fileURLToPath } from 'node:url';
+import { createQr } from '../src/lib/qr.ts';
+import { buildDemoUrl, selectLanAddress } from '../src/lib/demo-share.ts';
+
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const addresses = Object.entries(networkInterfaces()).flatMap(([name, entries]) => (entries ?? []).map(entry => ({ ...entry, name })));
+const lanAddress = selectLanAddress(addresses);
+const origin = process.argv[2] || process.env.VITE_DEMO_PUBLIC_URL || (lanAddress ? `http://${lanAddress}:5173` : null);
+const language = process.argv[3] || 'en';
+if (!origin || !['en', 'vi'].includes(language)) throw new Error('Usage: npm run demo:qr -- <HTTP(S) origin> [en|vi]');
+const url = buildDemoUrl(origin, language);
+const qr = createQr(url);
+const tokens = fs.readFileSync(path.join(root, 'src/styles/tokens.css'), 'utf8');
+const color = (name) => tokens.match(new RegExp(`--${name}:\\s*([^;]+);`))?.[1].trim();
+const escape = value => value.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('"', '&quot;');
+const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${qr.size} ${qr.size}" width="1024" height="1024" shape-rendering="crispEdges" role="img" aria-label="Scan to meet Miu"><title>Scan to meet Miu</title><desc>${escape(url)}</desc><rect width="${qr.size}" height="${qr.size}" fill="${color('pop-ink')}"/><path d="${qr.path}" fill="${color('ocean')}"/></svg>\n`;
+fs.writeFileSync(path.join(root, 'public/demo-qr.svg'), svg);
+console.log(JSON.stringify({ url, qr: path.join(root, 'public/demo-qr.svg') }));

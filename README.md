@@ -42,3 +42,13 @@ npm run dev
 ```
 
 Node22.19+ is required. Review `.env.example` and the pipeline README before real mode; existing local `.env` is not overwritten. `ffprobe` is required for MP4/WebM and real MP3 inspection. Microphone/playback on an iPad must be validated on the actual device over trusted HTTPS.
+
+The [React frontend](frontend/README.md) connects to this voice pipeline using the shared browser client. With the API running, start it in another terminal:
+
+```powershell
+cd frontend
+npm ci
+npm run dev
+```
+
+Open `http://localhost:5173/app/talk`. The frontend proxies `/api` to port 3001. Talk records one turn; Send submits it and Stop cancels it. Settings select a fictional profile, language, and approved voice. Fake reference recordings and local typing samples are labeled separately from real voice. Character state, memory and personality behavior are not supplied by the current voice stub.

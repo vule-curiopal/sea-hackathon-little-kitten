@@ -1,0 +1,101 @@
+/* The same kitten drawing, with local body language layered over its expression. */
+.miu-body { transform-origin: 200px 420px; }
+.miu-head { transform-origin: 200px 235px; }
+.miu[data-activity="settled"] .miu-tail { animation-duration: 5.5s; }
+.miu[data-activity="look"] .miu-head { animation: cat-look 5s ease-in-out both; }
+.miu[data-activity="ears"] .miu-ear-left { transform-origin: 125px 115px; animation: cat-ear-left 1.4s ease-in-out 2; }
+.miu[data-activity="ears"] .miu-ear-right { transform-origin: 275px 115px; animation: cat-ear-right 1.4s .3s ease-in-out 2; }
+.miu[data-activity="groom"] .miu-head { animation: cat-groom-head 1.4s ease-in-out infinite; }
+.miu[data-activity="groom"] .miu-paw-left { transform-origin: 132px 288px; animation: cat-groom-paw 1.4s ease-in-out infinite; }
+.miu[data-activity="stretch"] .miu-body,
+.miu[data-activity="wake"] .miu-body { animation: cat-stretch 1.8s ease-in-out both; }
+.miu[data-activity="stretch"] .miu-tail { animation: cat-tail-stretch 1.8s ease-in-out both; }
+.miu[data-activity="play"] .miu-body { animation: cat-pounce 1.3s ease-in-out infinite; }
+.miu[data-activity="play"] .miu-head { animation: cat-follow-yarn 1.3s ease-in-out infinite; }
+.miu[data-activity="play"] .miu-paw-right { transform-origin: 268px 288px; animation: cat-bat-yarn 1.3s ease-in-out infinite; }
+.miu[data-activity="doze"] .miu-body { animation: cat-nod 3s ease-in-out infinite; }
+.miu[data-activity="sleep"] .miu-body { animation: cat-sleep 4s ease-in-out infinite; }
+.miu[data-activity="sleep"] .miu-head { transform: rotate(-12deg) translateY(12px); }
+.miu[data-activity="sleep"] .miu-tail { transform: rotate(22deg) translate(-15px, 0); }
+.miu[data-activity="sleep"] .miu-sleep-marks { transform: translate(-35px, 95px); animation: cat-dream 4s ease-in-out infinite; }
+.miu[data-activity="purr"] .miu-body { animation: cat-purr .28s ease-in-out infinite; }
+.miu[data-activity="purr"] .miu-head { transform: rotate(-7deg); }
+.miu[data-activity="boop"] .miu-body { animation: cat-boop .65s ease-out both; }
+.miu[data-activity="boop"] .miu-head { animation: cat-boop-head .65s ease-out both; }
+.miu[data-activity="tickle"] .miu-body { animation: cat-giggle .3s ease-in-out infinite; }
+.miu[data-activity="tickle"] .miu-head { animation: cat-giggle-head .6s ease-in-out infinite; }
+.miu[data-activity="highfive"] .miu-paw-right { transform-origin: 268px 288px; animation: cat-highfive .55s ease-in-out 3; }
+.miu[data-activity="highfive"] .miu-body { animation: cat-boop .65s ease-out both; }
+.miu[data-activity="cuddle"] .miu-body { animation: cat-cuddle 1.5s ease-in-out infinite; }
+.miu[data-activity="cuddle"] .miu-head { transform: rotate(-8deg) translateY(5px); }
+.miu[data-activity="snack"] .miu-head { animation: cat-nom .5s ease-in-out infinite; }
+.miu[data-activity="snack"] .miu-mouth { animation: miu-mouth .3s ease-in-out infinite; }
+.miu.is-tracking .miu-head { animation: none; transform: rotate(4deg); }
+.miu[data-emotion="sulky"] .miu-head { animation: cat-pout-turn 2.4s ease-in-out both; }
+.miu[data-emotion="sulky"] .miu-puffed-cheeks { transform-origin: 200px 219px; animation: cat-puff-cheeks 2.4s ease-in-out both; }
+.miu[data-emotion="sulky"] .miu-tail { animation-duration: 6s; }
+
+.cat-companion { position: relative; width: min(340px, 62%); flex-shrink: 0; }
+.companion-stage { position: relative; display: flex; align-items: flex-end; justify-content: center; }
+.cat-companion .pet-button { width: 100%; max-width: 100%; }
+.yarn-toy { position: absolute; width: 58px; right: -5%; bottom: 8%; opacity: 0; pointer-events: none; }
+.yarn-toy svg { display: block; width: 100%; }
+.cat-companion[data-activity="play"] .yarn-toy { opacity: 1; animation: cat-yarn 1.3s ease-in-out infinite; }
+.companion-stage .purr { left: 8%; right: auto; bottom: 21%; z-index: 2; pointer-events: none; }
+.is-dozing > .night-window { opacity: .65; }
+
+/* Limit gesture capture to the character and toys. The room keeps native scrolling/zoom. */
+.touch-surface, .touch-toy { touch-action: none; -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
+.touch-surface svg, .touch-toy svg { pointer-events: none; }
+.touch-surface:enabled { cursor: grab; }
+.touch-surface:enabled:active { cursor: grabbing; }
+.touch-toy { position: absolute; z-index: 3; display: grid; place-items: center; width: 60px; height: 60px; min-width: 48px; min-height: 48px; border: 0; padding: 3px; border-radius: 50%; background: transparent; transform: translate(-50%, -50%); cursor: grab; transition: left .35s var(--ease-out), top .35s var(--ease-out), opacity .2s; filter: drop-shadow(0 4px 2px rgb(0 0 0 / .18)); }
+.touch-toy svg { width: 100%; height: 100%; }
+.touch-toy:disabled { opacity: .35; cursor: default; }
+.touch-toy:focus-visible { outline-offset: 3px; background: var(--pop-soft); }
+.companion-stage[data-dragging="yarn"] .touch-toy-yarn,
+.companion-stage[data-dragging="fish"] .touch-toy-fish { transition: none; cursor: grabbing; filter: drop-shadow(0 8px 5px rgb(0 0 0 / .22)); }
+.cat-companion[data-activity="play"] .companion-stage:not([data-dragging]) .touch-toy-yarn svg { animation: cat-yarn-wiggle 1.3s ease-in-out infinite; }
+.touch-feedback { position: absolute; z-index: 4; pointer-events: none; color: var(--gold); animation: cat-touch-feedback 1s ease-out both; }
+.touch-feedback.is-heart { color: var(--bad); }
+.touch-feedback svg { width: 29px; height: 29px; stroke-width: 2.5px; }
+
+@keyframes cat-look { 0%, 100% { transform: rotate(0); } 30%, 60% { transform: rotate(7deg); } 80% { transform: rotate(-4deg); } }
+@keyframes cat-ear-left { 15%, 45% { transform: rotate(-15deg); } 30%, 60%, 100% { transform: rotate(0); } }
+@keyframes cat-ear-right { 15%, 45% { transform: rotate(12deg); } 30%, 60%, 100% { transform: rotate(0); } }
+@keyframes cat-groom-head { 50% { transform: rotate(-12deg) translate(-4px, 10px); } }
+@keyframes cat-groom-paw { 0%, 100% { transform: rotate(145deg); } 50% { transform: rotate(161deg) translateY(-3px); } }
+@keyframes cat-stretch { 0%, 100% { transform: scale(1); } 40%, 65% { transform: scale(.96, 1.05) translateY(-4px); } }
+@keyframes cat-tail-stretch { 50% { transform: rotate(-12deg); } }
+@keyframes cat-pounce { 0%, 100% { transform: translateX(-5px) rotate(-2deg); } 45% { transform: translate(12px, -6px) rotate(3deg); } 65% { transform: translate(10px, 1px) rotate(2deg); } }
+@keyframes cat-follow-yarn { 50% { transform: rotate(8deg); } }
+@keyframes cat-bat-yarn { 0%, 100% { transform: rotate(-35deg); } 45%, 65% { transform: rotate(-85deg); } }
+@keyframes cat-nod { 0%, 100% { transform: scaleY(.96); } 60% { transform: scaleY(.90) rotate(-3deg); } }
+@keyframes cat-sleep { 0%, 100% { transform: scale(1.05, .73); } 50% { transform: scale(1.06, .75); } }
+@keyframes cat-dream { 50% { transform: translate(-35px, 88px); } }
+@keyframes cat-purr { 0%, 100% { transform: translateX(-.6px); } 50% { transform: translateX(.6px); } }
+@keyframes cat-yarn { 0%, 100% { transform: translateX(0) rotate(0); } 45% { transform: translateX(-44px) rotate(-110deg); } 70% { transform: translate(9px, -8px) rotate(30deg); } }
+@keyframes cat-boop { 0%, 100% { transform: translateY(0); } 35% { transform: translateY(-10px) scale(.99, 1.015); } 65% { transform: translateY(1px); } }
+@keyframes cat-boop-head { 40% { transform: rotate(8deg); } }
+@keyframes cat-giggle { 0%, 100% { transform: rotate(-1.5deg) translateX(-1px); } 50% { transform: rotate(1.5deg) translate(1px, -3px); } }
+@keyframes cat-giggle-head { 50% { transform: rotate(-5deg); } }
+@keyframes cat-highfive { 0%, 100% { transform: rotate(-150deg); } 50% { transform: rotate(-170deg); } }
+@keyframes cat-cuddle { 50% { transform: scale(1.02, .985); } }
+@keyframes cat-nom { 50% { transform: rotate(-3deg) translateY(3px); } }
+@keyframes cat-yarn-wiggle { 0%, 100% { transform: rotate(-12deg); } 50% { transform: translate(-3px, -3px) rotate(15deg); } }
+@keyframes cat-pout-turn { 0% { transform: rotate(0); } 30%, 75%, 100% { transform: rotate(-6deg) translateX(-3px); } }
+@keyframes cat-puff-cheeks { 0% { transform: scale(.92); } 35%, 75% { transform: scale(1.04); } 100% { transform: scale(1); } }
+@keyframes cat-touch-feedback { 0% { opacity: 0; transform: translate(-50%, -10%) scale(.5); } 20% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -170%) scale(1.2) rotate(10deg); } }
+
+@media (min-width: 600px) and (max-width: 899px) { .cat-companion { width: min(330px, 65%); } }
+@media (max-width: 599px) { .cat-companion { width: min(255px, 70%); }.yarn-toy { width: 46px; right: -6%; } }
+@media (max-width: 599px) and (max-height: 760px) { .cat-companion { width: 218px; max-width: 70%; } }
+@media (max-height: 599px) and (min-width: 600px) { .cat-companion { width: 250px; } }
+@media (max-width: 599px) { .touch-toy { width: 49px; height: 49px; } }
+@media (hover: none) and (pointer: coarse) { .touch-toy { width: 58px; height: 58px; } }
+@media (prefers-reduced-motion: reduce) {
+  .miu[data-activity] *, .miu[data-emotion="sulky"] *, .cat-companion .yarn-toy, .touch-toy, .touch-toy svg, .touch-feedback { animation: none !important; transition: none !important; }
+  .miu[data-emotion="sulky"] .miu-head { transform: rotate(-6deg) translateX(-3px); }
+  .miu[data-activity="sleep"] .miu-body { transform: scale(1.05, .74); }
+  .touch-feedback { transform: translate(-50%, -80%); }
+}

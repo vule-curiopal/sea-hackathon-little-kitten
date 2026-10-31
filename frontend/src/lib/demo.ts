@@ -1,0 +1,17 @@
+import type { Emotion } from './miu-pose.ts';
+import { DEMO_BUDDY } from './demo-buddy.ts';
+export function getDemoReply(message: string, language: 'en' | 'vi'): { text: string; emotion: Emotion } {
+  const text = message.toLocaleLowerCase();
+  const vi = language === 'vi';
+  if (/personality|characteristic|enfp|tính cách|who are you|your name|bạn tên|bạn là ai/.test(text)) return { emotion: 'happy', text: DEMO_BUDDY.copy[language].personalityAnswer };
+  if (/dinosaur|khủng long/.test(text)) return { emotion: 'excited', text: vi ? 'Có những chú khủng long dài bằng ba chiếc xe buýt xếp nối nhau. Miu chắc phải đi rất nhiều bước mới tới được đuôi!' : 'Some dinosaurs were as long as three buses parked in a row. My little paws would have such a long walk to their tails!' };
+  if (/sad|buồn|lonely|cô đơn|scared|sợ/.test(text)) return { emotion: 'sad', text: vi ? 'Miu đang lắng nghe đây. Bạn muốn kể thêm, hay cùng Miu tưởng tượng một góc nhỏ thật ấm áp?' : 'I’m here to listen. Would you like to tell me more, or imagine a little cozy corner together?' };
+  if (/love|yêu|thương/.test(text)) return { emotion: 'love', text: vi ? 'Một cái ôm tưởng tượng thật ấm áp gửi đến bạn! Miu rất vui khi được cùng bạn chơi.' : 'Here comes a very warm make-believe kitten hug! I’m happy we get to play together.' };
+  if (/story|stories|chuyện|truyện/.test(text)) return { emotion: 'curious', text: vi ? 'Trong căn nhà tưởng tượng, Miu tìm thấy một chiếc hộp bay được. Mình sẽ bay lên Mặt Trăng hay đến một khu vườn kẹo?' : 'In my pretend house, I found a cardboard box that could fly. Shall we visit the moon or a garden made of jellybeans?' };
+  if (/joke|funny|cười|vui/.test(text)) return { emotion: 'laughing', text: vi ? 'Nếu Miu đội một chiếc tất lên đầu, Miu sẽ là mèo hay là núi tất biết đi? Miu đoán là núi tất kêu meo!' : 'What do you call a kitten in a mountain of socks? A very purr-plexed explorer!' };
+  if (/sky|blue|trời|xanh/.test(text)) return { emotion: 'thinking', text: vi ? 'Ánh sáng Mặt Trời có nhiều màu. Không khí rải màu xanh đi khắp nơi, nên ban ngày mình thấy bầu trời xanh!' : 'Sunlight has lots of colors tucked inside it. Air scatters the blue part all around, so our daytime sky looks blue!' };
+  if (/\b(real|ai|robot)\b|thật/.test(text)) return { emotion: 'neutral', text: vi ? 'Miu là một chú mèo AI, không phải mèo thật. Những cuộc phiêu lưu của Miu là tưởng tượng, và mình có thể cùng nghĩ ra thật nhiều chuyện vui.' : 'I’m an AI kitten, so I’m not a real cat. My little adventures are make-believe, and we can imagine them together.' };
+  if (/sleep|tired|ngủ|mệt|bye|tạm biệt/.test(text)) return { emotion: 'sleepy', text: vi ? 'Nghỉ một chút cũng thật dễ chịu. Bạn có thể cho Miu nghỉ bằng nút phía trên nhé.' : 'A little rest can feel lovely. You can let me rest with the pause button whenever you like.' };
+  if (/hello|hi\b|chào/.test(text)) return { emotion: 'happy', text: vi ? 'Chào bạn! Miu vừa tưởng tượng ra một đám mây hình chiếc tất. Bạn nghĩ một đám mây có thể có hình gì nữa?' : 'Hello, little explorer! I was imagining a cloud shaped like a sock. What shape would your cloud be?' };
+  return { emotion: 'curious', text: vi ? 'Có bao điều để tò mò nhỉ! Trong bản demo nhỏ này, mình có thể nói về khủng long, bầu trời, hoặc cùng kể một câu chuyện. Bạn muốn chọn điều nào?' : 'There’s so much to wonder about! In this little demo, we can talk about dinosaurs, the sky, or make up a story. Which sounds fun?' };
+}
