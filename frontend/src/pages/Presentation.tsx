@@ -139,7 +139,7 @@ export default function Presentation() {
 
   return <main id="main-content" lang="en" ref={pageRef} data-slide={activeSlide + 1} className={`pitch-page${fullscreen ? ' is-fullscreen' : ''}`}>
     <header className="pitch-header">
-      <a href="/" className="pitch-brand" aria-label="Miu home"><span className="pitch-brand-avatar"><img src="/presentation/miu-excited.png" alt="" width="800" height="880" /></span><span>miu<span className="pitch-brand-dot" aria-hidden="true">.</span></span></a>
+      <a href="/" className="pitch-brand" aria-label="Miu home"><span className="pitch-brand-avatar"><img src="/presentation-assets/miu-excited.png" alt="" width="800" height="880" /></span><span>miu<span className="pitch-brand-dot" aria-hidden="true">.</span></span></a>
       <div className="pitch-deck-name"><strong>Meet Miu</strong><span>Sea x OpenAI Codex Hackathon</span></div>
       <a className="pitch-source" href={sourceDeck} download="Meet Miu.pptx" aria-label="Download PowerPoint">Download PowerPoint <span aria-hidden="true">↗</span></a>
     </header>
@@ -152,7 +152,7 @@ export default function Presentation() {
           <span className="pitch-slide-number">01 / 04</span>
           <h1>Small stories<br />deserve a<br /><span>familiar friend</span></h1>
           <p className="pitch-why-description">A gentle space for children to share<br />what matters in their day.</p>
-          <Room className="pitch-hero-room"><img className="pitch-why-miu" src="/presentation/miu-excited.png" alt="Miu, a blue kitten, greeting you with raised paws" width="800" height="880" draggable="false" /></Room>
+          <Room className="pitch-hero-room"><img className="pitch-why-miu" src="/presentation-assets/miu-excited.png" alt="Miu, a blue kitten, greeting you with raised paws" width="800" height="880" draggable="false" /></Room>
           <span className="pitch-wordmark">MIU</span>
         </section>
 
@@ -160,7 +160,7 @@ export default function Presentation() {
           <h1>Meet Miu</h1>
           <span className="pitch-slide-number">02 / 04</span>
           <div className="pitch-feature-grid">{features.map(feature => <article className="pitch-feature" key={feature.title}>
-            <div className="pitch-feature-art wall"><img src={`/presentation/${feature.image}`} alt="" width="800" height="880" draggable="false" /></div>
+            <div className="pitch-feature-art wall"><img src={`/presentation-assets/${feature.image}`} alt="" width="800" height="880" draggable="false" /></div>
             <h2>{feature.title}</h2>
             <p>{feature.description}</p>
           </article>)}</div>
@@ -174,7 +174,7 @@ export default function Presentation() {
           </div>
           <aside className="pitch-demo-aside">
             <h2>A familiar<br />follow-up</h2>
-            <img src="/presentation/miu-listening.png" alt="Miu listening with a paw raised" width="800" height="880" draggable="false" />
+            <img src="/presentation-assets/miu-listening.png" alt="Miu listening with a paw raised" width="800" height="880" draggable="false" />
             <span className="pitch-wordmark">MIU</span>
           </aside>
         </section>
@@ -184,7 +184,7 @@ export default function Presentation() {
             <p className="pitch-kicker">Future improvements</p>
             <h1>A more<br /><span>natural Miu</span></h1>
             <p className="pitch-proposed">Proposed next steps</p>
-            <Room className="pitch-future-room"><img src="/presentation/miu-thinking.png" alt="Miu thinking about what comes next" width="800" height="880" draggable="false" /></Room>
+            <Room className="pitch-future-room"><img src="/presentation-assets/miu-thinking.png" alt="Miu thinking about what comes next" width="800" height="880" draggable="false" /></Room>
           </div>
           <span className="pitch-slide-number">04 / 04</span>
           <div className="pitch-future-grid">{improvements.map((improvement, index) => <article key={improvement.title}>
