@@ -1,6 +1,9 @@
 import type { SVGProps } from 'react';
 
 const paths = {
+  calendar: <><rect x="3" y="5" width="18" height="16" rx="3" /><path d="M7 3v4M17 3v4M3 11h18M8 15h.01M12 15h.01M16 15h.01M8 18h.01M12 18h.01" /></>,
+  chart: <><path d="M4 3v17h17M8 15l4-5 4 2 5-7" /><path d="M17 5h4v4" /></>,
+  book: <><path d="M12 6C9 4 6 4 3 5v15c3-1 6-1 9 1 3-2 6-2 9-1V5c-3-1-6-1-9 1ZM12 6v15" /><path d="m6 9 3 1M15 10l3-1" /></>,
   qr: <><path d="M3 3h6v6H3zM15 3h6v6h-6zM3 15h6v6H3zM15 15h3v3h3v3h-6zM21 12v3M12 3v3M12 10v3H9M3 12h3M12 18v3" /></>,
   arrow: <path d="m10 5 7 7-7 7M17 12H4" />,
   back: <path d="m14 5-7 7 7 7" />,

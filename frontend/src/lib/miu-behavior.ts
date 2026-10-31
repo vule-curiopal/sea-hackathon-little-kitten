@@ -1,5 +1,6 @@
 import type { Emotion } from './miu-pose.ts';
 import type { Phase } from './conversation.ts';
+import type { IdleAffect } from './affect.ts';
 
 export type CatReaction = 'purr' | 'play' | 'wake' | 'boop' | 'tickle' | 'highfive' | 'cuddle' | 'snack';
 export type CatActivity = 'settled' | 'look' | 'ears' | 'groom' | 'stretch' | 'pout' | 'doze' | 'sleep' | CatReaction;
@@ -11,38 +12,56 @@ const idleDurations: Record<typeof autonomousActivities[number], number> = { loo
 
 // Miu chooses its own little moments. No needs meters, recording, or model calls.
 // A shuffled bag gives variety without repeating one action over and over.
-export function createIdleRoutine(random: () => number = Math.random): IdleRoutine {
+export function createIdleRoutine(random: () => number = Math.random, affect?: IdleAffect): IdleRoutine {
   const routine: [number, CatActivity][] = [[0, 'settled']];
   const choose = () => Math.max(0, Math.min(.999999, random()));
-  let cursor = 4500 + choose() * 2500;
+  const energy = affect ? Math.max(0, Math.min(1, affect.energy)) : .5;
+  const intervalScale = affect ? 1.75 - 1.1 * energy : 1;
+  const dozeAt = affect ? 72000 + 20000 * energy : 82000;
+  const allowed = affect && energy < .3 ? ['look', 'ears', 'groom'] as const : autonomousActivities;
+  let cursor = (4500 + choose() * 2500) * intervalScale;
   let previous: CatActivity = 'settled';
   let pouted = false;
-  while (cursor < 78000) {
+  while (cursor < dozeAt - 4000) {
     const before = cursor;
-    const bag = [...autonomousActivities];
+    const bag: (typeof autonomousActivities[number])[] = [...allowed];
+    if (affect?.mood === 'curious') bag.push('look', 'ears');
+    if (affect?.mood === 'mellow') bag.push('look', 'groom');
     for (let index = bag.length - 1; index > 0; index--) {
       const selected = Math.floor(choose() * (index + 1));
       [bag[index], bag[selected]] = [bag[selected], bag[index]];
     }
     if (bag[0] === previous) [bag[0], bag[1]] = [bag[1], bag[0]];
-    for (const activity of bag) {
-      if (cursor + idleDurations[activity] >= 82000) break;
+    for (let index = 0; index < bag.length; index++) {
+      if (affect && bag[index] === previous) {
+        const alternative = bag.findIndex((activity, next) => next > index && activity !== previous);
+        if (alternative === -1) continue;
+        [bag[index], bag[alternative]] = [bag[alternative], bag[index]];
+      }
+      const activity = bag[index];
+      if (cursor + idleDurations[activity] >= dozeAt) break;
       routine.push([cursor, activity]);
       cursor += idleDurations[activity];
       // A brief pretend disappointment about the yarn, never about the child.
-      if (activity === 'play' && !pouted && choose() < .25 && cursor + 2400 < 82000) {
+      if (!affect && activity === 'play' && !pouted && choose() < .25 && cursor + 2400 < dozeAt) {
         routine.push([cursor, 'pout']);
         cursor += 2400;
         pouted = true;
       }
       routine.push([cursor, 'settled']);
-      cursor += 4000 + choose() * 3000;
+      cursor += (4000 + choose() * 3000) * intervalScale;
       previous = activity;
     }
     if (cursor === before) break;
   }
-  routine.push([82000, 'doze'], [90000, 'sleep']);
+  routine.push([dozeAt, 'doze'], [dozeAt + 8000, 'sleep']);
   return routine;
+}
+
+export function idleMotionIntensity(affect?: IdleAffect, comfort = false): number {
+  if (!affect) return 1;
+  const intensity = .35 + .65 * Math.max(0, Math.min(1, affect.energy));
+  return comfort ? Math.min(.4, intensity) : intensity;
 }
 
 export function idleMoment(routine: IdleRoutine, elapsed: number, comfort = false) {

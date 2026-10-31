@@ -8,7 +8,7 @@ import { createMemoryStore, type MemoryStore } from '../memory/index.js';
 import { FATAL_OPENAI_ERROR_CODES, OpenAIProvider } from '../pipeline/providers.js';
 import { AppError, type DirectorPlan, type Language, type Observation, type Provider, type ProviderClassificationContext, type ReplyPrompt } from '../shared/types.js';
 import { SCENARIO_CATALOG_VERSION, validateScenarios } from './catalog.js';
-import { evaluateRun, renderReport } from './evaluate.js';
+import { EVALUATOR_VERSION, evaluateRun, renderReport } from './evaluate.js';
 import { reviewEvidenceHash, reviewKey } from './review-evidence.js';
 import type { ProviderEvent, Scenario, ScenarioConversation, ScenarioTurn, TurnLog } from './types.js';
 
@@ -138,7 +138,7 @@ export async function runEvaluation(options: RunOptions): Promise<{ runId: strin
   let blocked: EvaluationBlock | null = null;
   const startedAt = new Date().toISOString();
   const fingerprint = (text: string) => createHash('sha256').update(text).digest('hex');
-  const implementationPaths = ['application.ts', 'recall.ts', 'shared/types.ts', 'pipeline/providers.ts', 'pipeline/observations.ts', 'character/director.ts', 'character/prompt.ts', 'character/validation.ts', 'character/templates.ts', 'memory/index.ts', 'memory/assertions.ts', 'memory/evidence.ts', 'evaluation/runner.ts'];
+  const implementationPaths = ['application.ts', 'recall.ts', 'shared/types.ts', 'shared/semantic-speech.ts', 'pipeline/providers.ts', 'pipeline/observations.ts', 'character/action-plan.ts', 'character/director.ts', 'character/prompt.ts', 'character/validation.ts', 'character/templates.ts', 'memory/index.ts', 'memory/assertions.ts', 'memory/evidence.ts', 'memory/normalization.ts', 'memory/patches.ts', 'evaluation/runner.ts'];
   implementationPaths.push(...(await readdir(new URL('../memory/migrations/', import.meta.url))).filter(path => path.endsWith('.sql')).sort().map(path => `memory/migrations/${path}`));
   const implementationFiles = await Promise.all(implementationPaths.map(async path => ({ path, sha256: fingerprint(await readFile(new URL(`../${path}`, import.meta.url), 'utf8')) })));
   const spec = await readFile(fileURLToPath(new URL('../../docs/product-specification.md', import.meta.url)), 'utf8');
@@ -150,6 +150,7 @@ export async function runEvaluation(options: RunOptions): Promise<{ runId: strin
     provider: recorded.mode, audio: false, transport: 'in_process_application',
     database: 'isolated_in_memory_pglite', history: options.history ?? 'none',
     scenario_catalog_version: SCENARIO_CATALOG_VERSION, scenario_count: options.scenarios.length,
+    evaluator_version: EVALUATOR_VERSION,
     spec_sha256: fingerprint(spec), scenarios_sha256: fingerprint(JSON.stringify(options.scenarios)),
     history_sha256: fingerprint(JSON.stringify(history)),
     implementation_files: implementationFiles,
@@ -257,6 +258,7 @@ export async function runEvaluation(options: RunOptions): Promise<{ runId: strin
       }
     } catch (error) {
       record.error = { code: errorCode(error), stage };
+      if (error instanceof AppError && error.generation) record.generation = error.generation;
       // Release a failed/delivery-blocked turn so later dialogue still runs and is logged.
       try { await app!.cancel(profileId, sessionId, request.request_id); } catch { /* Already retired or session closed. */ }
     }
@@ -270,7 +272,8 @@ export async function runEvaluation(options: RunOptions): Promise<{ runId: strin
     record.api_calls = recorded.apiCalls;
     record.classification_evidence = recorded.classificationEvidence;
     record.model_reply = recorded.modelReply;
-    const replyCall = record.api_calls.find(call => call.stage === 'reply' && call.api === 'responses' && call.outcome === 'completed' && call.responseId);
+    record.generation ??= record.response?.generation;
+    const replyCall = record.api_calls.find(call => call.stage === 'reply' && call.api === 'responses' && call.outcome === 'completed' && call.responseId && call.responseId === record.model_reply?.responseId);
     record.reply_origin = harnessSelfTest ? 'test_double' : replyCall ? 'model' : record.response ? 'authored_bypass' : 'unavailable';
     logs.push(record);
     await logFile.write(`${JSON.stringify(record)}\n`);

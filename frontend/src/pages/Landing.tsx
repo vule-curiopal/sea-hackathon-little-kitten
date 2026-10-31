@@ -22,6 +22,7 @@ export default function Landing() {
       <Brand />
       <nav className={`main-nav ${menuOpen ? 'is-open' : ''}`} aria-label={t('menu')}>
         {(['how', 'emotions', 'safety', 'faq'] as const).map(key => <a key={key} href={`#${key}`} onClick={() => setMenuOpen(false)}>{t(key)}</a>)}
+        <a href="/app/growth" onClick={() => setMenuOpen(false)}>{t('growthLink')}</a>
       </nav>
       <div className="header-actions">
         <button className="language-toggle" onClick={() => setLanguage(language === 'en' ? 'vi' : 'en')} aria-label={t('language')}><Icon name="globe" /><span>{language === 'en' ? 'VI' : 'EN'}</span></button>

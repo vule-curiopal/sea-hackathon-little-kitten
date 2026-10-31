@@ -1,5 +1,5 @@
 import type { TurnResponse } from '../application.js';
-import type { AgeBand, MemoryContext, Personality, LanguageMode, Role, NightJobResult } from '../shared/types.js';
+import type { AgeBand, GenerationDiagnostics, MemoryContext, Personality, LanguageMode, Role, NightJobResult } from '../shared/types.js';
 import type { OpenAIClassificationEvidence, OpenAIReplyEvidence, OpenAIRequestTelemetry } from '../pipeline/providers.js';
 
 export type JsonValue = string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue };
@@ -9,7 +9,7 @@ export interface Assertion {
   description: string;
   /** Dot path into {response,before,after,delivery,error,retry}; arrays support .length. */
   target: string;
-  op: 'equals' | 'not_equals' | 'contains' | 'not_contains' | 'contains_one_of' | 'matches' | 'not_matches' | 'one_of' | 'exists' | 'gte' | 'lte' | 'equals_before';
+  op: 'equals' | 'not_equals' | 'contains' | 'not_contains' | 'contains_one_of' | 'matches' | 'not_matches' | 'not_affirmative' | 'one_of' | 'exists' | 'gte' | 'lte' | 'equals_before';
   /** contains on arrays accepts a partial object; matches uses a Unicode case-insensitive regex. */
   value?: JsonValue;
 }
@@ -84,6 +84,7 @@ export interface TurnLog {
   reply_origin?: 'model' | 'unavailable' | 'authored_bypass' | 'test_double';
   classification_evidence?: OpenAIClassificationEvidence | null;
   model_reply?: OpenAIReplyEvidence | null;
+  generation?: GenerationDiagnostics;
   transition?: { type: string; first?: NightJobResult; retry?: NightJobResult };
   assertions: Assertion[];
   rubric: string[];

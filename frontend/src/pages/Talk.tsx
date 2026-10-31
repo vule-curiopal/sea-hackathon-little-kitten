@@ -15,6 +15,7 @@ import { activityEmotion, type CatActivity, type CatReaction } from '../lib/miu-
 import { DEMO_BUDDY, demoLanguage } from '../lib/demo-buddy';
 import { PERSONALITIES, type Presentation, type Role } from '../lib/engine-api';
 import { emotions, type Emotion } from '../lib/miu-pose';
+import { readAffectPresentation, type IdleAffect } from '../lib/affect';
 
 export default function Talk({ guest = false }: { guest?: boolean }) {
   const { t, language, setLanguage } = useLanguage();
@@ -46,7 +47,7 @@ export default function Talk({ guest = false }: { guest?: boolean }) {
     },
     onTurn: response => {
       const plan = response.presentation as Presentation | null;
-      const expression = plan?.face?.expression ?? plan?.emotion;
+      const expression = plan?.face?.expression ?? readAffectPresentation(plan?.affect)?.emotion ?? plan?.emotion;
       const emotion: Emotion = emotions.includes(expression as Emotion) ? expression as Emotion : 'neutral';
       dispatch({ type: 'think' });
       dispatch({ type: 'reply', answer: { id: ++requestRef.current, text: response.reply.text, emotion, source: response.provider_mode === 'fake' ? 'reference' : 'voice' }, speaking: false });
@@ -58,7 +59,10 @@ export default function Talk({ guest = false }: { guest?: boolean }) {
   const voiceActive = ['recording', 'processing', 'speaking', 'playback_blocked'].includes(pipeline.state);
   const busy = state.phase === 'thinking' || state.phase === 'speaking' || voiceActive || pipeline.advancing;
   const comfort = presentation?.comfortActive === true;
-  const cat = useMiuBehavior({ phase: state.phase, visible, suspended: micEnabled || !!modal || memoryOpen, comfort });
+  const responseAffect = voiceActive ? readAffectPresentation(presentation?.affect) : undefined;
+  const affect: IdleAffect | undefined = responseAffect ? { mood: responseAffect.currentMood, energy: responseAffect.energy }
+    : pipeline.affect ? { mood: pipeline.affect.currentMood, energy: pipeline.affect.current.energy } : undefined;
+  const cat = useMiuBehavior({ phase: state.phase, visible, suspended: micEnabled || !!modal || memoryOpen, comfort, affect });
   const activity = cat.reset;
   const sleeping = cat.activity === 'sleep' || cat.activity === 'doze';
   const canPet = visible && !resting && !busy && state.phase !== 'listening' && !micEnabled && !modal && !memoryOpen;
@@ -149,7 +153,8 @@ export default function Talk({ guest = false }: { guest?: boolean }) {
   const ambient = state.phase === 'answered' && !voiceActive && !modal && !memoryOpen;
   const voiceNotice = voiceError ?? pipeline.error;
   const voiceMode: TranslationKey = !pipeline.session ? 'voiceService' : pipeline.session.provider_mode === 'fake' ? 'voiceReference' : 'voiceLive';
-  const emotion = resting ? 'sleepy' : comfort ? 'neutral' : ambient ? (cat.activity === 'settled' && lastAnswer ? state.emotion : activityEmotion(cat.activity)) : state.emotion;
+  const idleEmotion: Emotion | undefined = affect?.mood === 'curious' ? 'curious' : affect?.mood === 'content' ? 'happy' : affect ? 'neutral' : undefined;
+  const emotion = resting ? 'sleepy' : comfort ? 'neutral' : ambient ? (cat.activity === 'settled' ? idleEmotion ?? (lastAnswer ? state.emotion : 'neutral') : activityEmotion(cat.activity)) : state.emotion;
   const activityLabels: Record<CatActivity, TranslationKey> = { settled: 'catSettled', look: 'catLook', ears: 'catEars', groom: 'catGroom', stretch: 'catStretch', play: 'catPlay', pout: 'catPout', doze: 'catDoze', sleep: 'catSleep', wake: 'catWake', purr: 'catPurr', boop: 'catBoop', tickle: 'catTickle', highfive: 'catHighFive', cuddle: 'catCuddle', snack: 'catSnack' };
   const characterDescription = resting || sleeping ? t('touchWakeHint') : ambient ? t(activityLabels[cat.activity]) : '';
 
@@ -162,7 +167,7 @@ export default function Talk({ guest = false }: { guest?: boolean }) {
         <div className="talk-scene">
           <div className="scene-actions"><button className="round-button" aria-label={t('talkLang')} title={t('talkLang')} onClick={() => changeLanguage(language === 'en' ? 'vi' : 'en')}>{language === 'en' ? 'EN' : 'VI'}</button><button className="round-button" aria-label={t('newConversation')} title={t('newConversation')} onClick={() => { stopConversation(); setModal('new'); }}><Icon name="refresh" /></button><button className="round-button" aria-label={t(resting ? 'wake' : 'pause')} title={t(resting ? 'wake' : 'pause')} onClick={() => resting ? wake() : pause()}><Icon name={resting ? 'play' : 'pause'} /></button></div>
           {resting ? <div className="rest-card"><Icon name="moon" /><h2>{t('restingTitle')}</h2><p>{t('restingBody')}</p><button className="button button-primary" onClick={wake}>{t('wake')}<Icon name="play" /></button></div> : <div className={`talk-bubble ${state.phase === 'thinking' || state.phase === 'listening' ? 'is-quiet' : ''}`} aria-live="polite"><span className="speech-byline">Miu <span className="tiny-dot" />{t(lastAnswer?.source === 'reference' ? 'voiceReference' : 'voiceLive')}</span><p>{state.phase === 'thinking' ? t('isThinking') : state.phase === 'listening' ? t(status) : lastAnswer?.text ?? t('readyPrompt')}</p><span className="speech-tail" /></div>}
-          <MiuPlayground emotion={emotion} activity={cat.activity} alive={visible && !sleeping && !resting} speaking={state.phase === 'speaking'} mouthLevel={pipeline.mouthLevel} comfort={comfort} canInteract={canPet} resting={resting} sleeping={sleeping} label={`${t('characterLabel')}${characterDescription ? ` · ${characterDescription}` : ''}`} t={t} onReact={interact} onWake={wake} onCancel={activity} />
+          <MiuPlayground emotion={emotion} activity={cat.activity} alive={visible && !sleeping && !resting} speaking={state.phase === 'speaking'} mouthLevel={pipeline.mouthLevel} comfort={comfort} motionIntensity={cat.intensity} canInteract={canPet} resting={resting} sleeping={sleeping} label={`${t('characterLabel')}${characterDescription ? ` · ${characterDescription}` : ''}`} t={t} onReact={interact} onWake={wake} onCancel={activity} />
         </div>
         <div className={`talk-status phase-${state.phase}`} role={ambient ? undefined : 'status'}><span>{ambient ? t(activityLabels[cat.activity]) : t(status)}</span></div>
         <div className="talk-controls">
@@ -201,6 +206,7 @@ export default function Talk({ guest = false }: { guest?: boolean }) {
       </div>
       <div className="setting-row"><div><label htmlFor="sound">{t('sound')}</label><p>{t('voiceSampleSound')}</p></div><input id="sound" className="switch" type="checkbox" checked={sound} onChange={event => { stopConversation(); setSound(event.target.checked); }} /></div>
       <button className="button button-white adult-settings-link" onClick={() => { setModal(null); setMemoryOpen(true); }}>{t('adultDemo')}<Icon name="arrow" /></button>
+      <a className="button button-white adult-settings-link" href="/app/growth">{t('growthLink')}<Icon name="chart" /></a>
       <button className="button button-white settings-pause" onClick={() => { if (resting) wake(); else pause(); }}><Icon name={resting ? 'play' : 'pause'} />{t(resting ? 'wake' : 'pause')}</button><button className="button button-primary dialog-done" onClick={() => setModal(null)}>{t('done')}</button>
     </Dialog>
     <Dialog open={modal === 'new'} onClose={() => setModal(null)} title={t('newTitle')}><p className="dialog-body">{t('newBody')}</p><div className="dialog-actions"><button className="button button-white" onClick={() => setModal(null)}>{t('cancel')}</button><button className="button button-primary" onClick={() => { stopConversation(); pipeline.reconnect(); setMessage(''); setVoiceError(null); dispatch({ type: 'reset' }); setModal(null); activity(); }}>{t('newConfirm')}</button></div></Dialog>

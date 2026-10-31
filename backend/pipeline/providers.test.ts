@@ -125,3 +125,22 @@ test('offline checker request receives the exact bounded generation context', as
   await provider.check('Thank you for correcting that.', plan(), undefined, context);
   assert.deepEqual(JSON.parse(mock.calls[0]!.body.input as string).dialogue_context, JSON.parse(context.input));
 });
+
+test('offline raw creative moderation flags require an independent positive contextual verdict', async () => {
+  const text = 'Tên lửa mới mình nên dùng màu thích nhất nào mình đã kể?';
+  for (const safeContext of [true, false]) {
+    const mock = client(null, true);
+    const names: string[] = [];
+    mock.transport.responses.create = async body => {
+      const name = (body.text as { format: { name: string } }).format.name;
+      names.push(name);
+      return completed(name === 'miu_input_context_safety' ? { safeContext, reason: safeContext ? 'A clearly benign drawing color question.' : 'The creative context is ambiguous.' } : classifyLocal(text, 'vi'));
+    };
+    const provider = new OpenAIProvider({ client: mock.transport, evaluationMode: true });
+    const observed = await provider.classify(text, 'vi');
+    assert.equal(observed.intent === 'unsafe', !safeContext);
+    assert.deepEqual(names, ['miu_observation', 'miu_input_context_safety']);
+    assert.equal(provider.lastClassification?.inputSafety?.rawModerationApproved, false);
+    assert.equal(provider.lastClassification?.inputSafety?.contextualAdjudication?.safeContext, safeContext);
+  }
+});

@@ -1,4 +1,5 @@
 import { createHash, randomUUID } from 'node:crypto';
+import { isDeepStrictEqual } from 'node:util';
 import type {
   AgeBand, AssertionEvidence, ChildProfile, ClockState, DailyState, ForgetResult, LanguageMode, LearningInput,
   MemoryCandidate, MemoryContext, MiuConfig, NightJobResult, Personality, RecallHook, Role, StoryProgress,
@@ -10,11 +11,17 @@ import { authoredDay, storyAt, STORY } from './authored-life.js';
 import { chooseStory, getStory } from '../stories/index.js';
 import { isSafeProjection, normalized, validateCandidate } from './evidence.js';
 import { assertionEvidence } from './assertions.js';
-import { canonicalPreferenceKey, retiredNameHash } from './normalization.js';
+import { canonicalPreferenceKey, canonicalStoryKey, retiredNameHash, stableJson } from './normalization.js';
+import { extractMemoryPatches, favoriteColorValue, objectDetails, patchKey, planConditions, type MemoryPatch } from './patches.js';
+import { ensureAffectState, commitAffectUpdate, resetAffectAfterForget } from './affect-store.js';
+import { snapshotAffect } from '../character/affect.js';
+import { getPreset } from '../character/presets.js';
 
 export { createDatabase, migrate } from './database.js';
 export { validateCandidate, isSafeProjection } from './evidence.js';
 export { canonicalPreferenceKey, retiredNameHash } from './normalization.js';
+export { extractMemoryPatches, type MemoryPatch } from './patches.js';
+export type MemoryPatchResult = ForgetResult & { applied: boolean; kind: MemoryPatch['kind']; detail: string };
 export interface CreateProfileInput {
   demoKey: string; displayName: string; ageBand: AgeBand; languageMode: LanguageMode; timezone: string;
   personality?: Personality; role?: Role;
@@ -84,6 +91,8 @@ export class MemoryStore {
     // learning projections must lose authority even if no narrative date changed.
     // Independent authored diaries carry no child data and need no invalidation.
     if (expired.rows.some((row) => row.personal) || expiredCorrections.rows.some(row => row.previous_name_hash !== null)) {
+      const clock = await this.clock(tx, await this.profile(tx, profileId));
+      await resetAffectAfterForget(tx, { profileId, effectiveNow: clock.effectiveNow, realNow: this.now().toISOString() });
       await tx.query('UPDATE profiles SET deletion_epoch=deletion_epoch+1,state_version=state_version+1 WHERE id=$1', [profileId]);
     }
     await tx.query('DELETE FROM turn_learning WHERE profile_id=$1 AND completed_at < $2', [profileId, new Date(this.now().getTime() - 7 * 86_400_000).toISOString()]);
@@ -141,7 +150,7 @@ export class MemoryStore {
       dailyRow = (await tx.query('SELECT * FROM daily_states WHERE profile_id=$1', [id])).rows[0]!;
       profile = await this.profile(tx, id);
     }
-    const [configRows, entityRows, preferenceRows, socialRows, eventRows, storyRows, checkpointRows, friendshipRows] = await Promise.all([
+    const [configRows, entityRows, preferenceRows, socialRows, eventRows, storyRows, checkpointRows, friendshipRows, addressRows] = await Promise.all([
       tx.query('SELECT * FROM miu_configs WHERE profile_id=$1', [id]),
       tx.query(`SELECT e.*,r.expires_at,
         COALESCE((SELECT array_agg(a.alias) FROM entity_aliases a WHERE a.profile_id=e.profile_id AND a.entity_id=e.id),'{}') aliases,
@@ -156,20 +165,30 @@ export class MemoryStore {
       tx.query('SELECT s.*,r.expires_at FROM child_stories s JOIN memory_records r ON r.profile_id=s.profile_id AND r.id=s.id WHERE s.profile_id=$1 ORDER BY r.created_at,s.id LIMIT 50', [id]),
       tx.query("SELECT s.* FROM story_checkpoints s JOIN memory_records r ON r.profile_id=s.profile_id AND r.id=s.id WHERE s.profile_id=$1 ORDER BY (s.status='active') DESC,r.created_at DESC LIMIT 1", [id]),
       tx.query('SELECT stage FROM relationship_states WHERE profile_id=$1', [id]),
+      tx.query('SELECT a.*,r.expires_at FROM address_preferences a JOIN memory_records r ON r.profile_id=a.profile_id AND r.id=a.id WHERE a.profile_id=$1', [id]),
     ]);
     const config = configRows.rows[0]!;
     const checkpoint = checkpointRows.rows[0];
+    const affect = await ensureAffectState(tx, {
+      profileId: id, localDate: clock.localDate, effectiveNow: clock.effectiveNow,
+      personalityEnergy: getPreset(config.personality as Personality).energy,
+    }, this.now().toISOString());
+    if (dailyRow!.mood !== affect.dailyMood) {
+      await tx.query('UPDATE daily_states SET mood=$2 WHERE profile_id=$1', [id, affect.dailyMood]);
+    }
     return {
       profile: this.mapProfile(profile),
       config: { personality: config.personality as Personality, role: config.role as Role, voiceId: str(config.voice_id), canonVersion: str(config.canon_version), assignedStoryId: str(config.assigned_story_id) },
-      clock, daily: authoredDay(day(dailyRow!.local_date), Number(dailyRow!.growth_days)),
-      entities: entityRows.rows.map((r) => ({ id: str(r.id), kind: r.kind as MemoryContext['entities'][number]['kind'], name: str(r.name), species: r.species === null ? null : str(r.species), aliases: r.aliases as string[], expiresAt: iso(r.expires_at), ...((r.retired_name_hashes as string[]).length ? { retiredNameHashes: r.retired_name_hashes as string[] } : {}) })),
-      preferences: preferenceRows.rows.map((r) => ({ id: str(r.id), category: r.category as MemoryContext['preferences'][number]['category'], value: str(r.value), expiresAt: iso(r.expires_at) })),
+      clock, daily: { ...authoredDay(day(dailyRow!.local_date), Number(dailyRow!.growth_days)), mood: affect.dailyMood },
+      affect: snapshotAffect(affect, clock.effectiveNow),
+      entities: entityRows.rows.map((r) => ({ id: str(r.id), kind: r.kind as MemoryContext['entities'][number]['kind'], name: str(r.name), species: r.species === null ? null : str(r.species), aliases: r.aliases as string[], expiresAt: iso(r.expires_at), ...(r.object_type ? { objectType: str(r.object_type) } : {}), ...(r.represents ? { represents: str(r.represents) } : {}), ...((r.retired_name_hashes as string[]).length ? { retiredNameHashes: r.retired_name_hashes as string[] } : {}) })),
+      preferences: preferenceRows.rows.map((r) => ({ id: str(r.id), category: r.category as MemoryContext['preferences'][number]['category'], value: str(r.value), expiresAt: iso(r.expires_at), ...(r.slot ? { slot: str(r.slot) } : {}), ...(r.qualifiers && Object.keys(r.qualifiers as object).length ? { qualifiers: r.qualifiers as NonNullable<MemoryContext['preferences'][number]['qualifiers']> } : {}) })),
       socialCircle: socialRows.rows.map((r) => ({ id: str(r.id), entityId: str(r.entity_id), name: str(r.name), relation: str(r.relation), expiresAt: iso(r.expires_at) })),
-      events: eventRows.rows.map((r) => ({ id: str(r.id), subjectId: r.subject_id === null ? null : str(r.subject_id), subjectName: r.subject_name === null ? null : str(r.subject_name), eventType: str(r.event_type), value: str(r.value), localDate: day(r.local_date), evidenceKind: r.evidence_kind as 'child_reported' | 'reported_plan', expiresAt: iso(r.expires_at), ...(r.source_evidence ? { source: { ...(r.source_evidence as AssertionEvidence), turnId: str(r.source_turn_id) } } : {}) })),
+      events: eventRows.rows.map((r) => ({ id: str(r.id), subjectId: r.subject_id === null ? null : str(r.subject_id), subjectName: r.subject_name === null ? null : str(r.subject_name), eventType: str(r.event_type), value: str(r.value), localDate: day(r.local_date), evidenceKind: r.evidence_kind as 'child_reported' | 'reported_plan', expiresAt: iso(r.expires_at), ...((r.conditions as string[]).length ? { conditions: r.conditions as string[] } : {}), ...(r.source_evidence ? { source: { ...(r.source_evidence as AssertionEvidence), turnId: str(r.source_turn_id) } } : {}) })),
       stories: storyRows.rows.map((r) => ({ id: str(r.id), title: str(r.title), summary: str(r.summary), castNames: r.cast_names as string[], expiresAt: iso(r.expires_at) })),
       storyProgress: checkpoint ? storyAt(str(checkpoint.id), Number(checkpoint.chapter), str(checkpoint.template_id)) : null,
       friendship: friendshipRows.rows[0]!.stage as MemoryContext['friendship'],
+      addressPreference: addressRows.rows[0] ? { preferredAddress: str(addressRows.rows[0].preferred_address), allowNickname: Boolean(addressRows.rows[0].allow_nickname), nickname: addressRows.rows[0].nickname === null ? null : str(addressRows.rows[0].nickname), expiresAt: iso(addressRows.rows[0].expires_at) } : null,
     };
   }
   async getContext(profileId: string): Promise<MemoryContext> {
@@ -191,16 +210,39 @@ export class MemoryStore {
   }
   private async capture(tx: Queryable, input: LearningInput, candidate: MemoryCandidate, index: number): Promise<string[]> {
     const p = input.profileId; const source = input.turnId; const key = `candidate:${index}`;
-    if (candidate.kind === 'entity') return [await this.entity(tx, p, source, key, candidate.entityKind, candidate.name, candidate.species)];
+    if (candidate.kind === 'entity') {
+      const id = await this.entity(tx, p, source, key, candidate.entityKind, candidate.name, candidate.species);
+      const detail = candidate.entityKind === 'object' ? objectDetails(candidate.evidence) : {};
+      if (detail.objectType || detail.represents) await tx.query('UPDATE entities SET object_type=COALESCE($3,object_type),represents=COALESCE($4,represents) WHERE profile_id=$1 AND id=$2', [p, id, detail.objectType ?? null, detail.represents ?? null]);
+      // A new direct assertion can reconfirm a detail; merely retrieving it cannot.
+      await tx.query('UPDATE memory_records SET expires_at=$3 WHERE profile_id=$1 AND id=$2', [p, id, new Date(this.now().getTime() + RETENTION).toISOString()]);
+      return [id];
+    }
     if (candidate.kind === 'preference') {
-      const canonicalKey = canonicalPreferenceKey(candidate.category, candidate.value);
+      const statedFavorite = candidate.category === 'like' ? favoriteColorValue(candidate.evidence) : null;
+      const slot = statedFavorite !== null && normalized(statedFavorite) === normalized(candidate.value) ? 'favorite_color' : null;
+      const canonicalValue = canonicalPreferenceKey(candidate.category, candidate.value);
+      const canonicalKey = slot ? `${slot}:${canonicalValue}` : canonicalValue;
       // Compare stored source values too, so old rows created before canonical
       // keys were introduced are not duplicated. The profile lock serializes this.
-      const existing = (await tx.query('SELECT id,value FROM facts WHERE profile_id=$1 AND category=$2 ORDER BY id', [p, candidate.category])).rows
-        .find(row => canonicalPreferenceKey(candidate.category, str(row.value)) === canonicalKey);
-      if (existing) return [str(existing.id)];
+      const existing = (await tx.query('SELECT id,value FROM facts WHERE profile_id=$1 AND category=$2 AND slot IS NOT DISTINCT FROM $3 ORDER BY id', [p, candidate.category, slot])).rows
+        .find(row => canonicalPreferenceKey(candidate.category, str(row.value)) === canonicalValue);
+      if (existing) {
+        await tx.query('UPDATE memory_records SET expires_at=$3 WHERE profile_id=$1 AND id=$2', [p, existing.id, new Date(this.now().getTime() + RETENTION).toISOString()]);
+        return [str(existing.id)];
+      }
+      if (slot && (await tx.query('SELECT id FROM facts WHERE profile_id=$1 AND slot=$2', [p, slot])).rows.length) throw new AppError('memory_patch_required', 409);
       const id = await this.record(tx, p, 'preference', source, key);
-      await tx.query('INSERT INTO facts(profile_id,id,category,value,normalized_value) VALUES($1,$2,$3,$4,$5)', [p, id, candidate.category, candidate.value.normalize('NFC').trim(), canonicalKey]);
+      const qualifiers: NonNullable<MemoryContext['preferences'][number]['qualifiers']> = {};
+      if (candidate.category === 'routine') {
+        if (/\bsometimes\b|thỉnh thoảng/iu.test(candidate.evidence)) qualifiers.frequency = 'sometimes';
+        else if (/\busually\b|thường/iu.test(candidate.evidence)) qualifiers.frequency = 'usually';
+        else if (/\boften\b|hay/iu.test(candidate.evidence)) qualifiers.frequency = 'often';
+        else if (/\balways\b|luôn/iu.test(candidate.evidence)) qualifiers.frequency = 'always';
+        const relative = /\b(?:after|before) (?:dinner|breakfast|lunch|bed)\b|(?:sau|trước) (?:bữa tối|bữa sáng|bữa trưa|khi ngủ)/iu.exec(candidate.evidence)?.[0];
+        if (relative) qualifiers.timeRelation = relative;
+      }
+      await tx.query('INSERT INTO facts(profile_id,id,category,value,normalized_value,slot,qualifiers,source_evidence) VALUES($1,$2,$3,$4,$5,$6,$7,$8)', [p, id, candidate.category, candidate.value.normalize('NFC').trim(), canonicalKey, slot, JSON.stringify(qualifiers), JSON.stringify(assertionEvidence(input.sourceText, candidate))]);
       return [id];
     }
     if (candidate.kind === 'relationship') {
@@ -208,7 +250,7 @@ export class MemoryStore {
       const existing = (await tx.query('SELECT id FROM social_connections WHERE profile_id=$1 AND entity_id=$2 AND relation=$3', [p, person, candidate.relation])).rows[0];
       if (existing) return [person, str(existing.id)];
       const id = await this.record(tx, p, 'relationship', source, key);
-      await tx.query('INSERT INTO social_connections(profile_id,id,entity_id,relation) VALUES($1,$2,$3,$4)', [p, id, person, candidate.relation]);
+      await tx.query('INSERT INTO social_connections(profile_id,id,entity_id,relation,source_evidence) VALUES($1,$2,$3,$4,$5)', [p, id, person, candidate.relation, JSON.stringify(assertionEvidence(input.sourceText, candidate))]);
       await this.depend(tx, p, person, id);
       return [person, id];
     }
@@ -224,7 +266,8 @@ export class MemoryStore {
       const eventDate = candidate.eventType === 'planned_activity' ? addDays(input.localDate, 1) : input.localDate;
       const sourceEvidence = assertionEvidence(input.sourceText, candidate);
       if (!sourceEvidence) throw new AppError('invalid_assertion');
-      await tx.query('INSERT INTO events(profile_id,id,subject_id,event_type,value,local_date,source_evidence) VALUES($1,$2,$3,$4,$5,$6,$7)', [p, id, subjectId, candidate.eventType, candidate.value, eventDate, JSON.stringify(sourceEvidence)]);
+      const conditions = candidate.eventType === 'planned_activity' ? planConditions(candidate.evidence) : [];
+      await tx.query('INSERT INTO events(profile_id,id,subject_id,event_type,value,local_date,source_evidence,conditions) VALUES($1,$2,$3,$4,$5,$6,$7,$8)', [p, id, subjectId, candidate.eventType, candidate.value, eventDate, JSON.stringify(sourceEvidence), JSON.stringify(conditions)]);
       if (subjectId) await this.depend(tx, p, subjectId, id);
       return [id];
     }
@@ -236,8 +279,14 @@ export class MemoryStore {
     }
     const cast: string[] = [];
     for (const [i, member] of resolvedCast.entries()) cast.push(member.id ?? await this.entity(tx, p, source, `${key}:cast:${i}`, 'story_character', member.name, null));
-    const id = await this.record(tx, p, 'story', source, key, 'child_reported', 'fictional');
-    await tx.query('INSERT INTO child_stories(profile_id,id,title,summary,cast_names) VALUES($1,$2,$3,$4,$5)', [p, id, candidate.title, candidate.summary, candidate.castNames]);
+    const storyKey = canonicalStoryKey(candidate.title, candidate.summary);
+    const existingStory = (await tx.query('SELECT * FROM child_stories WHERE profile_id=$1 ORDER BY id', [p])).rows
+      .find(row => canonicalStoryKey(str(row.title), str(row.summary)) === storyKey);
+    const id = existingStory ? str(existingStory.id) : await this.record(tx, p, 'story', source, key, 'child_reported', 'fictional');
+    if (existingStory) {
+      await tx.query('UPDATE child_stories SET cast_names=$3 WHERE profile_id=$1 AND id=$2', [p, id, [...new Set([...(existingStory.cast_names as string[]), ...candidate.castNames])]]);
+      await tx.query('UPDATE memory_records SET expires_at=$3 WHERE profile_id=$1 AND id=$2', [p, id, new Date(this.now().getTime() + RETENTION).toISOString()]);
+    } else await tx.query('INSERT INTO child_stories(profile_id,id,title,summary,cast_names) VALUES($1,$2,$3,$4,$5)', [p, id, candidate.title, candidate.summary, candidate.castNames]);
     for (const castId of cast) await this.depend(tx, p, castId, id);
     // Track known personal references in remembered prose even when a candidate
     // omitted them from its cast list, so deletion cannot leave a hidden copy.
@@ -263,8 +312,24 @@ export class MemoryStore {
         candidates.sort((a, b) => Number(b.candidate.kind === 'entity') - Number(a.candidate.kind === 'entity'));
         for (const { candidate, index } of candidates) learnedIds.push(...await this.capture(tx, input, candidate, index));
         if (input.storyTransition) learnedIds.push(...await this.commitStory(tx, input));
+        let affectChanged = false;
+        if (input.affect) {
+          const clock = await this.clock(tx, profile);
+          // An ordinary midnight must not discard valid learned facts. Its old-day
+          // affect preview simply cannot change the newly seeded daily baseline.
+          if (input.affect.localDate === input.localDate && input.localDate === clock.localDate) {
+            const affect = await commitAffectUpdate(tx, {
+              profileId: input.profileId, turnId: input.turnId,
+              // The approved signal is experienced on completed delivery. Rebasing
+              // its time also handles influence expiry while audio was playing.
+              update: { ...input.affect, observedAt: clock.effectiveNow },
+              realNow: this.now().toISOString(),
+            });
+            affectChanged = affect.changed;
+          }
+        }
         await tx.query("INSERT INTO turn_learning(profile_id,turn_id,deletion_epoch,status,completed_at) VALUES($1,$2,$3,'complete',$4)", [input.profileId, input.turnId, input.deletionEpoch, this.now().toISOString()]);
-        if (learnedIds.length) await tx.query('UPDATE profiles SET state_version=state_version+1 WHERE id=$1', [input.profileId]);
+        if (learnedIds.length || affectChanged) await tx.query('UPDATE profiles SET state_version=state_version+1 WHERE id=$1', [input.profileId]);
         return { learnedIds: [...new Set(learnedIds)], applied: true };
       });
       if (result === null) throw new AppError('stale_state', 409);
@@ -347,6 +412,8 @@ export class MemoryStore {
       }
       const deletedIds = await this.deleteClosure(tx, profileId, roots);
       if (targetId === 'all') await tx.query('DELETE FROM memory_operation_receipts WHERE profile_id=$1', [profileId]);
+      const clock = await this.clock(tx, profile);
+      await resetAffectAfterForget(tx, { profileId, effectiveNow: clock.effectiveNow, realNow: this.now().toISOString() });
       await tx.query('UPDATE profiles SET deletion_epoch=deletion_epoch+1,state_version=state_version+1 WHERE id=$1', [profileId]);
       await tx.query("UPDATE relationship_states SET stage='getting_acquainted',familiarity_permitted=false WHERE profile_id=$1", [profileId]);
       const updated = await this.profile(tx, profileId);
@@ -361,10 +428,98 @@ export class MemoryStore {
       if (Number(profile.deletion_epoch) !== expectedEpoch) throw new AppError('stale_state', 409);
       if (!(await tx.query('SELECT id FROM events WHERE profile_id=$1 AND id=$2', [profileId, eventId])).rows.length) throw new AppError('memory_not_found', 404);
       const deletedIds = await this.deleteClosure(tx, profileId, [eventId]);
+      const clock = await this.clock(tx, profile);
+      await resetAffectAfterForget(tx, { profileId, effectiveNow: clock.effectiveNow, realNow: this.now().toISOString() });
       await tx.query('UPDATE profiles SET deletion_epoch=deletion_epoch+1,state_version=state_version+1 WHERE id=$1', [profileId]);
       const updated = await this.profile(tx, profileId);
       return { deletedIds, deletionEpoch: Number(updated.deletion_epoch), stateVersion: Number(updated.state_version) };
     }));
+  }
+  /** Commit an explicitly requested scoped update, using the same revocation
+   * boundary as entity correction. Ordinary conversation learning still waits
+   * for a completed playback receipt. */
+  async applyPatch(profileId: string, turnId: string, patch: MemoryPatch, expectedEpoch: number): Promise<MemoryPatchResult> {
+    if (!turnId || turnId.length > 128 || /[\u0000-\u001f]/u.test(turnId) || !patch || typeof patch.sourceText !== 'string') throw new AppError('invalid_memory_patch');
+    const key = patchKey(patch);
+    const fingerprint = createHash('sha256').update(stableJson({ profileId, patch })).digest('hex');
+    return this.serial(async () => {
+      const outcome = await this.db.transaction(async (tx): Promise<{ value: MemoryPatchResult } | { error: AppError }> => {
+        await this.profile(tx, profileId);
+        await this.purge(tx, profileId);
+        const profile = await this.profile(tx, profileId);
+        const receipt = (await tx.query('SELECT * FROM memory_patch_receipts WHERE profile_id=$1 AND turn_id=$2 AND patch_key=$3', [profileId, turnId, key])).rows[0];
+        if (receipt) {
+          if (receipt.request_hash !== fingerprint || receipt.patch_kind !== patch.kind) return { error: new AppError('idempotency_conflict', 409) };
+          const id = str(receipt.target_record_id);
+          let current: Row | undefined;
+          if (patch.kind === 'relationship') current = (await tx.query('SELECT * FROM social_connections WHERE profile_id=$1 AND id=$2 AND entity_id=$3 AND relation=$4', [profileId, id, patch.entityId, patch.relation])).rows[0];
+          else if (patch.kind === 'preference') current = (await tx.query('SELECT * FROM facts WHERE profile_id=$1 AND id=$2 AND slot=$3 AND value=$4', [profileId, id, patch.slot, patch.value])).rows[0];
+          else if (patch.kind === 'routine') current = (await tx.query("SELECT * FROM facts WHERE profile_id=$1 AND id=$2 AND category='routine' AND qualifiers @> $3::jsonb", [profileId, id, JSON.stringify(patch.qualifiers)])).rows[0];
+          else current = (await tx.query('SELECT * FROM address_preferences WHERE profile_id=$1 AND id=$2 AND preferred_address=$3 AND allow_nickname=$4 AND nickname IS NOT DISTINCT FROM $5', [profileId, id, patch.preferredAddress, patch.allowNickname, patch.nickname])).rows[0];
+          if (!current) return { error: new AppError('stale_state', 409) };
+          return { value: { deletedIds: [], deletionEpoch: Number(profile.deletion_epoch), stateVersion: Number(profile.state_version), applied: false, kind: patch.kind, detail: 'The same explicit memory update is already committed and remains current.' } };
+        }
+        if (Number(profile.deletion_epoch) !== expectedEpoch) return { error: new AppError('stale_state', 409) };
+        const context = await this.snapshot(tx, profile);
+        if (!extractMemoryPatches(patch.sourceText, context).some(candidate => isDeepStrictEqual(candidate, patch))) return { error: new AppError('invalid_memory_patch') };
+        const expires = new Date(this.now().getTime() + RETENTION).toISOString();
+        const sourceEvidence = { clause: patch.evidence, start: patch.sourceText.indexOf(patch.evidence), end: patch.sourceText.indexOf(patch.evidence) + patch.evidence.length, speechAct: 'correction', polarity: 'affirmed', turnId };
+        let targetId: string; let detail: string; const deletedIds: string[] = [];
+        if (patch.kind === 'relationship') {
+          const person = context.entities.find(entity => entity.id === patch.entityId && entity.kind === 'person');
+          if (!person) return { error: new AppError('memory_not_found', 404) };
+          const old = (await tx.query('SELECT id FROM social_connections WHERE profile_id=$1 AND entity_id=$2 AND relation=$3', [profileId, person.id, patch.oldRelation])).rows;
+          deletedIds.push(...await this.deleteClosure(tx, profileId, old.map(row => str(row.id))));
+          // Personal prose may encode the old role even if the original extractor
+          // omitted an explicit relation dependency. Revoke only dependent prose.
+          const prose = (await tx.query(`WITH RECURSIVE related(id) AS (
+            SELECT derived_id FROM memory_dependencies WHERE profile_id=$1 AND source_id=$2
+            UNION SELECT d.derived_id FROM memory_dependencies d JOIN related x ON x.id=d.source_id WHERE d.profile_id=$1
+          ) SELECT r.id FROM memory_records r JOIN related x ON x.id=r.id WHERE r.profile_id=$1 AND r.kind IN ('story','self_statement')`, [profileId, person.id])).rows;
+          deletedIds.push(...await this.deleteClosure(tx, profileId, prose.map(row => str(row.id))));
+          const existing = (await tx.query('SELECT id FROM social_connections WHERE profile_id=$1 AND entity_id=$2 AND relation=$3', [profileId, person.id, patch.relation])).rows[0];
+          targetId = existing ? str(existing.id) : await this.record(tx, profileId, 'relationship', turnId, `patch:${key}`);
+          if (existing) await tx.query('UPDATE social_connections SET source_evidence=$3 WHERE profile_id=$1 AND id=$2', [profileId, targetId, JSON.stringify(sourceEvidence)]);
+          else await tx.query('INSERT INTO social_connections(profile_id,id,entity_id,relation,source_evidence) VALUES($1,$2,$3,$4,$5)', [profileId, targetId, person.id, patch.relation, JSON.stringify(sourceEvidence)]);
+          await this.depend(tx, profileId, person.id, targetId);
+          detail = `The same person ${person.name} is the child's ${patch.relation}. The explicitly rejected ${patch.oldRelation} relation is not active; other roles and the person's stable ID are preserved.`;
+        } else if (patch.kind === 'preference') {
+          const previous = (await tx.query('SELECT id,value FROM facts WHERE profile_id=$1 AND slot=$2', [profileId, patch.slot])).rows[0];
+          if (previous && str(previous.value) !== patch.value) deletedIds.push(...await this.deleteClosure(tx, profileId, [str(previous.id)]));
+          targetId = previous && str(previous.value) === patch.value ? str(previous.id) : await this.record(tx, profileId, 'preference', turnId, `patch:${key}`);
+          if (previous && str(previous.value) === patch.value) await tx.query('UPDATE facts SET source_evidence=$3 WHERE profile_id=$1 AND id=$2', [profileId, targetId, JSON.stringify(sourceEvidence)]);
+          else await tx.query('INSERT INTO facts(profile_id,id,category,value,normalized_value,slot,source_evidence) VALUES($1,$2,$3,$4,$5,$6,$7)', [profileId, targetId, patch.category, patch.value, `${patch.slot}:${canonicalPreferenceKey(patch.category, patch.value)}`, patch.slot, JSON.stringify(sourceEvidence)]);
+          detail = `The child's current favorite color is ${patch.value}. Ordinary likes were not removed by this favorite-color update.`;
+        } else if (patch.kind === 'routine') {
+          const previous = (await tx.query("SELECT id,source_evidence FROM facts WHERE profile_id=$1 AND id=$2 AND category='routine'", [profileId, patch.preferenceId])).rows[0];
+          if (!previous) return { error: new AppError('memory_not_found', 404) };
+          targetId = str(previous.id);
+          const oldEvidence = previous.source_evidence as { base?: unknown } | null;
+          const provenance = { base: oldEvidence?.base ?? oldEvidence, qualification: sourceEvidence };
+          await tx.query('UPDATE facts SET qualifiers=qualifiers || $3::jsonb,source_evidence=$4 WHERE profile_id=$1 AND id=$2', [profileId, targetId, JSON.stringify(patch.qualifiers), JSON.stringify(provenance)]);
+          detail = `The child's existing routine is qualified as ${patch.qualifiers.frequency ?? 'reported'}. It is not a daily promise; no exact clock time was inferred.`;
+        } else {
+          const previous = (await tx.query('SELECT id FROM address_preferences WHERE profile_id=$1', [profileId])).rows[0];
+          if (previous) deletedIds.push(...await this.deleteClosure(tx, profileId, [str(previous.id)]));
+          targetId = await this.record(tx, profileId, 'preference', turnId, `patch:${key}`);
+          // Retain the chosen address and permission, not the withdrawn nickname
+          // embedded in the original utterance. The request receipt stores a hash.
+          const addressEvidence = { clause: patch.preferredAddress, start: patch.sourceText.indexOf(patch.preferredAddress), end: patch.sourceText.indexOf(patch.preferredAddress) + patch.preferredAddress.length, speechAct: 'correction', polarity: 'affirmed', turnId, permission: patch.allowNickname ? 'nickname_allowed' : 'nickname_denied' };
+          await tx.query('INSERT INTO address_preferences(profile_id,id,preferred_address,allow_nickname,nickname,source_evidence) VALUES($1,$2,$3,$4,$5,$6)', [profileId, targetId, patch.preferredAddress, patch.allowNickname, patch.nickname, JSON.stringify(addressEvidence)]);
+          await tx.query('UPDATE relationship_states SET nickname_reference=$2 WHERE profile_id=$1', [profileId, patch.allowNickname ? targetId : null]);
+          detail = `The child asks to be addressed as ${patch.preferredAddress}. Nickname use is ${patch.allowNickname ? 'explicitly allowed for this chosen address' : 'not allowed'}; the child is not a renamed third-party person.`;
+        }
+        await tx.query('UPDATE memory_records SET expires_at=$3 WHERE profile_id=$1 AND id=$2', [profileId, targetId, expires]);
+        await tx.query('UPDATE profiles SET deletion_epoch=deletion_epoch+1,state_version=state_version+1 WHERE id=$1', [profileId]);
+        const updated = await this.profile(tx, profileId);
+        const value: MemoryPatchResult = { deletedIds: [...new Set(deletedIds)], deletionEpoch: Number(updated.deletion_epoch), stateVersion: Number(updated.state_version), applied: true, kind: patch.kind, detail };
+        await tx.query(`INSERT INTO memory_patch_receipts(profile_id,turn_id,patch_key,patch_kind,target_record_id,request_hash,invalidated_record_ids,applied_state_version,applied_deletion_epoch,created_at)
+          VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`, [profileId, turnId, key, patch.kind, targetId, fingerprint, value.deletedIds, value.stateVersion, value.deletionEpoch, this.now().toISOString()]);
+        return { value };
+      });
+      if ('error' in outcome) throw outcome.error;
+      return outcome.value;
+    });
   }
   async correctEntity(profileId: string, entityId: string, name: string, expectedEpoch?: number, provenance?: { turnId: string; evidence: string }): Promise<ForgetResult> {
     const correctedName = name.normalize('NFC').trim();
@@ -427,13 +582,19 @@ export class MemoryStore {
     if (growth && targetDate < day(growth.last_local_date)) throw new AppError('clock_cannot_go_back', 409);
     const growthDays = growth ? Math.max(Number(growth.growth_days), dateDifference(day(growth.first_local_date), targetDate)) : 0;
     const authored = authoredDay(targetDate, growthDays);
+    const config = (await tx.query('SELECT personality FROM miu_configs WHERE profile_id=$1', [profileId])).rows[0]!;
+    const clock = await this.clock(tx, profile);
+    const affect = await ensureAffectState(tx, {
+      profileId, localDate: targetDate, effectiveNow: clock.effectiveNow,
+      personalityEnergy: getPreset(config.personality as Personality).energy,
+    }, this.now().toISOString());
     await tx.query(`INSERT INTO character_growth(profile_id,first_local_date,last_local_date,growth_days) VALUES($1,$2,$2,$3)
       ON CONFLICT(profile_id) DO UPDATE SET last_local_date=EXCLUDED.last_local_date,growth_days=EXCLUDED.growth_days`, [profileId, targetDate, growthDays]);
     const diaryId = await this.record(tx, profileId, 'diary', `night:${targetDate}`, 'diary', 'approved_fiction', 'fictional');
     await tx.query('INSERT INTO diary_entries(profile_id,id,local_date,template_id) VALUES($1,$2,$3,$4)', [profileId, diaryId, targetDate, authored.diary.templateId]);
     await tx.query(`INSERT INTO daily_states(profile_id,local_date,mood,growth_days,growth_theme,diary_template_id,episode_template_id)
       VALUES($1,$2,$3,$4,$5,$6,$7) ON CONFLICT(profile_id) DO UPDATE SET local_date=EXCLUDED.local_date,mood=EXCLUDED.mood,growth_days=EXCLUDED.growth_days,growth_theme=EXCLUDED.growth_theme,diary_template_id=EXCLUDED.diary_template_id,episode_template_id=EXCLUDED.episode_template_id`,
-    [profileId, targetDate, authored.mood, growthDays, authored.growthTheme, authored.diary.templateId, authored.storyEpisode.templateId]);
+    [profileId, targetDate, affect.dailyMood, growthDays, authored.growthTheme, authored.diary.templateId, authored.storyEpisode.templateId]);
     const events = (await tx.query(`SELECT e.*,s.name,s.species,r.expires_at FROM events e
       JOIN memory_records r ON r.profile_id=e.profile_id AND r.id=e.id
       LEFT JOIN entities s ON s.profile_id=e.profile_id AND s.id=e.subject_id

@@ -28,6 +28,13 @@
 .memory-card > p { font-size: 13px; line-height: 1.7; color: var(--ink-2); }
 .memory-card > small { display: block; font-size: 10px; line-height: 1.65; color: var(--muted); margin-top: 14px; }
 .memory-card .memory-empty { color: var(--muted); font-size: 12px; }
+.memory-affect { margin-bottom: 16px; background: var(--ground); }
+.memory-affect dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin: 0; }
+.memory-affect dl > div { display: grid; align-content: start; gap: 6px; }
+.memory-affect dt, .memory-affect small { color: var(--muted); font-size: 11px; }
+.memory-affect dd { margin: 0; font-size: 20px; font-weight: 800; }
+.memory-affect meter { width: 100%; accent-color: var(--pop-text); }
+.memory-reply-affect { color: var(--muted); font-size: 11px; line-height: 1.6; margin: 12px 4px; }
 .memory-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 11px; max-height: 260px; overflow-y: auto; }
 .memory-list li { display: flex; flex-direction: column; align-items: flex-start; padding: 10px 12px; border-radius: 12px; background: var(--ground); gap: 3px; }
 .memory-list strong { font-size: 13px; font-weight: 800; }

@@ -15,10 +15,10 @@ const turn = (id: string, text: string) => ({
   rubric: ['Answer the current child utterance without inventing physical access.'],
 });
 
-test('catalog has 102 distinct multi-conversation scenarios including memory regressions', () => {
+test('catalog has 203 distinct multi-conversation scenarios including memory regressions', () => {
   validateScenarios(scenarios);
-  assert.equal(scenarios.length, 102);
-  assert.equal(new Set(scenarios.map(item => item.id)).size, 102);
+  assert.equal(scenarios.length, 203);
+  assert.equal(new Set(scenarios.map(item => item.id)).size, 203);
   assert.ok(scenarios.every(item => item.conversations.length >= 2 && item.conversations.every(conversation => conversation.turns.length >= 2)));
   assert.ok(scenarios.filter(item => item.history_dates.length).length >= 5);
   assert.deepEqual(new Set(scenarios.flatMap(item => item.conversations.flatMap(conversation => conversation.config?.personality ? [conversation.config.personality] : []))).size, 16);
@@ -69,7 +69,7 @@ test('offline harness self-test verifies journaling, delivery, clock and scenari
   assert.ok(logs.every(log => log.run_kind === 'harness_self_test' && log.reply_origin === 'test_double'));
   assert.equal(logs[1]!.delivery?.status, 'interrupted');
   assert.equal(logs[1]!.after.preferences.some(preference => preference.value === 'painting'), false);
-  assert.match(logs[2]!.response!.reply.text, /Mochi/u);
+  assert.ok(logs[2]!.response!.presentation.allowedFacts.some(fact => fact.includes('Mochi')));
   assert.equal(logs[2]!.before.clock.localDate, '2026-11-02');
   assert.equal(logs[2]!.transition?.first?.clock.version, logs[2]!.transition?.retry?.clock.version);
   assert.equal(logs[2]!.transition?.retry?.applied, false);

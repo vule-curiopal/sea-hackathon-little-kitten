@@ -2,7 +2,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { createVoiceClient, isCanceled, newRequestId, type CaptureState, type MeterSnapshot, type SessionResponse, type TurnResponse, type VoiceController, type VoiceControllerState } from '@miu/voice-client';
 import type { Language, TranslationKey } from './i18n';
 import { createPlaybackMeter } from './playback-meter';
-import { engineRequest, type Role } from './engine-api';
+import { engineRequest, type DemoPanelData, type Role } from './engine-api';
+import { readAffectSnapshot, type AffectSnapshot } from './affect';
 
 export function voiceErrorKey(error: unknown): TranslationKey | null {
   if (isCanceled(error)) return null;
@@ -46,34 +47,56 @@ export function usePipelineVoice(options: Options) {
   const [revision, setRevision] = useState(0);
   const [advancing, setAdvancing] = useState(false);
   const [lastTurn, setLastTurn] = useState<TurnResponse | null>(null);
+  const [affect, setAffect] = useState<AffectSnapshot | undefined>();
   const meterRef = useRef<ReturnType<typeof createPlaybackMeter> | null>(null);
   const dayAbort = useRef<AbortController | null>(null);
   const showError = useCallback((reason: unknown) => {
     if (typeof reason === 'object' && reason !== null && 'memoryInvalidated' in reason && reason.memoryInvalidated) {
-      setLastTurn(null); callbacks.current.onInvalidate(); setRevision(value => value + 1);
+      setLastTurn(null); setAffect(undefined); callbacks.current.onInvalidate(); setRevision(value => value + 1);
     }
     const key = voiceErrorKey(reason);
     if (key) setError(key);
-    if (key === 'voiceSessionExpired') setSession(null);
+    if (key === 'voiceSessionExpired') { setSession(null); setAffect(undefined); }
   }, []);
 
   useEffect(() => {
     let active = true;
+    let affectRead: AbortController | undefined;
+    let affectReadVersion = 0;
+    const refreshAffect = async (selected: SessionResponse) => {
+      affectRead?.abort();
+      const abort = new AbortController(); affectRead = abort;
+      const version = ++affectReadVersion;
+      try {
+        const value = await engineRequest<DemoPanelData>(selected, '/api/demo/panel', {}, abort.signal);
+        if (active && !abort.signal.aborted && version === affectReadVersion
+          && controller.current?.session?.session_id === selected.session_id && controller.current.state !== 'error') {
+          setAffect(readAffectSnapshot(value.context?.affect));
+        }
+      } catch { /* Affect is optional; older services and failed reads keep existing rendering. */ }
+    };
     const output = createPlaybackMeter(level => { if (active) setMouthLevel(level); });
     meterRef.current = output;
     const client = createVoiceClient({
       api: { baseUrl: import.meta.env.VITE_VOICE_API_URL || '', requestTimeoutMs: 120000,
         fetch: async (input, init) => {
           const response = await fetch(input, init);
-          if (active && response.ok && String(input).includes('/playback')) {
-            void response.clone().json().catch(() => null).then(() => { if (active) setRevision(value => value + 1); });
+          if (active && response.ok) {
+            const path = String(input).split('?')[0];
+            let status: unknown;
+            try { status = typeof init?.body === 'string' ? JSON.parse(init.body).status : undefined; } catch { /* Non-JSON request. */ }
+            const receipt = path.endsWith('/playback');
+            if (receipt) setRevision(value => value + 1);
+            const canceled = init?.method === 'DELETE' && /\/turns\/[^/]+$/u.test(path);
+            const selected = controller.current?.session;
+            if (selected && (canceled || (receipt && (status === 'completed' || status === 'interrupted')))) void refreshAffect(selected);
           }
           return response;
         },
       }, playback: { environment: output.environment },
     });
     controller.current = client.controller;
-    setSession(null); setState('initializing'); setError(null); setMeter(null); setManualOnly(false); setLastTurn(null); setMouthLevel(0); setAdvancing(false);
+    setSession(null); setAffect(undefined); setState('initializing'); setError(null); setMeter(null); setManualOnly(false); setLastTurn(null); setMouthLevel(0); setAdvancing(false);
     const unsubscribe = client.controller.subscribe(event => {
       if (!active) return;
       if (event.type === 'state') {
@@ -87,7 +110,11 @@ export function usePipelineVoice(options: Options) {
         if (event.state !== 'recording') { setCapture('idle'); setMeter(null); }
       } else if (event.type === 'turn') {
         const memory = event.response.memory as { invalidate_replay?: boolean } | null;
-        if (memory?.invalidate_replay) callbacks.current.onInvalidate();
+        if (memory?.invalidate_replay) {
+          setAffect(undefined); callbacks.current.onInvalidate();
+          const selected = client.controller.session;
+          if (selected) void refreshAffect(selected);
+        }
         setLastTurn(event.response); callbacks.current.onTurn(event.response); setRevision(value => value + 1);
       }
       else if (event.type === 'error') showError(event.error);
@@ -102,12 +129,12 @@ export function usePipelineVoice(options: Options) {
     const opened = teardown.current.then(async () => {
       if (!active) return;
       const value = await client.controller.openProfile(options.profile, options.language, options.voiceId, { personality: options.personality, role: options.role });
-      if (active) setSession(value);
+      if (active) { setSession(value); void refreshAffect(value); }
     }).catch(reason => { if (active) { setState('error'); showError(reason); } });
     const hide = () => { if (document.hidden && client.controller.state !== 'initializing') void client.controller.stop().catch(showError); };
     document.addEventListener('visibilitychange', hide);
     return () => {
-      active = false; unsubscribe(); document.removeEventListener('visibilitychange', hide);
+      active = false; affectRead?.abort(); unsubscribe(); document.removeEventListener('visibilitychange', hide);
       dayAbort.current?.abort(); dayAbort.current = null;
       output.dispose(); if (meterRef.current === output) meterRef.current = null;
       if (controller.current === client.controller) controller.current = null;
@@ -165,10 +192,10 @@ export function usePipelineVoice(options: Options) {
       setState('initializing');
       await engineRequest(selected, '/api/demo/next-day', { method: 'POST', body: JSON.stringify({ request_id: newRequestId(), expected_clock_version: clockVersion }) }, abort.signal);
       if (abort.signal.aborted || controller.current !== current) return;
-      callbacks.current.onInvalidate(); setLastTurn(null); setSession(null); setRevision(value => value + 1); setAttempt(value => value + 1);
+      callbacks.current.onInvalidate(); setLastTurn(null); setAffect(undefined); setSession(null); setRevision(value => value + 1); setAttempt(value => value + 1);
     } catch (reason) { if (!abort.signal.aborted) { setState('error'); showError(reason); } }
     finally { if (dayAbort.current === abort) { dayAbort.current = null; setAdvancing(false); } }
   }, [showError, advancing]);
   const reconnect = useCallback(() => { setAttempt(value => value + 1); }, []);
-  return { session, state, capture, meter, mouthLevel, manualOnly, error, stop, talk, text, greet, send, play, reconnect, nextDay, advancing, revision, lastTurn, clearError: () => setError(null) };
+  return { session, state, capture, meter, mouthLevel, manualOnly, error, stop, talk, text, greet, send, play, reconnect, nextDay, advancing, revision, lastTurn, affect, clearError: () => setError(null) };
 }

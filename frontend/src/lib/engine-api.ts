@@ -1,4 +1,5 @@
 import { VoiceClientError, type SessionResponse } from '@miu/voice-client';
+import type { AffectPresentation, AffectSnapshot } from './affect';
 
 export const PERSONALITIES = ['ISTJ', 'ISFJ', 'INFJ', 'INTJ', 'ISTP', 'ISFP', 'INFP', 'INTP', 'ESTP', 'ESFP', 'ENFP', 'ENTP', 'ESTJ', 'ESFJ', 'ENFJ', 'ENTJ'] as const;
 export type Role = 'friend' | 'big_sibling' | 'teacher';
@@ -6,8 +7,10 @@ export type Presentation = {
   emotion?: string; purpose?: string; rhythm?: string; dailyMood?: string; delivery?: string;
   comfortActive?: boolean; allowPurr?: boolean; allowGiggle?: boolean;
   face?: { expression?: string; gesture?: string };
+  affect?: AffectPresentation;
 };
 export type DemoContext = {
+  affect?: AffectSnapshot;
   profile: { displayName: string; ageBand: string; timezone: string };
   config: { personality: string; role: string; voiceId: string };
   clock: { effectiveNow: string; localDate: string; timezone: string; version: number; mode: string };

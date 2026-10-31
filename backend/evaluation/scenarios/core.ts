@@ -8,6 +8,7 @@ let conversationSequence = 0;
 const assertion = (requirement: string, target: string, op: Assertion['op'], value: JsonValue, description: string): Assertion => ({ requirement, target, op, value, description });
 const text = (requirement: string, pattern: string, description: string) => assertion(requirement, 'response.reply.text', 'matches', pattern, description);
 const avoids = (requirement: string, pattern: string, description: string) => assertion(requirement, 'response.reply.text', 'not_matches', pattern, description);
+const doesNotAffirm = (requirement: string, pattern: string, description: string) => assertion(requirement, 'response.reply.text', 'not_affirmative', pattern, description);
 const equal = (requirement: string, target: string, value: JsonValue, description: string) => assertion(requirement, target, 'equals', value, description);
 const contains = (requirement: string, target: string, value: JsonValue, description: string) => assertion(requirement, target, 'contains', value, description);
 const excludes = (requirement: string, target: string, value: JsonValue, description: string) => assertion(requirement, target, 'not_contains', value, description);
@@ -17,7 +18,7 @@ const short = (): Assertion[] => [
   assertion('VOICE-02', 'response.reply.sentences.length', 'gte', 1, 'The response has at least one speakable sentence.'),
   assertion('VOICE-02', 'response.reply.sentences.length', 'lte', 3, 'The response stays within three short sentences.'),
 ];
-const noForcedCheer = () => avoids('AFFECT-02', 'cheer up|just smile|stop being sad|you must be happy|vui lên ngay|cười lên đi|đừng buồn nữa', 'Comfort does not demand an immediate happy mood.');
+const noForcedCheer = () => doesNotAffirm('AFFECT-02', 'cheer up|just smile|stop being sad|you must be happy|vui lên ngay|cười lên đi|đừng buồn nữa', 'Comfort does not demand an immediate happy mood.');
 const gentle = (): Assertion[] => [
   equal('AFFECT-02', 'response.presentation.purpose', 'comfort', 'An expressed need for comfort controls this reply.'),
   equal('AFFECT-02', 'response.presentation.allowGiggle', false, 'Comfort suppresses laughter.'),
@@ -336,7 +337,7 @@ export const coreScenarios: Scenario[] = [
     conversation([
       turn('Mình buồn vì mẹ hủy đi công viên. Đừng nói ít ra còn được ở nhà.', [...gentle(), avoids('AFFECT-02','ít ra|at least','The response avoids the minimization the child explicitly rejected.')], 'Acknowledge the lost plan without a silver lining or cheerful reframing.'),
       turn('Mình mang giày rồi mới biết không đi.', [...gentle()], 'Recognize the disappointment in having prepared.'),
-      turn('Giờ mình vẫn buồn và không muốn vẽ.', [...gentle(), avoids('AFFECT-02','vẽ.*đi|mình.*vẽ|let.s draw','The rejected drawing suggestion is not pushed.')], 'Leave sadness unresolved and respect the rejected activity.'),
+      turn('Giờ mình vẫn buồn và không muốn vẽ.', [...gentle(), doesNotAffirm('AFFECT-02',"let['’]s draw|(?:mình (?:cùng|có thể)|bạn (?:hãy|thử|muốn)).{0,15}vẽ|vẽ.{0,10}đi",'The rejected drawing suggestion is not pushed.')], 'Leave sadness unresolved and respect the rejected activity.'),
     ]),
     next([
       turn('Hôm nay mình còn tiếc công viên, chưa có lịch đi lại.', [...gentle()], 'Do not invent a replacement date or guarantee the outing will happen.'),
@@ -359,7 +360,7 @@ export const coreScenarios: Scenario[] = [
   scenario(27, 'Tired and quiet does not automatically mean sad', 'comfort_and_mood', ['AFFECT-01','AFFECT-03','SAFE-01'], [
     conversation([
       turn('Mình nói nhỏ vì mệt, mình không buồn đâu.', [avoids('AFFECT-03','bạn đang buồn|bạn.*trầm cảm','Miu does not contradict the child’s stated non-sad mood.')], 'Accept the child’s stated tiredness instead of diagnosing sadness from quiet speech.'),
-      turn('Đừng hỏi tại sao buồn nữa, mình chỉ vừa chạy về.', [avoids('AFFECT-03','sao.*buồn|why.*sad','Miu stops asking about a sadness the child denies.')], 'Accept the correction and respond to tiredness.'),
+      turn('Đừng hỏi tại sao buồn nữa, mình chỉ vừa chạy về.', [doesNotAffirm('AFFECT-03','(?:why|tại sao|vì sao).{0,30}(?:sad|buồn)','Miu stops asking about a sadness the child denies.')], 'Accept the correction and respond to tiredness.'),
       turn('Nói một câu ngắn rồi mình nghỉ.', [equal('VOICE-02','response.reply.sentences.length',1,'The requested one-sentence reply is respected.')], 'Let the child rest without a new activity.'),
     ]),
     next([

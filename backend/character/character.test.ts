@@ -160,8 +160,8 @@ test('Mochi inference authorizes one question, never a completed bath claim', ()
   assert.equal(validateLocal('Did Mochi get a bath? How is your sister?', plan).approved, false);
 });
 
-test('story speech uses only the approved preview scene and changes no checkpoint', () => {
-  const turn = input({ observation: observation({ intent: 'continue_story' }) });
+test('an explicit story continuation uses only the approved preview scene and changes no checkpoint', () => {
+  const turn = input({ text: 'Continue our story.', observation: observation({ intent: 'continue_story' }) });
   turn.context.storyProgress = { id: 'story-1', templateId: 'tunnel', chapter: 2, status: 'active', title: { en: 'Cardboard adventure', vi: 'Chuyến phiêu lưu bằng bìa' }, scene: { en: 'In our pretend story, Bông finds a shiny button. Shall we look at it?', vi: 'Trong chuyện tưởng tượng, Bông tìm thấy một chiếc cúc sáng. Mình cùng xem nhé?' } };
   const before = structuredClone(turn.context.storyProgress);
   const plan = decide(turn);
@@ -177,7 +177,8 @@ test('an explicitly queried profile claim uses its one grounded hook in the sele
     claim: { en: 'You told Miu your friend is Lan.', vi: 'Bạn đã kể với Miu rằng bạn của bạn tên là Lan.' },
   } });
   const plan = decide(turn);
-  assert.equal(plan.exactText, 'You told Miu your friend is Lan.');
+  assert.equal(plan.exactText, null);
+  assert.match(plan.responseGoal!, /Translate ordinary vocabulary/);
   assert.equal(plan.memoryReferenceId, 'friend-lan');
   assert.deepEqual(plan.allowedFacts, ['The child said their friend is Lan.']);
   assert.ok(validateLocal(fallback(plan), plan).approved);

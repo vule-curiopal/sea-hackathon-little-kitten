@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from '
 
 export type Language = 'en' | 'vi';
 const en = {
+  growthTitle: 'A year with Miu', growthLink: 'A year together', growthLoading: 'Opening An’s year with Miu…',
   how: 'How it works', emotions: 'Emotions', safety: 'Safety', faq: 'FAQ', signIn: 'Sign in',
   getStarted: 'Get started', start: 'Meet your little buddy', seeHow: 'See how it works',
   language: 'Change language to Vietnamese', menu: 'Open menu', close: 'Close', back: 'Back to home',
@@ -84,6 +85,7 @@ const en = {
 
 export type TranslationKey = keyof typeof en;
 const vi: Record<TranslationKey, string> = {
+  growthTitle: 'Một năm cùng Miu', growthLink: 'Một năm cùng nhau', growthLoading: 'Đang mở một năm cùng Miu của An…',
   how: 'Cách hoạt động', emotions: 'Cảm xúc', safety: 'An toàn', faq: 'Hỏi đáp', signIn: 'Đăng nhập',
   getStarted: 'Bắt đầu', start: 'Gặp người bạn nhỏ', seeHow: 'Khám phá cùng Miu', language: 'Đổi ngôn ngữ sang tiếng Anh', menu: 'Mở trình đơn', close: 'Đóng', back: 'Về trang chủ',
   eyebrow: 'Chú mèo nhỏ. Thế giới diệu kỳ.', age: 'Người bạn AI cho trẻ từ 4 đến 8 tuổi',

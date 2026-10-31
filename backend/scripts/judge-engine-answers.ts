@@ -4,15 +4,16 @@ import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 import { evaluateRun, renderReport } from '../evaluation/evaluate.js';
 import { judgeConversation } from '../evaluation/judge.js';
-import { selectJudgePriorContext } from '../evaluation/judge-context.js';
+import { groupJudgeConversations, selectJudgePriorContext } from '../evaluation/judge-context.js';
 import type { SemanticReview, TurnLog } from '../evaluation/types.js';
 
 const { values } = parseArgs({ options: {
   input: { type: 'string' }, output: { type: 'string' }, model: { type: 'string' },
   limit: { type: 'string' }, concurrency: { type: 'string', default: '2' }, help: { type: 'boolean', default: false },
+  'include-seeds': { type: 'boolean', default: false },
 } });
 if (values.help) {
-  console.log('Usage: npm run eval:judge -- --input PATH/turns.jsonl --model MODEL --output NEW_DIRECTORY [--limit CONVERSATIONS] [--concurrency 1..4]');
+  console.log('Usage: npm run eval:judge -- --input PATH/turns.jsonl --model MODEL --output NEW_DIRECTORY [--limit CONVERSATIONS] [--concurrency 1..4] [--include-seeds]');
   process.exit(0);
 }
 if (!values.input || !values.model || !values.output) throw new Error('--input, --model and --output are required; model judging is always explicit.');
@@ -25,11 +26,7 @@ const input = resolve(values.input);
 const logs = (await readFile(input, 'utf8')).trimEnd().split('\n').map(line => JSON.parse(line) as TurnLog);
 if (!logs.length || logs.some(log => log.schema_version !== 'miu-engine-evaluation-v1' || !Array.isArray(log.rubric))) throw new Error('Invalid engine log format');
 if (logs.some(log => log.provider_mode !== 'real')) throw new Error('Model evaluation requires real-provider replies; fake diagnostics cannot be judged as model performance.');
-const groups = new Map<string, TurnLog[]>();
-for (const log of logs.filter(log => log.phase === 'scenario')) {
-  const key = `${log.run_id}/${log.scenario_id}/${log.conversation_id}`;
-  groups.set(key, [...(groups.get(key) ?? []), log]);
-}
+const groups = groupJudgeConversations(logs, values['include-seeds']);
 const selected = [...groups.entries()].slice(0, limit);
 const spec = await readFile(fileURLToPath(new URL('../../docs/product-specification.md', import.meta.url)), 'utf8');
 const sections = spec.split(/\n(?=## \d+ )/u);
@@ -65,6 +62,7 @@ try {
 const report = evaluateRun(logs, reviews);
 await writeFile(resolve(output, 'judge-manifest.json'), `${JSON.stringify({
   synthetic: true, source_engine_log: input, model: values.model, store: false,
+  include_seed_conversations: values['include-seeds'],
   requested_conversations: selected.length, reviewed_turns: reviews.length, errors,
   note: 'Model judgments are fallible evidence. Independent check failures cannot be overridden. Missing, malformed or stale judgments remain needs_review.',
 }, null, 2)}\n`);

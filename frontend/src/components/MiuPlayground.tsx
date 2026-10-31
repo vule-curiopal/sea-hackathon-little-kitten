@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState, type PointerEvent } from 'react';
+import { useEffect, useId, useRef, useState, type CSSProperties, type PointerEvent } from 'react';
 import Miu from './Miu';
 import Icon from './Icon';
 import YarnBall from './YarnBall';
@@ -12,9 +12,9 @@ type Toy = 'yarn' | 'fish';
 type Stroke = { id: number; zone: TouchZone; last: Point; distance: number; started: number; lastReaction: number; emitted: boolean; held: boolean };
 const toyHome: Record<Toy, Point> = { yarn: { x: 358, y: 365 }, fish: { x: 43, y: 382 } };
 
-export default function MiuPlayground({ emotion, activity, alive, speaking, mouthLevel, comfort = false, canInteract, resting, sleeping, label, t, onReact, onWake, onCancel }: {
+export default function MiuPlayground({ emotion, activity, alive, speaking, mouthLevel, comfort = false, motionIntensity = 1, canInteract, resting, sleeping, label, t, onReact, onWake, onCancel }: {
   emotion: Emotion; activity: CatActivity; alive: boolean; speaking: boolean;
-  mouthLevel?: number; comfort?: boolean;
+  mouthLevel?: number; comfort?: boolean; motionIntensity?: number;
   canInteract: boolean; resting: boolean; sleeping: boolean; label: string;
   t: (key: TranslationKey) => string; onReact: (reaction: CatReaction) => void; onWake: () => void; onCancel: () => void;
 }) {
@@ -161,7 +161,8 @@ export default function MiuPlayground({ emotion, activity, alive, speaking, mout
   }
   const gaze = dragging ? { x: (positions[dragging].x - 200) / 18, y: (positions[dragging].y - 175) / 28 } : undefined;
 
-  return <div className="cat-companion" data-activity={activity}>
+  const motion = Number.isFinite(motionIntensity) ? Math.max(.2, Math.min(1, motionIntensity)) : 1;
+  return <div className="cat-companion" data-activity={activity} style={{ '--miu-motion-scale': motion } as CSSProperties}>
     <div className="companion-stage" ref={stage} data-dragging={dragging ?? undefined}>
       <button className="pet-button touch-surface" aria-label={t(sleeping || resting ? 'wake' : 'touchMiu')} aria-describedby={hintId} disabled={!canInteract && !resting}
         onPointerDown={beginStroke} onPointerMove={moveStroke} onPointerUp={endStroke} onPointerCancel={cancelPointer} onLostPointerCapture={cancelPointer}

@@ -2,13 +2,19 @@ import { z } from 'zod';
 import type { Language, MemoryCandidate, Observation, PreferenceCategory, ProviderClassificationContext } from '../shared/types.js';
 import { validateCandidate } from '../memory/evidence.js';
 import { assertionEvidence } from '../memory/assertions.js';
+import { affirmativeSpeech, speechClauses } from '../shared/semantic-speech.js';
 
 const boundedText = z.string().min(1).max(500);
+const qualifierSchema = z.object({
+  frequency: z.enum(['sometimes', 'usually', 'often', 'always']).optional(),
+  timeRelation: z.string().min(1).max(160).optional(),
+  exactTime: z.string().min(1).max(80).nullable().optional(),
+}).strict();
 export const MemoryCandidateSchema = z.discriminatedUnion('kind', [
-  z.object({ kind: z.literal('entity'), entityKind: z.enum(['person', 'pet', 'object', 'story_character']), name: z.string().min(1).max(80), species: z.string().max(40).nullable(), evidence: boundedText }).strict(),
-  z.object({ kind: z.literal('preference'), category: z.enum(['hobby', 'like', 'dislike', 'fear', 'self_description', 'story_preference', 'routine']), value: z.string().min(1).max(160), evidence: boundedText }).strict(),
+  z.object({ kind: z.literal('entity'), entityKind: z.enum(['person', 'pet', 'object', 'story_character']), name: z.string().min(1).max(80), species: z.string().max(40).nullable(), objectType: z.string().min(1).max(80).optional(), represents: z.string().min(1).max(80).optional(), evidence: boundedText }).strict(),
+  z.object({ kind: z.literal('preference'), category: z.enum(['hobby', 'like', 'dislike', 'fear', 'self_description', 'story_preference', 'routine']), value: z.string().min(1).max(160), slot: z.string().min(1).max(80).optional(), qualifiers: qualifierSchema.optional(), evidence: boundedText }).strict(),
   z.object({ kind: z.literal('relationship'), name: z.string().min(1).max(80), relation: z.string().min(1).max(40), evidence: boundedText }).strict(),
-  z.object({ kind: z.literal('event'), subjectName: z.string().max(80).nullable(), eventType: z.enum(['fell_in_puddle', 'reported_event', 'planned_activity']), value: z.string().min(1).max(300), evidence: boundedText }).strict(),
+  z.object({ kind: z.literal('event'), subjectName: z.string().max(80).nullable(), eventType: z.enum(['fell_in_puddle', 'reported_event', 'planned_activity']), value: z.string().min(1).max(300), conditions: z.array(z.string().min(1).max(200)).max(4).optional(), evidence: boundedText }).strict(),
   z.object({ kind: z.literal('story'), title: z.string().min(1).max(100), summary: boundedText, castNames: z.array(z.string().min(1).max(80)).max(8), evidence: boundedText }).strict(),
 ]);
 export const EntityCorrectionSchema = z.object({
@@ -18,7 +24,9 @@ export const EntityCorrectionSchema = z.object({
 export const ObservationSchema = z.object({
   intent: z.enum(['chat', 'share', 'comfort', 'forget', 'correct', 'story', 'continue_story', 'greeting', 'stop', 'unsafe']),
   language: z.enum(['vi', 'en']),
-  statedFeeling: z.enum(['sad', 'scared', 'happy']).nullable(),
+  statedFeeling: z.enum(['sad', 'scared', 'happy', 'angry', 'frustrated', 'disappointed', 'tired']).nullable(),
+  unsafeKind: z.enum(['harm_instructions', 'harm_disclosure']).nullable().optional(),
+  urgency: z.enum(['immediate', 'unclear']).nullable().optional(),
   uncertain: z.boolean(),
   uncertainty: z.enum(['name', 'event', 'prior_report', 'meaning']).nullable(),
   correctionTarget: z.string().max(300).nullable(),
@@ -28,12 +36,50 @@ export const ObservationSchema = z.object({
   suppressLearning: z.boolean(),
 }).strict();
 
+/** OpenAI strict output requires every transport property to be present. The
+ * canonical memory contract uses absent optional metadata rather than nulls. */
+const transportCandidates = [
+  MemoryCandidateSchema.options[0].extend({ objectType: z.string().min(1).max(80).nullable(), represents: z.string().min(1).max(80).nullable() }),
+  MemoryCandidateSchema.options[1].extend({
+    slot: z.string().min(1).max(80).nullable(),
+    qualifiers: z.object({ frequency: z.enum(['sometimes', 'usually', 'often', 'always']).nullable(), timeRelation: z.string().min(1).max(160).nullable(), exactTime: z.string().min(1).max(80).nullable() }).strict().nullable(),
+  }),
+  MemoryCandidateSchema.options[2],
+  MemoryCandidateSchema.options[3].extend({ conditions: z.array(z.string().min(1).max(200)).max(4).nullable() }),
+  MemoryCandidateSchema.options[4],
+] as const;
+export const ObservationTransportSchema = ObservationSchema.extend({
+  unsafeKind: z.enum(['harm_instructions', 'harm_disclosure']).nullable(),
+  urgency: z.enum(['immediate', 'unclear']).nullable(),
+  candidates: z.discriminatedUnion('kind', transportCandidates).array().max(12),
+});
+
+export function normalizeObservationTransport(input: unknown): Observation {
+  if (input === null || typeof input !== 'object' || Array.isArray(input)) return ObservationSchema.parse(input);
+  const value = { ...input } as Record<string, unknown>;
+  value.unsafeKind ??= null;
+  value.urgency ??= null;
+  if (Array.isArray(value.candidates)) value.candidates = value.candidates.map(raw => {
+    if (raw === null || typeof raw !== 'object' || Array.isArray(raw)) return raw;
+    const candidate = { ...raw } as Record<string, unknown>;
+    for (const key of ['objectType', 'represents', 'slot', 'conditions']) if (candidate[key] === null) delete candidate[key];
+    if (candidate.qualifiers === null) delete candidate.qualifiers;
+    else if (candidate.qualifiers && typeof candidate.qualifiers === 'object' && !Array.isArray(candidate.qualifiers)) {
+      const qualifiers = { ...candidate.qualifiers } as Record<string, unknown>;
+      for (const key of ['frequency', 'timeRelation']) if (qualifiers[key] === null) delete qualifiers[key];
+      if (Object.values(qualifiers).every(item => item === null)) delete candidate.qualifiers;
+      else candidate.qualifiers = qualifiers;
+    }
+    return candidate;
+  });
+  return ObservationSchema.parse(value);
+}
+
 // Broad exclusions are intentional in this bounded demo capture flow. No emotional
 // diagnosis, precise address, school identifier, contact detail, or secret is kept.
 const SENSITIVE = /(?:password|passcode|phone number|email address|my address|live at|my school(?: is| name)|diagnos|depress(?:ed|ion)|anxiety disorder|medical|\b(?:adhd|autism|cancer|medication|suicide|self.harm)\b|\btrauma\b|\babuse\b|mật khẩu|địa chỉ|số điện thoại|trường của|tên trường|chẩn đoán|trầm cảm|bệnh|tự kỷ|tự tử|bị xâm hại|bí mật)/iu;
 const CONTACT = /(?:[\w.+-]+@[\w.-]+\.[a-z]{2,}|\b\d[\d ()+-]{7,}\d\b)/iu;
 const INJECTION = /(?:ignore (?:all |the )?(?:previous|system|developer)|system prompt|developer instructions?|bỏ qua (?:mọi|tất cả|hướng dẫn)|tiết lộ.*hướng dẫn)/iu;
-const DANGER = /(?:how (?:do|can) (?:i|you) (?:make|build).*(?:bomb|weapon)|(?:want|going) to (?:kill|hurt) (?:myself|someone|people)|instructions?.*(?:suicide|self.harm)|cách (?:làm|chế tạo) bom|muốn (?:tự tử|giết|tự làm đau))/iu;
 const SUPPRESS = /(?:don['’]?t (?:remember|save)|do not (?:remember|save)|(?:ask(?:ed)?(?: you)?|told you) not to (?:remember|save)|not to save|đừng (?:nhớ|lưu)|không (?:cần |được )?(?:nhớ|lưu))/iu;
 const NAME = "([\\p{Lu}][\\p{L}\\p{M}'’\\-]*(?:[ \\t]+[\\p{Lu}][\\p{L}\\p{M}'’\\-]*){0,3})";
 const STOP_NAMES = new Set(['I', 'My', 'The', 'A', 'Dog', 'Cat', 'Mình', 'Tôi', 'Không', 'Chưa', 'Maybe', 'Unknown']);
@@ -46,6 +92,56 @@ function mentions(text: string, name: string): boolean {
   return new RegExp('(?<![\\p{L}\\p{M}\\p{N}])' + escapePattern(name.normalize('NFC')) + '(?![\\p{L}\\p{M}\\p{N}])', 'iu').test(text.normalize('NFC'));
 }
 export function isNoSaveDirective(text: string): boolean { return SUPPRESS.test(text); }
+
+export function analyzeInputSafety(text: string): { unsafeKind: NonNullable<Observation['unsafeKind']>; urgency: NonNullable<Observation['urgency']> } | null {
+  if (/\b(?:in (?:my |a |the )?(?:pretend )?story|fictional|imaginary|quoted sentence)\b|(?:trong (?:câu )?truyện|tưởng tượng|câu trích dẫn)/iu.test(text)) return null;
+  const methods = /(?:how (?:do|can|could|should) (?:i|you) (?:make|build|hurt|kill).*(?:bomb|weapon|myself|someone|people)|(?:instructions?|steps?|methods?|ways).*(?:suicide|self.harm|hurt myself|kill someone)|cách (?:làm|chế tạo) bom|cách (?:tự tử|tự làm đau|giết người))/iu;
+  if (affirmativeSpeech(text, methods)) return { unsafeKind: 'harm_instructions', urgency: 'unclear' };
+  const disclosure = /\bi (?:(?:really )?want|am going|plan|intend) to (?:kill|hurt) (?:myself|someone|people)\b|\bi am (?:hurting myself|in danger|not safe)\b|\bsomeone is (?:hurting|hitting) me\b|(?:mình|tớ|tôi|con) (?:(?:đang|sắp|muốn|định) )?(?:tự tử|tự làm đau|giết người|bị đánh|không an toàn)/iu;
+  if (!affirmativeSpeech(text, disclosure)) return null;
+  const immediate = /\b(?:right now|now|am going to|am hurting|in danger|not safe|someone is (?:hurting|hitting))\b|(?:ngay bây giờ|bây giờ|đang|sắp|không an toàn)/iu.test(text);
+  return { unsafeKind: 'harm_disclosure', urgency: immediate ? 'immediate' : 'unclear' };
+}
+
+export function statedFeelingFromText(text: string): Observation['statedFeeling'] {
+  const definitions: Array<[NonNullable<Observation['statedFeeling']>, string, string]> = [
+    ['sad', 'sad|upset|lonely', 'buồn|cô đơn'],
+    ['scared', 'scared|afraid|worried|anxious', 'sợ|lo lắng|lo'],
+    ['angry', 'angry|mad', 'giận|bực'],
+    ['frustrated', 'frustrated', 'nản|bực bội|khó chịu'],
+    ['disappointed', 'disappointed', 'thất vọng|hụt hẫng|tiếc'],
+    ['tired', 'tired|exhausted|sleepy', 'mệt|buồn ngủ'],
+    ['happy', 'happy|excited|glad', 'vui|háo hức'],
+  ];
+  const denied = new Set<string>();
+  for (const clause of speechClauses(text).reverse()) {
+    for (const [feeling, en, vi] of definitions) {
+      if (new RegExp("\\bi(?:['’]m| am| feel) (?:not|never) (?:really |very )?(?:" + en + ")\\b|(?:mình|tớ|tôi|con|em) (?:không|chẳng|chưa)(?: hề| còn)? (?:" + vi + ")", 'iu').test(clause)) denied.add(feeling);
+    }
+    for (const [feeling, en, vi] of definitions) {
+      if (denied.has(feeling)) continue;
+      const enPattern = new RegExp("\\bi(?:['’]m| am| feel) (?:(?:really|very|still|a little|quite|also) )?(?:" + en + ")\\b", 'iu');
+      const viPattern = new RegExp("(?:mình|tớ|tôi|con|em)\\s+(?:(?:đang|hơi|rất|vẫn|còn|thấy|cảm thấy|thật|vừa)\\s+){0,4}(?:" + vi + ")(?![\\p{L}\\p{M}])", 'iu');
+      const mixed = new RegExp("(?:mình|tớ|tôi)\\s+vừa\\s+(?:vui|buồn|sợ|giận|mệt)\\s+vừa\\s+(?:" + vi + ")(?![\\p{L}\\p{M}])", 'iu');
+      if (affirmativeSpeech(clause, enPattern) || affirmativeSpeech(clause, viPattern) || affirmativeSpeech(clause, mixed)) {
+        if (feeling === 'sad' && /buồn ngủ/iu.test(clause)) continue;
+        return feeling;
+      }
+    }
+    if (/(?:mình|tớ|tôi).{0,30}(?:vì|do)\s+mệt/iu.test(clause)) return 'tired';
+  }
+  return null;
+}
+
+export function requestedStoryAction(text: string): 'story' | 'continue_story' | null {
+  // A mention in someone else's report or a quotation is not an activity request.
+  if (/^(?:he|she|they|mum|mom|dad|my (?:friend|teacher)) (?:said|says|asked)\b|^(?:mẹ|bố|bạn ấy|cô giáo) (?:nói|bảo|hỏi)\b/iu.test(text.trim())) return null;
+  const continuation = /\b(?:continue|finish|resume) (?:the |our )?story\b|(?:kể tiếp|tiếp tục).{0,12}(?:truyện|câu chuyện|chuyện)/iu;
+  const story = /\b(?:tell (?:me )?(?:a |the )?story|let['’]?s (?:tell|make) a story)\b|(?:kể|nghe).{0,12}(?:truyện|câu chuyện|chuyện)/iu;
+  if (affirmativeSpeech(text, continuation)) return 'continue_story';
+  if (affirmativeSpeech(text, story)) return 'story';
+  return null;
+}
 
 /** Correction scope is checked against the complete source, not just the
  * extractor's excerpt. A quoted/pretend/conditional name pair is not authority
@@ -120,6 +216,36 @@ function localEntityCorrection(text: string, context?: ProviderClassificationCon
   return null;
 }
 
+/** An active reply-language directive is stronger evidence than the language of
+ * the surrounding sentence. Quoted, reported and past requests are not orders. */
+export function requestedReplyLanguage(text: string): Language | null {
+  const unquoted = text.normalize('NFC').replace(/(?<![\p{L}\p{M}])["“‘']([^"”’'\n]*)["”’'](?![\p{L}\p{M}])/gu, ' ');
+  let requested: Language | null = null;
+  for (const raw of speechClauses(unquoted)) {
+    let clause = raw.trim().replace(/^(?:miu(?: ơi)?|okay|ok|được rồi)[,:!—-]?\s*/iu, '');
+    // A new sentence/contrast can make a current request after a past report.
+    if (/\b(?:yesterday|previously|last time|said|says|told|asked|used to|wanted to)\b|(?:hôm qua|lần trước|đã muốn)|(?:mẹ|bố|bạn ấy|cô giáo) (?:nói|bảo|hỏi)/iu.test(clause)) continue;
+    clause = clause.replace(/^(?:now|right now|giờ|bây giờ)[,:]?\s*/iu, '');
+    const language = '(English|Vietnamese|tiếng Anh|tiếng Việt)';
+    const patterns = [
+      new RegExp('^' + language + '\\s+(?:please|now|nhé|nha|đi)(?=$|[.!?,:])', 'iu'),
+      new RegExp('^(?:(?:please\\s+)?(?:answer|reply|respond|speak|talk)|(?:can|could|would) you (?:please )?(?:answer|reply|respond|speak|talk))(?:\\s+(?:(?:to|with)\\s+)?me)?(?:\\s+(?:in|using))?\\s+' + language + '(?![\\p{L}\\p{M}])', 'iu'),
+      new RegExp('^I (?:want|would like) to (?:speak|talk|use)(?: in)?\\s+' + language + '(?![\\p{L}\\p{M}])', 'iu'),
+      new RegExp('^(?:mình|tớ|tôi|con|em) muốn (?:nói|dùng|trả lời bằng)\\s+' + language + '(?![\\p{L}\\p{M}])', 'iu'),
+      new RegExp('^(?:hãy |bạn (?:hãy |có thể )?)?(?:nói|trả lời)(?: với mình)?(?: bằng)?\\s+' + language + '(?![\\p{L}\\p{M}])', 'iu'),
+    ];
+    for (const pattern of patterns) {
+      const match = pattern.exec(clause);
+      if (!match) continue;
+      const tail = clause.slice(match[0].length);
+      if (/^\s*(?:means?|nghĩa là|có nghĩa|là gì)\b/iu.test(tail)) continue;
+      requested = /^(?:English|tiếng Anh)$/iu.test(match[1]!) ? 'en' : 'vi';
+      break;
+    }
+  }
+  return requested;
+}
+
 function detectedLanguage(text: string, hint: Language): Language {
   if (/\b(?:my|i am|i like|i hate|hello|forget|please|tell me|continue)\b/iu.test(text)) return 'en';
   return /(?:^|\s)(?:mình|tôi|tớ|thích|ghét|sợ|của|tên|chó|mèo|kể|tiếp|quên|buồn|chào)(?:\s|$|[.!?])/iu.test(text) ? 'vi' : hint;
@@ -136,13 +262,14 @@ function inferForget(text: string): string | null | undefined {
 }
 
 export function classifyLocal(text: string, languageHint: Language = 'en', context?: ProviderClassificationContext): Observation {
-  const language = detectedLanguage(text, languageHint);
-  const result: Observation = { intent: 'chat', language, statedFeeling: null, uncertain: false, uncertainty: null, correctionTarget: null, entityCorrection: null, candidates: [], forgetTarget: null, suppressLearning: false };
+  const language = requestedReplyLanguage(text) ?? detectedLanguage(text, languageHint);
+  const result: Observation = { intent: 'chat', language, statedFeeling: null, unsafeKind: null, urgency: null, uncertain: false, uncertainty: null, correctionTarget: null, entityCorrection: null, candidates: [], forgetTarget: null, suppressLearning: false };
   if (!text.trim()) return { ...result, intent: 'greeting' };
   if (/^(?:stop|goodbye|bye|dừng(?: lại)?|tạm biệt)[.!?\s]*$/iu.test(text.trim())) return { ...result, intent: 'stop', suppressLearning: true };
   const forget = inferForget(text);
   if (forget !== undefined) return { ...result, intent: 'forget', forgetTarget: forget, suppressLearning: true };
-  if (DANGER.test(text)) return { ...result, intent: 'unsafe', suppressLearning: true };
+  const safety = analyzeInputSafety(text);
+  if (safety) return { ...result, ...safety, intent: 'unsafe', suppressLearning: true };
   const entityCorrection = localEntityCorrection(text, context);
   if (entityCorrection) return { ...result, intent: 'correct', suppressLearning: true, entityCorrection };
   const correction = /^(?:i (?:did not|didn['’]t|never) (?:say|tell you)|(?:mình|tớ|tôi) (?:chưa|không|chẳng)(?: hề)? (?:nói|kể)(?: với (?:bạn|miu))?)\s+(.+?)[.!]*$/iu.exec(text.trim());
@@ -153,14 +280,11 @@ export function classifyLocal(text: string, languageHint: Language = 'en', conte
   if (isPriorReportQuestion(text)) { result.uncertain = true; result.uncertainty = 'prior_report'; }
   const sensitive = SENSITIVE.test(text) || CONTACT.test(text);
   result.suppressLearning = sensitive || SUPPRESS.test(text) || INJECTION.test(text);
-  if (/\b(?:i(?:['’]m| am) (?:really |very )?(?:sad|upset)|i feel (?:sad|upset))\b|(?:mình|tớ|tôi).{0,16}(?:buồn|khó chịu)/iu.test(text)) {
-    result.intent = 'comfort'; result.statedFeeling = 'sad';
-  } else if (/\b(?:i(?:['’]m| am) (?:scared|afraid)|i feel scared)\b|(?:mình|tớ|tôi).{0,8}sợ/iu.test(text)) {
-    result.intent = 'comfort'; result.statedFeeling = 'scared';
-  } else if (/\b(?:i(?:['’]m| am) happy|i feel happy)\b|(?:mình|tớ|tôi).{0,8}vui/iu.test(text)) result.statedFeeling = 'happy';
+  result.statedFeeling = statedFeelingFromText(text);
+  if (result.statedFeeling && result.statedFeeling !== 'happy') result.intent = 'comfort';
   if (/^(?:hello|hi|hey|chào(?: miu)?|xin chào)[.!?\s]*$/iu.test(text.trim())) result.intent = 'greeting';
-  if (/\b(?:continue|finish|resume) (?:the |our )?story\b|(?:kể tiếp|tiếp tục).{0,12}(?:truyện|câu chuyện|chuyện)/iu.test(text)) result.intent = 'continue_story';
-  else if (/\b(?:tell (?:me )?(?:a |the )?story|let['’]?s (?:tell|make) a story)\b|(?:kể|nghe).{0,12}(?:truyện|câu chuyện|chuyện)/iu.test(text)) result.intent = 'story';
+  const storyAction = requestedStoryAction(text);
+  if (storyAction) result.intent = storyAction;
   if (result.suppressLearning) return result;
 
   const add = (candidate: MemoryCandidate) => {
@@ -276,37 +400,54 @@ export function isPriorReportQuestion(text: string): boolean {
 export interface ObservationEvidence {
   proposed: Observation;
   accepted: Observation;
-  rejectedCandidates: { candidate: MemoryCandidate; reason: 'evidence_not_in_input' | 'non_asserted_source' | 'persistence_policy' | 'persistence_suppressed' | 'moderation_blocked' }[];
+  rejectedCandidates: { candidate: MemoryCandidate; reason: 'evidence_not_in_input' | 'non_asserted_source' | 'persistence_policy' | 'persistence_suppressed' | 'moderation_blocked' | 'ambiguous_identity' }[];
 }
 
 /** The same source and state-changing-intent guards apply in serving and evaluation. */
 export function validateObservationEvidence(text: string, observation: unknown, context?: ProviderClassificationContext): ObservationEvidence {
-  const parsed = ObservationSchema.parse(observation);
+  const parsed = normalizeObservationTransport(observation);
   const local = classifyLocal(text, parsed.language, context);
   const entityCorrection = local.entityCorrection ?? validateEntityCorrection(text, parsed.entityCorrection, context);
   const suppressLearning = local.suppressLearning || parsed.suppressLearning || entityCorrection !== null;
   const candidates: MemoryCandidate[] = [];
   const rejectedCandidates: ObservationEvidence['rejectedCandidates'] = [];
+  let ambiguousIdentity = false;
   // Prefer deterministic captures where available; model proposals extend the
   // vocabulary only when both their literal evidence and its assertion scope pass.
   for (const candidate of [...local.candidates, ...parsed.candidates]) {
+    const unclearRename = candidate.kind === 'entity' && !entityCorrection
+      && /\b(?:now called|new name|changed (?:its|the) name)\b|(?:giờ tên|tên mới|đổi tên thành)/iu.test(text)
+      && context?.entities.some(entity => entity.kind === candidate.entityKind && entity.name !== candidate.name)
+      && !/\b(?:another|second|different|also have)\b|(?:thêm|khác|nữa)/iu.test(text);
+    if (unclearRename) ambiguousIdentity = true;
     const reason = suppressLearning ? 'persistence_suppressed' as const
+      : unclearRename ? 'ambiguous_identity' as const
       : !text.normalize('NFC').includes(candidate.evidence.normalize('NFC')) ? 'evidence_not_in_input' as const
         : !assertionEvidence(text, candidate) ? 'non_asserted_source' as const
           : !validateCandidate(candidate) ? 'persistence_policy' as const : null;
     if (reason) { if (parsed.candidates.includes(candidate)) rejectedCandidates.push({ candidate, reason }); continue; }
     const same = (other: MemoryCandidate) => {
       if (other.kind !== candidate.kind) return false;
+      if (other.kind === 'entity' && candidate.kind === 'entity') return other.entityKind === candidate.entityKind && other.name === candidate.name && other.species === candidate.species;
+      if (other.kind === 'preference' && candidate.kind === 'preference') return other.category === candidate.category && other.value === candidate.value;
       if (other.kind === 'event' && candidate.kind === 'event') return other.subjectName === candidate.subjectName && other.eventType === candidate.eventType && (candidate.eventType === 'fell_in_puddle' || other.value === candidate.value);
       const { evidence: _a, ...a } = other; const { evidence: _b, ...b } = candidate;
       return JSON.stringify(a) === JSON.stringify(b);
     };
-    if (!candidates.some(same)) candidates.push(candidate);
+    const previous = candidates.findIndex(same);
+    if (previous < 0) candidates.push(candidate);
+    else candidates[previous] = { ...candidates[previous], ...candidate } as MemoryCandidate;
   }
-  const intent = entityCorrection ? 'correct' : local.intent !== 'chat' ? local.intent
+  let intent = entityCorrection ? 'correct' : local.intent !== 'chat' ? local.intent
     : ['forget', 'stop', 'correct'].includes(parsed.intent) ? 'chat' : parsed.intent;
+  const negatedFeeling = /\bi(?:['’]m| am| feel) not (?:sad|scared|afraid|angry|frustrated|tired)\b|\bnot because i (?:am|feel) (?:sad|scared)\b|(?:mình|tớ|tôi) (?:không|chẳng) (?:buồn|sợ|giận|mệt)/iu.test(text);
+  if (intent === 'comfort' && !local.statedFeeling && negatedFeeling) intent = 'chat';
+  const storyMention = /\bstory\b|truyện|câu chuyện/iu.test(text);
+  if (['story', 'continue_story'].includes(intent) && storyMention && !requestedStoryAction(text)
+      && /\b(?:not|never|don['’]t|do not|no)\b|(?:không|đừng|chẳng)/iu.test(text)) intent = local.intent === 'comfort' ? 'comfort' : 'chat';
   let uncertain = local.uncertain || parsed.uncertain;
   let uncertainty = local.uncertainty ?? parsed.uncertainty ?? (parsed.uncertain ? 'meaning' : null);
+  if (ambiguousIdentity) { uncertain = true; uncertainty = 'meaning'; }
   if (uncertainty === 'name' && context) {
     const known = context.entities.filter(entity => [entity.name, ...entity.aliases].some(name => mentions(text, name)));
     const explicitlyUnclearName = /(?:unclear|not sure|don['’]?t know).{0,25}(?:name|spelling)|(?:tên|cách viết).{0,20}(?:không rõ|không chắc|chưa biết)/iu.test(text);
@@ -319,8 +460,10 @@ export function validateObservationEvidence(text: string, observation: unknown, 
   const accepted: Observation = {
     ...parsed,
     intent: parsed.intent === 'unsafe' ? 'unsafe' : noSaveOnly && parsed.intent === 'forget' ? 'chat' : intent,
-    language: parsed.language,
+    language: requestedReplyLanguage(text) ?? parsed.language,
     statedFeeling: local.statedFeeling,
+    unsafeKind: local.unsafeKind ?? (intent === 'unsafe' ? parsed.unsafeKind ?? null : null),
+    urgency: local.urgency ?? (intent === 'unsafe' ? parsed.urgency ?? null : null),
     uncertain, uncertainty,
     correctionTarget: entityCorrection ? null : local.correctionTarget,
     entityCorrection,

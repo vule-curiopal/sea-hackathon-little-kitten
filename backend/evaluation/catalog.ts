@@ -1,14 +1,18 @@
 import { coreScenarios } from './scenarios/core.js';
 import { advancedScenarios } from './scenarios/advanced.js';
 import { memoryRegressionScenarios } from './scenarios/memory-regressions.js';
+import { extendedMemoryScenarios } from './scenarios/extended-memory.js';
+import { extendedDialogueScenarios } from './scenarios/extended-dialogue.js';
+import { extendedLifecycleScenarios } from './scenarios/extended-lifecycle.js';
 import { isSafeProjection } from '../memory/evidence.js';
 import type { Scenario } from './types.js';
 
-export const SCENARIO_CATALOG_VERSION = 'miu-product-scenarios-v1';
-export const scenarios: Scenario[] = [...coreScenarios, ...advancedScenarios, ...memoryRegressionScenarios];
-const assertionOps = new Set(['equals', 'not_equals', 'contains', 'not_contains', 'contains_one_of', 'matches', 'not_matches', 'one_of', 'exists', 'gte', 'lte', 'equals_before']);
+export const SCENARIO_CATALOG_VERSION = 'miu-product-scenarios-v3';
+export const SCENARIO_CATALOG_COUNT = 203;
+export const scenarios: Scenario[] = [...coreScenarios, ...advancedScenarios, ...memoryRegressionScenarios, ...extendedMemoryScenarios, ...extendedDialogueScenarios, ...extendedLifecycleScenarios];
+const assertionOps = new Set(['equals', 'not_equals', 'contains', 'not_contains', 'contains_one_of', 'matches', 'not_matches', 'not_affirmative', 'one_of', 'exists', 'gte', 'lte', 'equals_before']);
 
-export function validateScenarios(items: Scenario[], expectedCount = 103): void {
+export function validateScenarios(items: Scenario[], expectedCount = SCENARIO_CATALOG_COUNT): void {
   if (items.length !== expectedCount) throw new Error(`Expected ${expectedCount} scenarios; found ${items.length}`);
   const ids = new Set<string>();
   const titles = new Set<string>();
@@ -46,7 +50,7 @@ export function validateScenarios(items: Scenario[], expectedCount = 103): void 
         for (const assertion of turn.assertions) {
           if (!assertionOps.has(assertion.op) || !assertion.description.trim() || !assertion.requirement) throw new Error(`Invalid assertion in ${scenario.id}/${turn.id}`);
           if (!assertion.target || assertion.target.split('.').some(part => ['__proto__', 'constructor', 'prototype'].includes(part))) throw new Error(`Unsafe assertion path in ${scenario.id}/${turn.id}`);
-          if (assertion.op === 'matches' || assertion.op === 'not_matches') {
+          if (assertion.op === 'matches' || assertion.op === 'not_matches' || assertion.op === 'not_affirmative') {
             if (typeof assertion.value !== 'string') throw new Error(`Regex must be a string in ${scenario.id}/${turn.id}`);
             new RegExp(assertion.value, 'iu');
           }

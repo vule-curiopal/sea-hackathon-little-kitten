@@ -1,3 +1,6 @@
+import type { TurnAction } from '../character/action-plan.js';
+import type { AffectLearningUpdate, AffectPresentation, AffectSnapshot } from './affect.js';
+
 export const PERSONALITIES = ['ISTJ', 'ISFJ', 'INFJ', 'INTJ', 'ISTP', 'ISFP', 'INFP', 'INTP', 'ESTP', 'ESFP', 'ENFP', 'ENTP', 'ESTJ', 'ESFJ', 'ENFJ', 'ENTJ'] as const;
 export type Personality = typeof PERSONALITIES[number];
 export type Language = 'vi' | 'en';
@@ -30,6 +33,8 @@ export interface Entity {
   kind: 'person' | 'pet' | 'object' | 'story_character';
   name: string;
   species: string | null;
+  objectType?: string;
+  represents?: string;
   aliases: string[];
   /** Scoped hashes support recognizing a corrected spelling supplied anew by the child. */
   retiredNameHashes?: string[];
@@ -39,6 +44,8 @@ export interface Preference {
   id: string;
   category: PreferenceCategory;
   value: string;
+  slot?: string;
+  qualifiers?: { frequency?: 'sometimes' | 'usually' | 'often' | 'always'; timeRelation?: string; exactTime?: string | null };
   expiresAt: string;
 }
 export interface SocialConnection {
@@ -56,6 +63,7 @@ export interface MemoryEvent {
   value: string;
   localDate: string;
   evidenceKind: 'child_reported' | 'reported_plan';
+  conditions?: string[];
   expiresAt: string;
   source?: AssertionEvidence & { turnId: string };
 }
@@ -63,8 +71,9 @@ export interface AssertionEvidence {
   clause: string;
   start: number;
   end: number;
-  speechAct: 'assertion';
+  speechAct: 'assertion' | 'plan' | 'correction';
   polarity: 'affirmed';
+  conditions?: string[];
 }
 export interface ChildStory {
   id: string;
@@ -109,26 +118,30 @@ export interface MemoryContext {
   config: MiuConfig;
   clock: ClockState;
   daily: DailyState;
+  affect?: AffectSnapshot;
   entities: Entity[];
   preferences: Preference[];
   socialCircle: SocialConnection[];
   events: MemoryEvent[];
   stories: ChildStory[];
   storyProgress: StoryProgress | null;
+  addressPreference?: { preferredAddress: string; allowNickname: boolean; nickname: string | null; expiresAt: string } | null;
   friendship: 'getting_acquainted' | 'buddies' | 'best_friends';
 }
 
 export type MemoryCandidate =
-  | { kind: 'entity'; entityKind: Entity['kind']; name: string; species: string | null; evidence: string }
-  | { kind: 'preference'; category: PreferenceCategory; value: string; evidence: string }
+  | { kind: 'entity'; entityKind: Entity['kind']; name: string; species: string | null; objectType?: string; represents?: string; evidence: string }
+  | { kind: 'preference'; category: PreferenceCategory; value: string; slot?: string; qualifiers?: Preference['qualifiers']; evidence: string }
   | { kind: 'relationship'; name: string; relation: string; evidence: string }
-  | { kind: 'event'; subjectName: string | null; eventType: 'fell_in_puddle' | 'reported_event' | 'planned_activity'; value: string; evidence: string }
+  | { kind: 'event'; subjectName: string | null; eventType: 'fell_in_puddle' | 'reported_event' | 'planned_activity'; value: string; conditions?: string[]; evidence: string }
   | { kind: 'story'; title: string; summary: string; castNames: string[]; evidence: string };
 
 export interface Observation {
   intent: 'chat' | 'share' | 'comfort' | 'forget' | 'correct' | 'story' | 'continue_story' | 'greeting' | 'stop' | 'unsafe';
   language: Language;
-  statedFeeling: 'sad' | 'scared' | 'happy' | null;
+  statedFeeling: 'sad' | 'scared' | 'happy' | 'angry' | 'frustrated' | 'disappointed' | 'tired' | null;
+  unsafeKind?: 'harm_instructions' | 'harm_disclosure' | null;
+  urgency?: 'immediate' | 'unclear' | null;
   uncertain: boolean;
   uncertainty?: 'name' | 'event' | 'prior_report' | 'meaning' | null;
   correctionTarget?: string | null;
@@ -143,11 +156,13 @@ export interface SessionExchange {
   referenceId: string | null;
 }
 export interface MemoryOperation {
-  type: 'forgotten' | 'clarify_forget' | 'confirmed_forget_all' | 'corrected' | 'correction_noted' | 'clarify_correction' | 'renamed' | 'capture_suppressed';
+  type: 'forgotten' | 'clarify_forget' | 'confirmed_forget_all' | 'forget_declined' | 'corrected' | 'correction_noted' | 'clarify_correction' | 'renamed' | 'memory_patched' | 'capture_suppressed';
   detail?: string;
   reportStatus?: 'denied_by_child';
 }
 export interface ActivityBoundaries { noGames: boolean; noQuestions: boolean }
+/** Ephemeral context established only by a completed, heard game reply. */
+export interface ActiveGame { premise: readonly string[] }
 export interface ProviderClassificationContext {
   entities: ReadonlyArray<Pick<Entity, 'id' | 'kind' | 'name' | 'aliases'>>;
   recent: readonly SessionExchange[];
@@ -159,9 +174,12 @@ export interface DirectorInput {
   recall: RecallHook | null;
   comfortActive: boolean;
   history: SessionExchange[];
+  activeGame?: ActiveGame | null;
   operation?: MemoryOperation;
   boundaries?: ActivityBoundaries;
   turnEvidence?: { kind: 'current_turn'; facts: string[]; persistable: boolean };
+  action?: TurnAction;
+  affect?: AffectPresentation;
 }
 export interface DirectorPlan {
   purpose: 'chat' | 'comfort' | 'clarify' | 'follow_up' | 'story' | 'farewell' | 'refusal' | 'acknowledge_forget';
@@ -171,6 +189,7 @@ export interface DirectorPlan {
   role: Role;
   emotion: Emotion;
   dailyMood: Mood;
+  affect?: AffectPresentation;
   rhythm: 'morning' | 'daytime' | 'evening' | 'bedtime';
   delivery: 'gentle' | 'normal' | 'playful' | 'sleepy';
   allowGiggle: boolean;
@@ -184,16 +203,31 @@ export interface DirectorPlan {
   boundaries?: ActivityBoundaries;
   maxSentences: number;
   maxQuestions: number;
+  maxInstructionSteps?: number;
+  action?: TurnAction;
   ruleTrace: string[];
   comfortActive: boolean;
 }
 export interface ReplyPrompt { instructions: string; input: string }
 export interface ValidationResult { approved: boolean; violations: string[]; sentences: string[] }
+export interface ProviderCheck {
+  approved: boolean;
+  violations: string[];
+  diagnostics?: {
+    local: { approved: boolean; violations: string[] };
+    moderation: { approved: boolean } | null;
+    contextual: { approved: boolean; violations: string[]; issues: Array<{ code: string; span: string; reason: string }> } | null;
+  };
+}
+export interface GenerationDiagnostics {
+  attempts: Array<{ attempt: number; approved: boolean; localViolations: string[]; providerCheck: ProviderCheck | null; errorCode?: string }>;
+  repaired: boolean;
+}
 export interface Provider {
   readonly mode: 'fake' | 'real';
   classify(text: string, language: Language, signal?: AbortSignal, context?: ProviderClassificationContext): Promise<Observation>;
   reply(prompt: ReplyPrompt, plan: DirectorPlan, signal?: AbortSignal): Promise<string>;
-  check(text: string, plan: DirectorPlan, signal?: AbortSignal, context?: ReplyPrompt): Promise<{ approved: boolean; violations: string[] }>;
+  check(text: string, plan: DirectorPlan, signal?: AbortSignal, context?: ReplyPrompt): Promise<ProviderCheck>;
 }
 
 export interface LearningInput {
@@ -204,6 +238,7 @@ export interface LearningInput {
   /** Full current input, used transiently to validate the scope of each excerpt. */
   sourceText: string;
   candidates: MemoryCandidate[];
+  affect?: AffectLearningUpdate;
   storyTransition?: 'start' | 'continue';
 }
 export interface ForgetResult { deletedIds: string[]; deletionEpoch: number; stateVersion: number }
@@ -211,5 +246,6 @@ export interface NightJobResult { daily: DailyState; clock: ClockState; stateVer
 
 export class AppError extends Error {
   invalidation?: { state_version: number; clock_version: number; memory: { invalidate_replay: true } };
+  generation?: GenerationDiagnostics;
   constructor(public code: string, public status = 400, message = code) { super(message); }
 }
