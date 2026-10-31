@@ -57,10 +57,9 @@ test('demo answers follow the chosen language and emotion', () => {
   assert.equal(getDemoReply('I love you', 'en').emotion, 'love');
 });
 
-test('account validation catches malformed fields and accepts valid demo input', () => {
-  assert.deepEqual(validateAuth({ family: '', name: '', email: 'lan@example', password: '123' }, false), { family: 'familyError', name: 'nameError', email: 'emailError', password: 'passwordError' });
-  assert.deepEqual(validateAuth({ family: 'Nguyen', name: 'Lan', email: 'lan@example.com', password: 'demo1234' }, false), {});
-  assert.deepEqual(validateAuth({ family: '', name: '', email: 'lan@example.com', password: 'demo1234' }, true), {});
+test('account validation needs only email and password', () => {
+  assert.deepEqual(validateAuth({ email: 'lan@example', password: '123' }), { email: 'emailError', password: 'passwordError' });
+  assert.deepEqual(validateAuth({ email: 'lan@example.com', password: 'demo1234' }), {});
 });
 
 test('all fifteen expressions have valid SVG values and unknown emotions are neutral', () => {
