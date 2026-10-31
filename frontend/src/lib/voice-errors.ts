@@ -9,7 +9,7 @@ export function voiceErrorKey(error: unknown): TranslationKey | null {
   if (code === 'NO_SIGNAL' || code === 'NO_AUDIO') return 'voiceNoSignal';
   if (code === 'unclear_audio') return 'voiceUnclear';
   if (code === 'RECORDING_LIMIT') return 'voiceRecordingLimit';
-  if (code.startsWith('provider_')) return 'voiceServiceUnavailable';
+  if (code.startsWith('provider_') || ['audio_probe_unavailable', 'audio_probe_timeout'].includes(code)) return 'voiceServiceUnavailable';
   if (['NETWORK_ERROR', 'TIMEOUT', 'INVALID_RESPONSE'].includes(code)) return 'voiceOffline';
   if (isSessionExpired(error)) return 'voiceSessionExpired';
   if (['UNSUPPORTED_AUDIO', 'MIC_UNAVAILABLE', 'MIC_NOT_FOUND'].includes(code)) return 'voiceMissing';
