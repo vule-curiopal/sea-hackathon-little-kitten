@@ -139,8 +139,16 @@
 .pitch-preview-features, .pitch-preview-future { background: var(--wall); color: var(--ink); box-shadow: 0 4px 0 var(--lip); }
 .pitch-preview-demo { --focus-ring: var(--on-ocean); background: var(--ocean); color: var(--on-ocean); box-shadow: 0 4px 0 var(--ocean-2); }
 .pitch-notes { width: min(860px, calc(100% - 32px)); }
-.pitch-notes > h3 { margin: 24px 0 18px; color: var(--pop-text); font: 800 26px/1.2 var(--display); }
-.pitch-notes > div[lang] p { margin: 0 0 20px; color: var(--ink-2); font: 600 17px/1.85 var(--body); white-space: pre-line; }
+.pitch-notes .dialog-heading .round-button { width: 44px; min-width: 44px; height: 44px; }
+.pitch-notes-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 24px; color: var(--muted); font: 800 13px/1.4 var(--body); }
+.pitch-notes-language { display: inline-flex; align-items: center; gap: 4px; min-height: 44px; padding: 4px; border: 1px solid var(--line); border-radius: 14px; background: var(--ground); box-shadow: 0 3px 0 var(--lip); font: 800 13px/1 var(--body); cursor: pointer; }
+.pitch-notes-language > span { display: grid; place-items: center; min-width: 40px; min-height: 34px; border-radius: 9px; color: var(--muted); }
+.pitch-notes-language > .is-active { color: var(--pop-ink); background: var(--pop); box-shadow: 0 2px 0 var(--pop-deep); }
+.pitch-notes-content h3 { margin: 0 0 22px; color: var(--pop-text); font: 800 26px/1.25 var(--display); }
+.pitch-notes-script p { margin: 0 0 18px; color: var(--ink-2); font: 600 17px/1.85 var(--body); }
+.pitch-notes-cue { margin-top: 26px; padding: 16px 18px; border: 1px solid var(--line); border-radius: 18px; background: var(--ground); }
+.pitch-notes-cue strong { color: var(--pop-text); font: 800 15px/1.3 var(--display); }
+.pitch-notes-cue p { margin: 8px 0 0; color: var(--ink-2); font: 600 14px/1.65 var(--body); }
 .pitch-page.is-fullscreen { --pitch-video-space: 0px; min-height: 100dvh; padding: 0 12px; display: flex; flex-direction: column; justify-content: center; overflow: auto; }
 .pitch-page.is-fullscreen .pitch-header { display: none; }
 .pitch-page.is-fullscreen .pitch-stage { width: min(100%, calc((100dvh - 88px) * 16 / 9)); }
@@ -153,6 +161,7 @@
   .pitch-controls { min-height: 84px; }
 }
 @media (max-width: 700px) {
+  .pitch-notes .dialog-heading h2 { font-size: 22px; }
   .pitch-page { padding: 0 14px 8px; }
   .pitch-header { min-height: 80px; gap: 12px; }
   .pitch-brand { gap: 8px; font-size: 32px; }

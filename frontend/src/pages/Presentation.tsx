@@ -3,13 +3,19 @@ import Dialog from '../components/Dialog';
 import Icon from '../components/Icon';
 import Room from '../components/Room';
 import PresentationShare from '../components/PresentationShare';
+import PresentationNotes, { notesLabels, type NotesLanguage } from '../components/PresentationNotes';
 import sourceDeck from './slide/Meet Miu.pptx?url';
-import speakerNotes from './slide/meet-miu-notes.json';
 import '../styles/presentation.css';
 
 const demoVideoId = 'yMPZn1eiUbA';
 const demoWatchUrl = `https://www.youtube.com/watch?v=${demoVideoId}`;
 const demoEmbedUrl = `https://www.youtube-nocookie.com/embed/${demoVideoId}?rel=0&playsinline=1`;
+const notesLanguageKey = 'miu.presentation.notes-language';
+
+function initialNotesLanguage(): NotesLanguage {
+  try { return window.localStorage.getItem(notesLanguageKey) === 'en' ? 'en' : 'vi'; }
+  catch { return 'vi'; }
+}
 
 const slides = [
   { title: 'Small stories deserve a familiar friend', label: 'Why Miu', theme: 'why' },
@@ -44,6 +50,7 @@ export default function Presentation() {
   const [activeSlide, setActiveSlide] = useState(initialSlide);
   const [overviewOpen, setOverviewOpen] = useState(false);
   const [notesOpen, setNotesOpen] = useState(false);
+  const [notesLanguage, setNotesLanguage] = useState<NotesLanguage>(initialNotesLanguage);
   const [fullscreen, setFullscreen] = useState(false);
   const [notice, setNotice] = useState('');
   const [videoFile, setVideoFile] = useState<File | null>(null);
@@ -53,6 +60,11 @@ export default function Presentation() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
   const pointerStart = useRef<{ x: number; y: number } | null>(null);
+
+  useEffect(() => {
+    try { window.localStorage.setItem(notesLanguageKey, notesLanguage); }
+    catch { /* Notes remain usable when browser storage is unavailable. */ }
+  }, [notesLanguage]);
 
   const goToSlide = useCallback((index: number) => {
     setActiveSlide(Math.min(slides.length - 1, Math.max(0, index)));
@@ -210,7 +222,7 @@ export default function Presentation() {
       <footer className="pitch-controls" aria-label="Presentation controls">
         <div className="pitch-tools">
           <button type="button" className="pitch-tool" onClick={() => setOverviewOpen(true)} aria-label="Show all slides" title="Show all slides"><Icon name="menu" /><span>Overview</span></button>
-          <button type="button" className="pitch-tool" onClick={() => setNotesOpen(true)} aria-label="Speaker notes in Vietnamese" title="Speaker notes in Vietnamese"><Icon name="chat" /><span>Notes</span></button>
+          <button type="button" className="pitch-tool" onClick={() => setNotesOpen(true)} aria-label="Speaker notes" title={`Speaker notes · ${notesLanguage.toUpperCase()}`}><Icon name="chat" /><span>Notes</span></button>
         </div>
         <nav className="pitch-navigation" aria-label="Slide navigation">
           <button type="button" className="pitch-arrow" aria-label="Previous slide" onClick={() => goToSlide(activeSlide - 1)} disabled={activeSlide === 0}><Icon name="back" /></button>
@@ -230,9 +242,8 @@ export default function Presentation() {
         <span className="pitch-preview-number">0{index + 1}</span><strong>{slide.title}</strong><span>{slide.label}</span>
       </button>)}</div>
     </Dialog>
-    <Dialog open={notesOpen} onClose={() => setNotesOpen(false)} title={`Speaker notes · ${activeSlide + 1} / ${slides.length}`} className="pitch-dialog pitch-notes">
-      <h3>{slides[activeSlide].title}</h3>
-      <div lang="vi">{speakerNotes[activeSlide].split(/\n\s*\n/).map((paragraph, index) => <p key={index}>{paragraph}</p>)}</div>
+    <Dialog open={notesOpen} onClose={() => setNotesOpen(false)} title={`${notesLabels[notesLanguage].title} · ${activeSlide + 1} / ${slides.length}`} lang={notesLanguage} closeLabel={notesLabels[notesLanguage].close} className="pitch-dialog pitch-notes">
+      <PresentationNotes slideIndex={activeSlide} language={notesLanguage} onLanguageChange={setNotesLanguage} />
     </Dialog>
   </main>;
 }
