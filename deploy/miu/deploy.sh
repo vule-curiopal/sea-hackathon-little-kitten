@@ -104,9 +104,12 @@ if (!stat.isFile() || fs.realpathSync(file) !== file || stat.uid !== 0 || (stat.
 }
 const assignments = fs.readFileSync(file, 'utf8').split(/\r?\n/).filter(line => /^\s*MIU_PROVIDER\s*=/.test(line));
 if (assignments.length !== 1) throw new Error('Miu runtime env must define MIU_PROVIDER exactly once.');
-const match = /^\s*MIU_PROVIDER\s*=\s*(fake|real)\s*$/.exec(assignments[0]);
-if (!match) throw new Error('Miu runtime MIU_PROVIDER must be fake or real.');
-process.stdout.write(match[1]);
+let mode = assignments[0].slice(assignments[0].indexOf('=') + 1).trim();
+if ((mode.startsWith('"') && mode.endsWith('"')) || (mode.startsWith("'") && mode.endsWith("'"))) {
+  mode = mode.slice(1, -1);
+}
+if (mode !== 'fake' && mode !== 'real') throw new Error('Miu runtime MIU_PROVIDER must be fake or real.');
+process.stdout.write(mode);
 NODE
 ) || fail 'Cannot read the expected Miu provider mode from /etc/miu/api.env.'
 readonly expected_provider_mode
