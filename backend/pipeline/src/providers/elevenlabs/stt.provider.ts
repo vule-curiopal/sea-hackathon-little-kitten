@@ -28,7 +28,10 @@ export function createElevenLabsStt(config: VoiceConfig, fetchImpl: typeof fetch
       use_speaker_library: 'false',
     };
     for (const [name, value] of Object.entries(parameters)) form.set(name, value);
-    const response = await fetchImpl(client.url('/v1/speech-to-text'), {
+    const url = client.url('/v1/speech-to-text');
+    // Brain leaves the provider default in place; false opts into restricted zero retention.
+    if (!config.enableLogging) url.searchParams.set('enable_logging', 'false');
+    const response = await fetchImpl(url, {
       method: 'POST', headers: { 'xi-api-key': client.apiKey }, body: form, signal,
     });
     const payload = await readJson(response, signal);

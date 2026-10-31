@@ -41,7 +41,7 @@ npm run smoke
 npm run dev
 ```
 
-Node22.19+ is required. Review `.env.example` and the pipeline README before real mode; existing local `.env` is not overwritten. `ffprobe` is required for MP4/WebM and real MP3 inspection. Microphone/playback on an iPad must be validated on the actual device over trusted HTTPS.
+Node22.19+ is required. Real mode requires `MIU_PROVIDER=real` and both provider keys from `.env.example`; existing local `.env` is not overwritten by the app. `STT_LOGGING=1` defaults to the working LittleBuddy brain behavior: omit the STT logging query. `0` requests provider zero retention and currently receives 403; TTS is unaffected, and GPT still has no conversation memory. See the [pipeline README](backend/pipeline/README.md). `ffprobe` is required for MP4/WebM and real MP3 inspection. Microphone/playback on an iPad must be validated on the actual device over trusted HTTPS.
 
 The [React frontend](frontend/README.md) connects to this voice pipeline using the shared browser client. With the API running, start it in another terminal:
 
@@ -53,4 +53,4 @@ npm run dev
 
 Open `http://localhost:5173/app/talk`. The frontend proxies `/api` to port 3001. Talk records one turn; Send submits it and Stop cancels it. Settings select a fictional profile, language, and approved voice. Fake reference recordings and local typing samples are labeled separately from real voice. Character state, memory and personality behavior are not supplied by the current voice stub.
 
-The frontend and API are deployed together at `miu.curiopal.com`, using isolated Miu services and manual releases. Deployment configuration: [deploy/miu](deploy/miu/README.md). The public voice backend initially uses fake providers.
+The frontend and API are deployed together at `miu.curiopal.com`, using isolated Miu services and manual releases. Deployment configuration: [deploy/miu](deploy/miu/README.md). The deployed mode is reported by `provider_mode` in [`/api/health`](https://miu.curiopal.com/api/health); fake remains the no-key default, while real uses the configured providers.

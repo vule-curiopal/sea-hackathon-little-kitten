@@ -1,6 +1,6 @@
 # Tham số provider và cấu hình pipeline
 
-Tra cứu/cập nhật ngày **31/10/2026**. Đã chốt ElevenLabs STT batch/TTS, Express/TypeScript trên Node.js, ngôn ngữ chọn trước phiên, GPT tạm `gpt-6-luna`, detector RMS và gửi nguyên blob từ iPad. Voice ID lấy từ bản local `D:/Intern/LittleBuddy_Implementation`, chi tiết tại [voices.md](voices.md). D10-C: tier/retention chưa rõ; chưa nghiệm thu trọn pipeline real API. Job TTS riêng tạo audio đầu vào được ghi ở [trạng thái triển khai](implementation-status.md). Phân biệt **lựa chọn đã chốt**, **default provider**, **giá trị kỹ thuật đề xuất** và **trường không gửi**. Các tên dưới đây là wire HTTP; SDK có thể dùng tên khác.
+Tra cứu/cập nhật ngày **31/10/2026**. Đã chốt ElevenLabs STT batch/TTS, Express/TypeScript trên Node.js, ngôn ngữ chọn trước phiên, GPT tạm `gpt-6-luna`, detector RMS và gửi nguyên blob từ iPad. Voice ID lấy từ bản local `D:/Intern/LittleBuddy_Implementation`, chi tiết tại [voices.md](voices.md). D10 hiện dùng normal mode theo brain (`STT_LOGGING=1`); probe thật STT → GPT → TTS Việt/Anh đã qua, chưa benchmark p95 hoặc kiểm thử iPad. Các kết quả và job TTS tạo audio đầu vào được ghi ở [trạng thái triển khai](implementation-status.md). Phân biệt **lựa chọn đã chốt**, **default provider**, **giá trị kỹ thuật đề xuất** và **trường không gửi**. Các tên dưới đây là wire HTTP; SDK có thể dùng tên khác.
 
 ## 1. Provider/model theo lựa chọn đã xác nhận
 
@@ -21,7 +21,7 @@ Không để TTS âm thầm dùng model mặc định `eleven_multilingual_v2`: 
 | Vị trí | Tên API | Kiểu / miền giá trị | Đề xuất gửi |
 | --- | --- | --- | --- |
 | Header | `xi-api-key` | Secret string | Đọc từ env server |
-| Query | `enable_logging` | Boolean; provider mặc định `true` | Theo D10, chỉ gửi `false` khi đã xác minh quyền/chế độ thực tế |
+| Query | `enable_logging` | Boolean; provider mặc định `true` | **Không gửi** khi `STT_LOGGING=1` hoặc bỏ trống, giống brain. Chỉ `STT_LOGGING=0` mới gửi `false` để yêu cầu ZRM; tài khoản hiện tại trả 403 cho chế độ này |
 | Form | `model_id` | String, bắt buộc | `scribe_v2` |
 | Form | `file` | Binary audio | Blob MediaRecorder nguyên bytes, MIME/tên file khớp container; MP4/AAC hoặc WebM/Opus theo capability iPad |
 | Form | `file_format` | `pcm_s16le_16` hoặc `other` | `other` cho blob container v1; không gắn nhãn raw PCM cho WebM/MP4 |
@@ -39,6 +39,8 @@ Không để TTS âm thầm dùng model mặc định `eleven_multilingual_v2`: 
 | Form | `keyterms` | List string, tối đa 1000; mỗi mục <50 ký tự, tối đa 5 từ | Bỏ qua lúc đầu; chỉ thuật ngữ demo tĩnh nếu đo cần |
 
 `language_probability` là độ tin cậy nhận diện ngôn ngữ, không phải độ đúng transcript/tên riêng. Chuẩn hóa `vie`/`vi`, `eng`/`en` để chẩn đoán nhưng không dùng để ghi đè ngôn ngữ phiên D07-B. Session config ở server là nguồn quyết định tiếng STT/GPT/TTS; `language_hint` trong API chung không phải quyền override.
+
+Logging ở đây là chính sách dữ liệu phía ElevenLabs, không phải log ứng dụng hoặc memory GPT. LittleBuddy brain chọn `STT_LOGGING=1` và bỏ query trong `brain/speech/stt.js:44`; pipeline này làm tương tự. Probe cùng key/payload cho kết quả normal HTTP 200, ZRM HTTP 403 `not_allowed` với thông báo cần enterprise hoặc trial tier. Backend không tự đổi từ ZRM sang normal khi lỗi. Chi tiết quyết định và phạm vi retention tại [D10](decisions.md#d10--logging-theo-littlebuddy-brain).
 
 ### Trường có trong API nhưng chưa sử dụng
 
@@ -89,7 +91,7 @@ Việc cân nhắc ở đợt sau cần đo chất lượng, độ trễ/chi ph�
 | Header | `xi-api-key` | Secret server |
 | Header | `Content-Type` | `application/json` |
 | Query | `output_format` | `mp3_44100_128`; backend bọc vào `audio.data_base64`, `audio.mime_type=audio/mpeg` theo envelope chung |
-| Query | `enable_logging` | Theo D10; mặc định provider là `true` |
+| Query | `enable_logging` | **Không gửi**, giống `brain/speech/tts.js`; dùng mặc định provider. Cờ `STT_LOGGING` và alias cũ chỉ điều khiển STT, không thay đổi TTS |
 | Body | `text` | `replyText` sau kiểm tra, không gửi transcript người dùng vào TTS |
 | Body | `model_id` | `eleven_flash_v2_5`, luôn gửi rõ |
 | Body | `language_code` | `vi` / `en` từ cấu hình phiên; reply cần khớp cùng tiếng trước TTS |
@@ -167,17 +169,18 @@ Lấy text bằng helper SDK hoặc parse output text đúng kiểu. Nếu respo
 
 ## 6. Cấu hình server và timeout đề xuất
 
-Các tên UPPERCASE bên dưới là **tên env dự kiến của dự án**, không phải API fields. File `.env` thật không được commit. `deviceId` là lựa chọn phiên trên browser, không phải env server.
+Các tên UPPERCASE bên dưới là **cấu hình dự án**, không phải API fields; một số giới hạn là hằng số baseline, không phải env được đọc trực tiếp. File `.env` thật không được commit. `deviceId` là lựa chọn phiên trên browser, không phải env server.
 
 | Nhóm | Tên env / cấu hình | Khởi điểm |
 | --- | --- | --- |
 | Secret | `ELEVENLABS_API_KEY`, `OPENAI_API_KEY` | Cung cấp ở server, không đặt tiền tố public/VITE |
-| Chế độ chung | `MIU_PROVIDER` | `fake` trong lúc D10 chưa xác minh; real mode dùng cùng hợp đồng, không thêm memory cho GPT tạm |
+| Chế độ chung | `MIU_PROVIDER` | Mặc định/template `fake`; `real` yêu cầu hai provider key, dùng cùng hợp đồng và không thêm memory cho GPT tạm |
 | ElevenLabs | `ELEVENLABS_BASE_URL` | `https://api.elevenlabs.io`; chỉ allowlist host provider |
 | STT | `VOICE_STT_MODE`, `ELEVENLABS_STT_MODEL` | `batch`, `scribe_v2` |
 | TTS | `ELEVENLABS_TTS_MODEL` | `eleven_flash_v2_5` |
 | Voice | `ELEVENLABS_VOICE_ID_VI`, `ELEVENLABS_VOICE_ID_EN` | `mgBpvrNosWzExdPuRbXP`, `fBD19tfE58bkETeiwUoC`; kế thừa mặc định Việt/Anh của bản local |
-| Logging provider | `ELEVENLABS_ENABLE_LOGGING` | D10-C: tier/chính sách chưa rõ; cần xác minh trước real mode, không tự coi false hoặc mặc định true là đã được duyệt |
+| Logging STT | `STT_LOGGING` | `1` mặc định/bỏ trống: không gửi query; `0`: gửi `enable_logging=false` (ZRM, hiện 403). Khớp brain; không áp dụng TTS |
+| Alias logging STT cũ | `ELEVENLABS_ENABLE_LOGGING` | `true`/`false`, tương ứng `1`/`0`; chỉ dùng khi cần tương thích. Nếu đặt cùng `STT_LOGGING`, hai giá trị phải khớp; sai định dạng hoặc mâu thuẫn sẽ báo lỗi |
 | GPT | `OPENAI_MODEL`, `OPENAI_MAX_OUTPUT_TOKENS` | `gpt-6-luna`, `200` |
 | Timeout STT | `STT_TIMEOUT_MS` | `10000` sau khi bắt đầu request |
 | Timeout GPT | `REPLY_TIMEOUT_MS` | `10000` |

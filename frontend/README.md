@@ -124,7 +124,7 @@ This refreshes the generated artwork and copies the design tokens into the front
 
 ## Self-hosted deployment
 
-The frontend and Express API are served together at **https://miu.curiopal.com**. The direct demo is https://miu.curiopal.com/demo/miu?lang=vi. Nginx serves the built `dist/` with SPA fallback and proxies `/api` to the isolated voice service. The build sets `VITE_DEMO_PUBLIC_URL=https://miu.curiopal.com`; `VITE_VOICE_API_URL` is empty for same-origin requests. The initial public voice mode is fake, as labeled in the UI.
+The frontend and Express API are served together at **https://miu.curiopal.com**. The direct demo is https://miu.curiopal.com/demo/miu?lang=vi. Nginx serves the built `dist/` with SPA fallback and proxies `/api` to the isolated voice service. The build sets `VITE_DEMO_PUBLIC_URL=https://miu.curiopal.com`; `VITE_VOICE_API_URL` is empty for same-origin requests. The UI displays the mode returned by the server; check `provider_mode` at https://miu.curiopal.com/api/health for the current runtime setting.
 
 Deployment is manual, with versioned releases, health checks and rollback. See [deploy/miu](../deploy/miu/README.md) for commands and server paths. No GitHub webhook is configured. The separate Sites deployment below is preserved.
 

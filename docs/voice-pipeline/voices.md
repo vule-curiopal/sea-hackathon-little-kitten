@@ -14,7 +14,7 @@
 | Anh (`en`) | Ziggy | `87n4zM8Wuy87vFILuKvE` | Không |
 | Anh (`en`) | The Elf | `e79twtVS2278lVZZQiAD` | Không |
 
-Nhãn ở đây giữ đúng tên trong repo tham chiếu, chưa xác minh tên hiển thị hiện tại trong thư viện ElevenLabs. Các file nghe thử cũng được repo lưu tại `frontend/public/voice-samples/<voice-id>.wav`; chưa tạo hoặc tải lại audio mẫu trong project này.
+Nhãn ở đây giữ đúng tên trong repo tham chiếu, chưa xác minh tên hiển thị hiện tại trong thư viện ElevenLabs. Các file nghe thử được repo tham chiếu lưu tại `frontend/public/voice-samples/<voice-id>.wav`; hai sample mặc định đã được sao chép làm fixture của pipeline, xem [nguồn fixture](../../backend/pipeline/fixtures/README.md).
 
 ## Cấu hình khởi điểm cho v1
 
@@ -25,7 +25,7 @@ ELEVENLABS_VOICE_ID_VI=mgBpvrNosWzExdPuRbXP
 ELEVENLABS_VOICE_ID_EN=fBD19tfE58bkETeiwUoC
 ```
 
-Đây là ví dụ cấu hình **chỉ chứa voice ID**, không có API key. Chưa ghi hoặc sửa `.env` thật. Provider/model TTS của v1 vẫn theo [provider-parameters.md](provider-parameters.md), hiện là `eleven_flash_v2_5`.
+Đây là ví dụ cấu hình **chỉ chứa voice ID**, không có API key. Provider/model TTS của v1 vẫn theo [provider-parameters.md](provider-parameters.md), hiện là `eleven_flash_v2_5`/MP3; đồng bộ logging theo brain không đổi model hoặc format này.
 
 | Tiếng chọn trước phiên | Voice mặc định v1 | Voice thay thế trong allowlist |
 | --- | --- | --- |
@@ -47,8 +47,8 @@ Các file sau cùng xác nhận bộ voice đang dùng trong source local:
 
 V1 Miu kế thừa mặc định theo ngôn ngữ đã nêu. Không cần truy cập API ElevenLabs để trích xuất các ID này.
 
-## Kiểm tra trước khi gọi TTS thật
+## Kiểm tra provider và nghe thử
 
 - D08 đã có bộ ID/allowlist và cấu hình khởi điểm, không còn cần hỏi lại mã voice.
-- Xác minh tài khoản ElevenLabs hiện tại truy cập được các ID, dùng được model đã chọn và nghe thử cả hai ngôn ngữ trên iPad.
-- D10 vẫn là **chưa biết tier/retention**: việc tìm thấy ID không xác minh quyền tài khoản hoặc chính sách dữ liệu. Chưa gọi API tính phí để kiểm thử các voice trong đợt cập nhật docs này.
+- Probe thật STT → GPT → TTS đã qua cho hai voice mặc định Việt/Anh với Flash v2.5/MP3; chưa xác minh toàn bộ 5 voice hoặc nghe thử trên iPad. Các lượt probe không phải benchmark p95; xem [trạng thái triển khai](implementation-status.md).
+- D10 dùng normal mode theo brain theo yêu cầu của bạn: STT mặc định `STT_LOGGING=1`, TTS không gửi logging query. Tier/thời hạn retention cụ thể chưa rõ; STT ZRM hiện trả 403 và không phải chế độ đang dùng. Việc tìm thấy ID không tự xác minh chính sách dữ liệu hoặc quyền của mọi voice.

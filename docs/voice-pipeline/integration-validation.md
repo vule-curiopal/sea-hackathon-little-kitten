@@ -41,7 +41,7 @@ interface ResponseGenerator {
 
 GPT tạm dùng model đã chọn ở D09, chỉ transcript hiện tại + hướng dẫn cố định, không conversation ID, previous response ID hoặc lịch sử lượt trước. `store=false`, không tool. Validate schema, text rỗng/quá dài/incomplete, ngôn ngữ và định dạng lời nói trước TTS. Bộ kiểm định nội dung/character đầy đủ thuộc engine của team; prompt tạm không được trình bày như engine đó đã hoàn thành.
 
-D10 chọn chưa biết gói/quyền retention: tiếp tục làm contracts và fake provider, xác minh điều kiện tài khoản trước cấu hình/gọi provider thật. Không coi có API key hoặc gửi `enable_logging=false` là đã xác minh chính sách dữ liệu.
+D10 cập nhật theo yêu cầu dùng brain đang hoạt động: `STT_LOGGING=1` mặc định, bỏ query logging cho STT; TTS cũng không gửi query này. `0` yêu cầu STT ZRM bằng `enable_logging=false` và đang nhận HTTP 403 trên tài khoản hiện tại, trong khi STT normal trả 200. Đây là dữ liệu phía provider, không thay đổi tính stateless của GPT hoặc quy tắc không log nội dung tại ứng dụng. Tier/thời hạn retention cụ thể vẫn chưa được xác nhận; không tuyên bố zero retention. Xem [D10](decisions.md#d10--logging-theo-littlebuddy-brain).
 
 ## 3. Ngôn ngữ đã chọn trước phiên
 
@@ -110,7 +110,7 @@ Receipt `started/completed/interrupted` dùng ID riêng và trạng thái thật
 
 ## 7. Kiểm thử khi triển khai
 
-Đã có test tự động cho backend/provider và browser library, cùng fake smoke Việt/Anh. HTTP localhost dùng frontend API client với runtime Node HTTP/Express; request provider trong tests đều mocked. Chưa kiểm thử mic/playback trên iPad hoặc nghiệm thu trọn pipeline provider thật. Xem [trạng thái triển khai](implementation-status.md).
+Đã có 139 test tự động cho backend/provider và browser library, cùng fake smoke Việt/Anh. HTTP localhost dùng frontend API client với runtime Node HTTP/Express; request provider trong tests đều mocked. Probe riêng đã chạy STT → GPT → TTS thật cho Việt/Anh trên máy phát triển và server, nhận MP3 hợp lệ. Đây là các lượt đơn lẻ, chưa kiểm thử mic/playback trên iPad hoặc đo p95. Xem [trạng thái triển khai](implementation-status.md).
 
 | Nhóm | Ca cần thử | Điều kiện đánh giá |
 | --- | --- | --- |
@@ -126,6 +126,7 @@ Receipt `started/completed/interrupted` dùng ID riêng và trạng thái thật
 | Không memory | Hai lượt, reload, kiểm tra payload GPT/log | Chỉ lượt hiện tại; không lưu nội dung hoặc dựng memory giả |
 | Engine | Thay GPT adapter bằng engine/fake, sai schema/language/timeout | Endpoint/STT/TTS giữ nguyên, lỗi/hủy đúng |
 | Provider lỗi | Timeout, mạng mất, 401/403/429/5xx | Lỗi chuẩn, không retry ẩn hoặc đọc lỗi kỹ thuật |
+| Logging STT | Mặc định/`1`, explicit `0`, alias cũ và cờ mâu thuẫn | Normal không có query; `0` chỉ gửi `enable_logging=false` cho STT; TTS không có query; cấu hình mâu thuẫn bị từ chối; không fallback ZRM sang normal |
 
 Tự động kiểm tra phần dễ gây chi phí/state sai: adaptive threshold không học tiếng đang nói, clock/timer, flush-before-upload, finalize một lần, cancel race/idempotency, mapping container/provider, output incomplete và error mapping. Chất lượng mic/STT/giọng đọc cần iPad thật và người kiểm thử, không thay bằng snapshot cấu hình.
 
@@ -144,4 +145,4 @@ Mục tiêu acceptance chung: **p95 audio trả lời được duyệt bắt đ�
 
 Dùng clock đơn điệu, không trừ hai clock máy khác nhau. Kiểm tra 30 lượt mỗi ngôn ngữ trên mạng/iPad demo, phân biệt cold/warm start và fake/real. Báo số lượt lỗi/timeouts, codec, kích thước blob, browser/iPadOS, cấu hình ngưỡng; không loại lỗi khỏi báo cáo. Theo D11-B, tối ưu connection reuse, blob/container, độ dài reply và TTS trong luồng batch; không đổi sang realtime hoặc giảm khoảng dừng đã chốt chỉ để đạt số đo.
 
-Bàn giao cho frontend: library `@miu/voice-client` với controller, state/error mapping, request/envelope và receipt mẫu, cleanup/cancel, MIME và checklist iPad/responsive. Bàn giao cho engine: interface adapter nội bộ và cách thay GPT tạm. Bàn giao vận hành: env example, [kiến trúc Express](backend-architecture.md), runtime listen/close, hướng dẫn chạy/test và D10-C còn mở. Refactor backend dùng fake/mocked provider; bộ [20 audio đầu vào](../../test-assets/voice-pipeline/README.md) được tạo bằng job TTS riêng. UI sản phẩm/deploy vẫn ngoài lần bàn giao này.
+Bàn giao cho frontend: library `@miu/voice-client` với controller, state/error mapping, request/envelope và receipt mẫu, cleanup/cancel, MIME và checklist iPad/responsive. Bàn giao cho engine: interface adapter nội bộ và cách thay GPT tạm. Bàn giao vận hành: env example, [kiến trúc Express](backend-architecture.md), runtime listen/close, hướng dẫn chạy/test và normal mode theo brain ở D10. Test tự động dùng fake/mocked provider; probe thật Việt/Anh được ghi riêng trong [trạng thái triển khai](implementation-status.md). Bộ [20 audio đầu vào](../../test-assets/voice-pipeline/README.md) được tạo bằng job TTS riêng. Frontend/API đã được triển khai chung tại `https://miu.curiopal.com`; thiết kế UI vẫn thuộc người phụ trách frontend, checklist iPad và benchmark vẫn cần nghiệm thu.

@@ -62,11 +62,29 @@ describe('ElevenLabs batch STT', () => {
     expect(form.has('filter_background_audio')).toBe(false);
   });
 
-  it('sends logging=true only when explicitly configured', async () => {
+  it('matches brain by omitting the logging query in normal mode', async () => {
     const http = transport(() => json({ text: 'Hello!' }));
     const providers = await createProviders(realConfig({ enableLogging: true }), http.fetchImpl);
     await providers.transcribe(inputAudio, 'en', signal());
-    expect(http.calls[0]!.url.searchParams.get('enable_logging')).toBe('true');
+    expect(http.calls[0]!.url.searchParams.has('enable_logging')).toBe(false);
+  });
+
+  it('uses normal logging by default when real mode has both API keys', async () => {
+    const http = transport(() => json({ text: 'Hello!' }));
+    const config = loadConfig({ MIU_PROVIDER: 'real', ELEVENLABS_API_KEY: 'eleven-test-secret', OPENAI_API_KEY: 'openai-test-secret' });
+    const providers = await createProviders(config, http.fetchImpl);
+    await providers.transcribe(inputAudio, 'en', signal());
+    expect(http.calls[0]!.url.searchParams.has('enable_logging')).toBe(false);
+  });
+
+  it('preserves explicit zero retention on a 403 without retrying with normal logging', async () => {
+    const http = transport(() => json({ detail: { status: 'not_allowed', message: 'raw provider body' } }, 403));
+    const providers = await createProviders(realConfig(), http.fetchImpl);
+    const error = await providers.transcribe(inputAudio, 'en', signal()).catch((value: unknown) => value);
+    expect(error).toMatchObject({ code: 'provider_unavailable', status: 503, retryable: false });
+    expect(String(error)).not.toContain('raw provider body');
+    expect(http.calls).toHaveLength(1);
+    expect(http.calls[0]!.url.searchParams.get('enable_logging')).toBe('false');
   });
 
   it.each([{ text: '' }, { text: '  ' }])('rejects empty transcripts before dialogue: %j', async payload => {
@@ -148,16 +166,16 @@ describe('stateless OpenAI reply adapter', () => {
 });
 
 describe('ElevenLabs synthesis', () => {
-  it('uses the selected allowlisted voice and full approved text, returns bounded MP3 with probed duration', async () => {
+  it.each([false, true])('uses the selected voice and returns bounded MP3 without an STT logging query (STT logging=%s)', async enableLogging => {
     const audio = Buffer.from('ID3-test-mp3-payload');
     const http = transport(() => new Response(audio, { headers: { 'Content-Type': 'audio/mpeg' } }));
-    const providers = await createProviders(realConfig(), http.fetchImpl);
+    const providers = await createProviders(realConfig({ enableLogging }), http.fetchImpl);
     const output = await providers.synthesize('Chào bạn! Mình chơi nhé?', DEFAULT_VOICE.vi, 'vi', signal());
     expect(output).toEqual({ bytes: audio, mimeType: 'audio/mpeg', durationMs: 1350 });
     const call = http.calls[0]!;
     expect(call.url.pathname).toBe(`/v1/text-to-speech/${DEFAULT_VOICE.vi}`);
     expect(call.url.searchParams.get('output_format')).toBe('mp3_44100_128');
-    expect(call.url.searchParams.get('enable_logging')).toBe('false');
+    expect(call.url.searchParams.has('enable_logging')).toBe(false);
     expect(body(call)).toEqual({
       text: 'Chào bạn! Mình chơi nhé?', model_id: 'eleven_flash_v2_5', language_code: 'vi',
       voice_settings: { stability: 0.5, similarity_boost: 0.75, style: 0, use_speaker_boost: false, speed: 0.95 },
@@ -221,9 +239,9 @@ describe('provider cancellation and deadlines', () => {
     expect(http.calls.length).toBeLessThanOrEqual(1);
   });
 
-  it('refuses real mode without an explicit logging choice', async () => {
+  it.each(['elevenApiKey', 'openaiApiKey'] as const)('refuses real providers without %s', async key => {
     const http = transport(() => { throw new Error('Unexpected fetch'); });
-    await expect(createProviders(realConfig({ enableLogging: undefined }), http.fetchImpl)).rejects.toMatchObject({ code: 'provider_configuration' });
+    await expect(createProviders(realConfig({ [key]: '' }), http.fetchImpl)).rejects.toMatchObject({ code: 'provider_configuration' });
     expect(http.calls).toHaveLength(0);
   });
 });

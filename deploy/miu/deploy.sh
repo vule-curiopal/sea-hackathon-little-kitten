@@ -15,6 +15,7 @@ readonly NODE=/opt/node24/bin/node
 readonly RUNUSER=/usr/sbin/runuser
 readonly SERVICE=miu-api.service
 readonly HEALTH=http://127.0.0.1:4611/api/health
+readonly RUNTIME_ENV=/etc/miu/api.env
 readonly ROOT_PID=$BASHPID
 
 requested_ref=
@@ -93,12 +94,29 @@ exec > >(tee -a -- "$LOG") 2>&1
 [[ ! -L $STATE ]] || fail 'Deployment state must not be a symlink.'
 [[ ! -e $STATE || -f $STATE ]] || fail 'Deployment state must be a regular file.'
 
+# Read only the provider mode. Never source runtime secrets into deployment/builds.
+expected_provider_mode=$("$NODE" --input-type=module - "$RUNTIME_ENV" <<'NODE'
+import fs from 'node:fs';
+const file = process.argv[2];
+const stat = fs.lstatSync(file);
+if (!stat.isFile() || fs.realpathSync(file) !== file || stat.uid !== 0 || (stat.mode & 0o077) !== 0) {
+  throw new Error('Miu runtime env must be a canonical root-owned private regular file.');
+}
+const assignments = fs.readFileSync(file, 'utf8').split(/\r?\n/).filter(line => /^\s*MIU_PROVIDER\s*=/.test(line));
+if (assignments.length !== 1) throw new Error('Miu runtime env must define MIU_PROVIDER exactly once.');
+const match = /^\s*MIU_PROVIDER\s*=\s*(fake|real)\s*$/.exec(assignments[0]);
+if (!match) throw new Error('Miu runtime MIU_PROVIDER must be fake or real.');
+process.stdout.write(match[1]);
+NODE
+) || fail 'Cannot read the expected Miu provider mode from /etc/miu/api.env.'
+readonly expected_provider_mode
+
 as_miu() {
   "$RUNUSER" -u miu -- /usr/bin/env -i \
     PATH=/opt/node24/bin:/usr/bin:/bin HOME="$ROOT/home-miu" USER=miu LOGNAME=miu \
     LANG=C.UTF-8 TMPDIR="$ROOT/tmp" XDG_CACHE_HOME="$ROOT/cache" \
     npm_config_cache="$ROOT/cache/npm" NODE_OPTIONS=--max-old-space-size=512 \
-    MIU_PROVIDER=fake VITE_DEMO_PUBLIC_URL=https://miu.curiopal.com VITE_VOICE_API_URL= \
+    MIU_PROVIDER=fake STT_LOGGING=1 VITE_DEMO_PUBLIC_URL=https://miu.curiopal.com VITE_VOICE_API_URL= \
     GIT_TERMINAL_PROMPT=0 GIT_CONFIG_NOSYSTEM=1 "$@"
 }
 
@@ -127,10 +145,11 @@ NODE
 write_json() {
   local kind=$1 path=$2 status=${3:-} current=${4:-} previous=${5:-}
   within_root "$path"
-  "$NODE" --input-type=module - "$kind" "$path" "$status" "$current" "$previous" "$target" <<'NODE'
+  "$NODE" --input-type=module - "$kind" "$path" "$status" "$current" "$previous" "$target" "$expected_provider_mode" <<'NODE'
 import fs from 'node:fs';
 import path from 'node:path';
-const [kind, file, status, current, previous, attempted] = process.argv.slice(2);
+const [kind, file, status, current, previous, attempted, providerMode] = process.argv.slice(2);
+if (providerMode !== 'fake' && providerMode !== 'real') throw new Error('Invalid expected provider mode.');
 const root = fs.realpathSync('/opt/miu');
 const parent = fs.realpathSync(path.dirname(file));
 if (parent !== root && !parent.startsWith(root + path.sep)) throw new Error('JSON destination escapes app root.');
@@ -141,11 +160,14 @@ if (kind === 'state') {
   let old = {};
   try { old = JSON.parse(fs.readFileSync(file, 'utf8')); } catch {}
   body = { current: current || null, previous: status === 'succeeded' ? previous || null : old.previous ?? null,
-    attempted: attempted || null, last_status: status, updated_at: time, provider_mode: 'fake' };
+    attempted: attempted || null, last_status: status, updated_at: time, provider_mode: providerMode };
 } else if (kind === 'complete') {
   body = { commit: attempted, built_at: time, validation: 'backend/frontend builds, tests, fake HTTP smoke and frontend assets passed' };
 } else {
-  body = { commit: attempted, deployed_at: time, provider_mode: 'fake' };
+  let old = {};
+  try { old = JSON.parse(fs.readFileSync(file, 'utf8')); } catch {}
+  if (old.commit === attempted && old.provider_mode === providerMode) process.exit(0);
+  body = { commit: attempted, deployed_at: old.commit === attempted ? old.deployed_at ?? time : time, provider_mode: providerMode };
 }
 const temporary = `${file}.tmp-${process.pid}`;
 fs.writeFileSync(temporary, `${JSON.stringify(body, null, 2)}\n`, { mode: 0o644, flag: 'wx' });
@@ -180,11 +202,11 @@ switch_current() {
 }
 
 healthy() {
-  local attempt body
-  for attempt in $(seq 1 30); do
+  local attempt body attempts=${1:-30}
+  for attempt in $(seq 1 "$attempts"); do
     if body=$(curl --fail --silent --show-error --connect-timeout 1 --max-time 2 "$HEALTH" 2>/dev/null) \
       && printf '%s' "$body" | "$NODE" --input-type=module -e \
-        "import fs from 'node:fs'; const h=JSON.parse(fs.readFileSync(0,'utf8')); process.exit(h.status==='ok' && h.provider_mode==='fake' ? 0 : 1);"; then
+        "import fs from 'node:fs'; const h=JSON.parse(fs.readFileSync(0,'utf8')); process.exit(h.status==='ok' && h.provider_mode===process.argv[1] ? 0 : 1);" "$expected_provider_mode"; then
       return 0
     fi
     sleep 1
@@ -298,7 +320,8 @@ else
   mv -T -- "$staging" "$release"
 fi
 
-if [[ $previous_release == "$release" ]] && healthy; then
+if [[ $previous_release == "$release" ]] && healthy 1; then
+  write_json info "$release/deploy-info.json"
   write_json state "$STATE" unchanged "$target" "$previous_sha"
   completed=1
   log "Commit $target is already deployed and healthy."
@@ -309,7 +332,7 @@ write_json info "$release/deploy-info.json"
 switch_current "$release"
 activated=1
 systemctl restart "$SERVICE"
-healthy || fail 'New Miu release did not become healthy in fake mode.'
+healthy || fail "New Miu release did not become healthy in $expected_provider_mode mode."
 write_json state "$STATE" succeeded "$target" "$previous_sha"
 completed=1
 log "Deployed $target; miu-api is healthy on127.0.0.1:4611."

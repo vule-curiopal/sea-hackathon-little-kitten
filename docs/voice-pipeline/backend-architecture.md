@@ -62,8 +62,8 @@ backend/pipeline/src/
     real.ts                       # lắp ba real adapters
     fake.ts                       # fixture path, không gọi provider
     elevenlabs/
-      client.ts                   # provider URL, key header, logging validation
-      stt.provider.ts             # batch STT
+      client.ts                   # provider URL và key header, không thêm logging query
+      stt.provider.ts             # batch STT; chỉ query enable_logging=false nếu STT_LOGGING=0
       tts.provider.ts             # text → MP3
     openai/
       response.generator.ts       # GPT tạm stateless
@@ -87,6 +87,8 @@ backend/pipeline/src/
 | Shared contracts | Envelope/type phía frontend ở `packages/voice-contracts`; browser logic ở `packages/voice-client` |
 
 Repository chỉ giữ cấu hình fixture và metadata giao thức có giới hạn. Đây không phải memory hội thoại hoặc database sản phẩm. GPT tạm chỉ nhận transcript của lượt hiện tại; config MBTI/role chưa có logic personality.
+
+`config.ts` đọc `STT_LOGGING=1|0`, mặc định `1`, theo LittleBuddy brain. Alias cũ `ELEVENLABS_ENABLE_LOGGING=true|false` chỉ áp dụng STT; hai cờ mâu thuẫn bị từ chối. STT adapter bỏ logging query ở normal mode và chỉ gửi `enable_logging=false` khi chọn `0` (ZRM); TTS adapter không gửi query này. Đây là chính sách phía provider, không thêm history/memory cho GPT hay nội dung vào log ứng dụng. Xem [D10](decisions.md#d10--logging-theo-littlebuddy-brain).
 
 ## HTTP và upload
 
@@ -136,4 +138,4 @@ Ví dụ đặt trong `backend/pipeline/src`. Đây là điểm nối text-reply
 
 ## Trạng thái kiểm chứng
 
-Build/typecheck, **115 tests trong 12 file**, localhost smoke Việt/Anh và compiled CLI check qua với fake/mocked provider; chi tiết ở [implementation-status.md](implementation-status.md). Các kết quả này chưa chứng minh STT/TTS thật, chất lượng voice, latency hoặc microphone/playback iPad. [20 audio đầu vào](../../test-assets/voice-pipeline/README.md) có job TTS tạo nguồn riêng; job đó không phải kiểm thử trọn pipeline thật.
+Build/typecheck, **139 tests trong 13 file**, localhost smoke Việt/Anh và compiled CLI check qua với fake/mocked provider; chi tiết ở [implementation-status.md](implementation-status.md). Probe riêng STT → GPT → TTS thật Việt/Anh đã qua trên máy phát triển và server, nhận MP3 hợp lệ. Những lượt đơn lẻ này chưa xác nhận chất lượng toàn bộ voice, p95 hoặc microphone/playback iPad. [20 audio đầu vào](../../test-assets/voice-pipeline/README.md) có job TTS tạo nguồn riêng; job đó không phải kiểm thử trọn pipeline thật.

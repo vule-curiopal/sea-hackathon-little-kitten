@@ -1,6 +1,6 @@
 # Kế hoạch triển khai voice pipeline
 
-Ngày cập nhật: **31/10/2026**. Đã triển khai backend **Express 5 + TypeScript trên Node.js**, tách routes/controllers, services, repository RAM và provider adapters; cùng thư viện browser RMS/capture/playback cho frontend React/TypeScript tích hợp trên iPad. Hướng dẫn chạy: [backend/pipeline/README.md](../../backend/pipeline/README.md). Tests dùng fake/mocked provider; chưa benchmark trọn pipeline provider thật hoặc kiểm thử iPad thật. D10 về tài khoản/retention còn cần xác minh.
+Ngày cập nhật: **31/10/2026**. Đã triển khai backend **Express 5 + TypeScript trên Node.js**, tách routes/controllers, services, repository RAM và provider adapters; cùng thư viện browser RMS/capture/playback cho frontend React/TypeScript tích hợp trên iPad. Hướng dẫn chạy: [backend/pipeline/README.md](../../backend/pipeline/README.md). Bộ 139 test tự động dùng fake/mocked provider; các probe riêng đã chạy STT → GPT → TTS thật cho Việt/Anh trên máy phát triển và server. Chưa benchmark p95 hoặc kiểm thử iPad thật; xem [trạng thái triển khai](implementation-status.md).
 
 Phạm vi đã thống nhất: **microphone → STT → GPT tạm → TTS → phát audio**, không memory. Engine trả lời chính thức do thành viên khác phụ trách. Xem [phân chia phạm vi](../voice-pipeline-scope.md) và [đặc tả sản phẩm](../product-specification.md).
 
@@ -24,6 +24,8 @@ Phạm vi đã thống nhất: **microphone → STT → GPT tạm → TTS → ph
 **Bạn đã chọn cách số 4 cho v1:** đo mức âm lượng với ngưỡng thích nghi. Web Audio và MediaRecorder dùng cùng stream; thu xong gửi nguyên blob qua endpoint turn chung tới backend Node/TS, rồi ElevenLabs STT batch. Frontend React/TS responsive trên iPad do thành viên frontend phụ trách; phần voice bàn giao contract, cấu hình và lifecycle.
 
 Voice khởi điểm kế thừa từ repo tham chiếu: **Việt — Phan Anh `mgBpvrNosWzExdPuRbXP`**, **Anh — Little Dude II `fBD19tfE58bkETeiwUoC`**. Ba lựa chọn thay thế và nguồn xác nhận nằm trong [voices.md](voices.md).
+
+Theo yêu cầu dùng cấu hình đang chạy của LittleBuddy brain, **`STT_LOGGING=1`** là mặc định: STT không gửi query `enable_logging`, TTS cũng không gửi query này. `STT_LOGGING=0` mới yêu cầu STT zero-retention bằng `enable_logging=false`; tài khoản hiện tại trả 403 cho chế độ đó nhưng STT bình thường trả 200. Đây là lựa chọn lưu dữ liệu phía ElevenLabs, không bật memory cho GPT hay log audio/transcript tại ứng dụng. Chi tiết ở [D10](decisions.md) và [tham số provider](provider-parameters.md).
 
 ```text
 Chọn vi/en trước phiên → session/config theo API contract

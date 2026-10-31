@@ -1,6 +1,6 @@
 # Kế hoạch triển khai voice pipeline
 
-Cập nhật ngày **31/10/2026** theo [các quyết định đã chốt](decisions.md), gồm yêu cầu dùng Express + TypeScript. Trạng thái thực tế ở [implementation-status.md](implementation-status.md), lệnh chạy ở [pipeline README](../../backend/pipeline/README.md), module/dependencies ở [backend-architecture.md](backend-architecture.md). Chưa nghiệm thu trọn pipeline provider thật; job riêng tạo bộ audio đầu vào đã dùng ElevenLabs TTS như ghi trong trạng thái triển khai.
+Cập nhật ngày **31/10/2026** theo [các quyết định đã chốt](decisions.md), gồm yêu cầu dùng Express + TypeScript và logging theo LittleBuddy brain. Trạng thái thực tế ở [implementation-status.md](implementation-status.md), lệnh chạy ở [pipeline README](../../backend/pipeline/README.md), module/dependencies ở [backend-architecture.md](backend-architecture.md). Probe riêng STT → GPT → TTS thật Việt/Anh đã qua trên máy phát triển và server; chưa nghiệm thu iPad hoặc p95. Job tạo bộ audio đầu vào dùng ElevenLabs TTS là đợt riêng.
 
 ## 1. Kiến trúc đã chọn
 
@@ -75,7 +75,7 @@ Code backend ở `backend/pipeline/src`, types chung ở `packages/voice-contrac
 
 | Bước | Công việc | Điều kiện đạt |
 | --- | --- | --- |
-| P0 — Chuẩn bị | Theo API contract; kiểm tra quyền dùng voice D08 đã có ID, D10 tier/retention, quyền model, origin HTTPS trên iPad | Có checklist còn mở; chưa coi keys tồn tại hoặc retention đã được duyệt |
+| P0 — Chuẩn bị | Theo API contract; D08 có ID; D10 dùng normal mode theo brain; kiểm tra model, voice và HTTPS trên iPad | Real probe Việt/Anh đã qua với default voice; tier/thời hạn retention cụ thể và thiết bị thật còn cần xác nhận |
 | P1 — Backend Express/TS và fake adapters | Routers/controllers tách khỏi services/repository/providers; turn/session lifecycle theo contract; timeout/hủy/idempotency/timing; stub không memory | Fake path chạy không key; lỗi/cancel không sinh audio cũ; HTTP và wire contract giữ nguyên khi tách module |
 | P2 — Bàn giao capture iPad | Cùng frontend feature-detect MIME, MediaRecorder + RMS, calibration, Gửi/Stop, permission/audio state | Blob MP4/AAC hoặc WebM theo capability được giữ nguyên; các timer D05 đúng; không auto-upload khi chưa có tín hiệu |
 | P3 — STT batch | `file` + `file_format=other`, `language_code=vi|en` theo cấu hình phiên; lỗi/quota/empty text | Đọc được câu Việt/Anh; không auto-switch; không gọi GPT trên transcript rỗng |
@@ -84,7 +84,7 @@ Code backend ở `backend/pipeline/src`, types chung ở `packages/voice-contrac
 | P6 — Đo và tối ưu latency | Timing theo stage, kết nối provider tái sử dụng khi hỗ trợ, payload nhỏ, output ngắn | Báo cáo cold/warm và latency đầy đủ, không đổi batch hoặc cắt bớt 1,5 giây đã chọn để đạt số đẹp |
 | P7 — Rehearsal iPad và bàn giao | HTTPS thật trên iPad; xoay màn hình/split view, mic denial, play blocked, tab ẩn, mạng lỗi, Stop | Có kết quả thực tế, giới hạn còn lại, config và hướng dẫn cho frontend/engine |
 
-D10-C không chặn P1 và phần fake của P2. Trước P3/P4/P5 real mode, xác minh chính sách provider và quyền truy cập; không đọc/in key từ `.env` vào báo cáo. Chưa có deadline nên không tự gán số ngày hoặc ngày bàn giao.
+D10 đã cập nhật theo yêu cầu dùng brain: `STT_LOGGING=1` mặc định, bỏ query logging cho STT; TTS không gửi query này. `0` mới yêu cầu STT ZRM và đang bị 403 trên tài khoản hiện tại. Real mode cần hai provider key; không còn yêu cầu chọn cờ logging lại trước khi chạy. P3/P4/P5 đã có probe provider thật Việt/Anh; tiếp tục kiểm thử iPad, chất lượng và benchmark theo checklist, không coi normal mode là zero retention. Không in key từ `.env` vào báo cáo. Chưa có deadline nên không tự gán số ngày hoặc ngày bàn giao.
 
 ## 4. Cấu hình đã chốt và kỹ thuật còn tune
 
