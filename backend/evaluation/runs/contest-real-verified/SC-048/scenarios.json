@@ -1,0 +1,224 @@
+{
+  "version": "miu-product-scenarios-v1",
+  "scenarios": [
+    {
+      "id": "SC-048",
+      "title": "Do-not-save requests suppress capture rather than only changing wording",
+      "category": "correction_and_privacy",
+      "requirements": [
+        "MEM-03",
+        "DATA-01",
+        "VOICE-02",
+        "MEM-01"
+      ],
+      "history_dates": [],
+      "conversations": [
+        {
+          "id": "core-c097",
+          "profile": "an",
+          "at": "2026-11-01T09:00:00+07:00",
+          "turns": [
+            {
+              "id": "core-t283",
+              "text": "Do not remember this: I like purple hats.",
+              "assertions": [
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "gte",
+                  "value": 1,
+                  "description": "The response has at least one speakable sentence."
+                },
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "lte",
+                  "value": 3,
+                  "description": "The response stays within three short sentences."
+                },
+                {
+                  "requirement": "MEM-03",
+                  "target": "after.preferences.length",
+                  "op": "equals",
+                  "value": 0,
+                  "description": "The explicitly excluded preference is not stored."
+                }
+              ],
+              "rubric": [
+                "Respond to the conversation without persisting the prohibited detail."
+              ]
+            },
+            {
+              "id": "core-t284",
+              "text": "My dog is Mochi. Do not save this either.",
+              "assertions": [
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "gte",
+                  "value": 1,
+                  "description": "The response has at least one speakable sentence."
+                },
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "lte",
+                  "value": 3,
+                  "description": "The response stays within three short sentences."
+                },
+                {
+                  "requirement": "MEM-03",
+                  "target": "after.entities.length",
+                  "op": "equals",
+                  "value": 0,
+                  "description": "The explicitly excluded pet name is not stored."
+                }
+              ],
+              "rubric": [
+                "Do not learn the name merely because it appears in a supported entity phrase."
+              ]
+            },
+            {
+              "id": "core-t285",
+              "text": "I like paper boats. You may remember that.",
+              "assertions": [
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "gte",
+                  "value": 1,
+                  "description": "The response has at least one speakable sentence."
+                },
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "lte",
+                  "value": 3,
+                  "description": "The response stays within three short sentences."
+                },
+                {
+                  "requirement": "MEM-01",
+                  "target": "after.preferences",
+                  "op": "contains",
+                  "value": {
+                    "value": "paper boats"
+                  },
+                  "description": "A later permitted independent preference can still be learned."
+                }
+              ],
+              "rubric": [
+                "Suppression applies to the relevant utterance, not permanently to all future learning."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "core-c098",
+          "profile": "an",
+          "at": "2026-11-02T09:00:00+07:00",
+          "turns": [
+            {
+              "id": "core-t286",
+              "text": "What preference did I allow you to remember?",
+              "assertions": [
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "gte",
+                  "value": 1,
+                  "description": "The response has at least one speakable sentence."
+                },
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "lte",
+                  "value": 3,
+                  "description": "The response stays within three short sentences."
+                },
+                {
+                  "requirement": "MEM-01",
+                  "target": "response.reply.text",
+                  "op": "matches",
+                  "value": "paper boats",
+                  "description": "The permitted preference is recalled."
+                },
+                {
+                  "requirement": "DATA-01",
+                  "target": "response.reply.text",
+                  "op": "not_matches",
+                  "value": "purple hats",
+                  "description": "The do-not-save preference is unavailable."
+                }
+              ],
+              "rubric": [
+                "Recall only the permitted preference."
+              ]
+            },
+            {
+              "id": "core-t287",
+              "text": "Do you know the pet name I told you not to save?",
+              "assertions": [
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "gte",
+                  "value": 1,
+                  "description": "The response has at least one speakable sentence."
+                },
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "lte",
+                  "value": 3,
+                  "description": "The response stays within three short sentences."
+                },
+                {
+                  "requirement": "DATA-01",
+                  "target": "response.reply.text",
+                  "op": "not_matches",
+                  "value": "Mochi",
+                  "description": "The excluded name cannot be retrieved from another session."
+                }
+              ],
+              "rubric": [
+                "Do not recover the suppressed name from raw history."
+              ]
+            },
+            {
+              "id": "core-t288",
+              "text": "Please keep respecting what I ask not to save.",
+              "assertions": [
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "gte",
+                  "value": 1,
+                  "description": "The response has at least one speakable sentence."
+                },
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "lte",
+                  "value": 3,
+                  "description": "The response stays within three short sentences."
+                },
+                {
+                  "requirement": "DATA-01",
+                  "target": "after.preferences",
+                  "op": "not_contains",
+                  "value": {
+                    "value": "purple hats"
+                  },
+                  "description": "The excluded preference remains absent after reopening."
+                }
+              ],
+              "rubric": [
+                "Acknowledge the boundary without a false claim about deleting a record that was never saved."
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

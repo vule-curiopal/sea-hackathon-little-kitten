@@ -1,0 +1,507 @@
+{
+  "run_kind": "integrated_real_http_verification",
+  "provider": "real",
+  "status": "completed",
+  "scope": "browser_only",
+  "prior_report": "/Users/canon193/Desktop/Projects/shoppee-hackathon/reports/integrated-real-http-2026-10-31-browser",
+  "started_at": "2026-10-31T05:44:32.084Z",
+  "elapsed_ms": 89895,
+  "database": {
+    "engine": "postgresql",
+    "isolated_schema": "miu_integration_eval_1b25d17469a944baae10fa4c767086e7",
+    "schema_removed": true,
+    "preserved_by_request": false,
+    "public_counts_before": {
+      "character_growth": 2,
+      "child_stories": 0,
+      "clock_requests": 0,
+      "daily_states": 2,
+      "demo_clocks": 2,
+      "diary_entries": 2,
+      "entities": 0,
+      "entity_aliases": 0,
+      "events": 0,
+      "facts": 0,
+      "followups": 0,
+      "historical_datasets": 1,
+      "historical_messages": 2932,
+      "historical_profiles": 1,
+      "historical_sessions": 365,
+      "integration_voice_settings": 0,
+      "memory_dependencies": 0,
+      "memory_operation_receipts": 0,
+      "memory_records": 2,
+      "miu_configs": 2,
+      "miu_self_statements": 0,
+      "night_job_runs": 2,
+      "profiles": 2,
+      "promises": 0,
+      "relationship_states": 2,
+      "schema_migrations": 6,
+      "social_connections": 0,
+      "story_checkpoints": 0,
+      "turn_learning": 0
+    },
+    "public_counts_after": {
+      "character_growth": 2,
+      "child_stories": 0,
+      "clock_requests": 0,
+      "daily_states": 2,
+      "demo_clocks": 2,
+      "diary_entries": 2,
+      "entities": 0,
+      "entity_aliases": 0,
+      "events": 0,
+      "facts": 0,
+      "followups": 0,
+      "historical_datasets": 1,
+      "historical_messages": 2932,
+      "historical_profiles": 1,
+      "historical_sessions": 365,
+      "integration_voice_settings": 0,
+      "memory_dependencies": 0,
+      "memory_operation_receipts": 0,
+      "memory_records": 2,
+      "miu_configs": 2,
+      "miu_self_statements": 0,
+      "night_job_runs": 2,
+      "profiles": 2,
+      "promises": 0,
+      "relationship_states": 2,
+      "schema_migrations": 6,
+      "social_connections": 0,
+      "story_checkpoints": 0,
+      "turn_learning": 0
+    }
+  },
+  "coverage": {
+    "attempted": 5,
+    "passed": 5,
+    "failed": 0,
+    "blocked": 0,
+    "not_attempted": 0
+  },
+  "actual_api_requests": {
+    "total": 10,
+    "completed": 10,
+    "responses_with_ids": 6,
+    "replies_with_ids": 2,
+    "models": {
+      "classify": "gpt-6-astra",
+      "reply": "gpt-6-astra",
+      "check": "gpt-6-astra",
+      "moderation": "omni-moderation-latest"
+    },
+    "telemetry_scope": "this_run_only",
+    "prior_report_counts_included": false
+  },
+  "delivery_evidence": "Chrome exercised the actual Done reading control and HTML audio playback; resulting delivery receipts came from the real browser client. No physical iPad, microphone, speaker output, or child listening was verified.",
+  "voice_input": "When attempted, a fictional utterance is synthesized through real ElevenLabs TTS, transcoded from MP3 to PCM WAV by ffmpeg, uploaded as actual WAV bytes, transcribed by real STT, answered by the real character engine, and synthesized by real TTS.",
+  "limitations": [
+    "Focused integration coverage does not establish full character or memory quality.",
+    "HTTP assertions use explicit fictional inputs and saved state; authored reference answers and fake providers are never used.",
+    "A missing/failed real request is recorded as failed or blocked and is never replaced.",
+    "Public table count comparison detects changes during this run; concurrent external writes could also change those counts."
+  ],
+  "fatal_error": null,
+  "cleanup_error": null,
+  "steps": [
+    {
+      "name": "startup",
+      "status": "passed",
+      "elapsed_ms": 8039,
+      "evidence": {
+        "current_schema": "miu_integration_eval_1b25d17469a944baae10fa4c767086e7",
+        "health": {
+          "status": "ok",
+          "provider_mode": "real",
+          "engine_mode": "character_memory",
+          "capabilities": {
+            "text": true,
+            "audio": true,
+            "memory": true
+          },
+          "retention": "not_verified_by_this_service"
+        }
+      }
+    },
+    {
+      "name": "an_session_config",
+      "status": "passed",
+      "elapsed_ms": 8026,
+      "evidence": {
+        "entities": 0,
+        "preferences": 0,
+        "state_version": 3
+      }
+    },
+    {
+      "name": "real_browser_ui",
+      "status": "passed",
+      "elapsed_ms": 71549,
+      "evidence": {
+        "status": "passed",
+        "provider_mode": "real",
+        "engine_mode": "character_memory",
+        "checks": [
+          "visible_delivery_gates_learning",
+          "memory_panel_uses_postgresql_state",
+          "next_day_retains_memory",
+          "real_output_tts",
+          "real_tts_html_audio_completed_receipt"
+        ],
+        "stages": [
+          {
+            "stage": "initial_session",
+            "at": "2026-10-31T05:44:48.915Z"
+          },
+          {
+            "stage": "text_only_settings",
+            "at": "2026-10-31T05:44:56.401Z"
+          },
+          {
+            "stage": "typed_reply",
+            "at": "2026-10-31T05:44:56.573Z"
+          },
+          {
+            "stage": "before_reading",
+            "at": "2026-10-31T05:45:10.530Z"
+          },
+          {
+            "stage": "reading_acknowledgment",
+            "at": "2026-10-31T05:45:11.583Z"
+          },
+          {
+            "stage": "memory_panel",
+            "at": "2026-10-31T05:45:22.713Z"
+          },
+          {
+            "stage": "next_day_http",
+            "at": "2026-10-31T05:45:24.089Z"
+          },
+          {
+            "stage": "next_day_fresh_session_and_configuration",
+            "at": "2026-10-31T05:45:27.009Z"
+          },
+          {
+            "stage": "next_day_retained_memory",
+            "at": "2026-10-31T05:45:33.589Z"
+          },
+          {
+            "stage": "audio_settings",
+            "at": "2026-10-31T05:45:35.643Z"
+          },
+          {
+            "stage": "actual_model_and_output_tts",
+            "at": "2026-10-31T05:45:35.771Z"
+          },
+          {
+            "stage": "html_audio_completed_receipt",
+            "at": "2026-10-31T05:45:49.801Z"
+          }
+        ],
+        "http": [
+          {
+            "method": "POST",
+            "path": "/api/sessions",
+            "status": 200,
+            "stage": "initial_session",
+            "elapsed_ms": 3345,
+            "error_code": null
+          },
+          {
+            "method": "PATCH",
+            "path": "/api/profiles/current/config",
+            "status": 200,
+            "stage": "initial_session",
+            "elapsed_ms": 3390,
+            "error_code": null
+          },
+          {
+            "method": "POST",
+            "path": "/api/sessions/39973542-ba5b-4572-a6d9-6dde268d99c7/turns",
+            "status": 200,
+            "stage": "typed_reply",
+            "elapsed_ms": 13775,
+            "error_code": null
+          },
+          {
+            "method": "GET",
+            "path": "/api/demo/panel",
+            "status": 200,
+            "stage": "before_reading",
+            "elapsed_ms": 1042,
+            "error_code": null
+          },
+          {
+            "method": "POST",
+            "path": "/api/sessions/39973542-ba5b-4572-a6d9-6dde268d99c7/turns/29fb6663-de54-4ed9-be32-1112df8b0406/playback",
+            "status": 200,
+            "stage": "reading_acknowledgment",
+            "elapsed_ms": 5161,
+            "error_code": null
+          },
+          {
+            "method": "POST",
+            "path": "/api/sessions/39973542-ba5b-4572-a6d9-6dde268d99c7/turns/29fb6663-de54-4ed9-be32-1112df8b0406/playback",
+            "status": 200,
+            "stage": "reading_acknowledgment",
+            "elapsed_ms": 4840,
+            "error_code": null
+          },
+          {
+            "method": "GET",
+            "path": "/api/demo/panel",
+            "status": 200,
+            "stage": "reading_acknowledgment",
+            "elapsed_ms": 994,
+            "error_code": null
+          },
+          {
+            "method": "GET",
+            "path": "/api/demo/panel",
+            "status": 200,
+            "stage": "memory_panel",
+            "elapsed_ms": 999,
+            "error_code": null
+          },
+          {
+            "method": "POST",
+            "path": "/api/demo/next-day",
+            "status": 200,
+            "stage": "next_day_http",
+            "elapsed_ms": 2871,
+            "error_code": null
+          },
+          {
+            "method": "DELETE",
+            "path": "/api/sessions/39973542-ba5b-4572-a6d9-6dde268d99c7",
+            "status": 200,
+            "stage": "next_day_fresh_session_and_configuration",
+            "elapsed_ms": 2,
+            "error_code": null
+          },
+          {
+            "method": "POST",
+            "path": "/api/sessions",
+            "status": 200,
+            "stage": "next_day_fresh_session_and_configuration",
+            "elapsed_ms": 3291,
+            "error_code": null
+          },
+          {
+            "method": "PATCH",
+            "path": "/api/profiles/current/config",
+            "status": 200,
+            "stage": "next_day_fresh_session_and_configuration",
+            "elapsed_ms": 3270,
+            "error_code": null
+          },
+          {
+            "method": "GET",
+            "path": "/api/demo/panel",
+            "status": 200,
+            "stage": "next_day_fresh_session_and_configuration",
+            "elapsed_ms": 987,
+            "error_code": null
+          },
+          {
+            "method": "GET",
+            "path": "/api/demo/panel",
+            "status": 200,
+            "stage": "next_day_retained_memory",
+            "elapsed_ms": 2011,
+            "error_code": null
+          },
+          {
+            "method": "POST",
+            "path": "/api/sessions/37e81a71-32b2-467b-9c77-4a2aa7ac5eac/turns",
+            "status": 200,
+            "stage": "actual_model_and_output_tts",
+            "elapsed_ms": 13970,
+            "error_code": null
+          },
+          {
+            "method": "POST",
+            "path": "/api/sessions/37e81a71-32b2-467b-9c77-4a2aa7ac5eac/turns/843c8521-a135-43ea-aeaf-6227dd5f506a/playback",
+            "status": 200,
+            "stage": "html_audio_completed_receipt",
+            "elapsed_ms": 3260,
+            "error_code": null
+          },
+          {
+            "method": "POST",
+            "path": "/api/sessions/37e81a71-32b2-467b-9c77-4a2aa7ac5eac/turns/843c8521-a135-43ea-aeaf-6227dd5f506a/playback",
+            "status": 200,
+            "stage": "html_audio_completed_receipt",
+            "elapsed_ms": 4648,
+            "error_code": null
+          }
+        ],
+        "audio_input_stt": "not_in_scope",
+        "text_reply": "Nori is a lovely name! What kind of toy is Nori?",
+        "audio_reply": "Good morning! I’m Miu, a talking AI kitten, and I’m happy to chat with you.",
+        "growth_days": 1,
+        "audio_mime_type": "audio/mpeg",
+        "audio_duration_ms": 5094,
+        "screenshots": [
+          "conversation.png",
+          "memory-panel.png",
+          "approved-audio.png"
+        ],
+        "limitations": "Desktop headless Chrome exercised actual DOM controls and HTML audio events. No physical microphone, speaker, iPad, or child listening was verified."
+      }
+    },
+    {
+      "name": "actual_openai_request_provenance",
+      "status": "passed",
+      "elapsed_ms": 0,
+      "evidence": {
+        "actual_requests": 10,
+        "completed_reply_response_ids": [
+          "resp_02c4a94b37cac619016ae5805f590087d2bf468eb4df4f29ae",
+          "resp_00d7f1cf4e28a885016ae580861a9487d285cdf1cd24824ab5"
+        ],
+        "models": {
+          "classify": "gpt-6-astra",
+          "reply": "gpt-6-astra",
+          "check": "gpt-6-astra",
+          "moderation": "omni-moderation-latest"
+        }
+      }
+    },
+    {
+      "name": "public_database_preserved",
+      "status": "passed",
+      "elapsed_ms": 0
+    }
+  ],
+  "snapshots": {
+    "an_initial": {
+      "profile": {
+        "id": "810cf25e-372f-4fb2-9b42-456bb1612e8c",
+        "demoKey": "an",
+        "displayName": "An",
+        "ageBand": "6-8",
+        "languageMode": "en",
+        "timezone": "Asia/Ho_Chi_Minh",
+        "stateVersion": 3,
+        "deletionEpoch": 0
+      },
+      "config": {
+        "personality": "ENFP",
+        "role": "friend",
+        "voiceId": "miu-default",
+        "canonVersion": "miu-v1",
+        "assignedStoryId": "miu-b-folding-chair-cushion-hills-v1"
+      },
+      "clock": {
+        "mode": "demo",
+        "effectiveNow": "2026-10-31T05:44:47.572Z",
+        "localDate": "2026-10-31",
+        "timezone": "Asia/Ho_Chi_Minh",
+        "version": 1
+      },
+      "daily": {
+        "localDate": "2026-10-31",
+        "mood": "content",
+        "growthDays": 0,
+        "growthTheme": "curiosity",
+        "diary": {
+          "templateId": "cardboard-fort",
+          "en": "In my pretend house, I made a tiny cardboard fort.",
+          "vi": "Trong ngôi nhà tưởng tượng, Miu làm một pháo đài bìa nhỏ."
+        },
+        "storyEpisode": {
+          "templateId": "lantern-1",
+          "en": "In our pretend story, Miu and Pip the paper bird find a little lantern.",
+          "vi": "Trong truyện tưởng tượng, Miu và chim giấy Pip tìm thấy một chiếc đèn nhỏ.",
+          "chapter": 1
+        }
+      },
+      "entities": [],
+      "preferences": [],
+      "socialCircle": [],
+      "events": [],
+      "stories": [],
+      "storyProgress": null,
+      "friendship": "getting_acquainted",
+      "configuration": {
+        "personality": "ENFP",
+        "role": "friend",
+        "language_mode": "en",
+        "voice_id": "fBD19tfE58bkETeiwUoC"
+      },
+      "state_version": 3,
+      "clock_version": 1,
+      "effective_now": "2026-10-31T05:44:47.572Z",
+      "provider_mode": "real",
+      "engine_mode": "character_memory",
+      "context": {
+        "profile": {
+          "id": "810cf25e-372f-4fb2-9b42-456bb1612e8c",
+          "demoKey": "an",
+          "displayName": "An",
+          "ageBand": "6-8",
+          "languageMode": "en",
+          "timezone": "Asia/Ho_Chi_Minh",
+          "stateVersion": 3,
+          "deletionEpoch": 0
+        },
+        "config": {
+          "personality": "ENFP",
+          "role": "friend",
+          "voiceId": "miu-default",
+          "canonVersion": "miu-v1",
+          "assignedStoryId": "miu-b-folding-chair-cushion-hills-v1"
+        },
+        "clock": {
+          "mode": "demo",
+          "effectiveNow": "2026-10-31T05:44:47.572Z",
+          "localDate": "2026-10-31",
+          "timezone": "Asia/Ho_Chi_Minh",
+          "version": 1
+        },
+        "daily": {
+          "localDate": "2026-10-31",
+          "mood": "content",
+          "growthDays": 0,
+          "growthTheme": "curiosity",
+          "diary": {
+            "templateId": "cardboard-fort",
+            "en": "In my pretend house, I made a tiny cardboard fort.",
+            "vi": "Trong ngôi nhà tưởng tượng, Miu làm một pháo đài bìa nhỏ."
+          },
+          "storyEpisode": {
+            "templateId": "lantern-1",
+            "en": "In our pretend story, Miu and Pip the paper bird find a little lantern.",
+            "vi": "Trong truyện tưởng tượng, Miu và chim giấy Pip tìm thấy một chiếc đèn nhỏ.",
+            "chapter": 1
+          }
+        },
+        "entities": [],
+        "preferences": [],
+        "socialCircle": [],
+        "events": [],
+        "stories": [],
+        "storyProgress": null,
+        "friendship": "getting_acquainted",
+        "configuration": {
+          "personality": "ENFP",
+          "role": "friend",
+          "language_mode": "en",
+          "voice_id": "fBD19tfE58bkETeiwUoC"
+        },
+        "state_version": 3,
+        "clock_version": 1,
+        "effective_now": "2026-10-31T05:44:47.572Z",
+        "provider_mode": "real",
+        "engine_mode": "character_memory"
+      },
+      "memory_available": true,
+      "character_engine_available": true,
+      "active_turn": null,
+      "storage": "postgresql"
+    }
+  }
+}

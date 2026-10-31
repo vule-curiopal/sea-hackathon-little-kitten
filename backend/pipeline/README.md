@@ -2,6 +2,8 @@
 
 Express 5 + TypeScript backend on Node.js for the user's voice scope. One authenticated turn endpoint runs **audio → ElevenLabs batch STT → stateless GPT → checked plain text → ElevenLabs TTS**. The response uses the shared envelope and inline base64 audio. Engine/personality/memory features remain owned by the other workstreams.
 
+The root integrated app injects the persistent engine bridge into this transport. In that composition, the engine supplies the approved reply, presentation, canonical versions, memory reference, and delivery lifecycle; the stateless generator is bypassed. Start the integrated React app with `npm start` from the repository root. The standalone commands below retain voice-transport development behavior.
+
 ## Architecture
 
 `app.ts` composes dependencies and registers Express middleware/routers. Feature modules live in `src/modules`: session routes/controllers call `SessionService`, backed by `InMemorySessionRepository`; turn routes/controllers call the HTTP-independent `TurnService`. STT/TTS/OpenAI adapters live separately under `src/providers`, behind the ports in `src/ports.ts`. `src/http` owns request parsing, memory uploads and sanitized errors. See [backend architecture](../../docs/voice-pipeline/backend-architecture.md) for the full dependency map and engine handoff.
@@ -15,12 +17,12 @@ Requires Node **22.19+**. MP4/WebM input and real MP3 output probing also requir
 ```powershell
 npm ci
 npm run build
-npm test
+npm run test:voice
 npm run smoke
-npm run dev
+npm run dev:voice
 ```
 
-API defaults to `http://127.0.0.1:3001`; health: `GET /api/health`; public voice catalog: `GET /api/voices`. `npm run dev` loads the existing root `.env` but **does not modify it**. With no explicit `MIU_PROVIDER=real`, only fake providers run. See the root `.env.example` for configuration.
+API defaults to `http://127.0.0.1:3001`; health: `GET /api/health`; public voice catalog: `GET /api/voices`. `npm run dev:voice` loads the existing root `.env` but **does not modify it**. With no explicit `MIU_PROVIDER=real`, only fake providers run. See the root `.env.example` for configuration.
 
 For an iPad on another device, serve the frontend on trusted HTTPS and proxy `/api` to this server. The frontend and backend must agree on allowed origins. HTTP on a laptop's LAN address does not give an iPad microphone secure context. Manual deployment files for the frontend/API at `miu.curiopal.com`, isolated services and HTTPS are in [deploy/miu](../../deploy/miu/README.md). Behind the localhost proxy, set `TRUST_PROXY_LOOPBACK=true` and overwrite forwarded headers as shown there; the default stays false for direct local development.
 

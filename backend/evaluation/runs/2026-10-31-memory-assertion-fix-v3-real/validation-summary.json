@@ -1,0 +1,57 @@
+{
+  "status": "passed_focused_text_regressions",
+  "baseline_run": "2026-10-31T04-33-31-024Z-real",
+  "final_run": "2026-10-31-memory-assertion-fix-v3-real",
+  "scenario_ids": [
+    "SC-031",
+    "SC-101",
+    "SC-102"
+  ],
+  "implementation_matches_recorded_hashes": true,
+  "validation": {
+    "typecheck": "passed",
+    "offline_unit_and_harness_checks": {
+      "passed": 168,
+      "failed": 0,
+      "quality_evidence": false
+    },
+    "real_provider": {
+      "classify": "gpt-6-astra",
+      "reply": "gpt-6-astra",
+      "check": "gpt-6-astra",
+      "moderation": "omni-moderation-latest"
+    },
+    "real_turns": 19,
+    "model_reviewed_passes": 19,
+    "failures": 0,
+    "unjudged": 0,
+    "state_and_response_assertions": {
+      "pass": 59,
+      "fail": 0
+    },
+    "execution_errors": 0,
+    "judge_model": "gpt-6-astra"
+  },
+  "iterations": [
+    {
+      "run": "2026-10-31-memory-assertion-fix-real",
+      "result": "Three deterministic name-recall failures exposed uncertainty preceding retrieval; preserved and fixed."
+    },
+    {
+      "run": "2026-10-31-memory-assertion-fix-v2-real",
+      "result": "59 assertions passed; semantic review found one unresolved reporting denial; preserved and fixed."
+    },
+    {
+      "run": "2026-10-31-memory-assertion-fix-v3-real",
+      "result": "59 assertions and all 19 model-reviewed turns passed."
+    }
+  ],
+  "limitations": [
+    "Text engine only; simulated playback receipts; no audio or browser validation.",
+    "Focused regression scenarios, not the full catalog or historical year.",
+    "Model semantic judgments are advisory.",
+    "SC-102 initial legacy records are authored repair preconditions, not learning evidence.",
+    "Offline checks establish contracts and lifecycle logic, not character or memory quality."
+  ],
+  "report": "semantic-review/report.md"
+}

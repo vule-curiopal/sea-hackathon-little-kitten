@@ -14,23 +14,23 @@ export class SessionController {
       || typeof body.demo_profile_key !== 'string') {
       throw new PipelineError('invalid_request', 400);
     }
-    const session = this.sessions.create(body.demo_profile_key, identifier(body.request_id));
+    const session = await this.sessions.createSession(body.demo_profile_key, identifier(body.request_id));
     const result: SessionResponse = {
       session_id: session.id,
       demo_token: session.profile.token,
       configuration: { ...session.profile.configuration },
-      clock_version: 1,
+      clock_version: session.profile.clockVersion ?? 1,
       state_version: session.profile.stateVersion,
-      effective_now: new Date().toISOString(),
+      effective_now: session.profile.effectiveNow ?? new Date().toISOString(),
       provider_mode: this.providerMode,
-      engine_mode: 'voice_stub',
+      engine_mode: this.sessions.engineBridge ? 'character_memory' : 'voice_stub',
     };
     return response.json(result);
   };
 
   readonly configure = async (request: Request, response: Response) => {
     const body = object(request.body);
-    const result = this.sessions.configure(
+    const result = await this.sessions.configureProfile(
       this.sessions.profile(bearerToken(request)), identifier(body.request_id), body,
     );
     return response.json(result);
@@ -40,7 +40,7 @@ export class SessionController {
     const session = this.sessions.session(
       identifier(object(request.params).session_id), bearerToken(request),
     );
-    this.sessions.close(session);
+    await this.sessions.closeSession(session);
     return response.json({ session_id: session.id, closed: true });
   };
 }

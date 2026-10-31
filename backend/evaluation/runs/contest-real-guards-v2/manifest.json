@@ -1,0 +1,67 @@
+{
+  "run_kind": "character_memory_evaluation",
+  "provider": "real",
+  "scope": "contest_smoke",
+  "status": "completed_with_failures",
+  "scenarios": [
+    "SC-048",
+    "SC-026",
+    "SC-036",
+    "SC-044",
+    "SC-070"
+  ],
+  "concurrency": 3,
+  "completed_scenarios": [
+    {
+      "id": "SC-026",
+      "status": "completed",
+      "turns": 6
+    },
+    {
+      "id": "SC-048",
+      "status": "completed",
+      "turns": 6
+    },
+    {
+      "id": "SC-036",
+      "status": "completed",
+      "turns": 6
+    },
+    {
+      "id": "SC-070",
+      "status": "completed",
+      "turns": 4
+    },
+    {
+      "id": "SC-044",
+      "status": "completed",
+      "turns": 6
+    }
+  ],
+  "elapsed_ms": 97842,
+  "judge_model": "gpt-6-astra",
+  "errors": [],
+  "behavior": {
+    "turns": 28,
+    "pass": 24,
+    "fail": 4,
+    "needs_review": 0,
+    "execution_errors": 1,
+    "expected_execution_errors": 0,
+    "phases": {
+      "history": 0,
+      "scenario_history": 0,
+      "scenario": 28
+    },
+    "scenario_assertions": {
+      "pass": 105,
+      "fail": 4
+    }
+  },
+  "limitations": [
+    "Focused scenario coverage; this does not verify the full historical year.",
+    "Sequential turns and isolated databases preserve causality within each scenario.",
+    "Semantic criteria without a successful independent review remain needs_review.",
+    "Text path only; playback receipts are simulated."
+  ]
+}

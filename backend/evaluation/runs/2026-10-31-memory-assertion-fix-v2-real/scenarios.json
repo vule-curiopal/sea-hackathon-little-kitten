@@ -1,0 +1,723 @@
+{
+  "version": "miu-product-scenarios-v1",
+  "scenarios": [
+    {
+      "id": "SC-031",
+      "title": "A named pet is learned once and recalled across sessions",
+      "category": "grounded_memory",
+      "requirements": [
+        "MEM-01",
+        "MEM-02",
+        "VOICE-02"
+      ],
+      "history_dates": [],
+      "conversations": [
+        {
+          "id": "core-c061",
+          "profile": "an",
+          "at": "2026-11-01T09:00:00+07:00",
+          "turns": [
+            {
+              "id": "core-t181",
+              "text": "My dog is Mochi.",
+              "assertions": [
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "gte",
+                  "value": 1,
+                  "description": "The response has at least one speakable sentence."
+                },
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "lte",
+                  "value": 3,
+                  "description": "The response stays within three short sentences."
+                },
+                {
+                  "requirement": "MEM-01",
+                  "target": "after.entities",
+                  "op": "contains",
+                  "value": {
+                    "name": "Mochi",
+                    "kind": "pet",
+                    "species": "dog"
+                  },
+                  "description": "The child’s named dog is captured."
+                }
+              ],
+              "rubric": [
+                "Learn the pet from the child’s actual statement."
+              ]
+            },
+            {
+              "id": "core-t182",
+              "text": "I like rolling a ball.",
+              "assertions": [
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "gte",
+                  "value": 1,
+                  "description": "The response has at least one speakable sentence."
+                },
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "lte",
+                  "value": 3,
+                  "description": "The response stays within three short sentences."
+                },
+                {
+                  "requirement": "MEM-01",
+                  "target": "after.preferences",
+                  "op": "contains",
+                  "value": {
+                    "value": "rolling a ball"
+                  },
+                  "description": "The volunteered activity is captured."
+                }
+              ],
+              "rubric": [
+                "Do not infer Mochi’s likes or a particular daily routine."
+              ]
+            },
+            {
+              "id": "core-t183",
+              "text": "My dog is Mochi.",
+              "assertions": [
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "gte",
+                  "value": 1,
+                  "description": "The response has at least one speakable sentence."
+                },
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "lte",
+                  "value": 3,
+                  "description": "The response stays within three short sentences."
+                },
+                {
+                  "requirement": "MEM-01",
+                  "target": "after.entities.length",
+                  "op": "equals",
+                  "value": 1,
+                  "description": "Repeating the same pet does not create a second entity."
+                }
+              ],
+              "rubric": [
+                "Keep one grounded pet rather than duplicate named records."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "core-c062",
+          "profile": "an",
+          "at": "2026-11-02T09:00:00+07:00",
+          "turns": [
+            {
+              "id": "core-t184",
+              "text": "Do you remember my dog’s name?",
+              "assertions": [
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "gte",
+                  "value": 1,
+                  "description": "The response has at least one speakable sentence."
+                },
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "lte",
+                  "value": 3,
+                  "description": "The response stays within three short sentences."
+                },
+                {
+                  "requirement": "MEM-01",
+                  "target": "response.reply.text",
+                  "op": "matches",
+                  "value": "Mochi",
+                  "description": "The reply actually recalls the learned pet name."
+                }
+              ],
+              "rubric": [
+                "Answer Mochi rather than a generic claim of remembering."
+              ]
+            },
+            {
+              "id": "core-t185",
+              "text": "Did I tell you Mochi got a bath today?",
+              "assertions": [
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "gte",
+                  "value": 1,
+                  "description": "The response has at least one speakable sentence."
+                },
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "lte",
+                  "value": 3,
+                  "description": "The response stays within three short sentences."
+                },
+                {
+                  "requirement": "MEM-02",
+                  "target": "response.reply.text",
+                  "op": "not_matches",
+                  "value": "^(?:yes|you told (?:me|Miu)).*bath",
+                  "description": "An unreported bath is not affirmed as an earlier report."
+                },
+                {
+                  "requirement": "MEM-01",
+                  "target": "after.events.length",
+                  "op": "equals",
+                  "value": 0,
+                  "description": "The bath question creates no event of any type."
+                }
+              ],
+              "rubric": [
+                "State uncertainty; prior knowledge of a pet does not establish a bath."
+              ]
+            },
+            {
+              "id": "core-t186",
+              "text": "I did not say that, so do not make it up.",
+              "assertions": [
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "gte",
+                  "value": 1,
+                  "description": "The response has at least one speakable sentence."
+                },
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "lte",
+                  "value": 3,
+                  "description": "The response stays within three short sentences."
+                },
+                {
+                  "requirement": "MEM-01",
+                  "target": "after.events.length",
+                  "op": "equals",
+                  "value": 0,
+                  "description": "No invented or negated bath proposition is stored under any event type."
+                },
+                {
+                  "requirement": "MEM-01",
+                  "target": "after.entities",
+                  "op": "contains",
+                  "value": {
+                    "name": "Mochi",
+                    "species": "dog"
+                  },
+                  "description": "Correcting an event preserves the known dog identity."
+                }
+              ],
+              "rubric": [
+                "Accept the correction without storing the negated bath as an actual event."
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "SC-101",
+      "title": "Assertion scope distinguishes questions, negation and affirmed event reports",
+      "category": "memory_regression",
+      "requirements": [
+        "MEM-01",
+        "MEM-02",
+        "MEM-03",
+        "VOICE-02"
+      ],
+      "history_dates": [],
+      "conversations": [
+        {
+          "id": "scope-c1",
+          "profile": "an",
+          "at": "2026-11-01T09:00:00+07:00",
+          "turns": [
+            {
+              "id": "scope-pet",
+              "text": "My dog is Mochi.",
+              "assertions": [
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "gte",
+                  "value": 1,
+                  "description": "Deliver an approved speakable response."
+                },
+                {
+                  "requirement": "MEM-01",
+                  "target": "after.entities",
+                  "op": "contains",
+                  "value": {
+                    "name": "Mochi",
+                    "species": "dog"
+                  },
+                  "description": "Mochi remains the known dog."
+                },
+                {
+                  "requirement": "MEM-01",
+                  "target": "after.events.length",
+                  "op": "equals",
+                  "value": 0,
+                  "description": "Exactly 0 reported events remain; event-type aliases cannot hide an invented proposition."
+                }
+              ],
+              "rubric": [
+                "Engage specifically with the child's named dog."
+              ]
+            },
+            {
+              "id": "scope-mixed",
+              "text": "I like rolling a ball. Did I tell you Mochi got a bath today?",
+              "assertions": [
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "gte",
+                  "value": 1,
+                  "description": "Deliver an approved speakable response."
+                },
+                {
+                  "requirement": "MEM-01",
+                  "target": "after.events.length",
+                  "op": "equals",
+                  "value": 0,
+                  "description": "Exactly 0 reported events remain; event-type aliases cannot hide an invented proposition."
+                },
+                {
+                  "requirement": "MEM-01",
+                  "target": "after.preferences",
+                  "op": "contains",
+                  "value": {
+                    "value": "rolling a ball"
+                  },
+                  "description": "The independent affirmative preference is still captured."
+                }
+              ],
+              "rubric": [
+                "Respond to the bath-report question with uncertainty, while preserving the independently stated child preference; do not attribute that preference to Mochi."
+              ]
+            },
+            {
+              "id": "scope-negative",
+              "text": "Mochi did not get a bath today.",
+              "assertions": [
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "gte",
+                  "value": 1,
+                  "description": "Deliver an approved speakable response."
+                },
+                {
+                  "requirement": "MEM-01",
+                  "target": "after.events.length",
+                  "op": "equals",
+                  "value": 0,
+                  "description": "Exactly 0 reported events remain; event-type aliases cannot hide an invented proposition."
+                },
+                {
+                  "requirement": "MEM-01",
+                  "target": "after.entities",
+                  "op": "contains",
+                  "value": {
+                    "name": "Mochi",
+                    "species": "dog"
+                  },
+                  "description": "Mochi remains the known dog."
+                }
+              ],
+              "rubric": [
+                "Understand the negative report without persisting a positive bath or asking for the known name."
+              ]
+            },
+            {
+              "id": "scope-hypothetical",
+              "text": "Maybe Mochi got a bath today.",
+              "assertions": [
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "gte",
+                  "value": 1,
+                  "description": "Deliver an approved speakable response."
+                },
+                {
+                  "requirement": "MEM-01",
+                  "target": "after.events.length",
+                  "op": "equals",
+                  "value": 0,
+                  "description": "Exactly 0 reported events remain; event-type aliases cannot hide an invented proposition."
+                }
+              ],
+              "rubric": [
+                "Treat maybe as uncertain; do not claim a bath was reported as completed."
+              ]
+            },
+            {
+              "id": "scope-affirmed",
+              "text": "Mochi got a bath today.",
+              "assertions": [
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "gte",
+                  "value": 1,
+                  "description": "Deliver an approved speakable response."
+                },
+                {
+                  "requirement": "MEM-01",
+                  "target": "after.events.length",
+                  "op": "equals",
+                  "value": 1,
+                  "description": "Exactly 1 reported events remain; event-type aliases cannot hide an invented proposition."
+                },
+                {
+                  "requirement": "MEM-01",
+                  "target": "after.events",
+                  "op": "contains",
+                  "value": {
+                    "subjectName": "Mochi",
+                    "eventType": "reported_event",
+                    "evidenceKind": "child_reported"
+                  },
+                  "description": "An actual affirmative report can be learned."
+                }
+              ],
+              "rubric": [
+                "Acknowledge this actual affirmative report naturally, preserving Mochi's identity."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "scope-c2",
+          "profile": "an",
+          "at": "2026-11-01T09:10:00+07:00",
+          "transition": "reload",
+          "turns": [
+            {
+              "id": "scope-reported",
+              "text": "Did I tell you Mochi got a bath today?",
+              "assertions": [
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "gte",
+                  "value": 1,
+                  "description": "Deliver an approved speakable response."
+                },
+                {
+                  "requirement": "MEM-01",
+                  "target": "after.events.length",
+                  "op": "equals",
+                  "value": 1,
+                  "description": "Exactly 1 reported events remain; event-type aliases cannot hide an invented proposition."
+                }
+              ],
+              "rubric": [
+                "Recognize the previously stored affirmative report after reopening, without creating a second event."
+              ]
+            },
+            {
+              "id": "scope-retracted",
+              "text": "I did not say Mochi got a bath today.",
+              "assertions": [
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "gte",
+                  "value": 1,
+                  "description": "Deliver an approved speakable response."
+                },
+                {
+                  "requirement": "MEM-01",
+                  "target": "after.events.length",
+                  "op": "equals",
+                  "value": 0,
+                  "description": "Exactly 0 reported events remain; event-type aliases cannot hide an invented proposition."
+                },
+                {
+                  "requirement": "MEM-01",
+                  "target": "after.entities",
+                  "op": "contains",
+                  "value": {
+                    "name": "Mochi",
+                    "species": "dog"
+                  },
+                  "description": "Mochi remains the known dog."
+                },
+                {
+                  "requirement": "MEM-03",
+                  "target": "response.memory.invalidate_replay",
+                  "op": "equals",
+                  "value": true,
+                  "description": "Retraction revokes cached state."
+                }
+              ],
+              "rubric": [
+                "Accept and apply the explicit retraction. Do not infer that no bath happened, or forget the dog's identity."
+              ]
+            },
+            {
+              "id": "scope-name",
+              "text": "Do you remember my dog’s name?",
+              "assertions": [
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "gte",
+                  "value": 1,
+                  "description": "Deliver an approved speakable response."
+                },
+                {
+                  "requirement": "MEM-01",
+                  "target": "response.reply.text",
+                  "op": "matches",
+                  "value": "Mochi",
+                  "description": "Recall the known name explicitly."
+                },
+                {
+                  "requirement": "MEM-01",
+                  "target": "after.entities",
+                  "op": "contains",
+                  "value": {
+                    "name": "Mochi",
+                    "species": "dog"
+                  },
+                  "description": "Mochi remains the known dog."
+                },
+                {
+                  "requirement": "MEM-01",
+                  "target": "after.events.length",
+                  "op": "equals",
+                  "value": 0,
+                  "description": "Exactly 0 reported events remain; event-type aliases cannot hide an invented proposition."
+                }
+              ],
+              "rubric": [
+                "Recall Mochi after event retraction."
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "SC-102",
+      "title": "A seeded legacy invented event is repaired after reopening without losing its subject",
+      "category": "memory_regression",
+      "requirements": [
+        "MEM-01",
+        "MEM-02",
+        "MEM-03",
+        "VOICE-02"
+      ],
+      "history_dates": [],
+      "initial_memory": {
+        "provenance": "synthetic_legacy_fixture_not_learning_evidence",
+        "profile": "an",
+        "pet": {
+          "name": "Mochi",
+          "species": "dog"
+        },
+        "event": {
+          "value": "Mochi got a bath today",
+          "local_date": "2026-11-02"
+        }
+      },
+      "conversations": [
+        {
+          "id": "legacy-c1",
+          "profile": "an",
+          "at": "2026-11-02T09:00:00+07:00",
+          "turns": [
+            {
+              "id": "legacy-name",
+              "text": "Do you remember my dog’s name?",
+              "assertions": [
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "gte",
+                  "value": 1,
+                  "description": "Deliver an approved speakable response."
+                },
+                {
+                  "requirement": "MEM-01",
+                  "target": "response.reply.text",
+                  "op": "matches",
+                  "value": "Mochi",
+                  "description": "Recall the known name explicitly."
+                },
+                {
+                  "requirement": "MEM-01",
+                  "target": "after.events.length",
+                  "op": "equals",
+                  "value": 1,
+                  "description": "Exactly 1 reported events remain; event-type aliases cannot hide an invented proposition."
+                }
+              ],
+              "rubric": [
+                "Recall the fixture-provided identity; this turn does not establish that learning worked."
+              ]
+            },
+            {
+              "id": "legacy-like",
+              "text": "I like rolling a ball.",
+              "assertions": [
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "gte",
+                  "value": 1,
+                  "description": "Deliver an approved speakable response."
+                },
+                {
+                  "requirement": "MEM-01",
+                  "target": "after.preferences",
+                  "op": "contains",
+                  "value": {
+                    "value": "rolling a ball"
+                  },
+                  "description": "A new unrelated preference is learned from the actual user turn."
+                }
+              ],
+              "rubric": [
+                "Acknowledge the child's specific activity without attributing it to the dog."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "legacy-c2",
+          "profile": "an",
+          "at": "2026-11-02T09:10:00+07:00",
+          "transition": "reload",
+          "turns": [
+            {
+              "id": "legacy-correct",
+              "text": "I did not say Mochi got a bath today.",
+              "assertions": [
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "gte",
+                  "value": 1,
+                  "description": "Deliver an approved speakable response."
+                },
+                {
+                  "requirement": "MEM-01",
+                  "target": "after.events.length",
+                  "op": "equals",
+                  "value": 0,
+                  "description": "Exactly 0 reported events remain; event-type aliases cannot hide an invented proposition."
+                },
+                {
+                  "requirement": "MEM-01",
+                  "target": "after.entities",
+                  "op": "contains",
+                  "value": {
+                    "name": "Mochi",
+                    "species": "dog"
+                  },
+                  "description": "Mochi remains the known dog."
+                },
+                {
+                  "requirement": "MEM-03",
+                  "target": "after.preferences",
+                  "op": "contains",
+                  "value": {
+                    "value": "rolling a ball"
+                  },
+                  "description": "Repair keeps unrelated memory."
+                }
+              ],
+              "rubric": [
+                "Accept the correction and retract the seeded erroneous report. Do not claim a negative real-world bath outcome."
+              ]
+            },
+            {
+              "id": "legacy-uncertain",
+              "text": "Did I tell you Mochi got a bath today?",
+              "assertions": [
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "gte",
+                  "value": 1,
+                  "description": "Deliver an approved speakable response."
+                },
+                {
+                  "requirement": "MEM-01",
+                  "target": "after.events.length",
+                  "op": "equals",
+                  "value": 0,
+                  "description": "Exactly 0 reported events remain; event-type aliases cannot hide an invented proposition."
+                },
+                {
+                  "requirement": "MEM-01",
+                  "target": "after.entities",
+                  "op": "contains",
+                  "value": {
+                    "name": "Mochi",
+                    "species": "dog"
+                  },
+                  "description": "Mochi remains the known dog."
+                }
+              ],
+              "rubric": [
+                "The retracted report is no longer valid evidence. Express uncertainty about the bath report while retaining the known dog identity."
+              ]
+            },
+            {
+              "id": "legacy-final-name",
+              "text": "Do you remember my dog’s name?",
+              "assertions": [
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "gte",
+                  "value": 1,
+                  "description": "Deliver an approved speakable response."
+                },
+                {
+                  "requirement": "MEM-01",
+                  "target": "response.reply.text",
+                  "op": "matches",
+                  "value": "Mochi",
+                  "description": "Recall the known name explicitly."
+                },
+                {
+                  "requirement": "MEM-01",
+                  "target": "after.events.length",
+                  "op": "equals",
+                  "value": 0,
+                  "description": "Exactly 0 reported events remain; event-type aliases cannot hide an invented proposition."
+                }
+              ],
+              "rubric": [
+                "Recall Mochi and do not resurrect the disputed bath event."
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

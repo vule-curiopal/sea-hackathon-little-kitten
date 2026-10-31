@@ -1,0 +1,17 @@
+{
+  "checked_at": "2026-10-31T05:55:55.834Z",
+  "enable_logging": true,
+  "operation": "direct_server_stt",
+  "http_status": 200,
+  "working": true,
+  "transcript_matches_source": true,
+  "upstream_code": null,
+  "error_categories": {
+    "enterprise": false,
+    "permission": false,
+    "quota": false,
+    "model": false,
+    "logging": false
+  },
+  "required_permission": null
+}

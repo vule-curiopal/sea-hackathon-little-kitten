@@ -1,0 +1,36 @@
+{
+  "schemaVersion": "miu-growth-replay-v1",
+  "runId": "2026-10-31T04-20-20-584Z-8e30afe8",
+  "synthetic": true,
+  "provider": "fake",
+  "status": "complete",
+  "startedAt": "2026-10-31T04:20:20.588Z",
+  "completedAt": "2026-10-31T04:21:04.136Z",
+  "sourceSessions": 365,
+  "sourceTurns": 1466,
+  "sourceSha256": "7266ec85e303b821ef64123b5c59c957d17e58248310b327e4a15f446193ab8f",
+  "database": "one_continuous_isolated_in_memory_pglite",
+  "wallClock": "source_calendar_and_user_timestamps",
+  "effectiveClock": "demo_anchor_follows_same_elapsed_wall_time",
+  "sourceAssistantPolicy": "inspection_only_never_used_as_engine_history_or_heard_output",
+  "delivery": "simulated_started_then_completed_receipts_at_user_timestamp_no_audio",
+  "errorCode": null,
+  "analysisStatus": "complete",
+  "archiveSource": {
+    "origin": "verified_database_archive",
+    "checksum": "e766b1b4d130f5de0f99336ded1e869b599a29a8c0fcd8e535e502b65421682d",
+    "datasetId": "edeed8fe-e7e1-4edd-ad83-ddb751f30550",
+    "originalArchiveModified": false
+  },
+  "expectationCount": 40,
+  "expectationsSha256": "ae15820986140e653f735d27d261f8c66e0f0915b93b39c2d2bc799f54120421",
+  "evidenceFilesSha256": {
+    "turns.jsonl": "2f50778e2055ba0401e252a8b25fdf40dba419b729b4a6c8bb4645c61521fbd8",
+    "days.jsonl": "eb1957cd1651c9f3f3814ec05540bb916bcb2cc5c854e738979d57961359c0f9",
+    "snapshots.jsonl": "807228dc8f7297f6c6eca3ec917fb6516624fa3ad6809c1541c077277838568b"
+  },
+  "evidenceClassification": "diagnostics_not_model_evaluation",
+  "modelPerformanceEvidence": false,
+  "realModelCalls": 0,
+  "notice": "Archived development diagnostic only. This run used authored/fake-provider output, invoked no real OpenAI model, and cannot support conclusions about actual model performance. Raw evidence is retained for provenance and must not be pooled with real-model evaluation."
+}

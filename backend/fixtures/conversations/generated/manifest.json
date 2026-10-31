@@ -1,0 +1,161 @@
+{
+  "schema_version": "miu-synthetic-year-v1",
+  "synthetic": true,
+  "purpose": "Offline testing of long-term conversation context, recall, mood handling, and dialogue behavior; no real child data.",
+  "response_origin": "authored_reference",
+  "period": {
+    "start": "2025-11-01",
+    "end": "2026-10-31",
+    "inclusive": true,
+    "days": 365,
+    "timezone": "Asia/Ho_Chi_Minh"
+  },
+  "persona": {
+    "profile_id": "synthetic-an-001",
+    "display_name": "An",
+    "fictional": true,
+    "birth_date": "2019-05-14",
+    "age_at_start": 6,
+    "age_at_end": 7,
+    "language_mode": "follow_child",
+    "age_band": "6-8",
+    "family": [
+      "mẹ",
+      "bố",
+      "bà ngoại"
+    ],
+    "dog": "Mochi",
+    "friend": "Bình",
+    "cousin": "Na",
+    "school": {
+      "first_grade_teacher": "cô Hạnh",
+      "second_grade_teacher": "cô Mai",
+      "second_grade_from": "2026-09-01"
+    },
+    "evolving_preferences": [
+      {
+        "since": "2025-11-01",
+        "favorite_color": "xanh lá (green)"
+      },
+      {
+        "since": "2026-06-10",
+        "favorite_color": "xanh ngọc (turquoise)"
+      },
+      {
+        "since": "2026-06-18",
+        "preferred_address": "An; retired banana captain nickname"
+      }
+    ]
+  },
+  "miu": {
+    "canon_version": "miu-v1",
+    "personality": "ENFP",
+    "role": "friend",
+    "identity": "AI kitten with an explicitly imaginary indoor life",
+    "daily_mood_values": [
+      "content",
+      "curious",
+      "mellow"
+    ],
+    "daily_mood_source": "Deterministic fixture annotation keyed by date; not extracted from dialogue or evidence of runtime state."
+  },
+  "totals": {
+    "sessions": 365,
+    "messages": 2932,
+    "exchanges": 1466
+  },
+  "distribution": {
+    "sessions_by_month": {
+      "2025-11": 30,
+      "2025-12": 31,
+      "2026-01": 31,
+      "2026-02": 28,
+      "2026-03": 31,
+      "2026-04": 30,
+      "2026-05": 31,
+      "2026-06": 30,
+      "2026-07": 31,
+      "2026-08": 31,
+      "2026-09": 30,
+      "2026-10": 31
+    },
+    "sessions_by_language": {
+      "en": 49,
+      "mixed": 28,
+      "vi": 288
+    },
+    "sessions_by_tag": {
+      "bedtime": 11,
+      "boundary": 56,
+      "correction": 29,
+      "creativity": 59,
+      "daily_life": 95,
+      "family": 97,
+      "friendship": 32,
+      "health": 6,
+      "holiday": 5,
+      "language_learning": 53,
+      "memory": 56,
+      "mood": 99,
+      "nonsense": 51,
+      "pet": 15,
+      "play": 109,
+      "q_and_a": 101,
+      "routine": 33,
+      "school": 62,
+      "stop": 9,
+      "story": 21,
+      "tam_su": 110
+    },
+    "child_mood_start": {
+      "angry": 16,
+      "anxious": 25,
+      "bored": 27,
+      "calm": 6,
+      "content": 18,
+      "curious": 94,
+      "disappointed": 23,
+      "excited": 52,
+      "frustrated": 24,
+      "happy": 17,
+      "lonely": 5,
+      "proud": 6,
+      "sad": 17,
+      "scared": 4,
+      "shy": 15,
+      "tired": 16
+    },
+    "child_mood_end": {
+      "anxious": 3,
+      "bored": 2,
+      "calm": 106,
+      "content": 67,
+      "curious": 15,
+      "disappointed": 3,
+      "excited": 16,
+      "frustrated": 2,
+      "happy": 69,
+      "proud": 59,
+      "sad": 12,
+      "tired": 11
+    },
+    "miu_daily_mood": {
+      "content": 124,
+      "curious": 109,
+      "mellow": 132
+    },
+    "sessions_with_mood_change": 342
+  },
+  "files": {
+    "sessions": "sessions.jsonl",
+    "messages": "messages.jsonl",
+    "evaluation_cases": "evaluation-cases.json"
+  },
+  "limitations": [
+    "One fictional child, one session every day, four to six exchanges per session; not a representative usage distribution.",
+    "Text only; no audio, STT errors, latency, cancellation receipts, or provider-generated responses.",
+    "Mood and topic labels are authored test annotations, not clinical assessments or model predictions.",
+    "Historical dates are simulated and must be replayed with an isolated demo clock; runtime memory retention still applies.",
+    "Reference replies are examples, not guaranteed output of MiuApplication or evidence that learning, deletion, or other operations occurred."
+  ]
+}

@@ -19,3 +19,26 @@ coverage/
 # Local checkout and packaging for hosted deployments
 .site-deploy/
 .cache/miu-deploy/
+
+# Local PostgreSQL development storage
+.miu-data/
+
+# Runtime caches, temporary database copies, and browser tooling output
+.cache/
+/.miu-data-*/
+/test-results/
+/playwright-report/
+
+# Ephemeral evaluation jobs and oversized raw replay output. Compact reports,
+# manifests, curated acceptance evidence, source fixtures and stories stay visible.
+/backend/evaluation/runs/*.log
+/backend/evaluation/runs/**/*.log
+/backend/evaluation/runs/real-100-*/
+/backend/evaluation/runs/baseline-fake/transcripts.md
+/backend/evaluation/runs/*.job.json
+/backend/evaluation/runs/growing-real-year/
+/backend/evaluation/runs/**/snapshots.jsonl
+/backend/evaluation/runs/**/days.jsonl
+/backend/evaluation/runs/growing-year-baseline/turns.jsonl
+/backend/evaluation/runs/baseline-fake/turns.jsonl
+/backend/evaluation/runs/baseline-fake/report.json

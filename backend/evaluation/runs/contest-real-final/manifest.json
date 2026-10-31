@@ -1,0 +1,53 @@
+{
+  "run_kind": "character_memory_evaluation",
+  "provider": "real",
+  "scope": "contest_smoke",
+  "status": "superseded_by_source_update",
+  "scenarios": [
+    "SC-011",
+    "SC-041",
+    "SC-048",
+    "SC-058",
+    "SC-061",
+    "SC-072",
+    "SC-036",
+    "SC-044",
+    "SC-026",
+    "SC-103"
+  ],
+  "concurrency": 4,
+  "completed_scenarios": [
+    {
+      "id": "SC-058",
+      "status": "completed",
+      "turns": 4
+    }
+  ],
+  "elapsed_ms": 34715,
+  "judge_model": "gpt-6-astra",
+  "errors": [],
+  "behavior": {
+    "turns": 4,
+    "pass": 4,
+    "fail": 0,
+    "needs_review": 0,
+    "execution_errors": 0,
+    "expected_execution_errors": 0,
+    "phases": {
+      "history": 0,
+      "scenario_history": 0,
+      "scenario": 4
+    },
+    "scenario_assertions": {
+      "pass": 7,
+      "fail": 0
+    }
+  },
+  "limitations": [
+    "Focused scenario coverage; this does not verify the full historical year.",
+    "Sequential turns and isolated databases preserve causality within each scenario.",
+    "Semantic criteria without a successful independent review remain needs_review.",
+    "Text path only; playback receipts are simulated."
+  ],
+  "reason": "Source changed after process startup; preserved partial evidence, rerun verifies frozen final files."
+}

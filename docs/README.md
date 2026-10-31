@@ -2,6 +2,10 @@
 
 These documents split the [product specification](product-specification.md) into buildable workstreams and describe intended full-product behavior and contracts. The [voice v1 implementation](voice-pipeline/README.md) now uses **Express 5 + TypeScript**, with separate modules documented in [backend architecture](voice-pipeline/backend-architecture.md). Its current [implementation status](voice-pipeline/implementation-status.md) covers fake/mocked validation; character/memory integration, real-provider measurements and iPad verification remain pending.
 
+For the proposed build approach, module interfaces, OpenAI integration, and delivery sequence for character and memory/time, see the [Character engine and memory technical proposal](character-memory-technical-proposal.md).
+
+The character engine and memory schema are implemented. See the [backend setup and text integration guide](../backend/README.md) for local execution, daily growth, schema tables, and API usage. Voice transport integration with this engine and measured real-provider voice latency remain integration work.
+
 | Workstream | Document | Implementation location | Owns |
 | --- | --- | --- | --- |
 | Frontend | [Frontend](frontend.md) | `frontend/` | Recording, kitten face and body, playback, setup, demo panel |

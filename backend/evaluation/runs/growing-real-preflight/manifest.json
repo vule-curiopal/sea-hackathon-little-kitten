@@ -1,0 +1,35 @@
+{
+  "schemaVersion": "miu-growth-replay-v1",
+  "runId": "2026-10-31T04-30-58-751Z-714b1b75",
+  "synthetic": true,
+  "provider": "real",
+  "models": {
+    "classify": "gpt-6-astra",
+    "reply": "gpt-6-astra",
+    "check": "gpt-6-astra",
+    "moderation": "omni-moderation-latest"
+  },
+  "evaluateRealModel": true,
+  "status": "complete",
+  "startedAt": "2026-10-31T04:30:58.755Z",
+  "completedAt": "2026-10-31T04:31:41.052Z",
+  "sourceSessions": 1,
+  "sourceTurns": 5,
+  "sourceSha256": "a89c11a347f0ee0d0dfeefc0d6dd9e44fa853bf22ffac95ab4f573310a7a9f45",
+  "database": "one_continuous_isolated_in_memory_pglite",
+  "wallClock": "source_calendar_and_user_timestamps",
+  "effectiveClock": "demo_anchor_follows_same_elapsed_wall_time",
+  "sourceAssistantPolicy": "inspection_only_never_used_as_engine_history_or_heard_output",
+  "delivery": "simulated_started_then_completed_receipts_at_user_timestamp_no_audio",
+  "errorCode": null,
+  "analysisStatus": "complete",
+  "archiveSource": {
+    "origin": "verified_database_archive",
+    "checksum": "e766b1b4d130f5de0f99336ded1e869b599a29a8c0fcd8e535e502b65421682d",
+    "datasetId": "edeed8fe-e7e1-4edd-ad83-ddb751f30550",
+    "originalArchiveModified": false
+  },
+  "expectationCount": 40,
+  "run_kind": "character_memory_evaluation",
+  "character_memory_quality_evidence": true
+}

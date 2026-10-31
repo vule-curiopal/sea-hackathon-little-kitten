@@ -16,8 +16,12 @@ export interface TurnRecord {
   playedMs: number;
   receipts: Map<string, string>;
   configVersion: number;
+  configClockVersion?: number;
   publishedVersion?: number;
+  publishedClockVersion?: number;
   durationMs?: number;
+  enginePrepared?: boolean;
+  textOnly?: boolean;
 }
 
 export interface Profile {
@@ -25,6 +29,8 @@ export interface Profile {
   token: string;
   configuration: FamilyConfig;
   stateVersion: number;
+  clockVersion?: number;
+  effectiveNow?: string;
   active?: TurnRecord;
   sessionId?: string;
   configRequests: Map<string, { fingerprint: string; result: unknown }>;

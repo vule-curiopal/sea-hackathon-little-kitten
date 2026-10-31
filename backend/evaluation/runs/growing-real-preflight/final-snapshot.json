@@ -1,0 +1,140 @@
+{
+  "at": "2025-11-01T09:30:27.000Z",
+  "context": {
+    "profile": {
+      "id": "56eeeb88-1bfc-43b2-9cff-b7bdac0288d5",
+      "demoKey": "an",
+      "displayName": "An",
+      "ageBand": "6-8",
+      "languageMode": "follow_child",
+      "timezone": "Asia/Ho_Chi_Minh",
+      "stateVersion": 4,
+      "deletionEpoch": 0
+    },
+    "config": {
+      "personality": "ENFP",
+      "role": "friend",
+      "voiceId": "miu-default",
+      "canonVersion": "miu-v1",
+      "assignedStoryId": "miu-gentle-dragon-ribbon-station-v1"
+    },
+    "clock": {
+      "mode": "demo",
+      "effectiveNow": "2025-11-01T09:30:27.000Z",
+      "localDate": "2025-11-01",
+      "timezone": "Asia/Ho_Chi_Minh",
+      "version": 1
+    },
+    "daily": {
+      "localDate": "2025-11-01",
+      "mood": "content",
+      "growthDays": 0,
+      "growthTheme": "curiosity",
+      "diary": {
+        "templateId": "cardboard-fort",
+        "en": "In my pretend house, I made a tiny cardboard fort.",
+        "vi": "Trong ngôi nhà tưởng tượng, Miu làm một pháo đài bìa nhỏ."
+      },
+      "storyEpisode": {
+        "templateId": "lantern-1",
+        "en": "In our pretend story, Miu and Pip the paper bird find a little lantern.",
+        "vi": "Trong truyện tưởng tượng, Miu và chim giấy Pip tìm thấy một chiếc đèn nhỏ.",
+        "chapter": 1
+      }
+    },
+    "entities": [
+      {
+        "id": "a830a5e8-ed53-451e-a6cc-fb0d318ed807",
+        "kind": "person",
+        "name": "An",
+        "species": null,
+        "aliases": [],
+        "expiresAt": "2025-12-01T09:25:58.000Z"
+      }
+    ],
+    "preferences": [],
+    "socialCircle": [],
+    "events": [],
+    "stories": [],
+    "storyProgress": {
+      "id": "5b5281fc-dc2f-4f08-875d-a43ed34b0d7a",
+      "templateId": "miu-gentle-dragon-ribbon-station-v1",
+      "chapter": 0,
+      "status": "active",
+      "title": {
+        "en": "The Dragon Who Collected Cushions — Ribbon Station",
+        "vi": "Bạn Rồng Sưu Tầm Gối — Ga Ruy Băng"
+      },
+      "scene": {
+        "en": "In our pretend story, at the ribbon station, a paper dragon gathers every cushion, leaving toy readers nowhere to sit.",
+        "vi": "Trong truyện tưởng tượng, ở nhà ga ruy băng, rồng giấy gom hết gối, khiến các bạn đọc sách không còn chỗ ngồi."
+      }
+    },
+    "friendship": "getting_acquainted"
+  },
+  "evidence": {
+    "records": [
+      {
+        "id": "5c3986f7-b14e-453a-a24a-22a5b9be856c",
+        "kind": "diary",
+        "sourceTurnId": "night:2025-11-01",
+        "sourceMessageId": null,
+        "evidenceKind": "approved_fiction",
+        "scope": "fictional",
+        "createdAt": "2025-10-31T17:01:00.000Z",
+        "expiresAt": "2025-11-30T17:01:00.000Z"
+      },
+      {
+        "id": "a830a5e8-ed53-451e-a6cc-fb0d318ed807",
+        "kind": "entity",
+        "sourceTurnId": "ea212d9c-77e7-49ce-9c91-fd4ad32296ec",
+        "sourceMessageId": "an_2025-11-01_01_m01",
+        "evidenceKind": "child_reported",
+        "scope": "reported_real",
+        "createdAt": "2025-11-01T09:25:58.000Z",
+        "expiresAt": "2025-12-01T09:25:58.000Z"
+      },
+      {
+        "id": "5b5281fc-dc2f-4f08-875d-a43ed34b0d7a",
+        "kind": "checkpoint",
+        "sourceTurnId": "612140c7-04e7-4ffe-8987-c64bffd0e43c",
+        "sourceMessageId": "an_2025-11-01_01_m09",
+        "evidenceKind": "approved_fiction",
+        "scope": "fictional",
+        "createdAt": "2025-11-01T09:30:06.000Z",
+        "expiresAt": "2025-12-01T09:30:06.000Z"
+      }
+    ],
+    "kindCounts": {
+      "diary": 1,
+      "entity": 1,
+      "checkpoint": 1
+    },
+    "dependencies": [],
+    "followups": [],
+    "checkpoints": [
+      {
+        "id": "5b5281fc-dc2f-4f08-875d-a43ed34b0d7a",
+        "templateId": "miu-gentle-dragon-ribbon-station-v1",
+        "chapter": 0,
+        "status": "active"
+      }
+    ],
+    "promises": [],
+    "nightJobs": [
+      {
+        "date": "2025-11-01",
+        "completedAt": "2025-10-31T17:01:00.000Z"
+      }
+    ],
+    "diaryEntries": [
+      {
+        "id": "5c3986f7-b14e-453a-a24a-22a5b9be856c",
+        "date": "2025-11-01",
+        "templateId": "cardboard-fort"
+      }
+    ],
+    "dailyStateRows": 1,
+    "learningReceiptCount": 4
+  }
+}

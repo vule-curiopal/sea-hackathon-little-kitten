@@ -1,16 +1,16 @@
 # Deploy frontend và API Miu
 
-Frontend React/Vite và backend Express/TypeScript phục vụ cùng origin **https://miu.curiopal.com**. Deploy thủ công; không dùng webhook hoặc auto-deploy. Runtime hỗ trợ **fake** và **real provider** theo `/etc/miu/api.env`; template mặc định `fake`, không gọi OpenAI/ElevenLabs.
+Frontend React/Vite và backend character/memory/voice phục vụ cùng origin **https://miu.curiopal.com**. Deploy thủ công; không dùng webhook hoặc auto-deploy. Deployment này yêu cầu provider **real**, PostgreSQL và cấu hình speech logging rõ ràng trong `/etc/miu/api.env`.
 
 ## Các URL
 
 - Website: `https://miu.curiopal.com/`
-- Demo không cần đăng nhập: `https://miu.curiopal.com/demo/miu?lang=vi`
+- Hội thoại: `https://miu.curiopal.com/app/talk`
 - API health: `https://miu.curiopal.com/api/health`
 - SHA release: `https://miu.curiopal.com/deploy-info.json`
 - 20 audio kiểm thử: `https://miu.curiopal.com/test-audio/`
 
-Frontend dùng `VITE_DEMO_PUBLIC_URL=https://miu.curiopal.com` và để trống `VITE_VOICE_API_URL`, nên QR đúng domain và API cùng origin. Fake voice hiển thị đúng mode và dùng sample Buddy cố định; real voice gọi ElevenLabs STT → GPT → ElevenLabs TTS. Typing demo chạy local. Microphone iPad thật và chất lượng provider thật vẫn cần kiểm thử riêng.
+Frontend dùng `VITE_DEMO_PUBLIC_URL=https://miu.curiopal.com` và để trống `VITE_VOICE_API_URL`, nên API cùng origin. Audio đi qua ElevenLabs STT → character/memory engine dùng OpenAI → ElevenLabs TTS. Tin nhắn nhập chữ dùng cùng engine và PostgreSQL. Chỉ receipt hoàn tất đọc hoặc phát mới commit learning; cancel hoặc lỗi TTS không tự học. Health/build không chứng minh chất lượng model hay microphone iPad thật.
 
 ## Phạm vi trên server
 
@@ -19,7 +19,8 @@ Frontend dùng `VITE_DEMO_PUBLIC_URL=https://miu.curiopal.com` và để trống
 | Release đang phục vụ | `/opt/miu/current` → `/opt/miu/releases/<commit>` |
 | Frontend | Nginx root `/opt/miu/current/frontend/dist`, SPA fallback về `index.html` |
 | API | `miu-api.service`, user `miu`, `127.0.0.1:4611` |
-| Runtime | `/opt/node24/bin/node`, `/usr/bin/ffprobe`; Node hệ thống giữ nguyên |
+| Runtime | `/opt/node24/bin/node --import tsx /opt/miu/current/backend/integration/server.ts`, `/usr/bin/ffprobe`; Node hệ thống giữ nguyên |
+| Database | PostgreSQL native `127.0.0.1:5432`, `DATABASE_SSH_TUNNEL=false`; không dùng PGlite trong release read-only |
 | Git source | `/opt/miu/source`, public repo HTTPS read-only, không lưu GitHub write token |
 | Build/cache | `/opt/miu/home-miu`, `/opt/miu/cache`, `/opt/miu/tmp` |
 | Runtime env | `/etc/miu/api.env`, root `0600`, từ [api.env.example](api.env.example) |
@@ -29,9 +30,9 @@ Frontend dùng `VITE_DEMO_PUBLIC_URL=https://miu.curiopal.com` và để trống
 | Certificate | `/etc/miu/letsencrypt`; work/log `/var/lib/miu/certbot`, `/var/log/miu-certbot` |
 | Gia hạn TLS | `miu-cert-renew.timer`, hai lần/ngày, chỉ certificate Miu |
 
-Không sửa checkout, process, service hoặc vhost của các project khác; không dùng `pm2 restart all`. `nginx -t` phải qua trước graceful reload. SSH/Cloudflare credentials giữ local, không chép nguyên `.env` lên server hoặc vào Git. Fake API không cần provider keys. Với `MIU_PROVIDER=real`, chỉ đặt các provider keys/cấu hình cần thiết trong `/etc/miu/api.env` root `0600`; không đưa key vào Git, public source/build, biến `VITE_*` hoặc CI.
+Không sửa checkout, process, service hoặc vhost của các project khác; không dùng `pm2 restart all`. `nginx -t` phải qua trước graceful reload. SSH/Cloudflare credentials giữ local, không chép nguyên `.env` lên server hoặc vào Git. Chỉ đặt provider keys/cấu hình runtime cần thiết trong `/etc/miu/api.env` root `0600`; không đưa key vào Git, public source/build, biến `VITE_*` hoặc môi trường build. Systemd đọc file này trước khi chạy user `miu`; service không cần quyền đọc trực tiếp file env.
 
-`STT_LOGGING=1` dùng logging thông thường như LittleBuddy brain: STT không gửi query `enable_logging`; TTS cũng không gửi query này. Chỉ `STT_LOGGING=0` mới gửi `enable_logging=false` cho STT, tức zero-retention mode; ElevenLabs yêu cầu enterprise hoặc trial được cấp quyền cho chế độ này. Key vẫn có thể dùng STT thông thường khi zero-retention bị trả `403 not_allowed`. Không tự retry chuyển chế độ logging sau lỗi.
+`STT_LOGGING=1` chọn standard logging. Alias cũ `ELEVENLABS_ENABLE_LOGGING=true` vẫn được chấp nhận; nếu có cả hai thì giá trị phải tương đương. Tài khoản production này cần standard logging để tránh zero-retention enterprise gate; helper yêu cầu cấu hình bật rõ ràng. Không tự retry chuyển retention sau lỗi. Giữ `NODE_OPTIONS=--dns-result-order=ipv4first` vì đường IPv6 của server đã gây connect timeout. Giữ `OPENAI_MODEL=gpt-6-luna` cho legacy adapter; integrated engine dùng riêng `OPENAI_CLASSIFY_MODEL`, `OPENAI_REPLY_MODEL`, `OPENAI_CHECK_MODEL` và moderation model.
 
 `TRUST_PROXY_LOOPBACK=true` chỉ tin proxy loopback. Nginx chỉ tin `CF-Connecting-IP` từ CIDR Cloudflare đã khai báo, sau đó **ghi đè** forwarded headers khi chuyển tới API. Tắt request/response buffering để không ghi audio/base64 vào Nginx temp files. Chỉ DNS record Miu được tạo/cập nhật, giữ nguyên SSL `strict` của zone.
 
@@ -43,10 +44,8 @@ Pull source về máy local để xem và kiểm thử:
 git pull --ff-only origin main
 npm ci
 npm run build
-npm test
-npm run smoke
+npm run typecheck
 npm ci --prefix frontend
-npm test --prefix frontend
 npm run build --prefix frontend
 ```
 
@@ -54,15 +53,17 @@ Sau khi code đã có trên GitHub, chạy qua SSH root:
 
 ```bash
 /usr/local/sbin/miu-deploy
-# Hoặc giới hạn yêu cầu vào một commit đã thuộc main:
+# Hoặc deploy chính xác một commit đã thuộc main:
 /usr/local/sbin/miu-deploy --ref <40-character-commit-sha>
 ```
 
-Helper khóa riêng `/run/lock/miu-deploy.lock`, fetch repo cố định và chọn main mới nhất sau kiểm tra ancestry. Build/test chạy bằng user `miu`, Node24, nice/ionice và một Vitest worker. Môi trường build được xóa bằng `env -i`, chỉ dùng `MIU_PROVIDER=fake`, `STT_LOGGING=1` và không nhận runtime/provider secrets; CI/public deployment tests không gọi provider thật. Root workspace và frontend có lockfile riêng: helper cài, test và build cả hai; frontend phải có `dist/index.html` và `assets` trước activate.
+Helper khóa riêng `/run/lock/miu-deploy.lock`, fetch repo cố định và chọn main mới nhất nếu không có `--ref`. Khi có `--ref`, helper kiểm tra ancestry rồi archive/build đúng SHA yêu cầu. Build/typecheck chạy bằng user `miu`, Node24 và nice/ionice. Môi trường build được xóa bằng `env -i`, đặt `MIU_PROVIDER=real`, không nhận runtime/provider secrets và không khởi tạo provider. Helper chỉ cài dependencies, build workspace, typecheck và build frontend; không chạy fake reply, fake HTTP smoke hoặc behavioral evaluation. Root và frontend có lockfile riêng; frontend phải có `dist/index.html` và `assets` trước activate.
 
-Helper đọc duy nhất `MIU_PROVIDER=fake|real` từ file runtime riêng tư để xác định mode cần kiểm tra, không `source` hay `eval` file env. File phải tồn tại, có đúng một khai báo mode hợp lệ và không được là symlink. Health chỉ qua khi `status=ok` và `provider_mode` khớp mode cấu hình; state và `deploy-info.json` cũng ghi đúng mode này. Health không gọi STT/GPT/TTS thật, nên vẫn cần kiểm thử pipeline riêng khi chuyển sang real.
+Helper parse file runtime riêng tư trong process kiểm tra riêng, không `source` hoặc `eval` env. File phải là regular file root `0600`, không symlink. Preflight yêu cầu real provider, credentials có mặt, standard logging rõ ràng và PostgreSQL native; không ghi lại giá trị secret vào log. Health của release mới chỉ qua khi `status=ok`, `provider_mode=real`, `engine_mode=character_memory` và `capabilities.memory=true`. Health không gọi STT/GPT/TTS; nghiệm thu hành vi cần actual real-provider requests riêng, có provenance và lỗi thực tế.
 
-Release được đóng dấu hoàn tất và chuyển `current` bằng symlink atomic. Chỉ `miu-api.service` được restart; Nginx đọc static frontend qua cùng symlink. Khi health fail, helper khôi phục release trước và restart Miu. Rollback release không khôi phục thay đổi runtime env; khi đổi mode/key cần giữ bản sao env riêng tư để có thể hoàn tác cấu hình. Giữ failed builds và releases để chẩn đoán; chưa tự prune. Cùng SHA đã healthy đúng mode thì không restart; helper đồng bộ metadata nếu mode đã đổi, giữ nguyên lịch sử rollback và thời điểm deploy của SHA đó. Routine deploy không sửa Nginx/TLS.
+Release được đóng dấu build/typecheck hoàn tất; marker không tuyên bố model quality. Trước cutover, helper backup rồi cài unit Miu và proxy snippet của đúng release, daemon-reload và kiểm tra `nginx -t` trước graceful reload. Proxy read timeout là150 giây. Các vhost, TLS và env không bị sửa. Sau đó đổi `current` atomic và restart riêng `miu-api.service`.
+
+Nếu activation lỗi, helper khôi phục symlink, unit và proxy snippet trước rồi restart Miu. Health rollback chấp nhận legacy `voice_stub` nếu provider vẫn real; không yêu cầu release cũ có memory. Backup unit/snippet nằm trong `/opt/miu/ops/deploy-<sha>-...` root-only. Rollback không undo database migration hoặc thay đổi env; migration của release phải tương thích ngược. Giữ failed builds/releases để chẩn đoán, không tự prune. Cùng SHA đã có integrated health và đúng unit/snippet thì không restart.
 
 [bootstrap.sh](bootstrap.sh) chỉ chuẩn bị user/thư mục, chưa tự cài mọi file. Lần cài đầu phải kiểm tra namespace chưa thuộc ứng dụng khác, copy helper/unit/proxy templates đúng vị trí, kiểm tra syntax và enable unit riêng. `.env.example` trong thư mục này là template không chứa secret.
 
@@ -79,6 +80,6 @@ systemctl list-timers miu-cert-renew.timer
 
 Certificate Miu dùng config/work/log và timer riêng để không tranh lock với Certbot của các app khác. [renew-certificate.sh](renew-certificate.sh) chỉ reload Nginx khi đúng lineage Miu. Không dùng `certbot --nginx` để tự sửa các vhost khác. Các CIDR trong [nginx-cloudflare-realip.conf](nginx-cloudflare-realip.conf) lấy từ danh sách công khai ngày 31/10/2026; cập nhật khi Cloudflare đổi ranges.
 
-Bộ Vitest backend/browser và frontend Node tests kiểm tra code; deployment health và mô phỏng browser chưa thay thế nghiệm thu iPad/API thật. [Sites deployment riêng](../../frontend/README.md#separate-sites-deployment) và DNS `little-buddy.curiopal.com` được giữ nguyên.
+Unit/harness checks có thể dùng doubles được gắn nhãn rõ; chúng không chứng minh character/memory/model quality. Deployment này không chạy chúng. Fake runs cũ giữ nhãn `diagnostics_not_model_evaluation`; không tính vào kết luận real-provider. [Sites deployment riêng](../../frontend/README.md#separate-sites-deployment) và DNS `little-buddy.curiopal.com` được giữ nguyên.
 
 Nguồn: [Nginx graceful reload](https://nginx.org/en/docs/control.html), [Cloudflare visitor IPs](https://developers.cloudflare.com/support/troubleshooting/restoring-visitor-ips/restoring-original-visitor-ips/).

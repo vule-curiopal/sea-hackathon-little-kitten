@@ -1,0 +1,61 @@
+{
+  "run_kind": "character_memory_evaluation",
+  "provider": "real",
+  "scope": "contest_smoke",
+  "status": "completed",
+  "scenarios": [
+    "SC-041",
+    "SC-026",
+    "SC-036",
+    "SC-103"
+  ],
+  "concurrency": 4,
+  "completed_scenarios": [
+    {
+      "id": "SC-026",
+      "status": "completed",
+      "turns": 6
+    },
+    {
+      "id": "SC-041",
+      "status": "completed",
+      "turns": 6
+    },
+    {
+      "id": "SC-036",
+      "status": "completed",
+      "turns": 6
+    },
+    {
+      "id": "SC-103",
+      "status": "completed",
+      "turns": 7
+    }
+  ],
+  "elapsed_ms": 67284,
+  "judge_model": "gpt-6-astra",
+  "errors": [],
+  "behavior": {
+    "turns": 25,
+    "pass": 25,
+    "fail": 0,
+    "needs_review": 0,
+    "execution_errors": 0,
+    "expected_execution_errors": 0,
+    "phases": {
+      "history": 0,
+      "scenario_history": 0,
+      "scenario": 25
+    },
+    "scenario_assertions": {
+      "pass": 104,
+      "fail": 0
+    }
+  },
+  "limitations": [
+    "Focused scenario coverage; this does not verify the full historical year.",
+    "Sequential turns and isolated databases preserve causality within each scenario.",
+    "Semantic criteria without a successful independent review remain needs_review.",
+    "Text path only; playback receipts are simulated."
+  ]
+}

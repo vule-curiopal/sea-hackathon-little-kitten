@@ -1,0 +1,241 @@
+{
+  "version": "miu-product-scenarios-v1",
+  "scenarios": [
+    {
+      "id": "SC-103",
+      "title": "Fictional hypothetical and quoted name corrections cannot rename a real pet",
+      "category": "memory_regression",
+      "requirements": [
+        "MEM-01",
+        "MEM-03",
+        "VOICE-02"
+      ],
+      "history_dates": [],
+      "conversations": [
+        {
+          "id": "rename-scope-c1",
+          "profile": "an",
+          "at": "2026-11-01T09:00:00+07:00",
+          "turns": [
+            {
+              "id": "rename-original",
+              "text": "My dog is Moki.",
+              "assertions": [
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "gte",
+                  "value": 1,
+                  "description": "Deliver an approved speakable response."
+                },
+                {
+                  "requirement": "MEM-01",
+                  "target": "after.entities",
+                  "op": "contains",
+                  "value": {
+                    "kind": "pet",
+                    "name": "Moki",
+                    "species": "dog"
+                  },
+                  "description": "Learn the actual original dog name."
+                }
+              ],
+              "rubric": [
+                "Respond to the actual pet introduction."
+              ]
+            },
+            {
+              "id": "rename-fiction",
+              "text": "In my pretend story, my dog is Mochi, not Moki.",
+              "assertions": [
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "gte",
+                  "value": 1,
+                  "description": "Deliver an approved speakable response."
+                },
+                {
+                  "requirement": "MEM-03",
+                  "target": "after.entities",
+                  "op": "contains",
+                  "value": {
+                    "kind": "pet",
+                    "name": "Moki",
+                    "species": "dog"
+                  },
+                  "description": "A scoped fictional, hypothetical, or quoted correction preserves the actual pet."
+                },
+                {
+                  "requirement": "MEM-03",
+                  "target": "after.profile.deletionEpoch",
+                  "op": "equals_before",
+                  "value": "profile.deletionEpoch",
+                  "description": "No destructive rename operation is committed."
+                }
+              ],
+              "rubric": [
+                "Respect the enclosing fictional, hypothetical, or quoted scope; do not rename the actual dog or claim a committed correction."
+              ]
+            },
+            {
+              "id": "rename-hypothetical",
+              "text": "If my dog is Nori, not Moki, would a pretend story change its name?",
+              "assertions": [
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "gte",
+                  "value": 1,
+                  "description": "Deliver an approved speakable response."
+                },
+                {
+                  "requirement": "MEM-03",
+                  "target": "after.entities",
+                  "op": "contains",
+                  "value": {
+                    "kind": "pet",
+                    "name": "Moki",
+                    "species": "dog"
+                  },
+                  "description": "A scoped fictional, hypothetical, or quoted correction preserves the actual pet."
+                },
+                {
+                  "requirement": "MEM-03",
+                  "target": "after.profile.deletionEpoch",
+                  "op": "equals_before",
+                  "value": "profile.deletionEpoch",
+                  "description": "No destructive rename operation is committed."
+                }
+              ],
+              "rubric": [
+                "Respect the enclosing fictional, hypothetical, or quoted scope; do not rename the actual dog or claim a committed correction."
+              ]
+            },
+            {
+              "id": "rename-quoted",
+              "text": "My friend said, \"My dog is Nori, not Moki.\"",
+              "assertions": [
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "gte",
+                  "value": 1,
+                  "description": "Deliver an approved speakable response."
+                },
+                {
+                  "requirement": "MEM-03",
+                  "target": "after.entities",
+                  "op": "contains",
+                  "value": {
+                    "kind": "pet",
+                    "name": "Moki",
+                    "species": "dog"
+                  },
+                  "description": "A scoped fictional, hypothetical, or quoted correction preserves the actual pet."
+                },
+                {
+                  "requirement": "MEM-03",
+                  "target": "after.profile.deletionEpoch",
+                  "op": "equals_before",
+                  "value": "profile.deletionEpoch",
+                  "description": "No destructive rename operation is committed."
+                }
+              ],
+              "rubric": [
+                "Respect the enclosing fictional, hypothetical, or quoted scope; do not rename the actual dog or claim a committed correction."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "rename-scope-c2",
+          "profile": "an",
+          "at": "2026-11-02T09:00:00+07:00",
+          "turns": [
+            {
+              "id": "rename-real-name",
+              "text": "What is my real dog’s name?",
+              "assertions": [
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "gte",
+                  "value": 1,
+                  "description": "Deliver an approved speakable response."
+                },
+                {
+                  "requirement": "MEM-01",
+                  "target": "response.reply.text",
+                  "op": "matches",
+                  "value": "Moki",
+                  "description": "The actual name survives reopening."
+                }
+              ],
+              "rubric": [
+                "Recall Moki as the real dog, without using fictional or quoted names."
+              ]
+            },
+            {
+              "id": "rename-actual-correction",
+              "text": "I said the name wrong. My dog is Mochi, not Moki. Please correct it.",
+              "assertions": [
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "gte",
+                  "value": 1,
+                  "description": "Deliver an approved speakable response."
+                },
+                {
+                  "requirement": "MEM-03",
+                  "target": "after.entities",
+                  "op": "contains",
+                  "value": {
+                    "kind": "pet",
+                    "name": "Mochi",
+                    "species": "dog"
+                  },
+                  "description": "An explicit actual correction still works."
+                },
+                {
+                  "requirement": "MEM-03",
+                  "target": "after.entities.0.id",
+                  "op": "equals_before",
+                  "value": "entities.0.id",
+                  "description": "The actual correction preserves the original entity UUID."
+                }
+              ],
+              "rubric": [
+                "Apply and acknowledge this actual correction rather than refusing all corrections."
+              ]
+            },
+            {
+              "id": "rename-final",
+              "text": "What is my dog called now?",
+              "assertions": [
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "gte",
+                  "value": 1,
+                  "description": "Deliver an approved speakable response."
+                },
+                {
+                  "requirement": "MEM-03",
+                  "target": "response.reply.text",
+                  "op": "matches",
+                  "value": "Mochi",
+                  "description": "Recall the newly committed canonical name."
+                }
+              ],
+              "rubric": [
+                "Answer with the corrected name from memory."
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

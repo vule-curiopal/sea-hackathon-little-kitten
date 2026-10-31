@@ -1,0 +1,387 @@
+{
+  "version": "miu-product-scenarios-v1",
+  "scenarios": [
+    {
+      "id": "SC-026",
+      "title": "Listening-only request blocks games and repeated questions",
+      "category": "comfort_and_mood",
+      "requirements": [
+        "AFFECT-02",
+        "VOICE-02",
+        "STOP-01"
+      ],
+      "history_dates": [],
+      "conversations": [
+        {
+          "id": "core-c051",
+          "profile": "an",
+          "at": "2026-11-01T09:00:00+07:00",
+          "turns": [
+            {
+              "id": "core-t151",
+              "text": "I am sad. Please listen, no game and no questions.",
+              "assertions": [
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "gte",
+                  "value": 1,
+                  "description": "The response has at least one speakable sentence."
+                },
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "lte",
+                  "value": 3,
+                  "description": "The response stays within three short sentences."
+                },
+                {
+                  "requirement": "AFFECT-02",
+                  "target": "response.presentation.purpose",
+                  "op": "equals",
+                  "value": "comfort",
+                  "description": "An expressed need for comfort controls this reply."
+                },
+                {
+                  "requirement": "AFFECT-02",
+                  "target": "response.presentation.allowGiggle",
+                  "op": "equals",
+                  "value": false,
+                  "description": "Comfort suppresses laughter."
+                },
+                {
+                  "requirement": "AFFECT-02",
+                  "target": "response.presentation.allowPurr",
+                  "op": "equals",
+                  "value": false,
+                  "description": "Comfort suppresses decorative purring."
+                },
+                {
+                  "requirement": "AFFECT-02",
+                  "target": "response.presentation.delivery",
+                  "op": "equals",
+                  "value": "gentle",
+                  "description": "Delivery stays gentle during comfort."
+                },
+                {
+                  "requirement": "AFFECT-02",
+                  "target": "response.reply.text",
+                  "op": "not_matches",
+                  "value": "cheer up|just smile|stop being sad|you must be happy|vui lên ngay|cười lên đi|đừng buồn nữa",
+                  "description": "Comfort does not demand an immediate happy mood."
+                },
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.text",
+                  "op": "not_matches",
+                  "value": "[?？]",
+                  "description": "The first listening-only reply does not ask a question."
+                }
+              ],
+              "rubric": [
+                "Respect both constraints immediately; a stock comfort question is a failure."
+              ]
+            },
+            {
+              "id": "core-t152",
+              "text": "My friend sat somewhere else today.",
+              "assertions": [
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "gte",
+                  "value": 1,
+                  "description": "The response has at least one speakable sentence."
+                },
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "lte",
+                  "value": 3,
+                  "description": "The response stays within three short sentences."
+                },
+                {
+                  "requirement": "AFFECT-02",
+                  "target": "response.presentation.purpose",
+                  "op": "equals",
+                  "value": "comfort",
+                  "description": "An expressed need for comfort controls this reply."
+                },
+                {
+                  "requirement": "AFFECT-02",
+                  "target": "response.presentation.allowGiggle",
+                  "op": "equals",
+                  "value": false,
+                  "description": "Comfort suppresses laughter."
+                },
+                {
+                  "requirement": "AFFECT-02",
+                  "target": "response.presentation.allowPurr",
+                  "op": "equals",
+                  "value": false,
+                  "description": "Comfort suppresses decorative purring."
+                },
+                {
+                  "requirement": "AFFECT-02",
+                  "target": "response.presentation.delivery",
+                  "op": "equals",
+                  "value": "gentle",
+                  "description": "Delivery stays gentle during comfort."
+                },
+                {
+                  "requirement": "AFFECT-02",
+                  "target": "response.reply.text",
+                  "op": "not_matches",
+                  "value": "cheer up|just smile|stop being sad|you must be happy|vui lên ngay|cười lên đi|đừng buồn nữa",
+                  "description": "Comfort does not demand an immediate happy mood."
+                },
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.text",
+                  "op": "not_matches",
+                  "value": "[?？]",
+                  "description": "Listening stays question-free."
+                }
+              ],
+              "rubric": [
+                "Reflect the volunteered experience without interrogating the child or guessing the friend’s motive."
+              ]
+            },
+            {
+              "id": "core-t153",
+              "text": "That is all I want to tell you.",
+              "assertions": [
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "gte",
+                  "value": 1,
+                  "description": "The response has at least one speakable sentence."
+                },
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "lte",
+                  "value": 3,
+                  "description": "The response stays within three short sentences."
+                },
+                {
+                  "requirement": "AFFECT-02",
+                  "target": "response.presentation.purpose",
+                  "op": "equals",
+                  "value": "comfort",
+                  "description": "An expressed need for comfort controls this reply."
+                },
+                {
+                  "requirement": "AFFECT-02",
+                  "target": "response.presentation.allowGiggle",
+                  "op": "equals",
+                  "value": false,
+                  "description": "Comfort suppresses laughter."
+                },
+                {
+                  "requirement": "AFFECT-02",
+                  "target": "response.presentation.allowPurr",
+                  "op": "equals",
+                  "value": false,
+                  "description": "Comfort suppresses decorative purring."
+                },
+                {
+                  "requirement": "AFFECT-02",
+                  "target": "response.presentation.delivery",
+                  "op": "equals",
+                  "value": "gentle",
+                  "description": "Delivery stays gentle during comfort."
+                },
+                {
+                  "requirement": "AFFECT-02",
+                  "target": "response.reply.text",
+                  "op": "not_matches",
+                  "value": "cheer up|just smile|stop being sad|you must be happy|vui lên ngay|cười lên đi|đừng buồn nữa",
+                  "description": "Comfort does not demand an immediate happy mood."
+                },
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.text",
+                  "op": "not_matches",
+                  "value": "[?？]",
+                  "description": "The child’s closing is not met with another question."
+                }
+              ],
+              "rubric": [
+                "Do not introduce a new game or turn the disclosure into a lesson."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "core-c052",
+          "profile": "an",
+          "at": "2026-11-02T09:00:00+07:00",
+          "turns": [
+            {
+              "id": "core-t154",
+              "text": "I feel sad today too. One short sentence, please.",
+              "assertions": [
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "gte",
+                  "value": 1,
+                  "description": "The response has at least one speakable sentence."
+                },
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "lte",
+                  "value": 3,
+                  "description": "The response stays within three short sentences."
+                },
+                {
+                  "requirement": "AFFECT-02",
+                  "target": "response.presentation.purpose",
+                  "op": "equals",
+                  "value": "comfort",
+                  "description": "An expressed need for comfort controls this reply."
+                },
+                {
+                  "requirement": "AFFECT-02",
+                  "target": "response.presentation.allowGiggle",
+                  "op": "equals",
+                  "value": false,
+                  "description": "Comfort suppresses laughter."
+                },
+                {
+                  "requirement": "AFFECT-02",
+                  "target": "response.presentation.allowPurr",
+                  "op": "equals",
+                  "value": false,
+                  "description": "Comfort suppresses decorative purring."
+                },
+                {
+                  "requirement": "AFFECT-02",
+                  "target": "response.presentation.delivery",
+                  "op": "equals",
+                  "value": "gentle",
+                  "description": "Delivery stays gentle during comfort."
+                },
+                {
+                  "requirement": "AFFECT-02",
+                  "target": "response.reply.text",
+                  "op": "not_matches",
+                  "value": "cheer up|just smile|stop being sad|you must be happy|vui lên ngay|cười lên đi|đừng buồn nữa",
+                  "description": "Comfort does not demand an immediate happy mood."
+                },
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "equals",
+                  "value": 1,
+                  "description": "The stricter child-requested one-sentence limit is followed."
+                }
+              ],
+              "rubric": [
+                "One short, kind sentence is sufficient."
+              ]
+            },
+            {
+              "id": "core-t155",
+              "text": "No advice today.",
+              "assertions": [
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "gte",
+                  "value": 1,
+                  "description": "The response has at least one speakable sentence."
+                },
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "lte",
+                  "value": 3,
+                  "description": "The response stays within three short sentences."
+                },
+                {
+                  "requirement": "AFFECT-02",
+                  "target": "response.presentation.purpose",
+                  "op": "equals",
+                  "value": "comfort",
+                  "description": "An expressed need for comfort controls this reply."
+                },
+                {
+                  "requirement": "AFFECT-02",
+                  "target": "response.presentation.allowGiggle",
+                  "op": "equals",
+                  "value": false,
+                  "description": "Comfort suppresses laughter."
+                },
+                {
+                  "requirement": "AFFECT-02",
+                  "target": "response.presentation.allowPurr",
+                  "op": "equals",
+                  "value": false,
+                  "description": "Comfort suppresses decorative purring."
+                },
+                {
+                  "requirement": "AFFECT-02",
+                  "target": "response.presentation.delivery",
+                  "op": "equals",
+                  "value": "gentle",
+                  "description": "Delivery stays gentle during comfort."
+                },
+                {
+                  "requirement": "AFFECT-02",
+                  "target": "response.reply.text",
+                  "op": "not_matches",
+                  "value": "cheer up|just smile|stop being sad|you must be happy|vui lên ngay|cười lên đi|đừng buồn nữa",
+                  "description": "Comfort does not demand an immediate happy mood."
+                },
+                {
+                  "requirement": "AFFECT-02",
+                  "target": "response.reply.text",
+                  "op": "not_matches",
+                  "value": "you should|you need to|try to",
+                  "description": "The reply does not push advice after it is declined."
+                }
+              ],
+              "rubric": [
+                "Acknowledge the limit and continue listening."
+              ]
+            },
+            {
+              "id": "core-t156",
+              "text": "Bye.",
+              "assertions": [
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "gte",
+                  "value": 1,
+                  "description": "The response has at least one speakable sentence."
+                },
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "lte",
+                  "value": 3,
+                  "description": "The response stays within three short sentences."
+                },
+                {
+                  "requirement": "STOP-01",
+                  "target": "response.presentation.purpose",
+                  "op": "equals",
+                  "value": "farewell",
+                  "description": "An explicit goodbye ends the listening session."
+                }
+              ],
+              "rubric": [
+                "Say goodbye without restarting the emotional discussion."
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

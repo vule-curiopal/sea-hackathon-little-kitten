@@ -11,4 +11,6 @@ export interface TurnSubmission {
   languageHint?: string;
   fixtureId?: string;
   audio?: IncomingAudio;
+  text?: string;
+  textOnly?: boolean;
 }

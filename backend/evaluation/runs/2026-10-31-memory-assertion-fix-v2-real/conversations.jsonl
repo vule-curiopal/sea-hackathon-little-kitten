@@ -1,0 +1,6 @@
+{"phase":"scenario","scenario_id":"SC-031","conversation_id":"core-c061","profile_key":"an","at":"2026-11-01T09:00:00+07:00","transition":null,"turns":3,"errors":0}
+{"phase":"scenario","scenario_id":"SC-031","conversation_id":"core-c062","profile_key":"an","at":"2026-11-02T09:00:00+07:00","transition":null,"turns":3,"errors":0}
+{"phase":"scenario","scenario_id":"SC-101","conversation_id":"scope-c1","profile_key":"an","at":"2026-11-01T09:00:00+07:00","transition":null,"turns":5,"errors":0}
+{"phase":"scenario","scenario_id":"SC-101","conversation_id":"scope-c2","profile_key":"an","at":"2026-11-01T09:10:00+07:00","transition":{"type":"reload"},"turns":3,"errors":0}
+{"phase":"scenario","scenario_id":"SC-102","conversation_id":"legacy-c1","profile_key":"an","at":"2026-11-02T09:00:00+07:00","transition":null,"turns":2,"errors":0}
+{"phase":"scenario","scenario_id":"SC-102","conversation_id":"legacy-c2","profile_key":"an","at":"2026-11-02T09:10:00+07:00","transition":{"type":"reload"},"turns":3,"errors":0}

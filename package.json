@@ -8,12 +8,40 @@
     "packages/voice-client"
   ],
   "scripts": {
-    "dev": "npm run build && npm run dev --workspace @miu/pipeline",
+    "dev": "npm run build:frontend && tsx watch backend/integration/server.ts",
     "build": "tsc -b",
-    "typecheck": "tsc -b --pretty false",
-    "test": "vitest run",
+    "typecheck": "npm run typecheck:voice && npm run typecheck:engine",
+    "test": "tsx --test backend/*.test.ts backend/**/*.test.ts backend/evaluation/growth/*.test.ts",
     "test:watch": "vitest",
-    "smoke": "tsx scripts/smoke.ts"
+    "smoke": "tsx scripts/smoke.ts",
+    "start": "tsx backend/integration/server.ts",
+    "prestart": "npm run build:frontend",
+    "build:frontend": "npm --prefix frontend run build",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "dev:integrated": "npm run dev",
+    "verify:integrated": "tsx backend/scripts/verify-integrated-real.ts",
+    "db:tunnel": "tsx backend/scripts/database-tunnel.ts",
+    "db:setup-production": "tsx backend/scripts/setup-production-database.ts",
+    "db:migrate": "tsx backend/scripts/migrate.ts",
+    "db:import-history": "tsx backend/scripts/import-conversation-history.ts",
+    "db:verify-history": "tsx backend/scripts/import-conversation-history.ts --check",
+    "demo": "tsx backend/scripts/demo.ts",
+    "stories:export": "tsx backend/scripts/export-stories.ts",
+    "eval:catalog": "tsx backend/scripts/export-evaluation-scenarios.ts",
+    "eval:run": "tsx backend/scripts/run-engine-evaluation.ts",
+    "eval:report": "tsx backend/scripts/evaluate-engine-answers.ts",
+    "eval:judge": "tsx backend/scripts/judge-engine-answers.ts",
+    "eval:growth": "tsx backend/scripts/evaluate-growing-year.ts",
+    "eval:quick": "tsx backend/scripts/verify-contest.ts",
+    "review:characters": "tsx backend/scripts/export-character-review.ts",
+    "dev:engine": "tsx watch backend/server.ts",
+    "start:engine": "tsx backend/server.ts",
+    "dev:voice": "npm run build && npm run dev --workspace @miu/pipeline",
+    "start:voice": "npm run start --workspace @miu/pipeline",
+    "typecheck:voice": "tsc -b --pretty false",
+    "typecheck:engine": "tsc --noEmit -p tsconfig.engine.json",
+    "test:engine": "tsx --test backend/*.test.ts backend/**/*.test.ts backend/evaluation/growth/*.test.ts",
+    "test:voice": "vitest run"
   },
   "engines": {
     "node": ">=22.19.0"
@@ -23,10 +51,20 @@
     "@types/express": "^5.0.6",
     "@types/multer": "^2.3.0",
     "@types/node": "^26.6.6",
+    "@types/pg": "^8.15.5",
     "@types/supertest": "^7.2.1",
+    "playwright": "^1.64.1",
     "supertest": "^7.3.1",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2",
     "vitest": "^5.0.5"
+  },
+  "version": "0.1.0",
+  "dependencies": {
+    "@electric-sql/pglite": "^0.3.14",
+    "openai": "^6.0.0",
+    "openai-engine": "npm:openai@^6.0.0",
+    "pg": "^8.16.3",
+    "zod": "^4.1.12"
   }
 }

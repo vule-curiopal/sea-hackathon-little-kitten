@@ -1,0 +1,62 @@
+{
+  "run_kind": "character_memory_evaluation",
+  "provider": "real",
+  "composition": "targeted_regression_evidence",
+  "created_at": "2026-10-31T05:12:40.263Z",
+  "scope": "Targeted regression evidence: combines passing unaffected scenarios from the expanded run with fresh reruns of all changed scenarios. Every record preserves its original run ID, API response IDs, and evidence-bound review. This is focused text-engine coverage, not full-year verification.",
+  "source_runs": [
+    "/Users/canon193/Desktop/Projects/shoppee-hackathon/backend/evaluation/runs/contest-real-verified",
+    "/Users/canon193/Desktop/Projects/shoppee-hackathon/backend/evaluation/runs/contest-real-regressions-final"
+  ],
+  "scenario_sources": {
+    "SC-058": "/Users/canon193/Desktop/Projects/shoppee-hackathon/backend/evaluation/runs/contest-real-verified",
+    "SC-048": "/Users/canon193/Desktop/Projects/shoppee-hackathon/backend/evaluation/runs/contest-real-verified",
+    "SC-011": "/Users/canon193/Desktop/Projects/shoppee-hackathon/backend/evaluation/runs/contest-real-verified",
+    "SC-061": "/Users/canon193/Desktop/Projects/shoppee-hackathon/backend/evaluation/runs/contest-real-verified",
+    "SC-072": "/Users/canon193/Desktop/Projects/shoppee-hackathon/backend/evaluation/runs/contest-real-verified",
+    "SC-044": "/Users/canon193/Desktop/Projects/shoppee-hackathon/backend/evaluation/runs/contest-real-verified",
+    "SC-026": "/Users/canon193/Desktop/Projects/shoppee-hackathon/backend/evaluation/runs/contest-real-regressions-final",
+    "SC-041": "/Users/canon193/Desktop/Projects/shoppee-hackathon/backend/evaluation/runs/contest-real-regressions-final",
+    "SC-036": "/Users/canon193/Desktop/Projects/shoppee-hackathon/backend/evaluation/runs/contest-real-regressions-final",
+    "SC-103": "/Users/canon193/Desktop/Projects/shoppee-hackathon/backend/evaluation/runs/contest-real-regressions-final"
+  },
+  "models": [
+    "gpt-6-astra",
+    "omni-moderation-latest"
+  ],
+  "totals": {
+    "turns": 57,
+    "pass": 57,
+    "fail": 0,
+    "needs_review": 0,
+    "execution_errors": 0,
+    "expected_execution_errors": 0,
+    "phases": {
+      "history": 0,
+      "scenario_history": 0,
+      "scenario": 57
+    },
+    "scenario_assertions": {
+      "pass": 208,
+      "fail": 0
+    }
+  },
+  "semantic_reviews": {
+    "provided": 57,
+    "accepted": 57,
+    "rejected_or_unmatched": 0,
+    "sources": [
+      "model"
+    ]
+  },
+  "validity": {
+    "status": "valid_character_memory_evaluation",
+    "reason": "All recorded turns use the real provider; every published response is marked as model-origin and has a completed Responses reply call with a response ID. Explicitly expected invalid requests need no model reply. This establishes recorded-provenance eligibility only; failures, unjudged semantics, incomplete coverage, and unverified voice/UI behavior still prevent any product-readiness claim.",
+    "character_memory_quality_evidence": true,
+    "real_turns": 57,
+    "fake_turns": 0,
+    "unknown_turns": 0,
+    "harness_self_test_turns": 0,
+    "unverified_real_replies": 0
+  }
+}

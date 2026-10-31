@@ -21,9 +21,9 @@ npm run dev
 
 Open `http://localhost:5173`. On Windows PowerShell, use `npm.cmd` if script execution is restricted. The frontend's predev/prebuild scripts compile the shared packages. Vite proxies `/api` to `http://127.0.0.1:3001` in development and preview.
 
-The API defaults to fake mode. The existing root `.env` is read by the backend, never changed by the frontend. Real mode requires the server configuration described in [the pipeline README](../backend/pipeline/README.md). MP4/WebM capture and real MP3 output require `ffprobe` on the server PATH or `FFPROBE_PATH`.
+The integrated application uses the real character and memory provider. Load provider credentials only in the server environment, as described in [the backend README](../backend/README.md). The frontend never receives provider keys. The standalone voice pipeline can still be used for development; its provider mode is displayed explicitly. MP4/WebM capture and real MP3 output require `ffprobe` on the server PATH or `FFPROBE_PATH`.
 
-For an iPhone or iPad on the same Wi-Fi, open the **Wi-Fi Network URL** printed by Vite. For example, `http://192.168.x.x:5173`. Do not use the computer's `localhost` address on another device. Keep the development server running while you try the app. The typing demo works over local HTTP. Microphone input on another device requires HTTPS and browser support; `localhost` is only treated as secure on the computer itself.
+For an iPhone or iPad on the same Wi-Fi, open the **Wi-Fi Network URL** printed by Vite. For example, `http://192.168.x.x:5173`. Do not use the computer's `localhost` address on another device. Keep the development server running while you try the app. Typed messages work over local HTTP when the backend is connected. Microphone input on another device requires HTTPS and browser support; `localhost` is only treated as secure on the computer itself.
 
 ## Screens
 
@@ -35,13 +35,17 @@ For an iPhone or iPad on the same Wi-Fi, open the **Wi-Fi Network URL** printed 
 | `/app/talk` | Miu's interactive room |
 | `/demo/miu?lang=en` | Direct, no-sign-in room with the prepared demo buddy |
 
-The room supports petting, pause/wake, starting a new session, Vietnamese/English switching, a local typing demo, and voice through `@miu/voice-client`. Only answers appear in the log, held in browser memory for the current visit. Typed questions stay local; voice recordings go to the configured server and, in real mode, its speech providers. Language and typing-demo read-aloud preferences are stored on the device.
+The room supports petting, pause/wake, new sessions, Vietnamese/English switching, voice, and typed messages through the same character and memory engine. Only approved answers appear in the log, held in browser memory for the current visit. The server receives typed messages and voice recordings; real providers process the corresponding requests. The display-language preference stays on the device. Demo tokens and conversation answers are never written to localStorage.
+
+Settings provide fictional profiles **An / Bình**, sixteen bounded personality presets, three roles (friend, big sibling, teacher), and approved voices filtered by language. Switching profile, language, voice, role, or preset cancels the current operation and clears stale captions before reconnecting. Changing style preserves the server's saved character and child memories.
+
+The **Adult demo panel** shows current server data: names, hobbies and preferences, social relationships, reported events, story checkpoints, the fictional diary, daily growth, and effective time. It does not fabricate remembered details. **Next day** advances the demo clock, clears playback state, and opens a fresh session. A greeting requires the explicit **Say hello** action; the room never speaks on page load or in the background.
 
 ## Keeping company with Miu
 
 Miu begins breathing, blinking, and gently moving its tail as soon as the room opens. After 4.5–7 quiet seconds, Miu independently chooses little activities: looking around, ear flicks, paw grooming, stretching, playing with yarn, and having a pretend fish snack. A shuffled bag randomizes the order and quiet pauses, includes both snack and play, and avoids repeating the same activity consecutively. Miu brings its own snack to its mouth; the child never needs to feed it or authorize its activities. After 82 seconds Miu becomes drowsy, settling into a catnap at 90 seconds. Touch a dozing Miu to wake it with a stretch. Petting Miu directly gives a visual purr and affectionate expression, with no separate pet or play buttons.
 
-**Let Miu rest** explicitly pauses conversation, cancels pending replies and speech, turns off the microphone, and keeps Miu asleep until touched or **Wake Miu** is selected. Waking by touch or Wake does not enable the microphone; deliberately pressing Talk wakes Miu and begins one recording. Idle actions run without network or model calls, yield to listening/thinking/speaking, and stop scheduling while the tab is hidden. A sad typing-demo response suppresses lively idle actions. Reduced-motion preferences keep the poses and readable activity cues without repeated animation. Activity captions are available in Vietnamese and English and do not repeatedly announce themselves to screen readers.
+**Let Miu rest** explicitly pauses conversation, cancels pending replies and speech, turns off the microphone, and keeps Miu asleep until touched or **Wake Miu** is selected. Waking by touch or Wake does not enable the microphone; deliberately pressing Talk wakes Miu and begins one recording. Idle actions run without network or model calls, yield to listening/thinking/speaking, and stop scheduling while the tab is hidden. The engine’s comfort state suppresses lively idle actions, purring, giggling, and toy play. Reduced-motion preferences keep the poses and readable activity cues without repeated animation. Activity captions are available in Vietnamese and English and do not repeatedly announce themselves to screen readers.
 
 Miu also has a gentle **Dỗi nhẹ / A little pout** expression: puffy cheeks, pursed lips, a sideways glance, relaxed brows, and folded paws. Occasionally, a yarn-playing moment ends with this 2.4-second pretend disappointment before Miu settles on its own. It is never triggered by the child's absence or withheld care. Petting still gives the usual affectionate response, and comfort, conversation, and rest override the pout. The expression is also available in the landing page's fifteen-expression picker.
 
@@ -57,9 +61,9 @@ The implementation targets the same Safari 16.4+ baseline as the frontend. Deskt
 
 Open `/app/talk` on the presenting laptop. The QR hangs on the wall inside Miu's room, next to the window. The room retains its full responsive layout. Attendees can scan immediately while you talk with Miu.
 
-The typing-demo buddy is Miu: **ENFP, friend, curious, playful, imaginative**. Its greeting, sample responses, default read-aloud setting, and device speech delivery use the preset in `src/lib/demo-buddy.ts`. The voice backend does not implement that personality yet. Scanning opens `/demo/miu` directly, without account forms. Language is carried in the link. Each device has its own local answer log. Voice uses the server's two shared fictional profiles, An and Bình; opening the same profile elsewhere closes its previous session, so this voice prototype does not support an independent voice session for every attendee.
+Scanning opens `/demo/miu` directly, without account forms. Language is carried in the link. Each device has its own in-memory answer log. The server's fictional profiles An and Bình are shared: opening the same profile elsewhere closes its previous session, so use distinct profiles for simultaneous demonstrations.
 
-For local demos, attendees must join the laptop's Wi-Fi. When the presenter opens `localhost`, Vite supplies the preferred LAN address through its development-only `/__demo/network` endpoint. The QR encodes that address rather than `localhost`, which would point at the attendee's phone. Microphones on phones require HTTPS; the local HTTP demo supports typing and sample-question buttons.
+For local demos, attendees must join the laptop's Wi-Fi. When the presenter opens `localhost`, Vite supplies the preferred LAN address through its development-only `/__demo/network` endpoint. Microphones on phones require HTTPS; local HTTP can use typed messages against the connected backend.
 
 Generate a reusable local QR file at `public/demo-qr.svg`:
 
@@ -92,11 +96,13 @@ Voice is connected to the Express batch pipeline through `src/lib/usePipelineVoi
 
 The client uploads actual audio/MIME to the canonical multipart turn route, rejects stale responses, plays returned audio, and sends playback receipts from media events. Blocked autoplay exposes an explicit Play answer action. Reconnecting, starting fresh, switching language, changing profile or selecting a voice clears stale answers and recreates/configures the session. Settings offer the five approved voices filtered by language, and fictional profiles An/Bình. Stop/cancellation failures remain visible without restarting the microphone.
 
-The visible mode comes from the server: fake mode explicitly chooses `voice_sample_vi` or `voice_sample_en` and plays its fixed reference recording, which says Buddy. It does not recognize or answer arbitrary speech. Real mode sends no fixture and uses the server's STT → reply → TTS adapters. The current `voice_stub` envelope supplies no character presentation or memory; voice replies use a neutral face, with local idle animation. Personality, relationship, diary and Next day features are not fabricated.
+The visible mode comes from the server. The integrated `character_memory` response supplies approved presentation, expression, and memory metadata. The kitten maps those expressions to its existing artwork. Its mouth opening comes from an analyser attached to approved reply playback, never from microphone levels. Browser autoplay rejection exposes a **Play answer** action; actual media events send started/completed/interrupted playback receipts.
 
-Typing remains the bounded local sample provider in `src/lib/demo.ts`, explicitly labeled separately from live voice and reference recordings. Its optional read-aloud uses the device voice; that preference does not mute returned voice-service audio. Forms still validate without creating accounts or authenticating. Email/password values are not persisted or sent.
+Typed messages use the same session coordinator and server endpoint as microphone turns. By default, typed answers use approved server TTS. Turning off **Read answers aloud** requests `audio:null`: after reading the visible answer, explicitly select **Done reading** to finish the turn. This sends text-delivery receipts with `played_ms:0`, and never claims audible playback. Stop discards a pending text delivery. Saved memories and story progress commit only after the appropriate delivery completion. A deletion response, including deletion followed by a provider failure, clears old captions and cached reply metadata.
 
-Production must route `/api` to the Express backend, or build with `VITE_VOICE_API_URL=https://your-voice-api.example` and configure backend `ALLOWED_ORIGINS` for the frontend's HTTPS origin. Keep provider secrets server-side. The existing static Sites deployment cannot host this Node/Express service; without a separately hosted API, it can only offer the typing demo and a visible voice-unavailable state.
+The standalone voice pipeline’s fake mode remains a frontend/pipeline development option. It is labeled reference audio and never counts as evidence of character, memory, or model quality. No local sample-reply or browser speech-synthesis path is used by the room. Account forms remain visual demonstrations; email/password values are not persisted or sent.
+
+Production can serve `frontend/dist` from the integrated Express app. Otherwise route `/api` to that backend, or build with `VITE_VOICE_API_URL` and configure the allowed HTTPS origin. Keep provider secrets server-side. The previous static Sites deployment cannot host the Node/Express service by itself; it needs a reachable API.
 
 ## Checks and production output
 
@@ -108,7 +114,7 @@ npm run preview
 
 `build` runs TypeScript checks and emits `dist/`. Production hosting must serve `index.html` for application paths such as `/app/talk` to support direct links and refreshes. Google Fonts provides Baloo 2 and Nunito; system font fallbacks apply when fonts cannot load.
 
-Tests cover account validation, pause/wake, stale replies while paused, conversation resets, language selection, all fifteen expressions, the gentle pout's distinct pose and automatic recovery, keeping questions out of conversation state, the idle-to-sleep routine, delayed activity timers, comfort behavior, conversation/rest precedence, touch geometry at phone/tablet/desktop sizes, held versus moving gestures, snack drop regions, toy bounds, and valid reaction/gaze poses.
+Offline unit checks cover account validation, pause/wake, stale replies while paused, conversation resets, language selection, all fifteen expressions, the gentle pout's distinct pose and automatic recovery, keeping questions out of conversation state, the idle-to-sleep routine, delayed activity timers, comfort behavior, conversation/rest precedence, touch geometry at phone/tablet/desktop sizes, held versus moving gestures, snack drop regions, toy bounds, and valid reaction/gaze poses. These checks establish frontend and harness behavior only; character and memory quality evaluations require actual model requests.
 
 ## Design source
 
@@ -120,7 +126,7 @@ After changing the original Miu SVG or tokens, run:
 npm run sync:artwork
 ```
 
-This refreshes the generated artwork and copies the design tokens into the frontend. Application components, page styles, and translated copy live under `src/`.
+This refreshes the generated artwork and copies the design tokens into the frontend. Preserve the approved-playback mouth overlay when regenerating `MiuArtwork.tsx`. Application components, page styles, and translated copy live under `src/`.
 
 ## Self-hosted deployment
 

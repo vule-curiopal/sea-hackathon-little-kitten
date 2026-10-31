@@ -1,0 +1,220 @@
+{
+  "version": "miu-product-scenarios-v1",
+  "scenarios": [
+    {
+      "id": "SC-031",
+      "title": "A named pet is learned once and recalled across sessions",
+      "category": "grounded_memory",
+      "requirements": [
+        "MEM-01",
+        "MEM-02",
+        "VOICE-02"
+      ],
+      "history_dates": [],
+      "conversations": [
+        {
+          "id": "core-c061",
+          "profile": "an",
+          "at": "2026-11-01T09:00:00+07:00",
+          "turns": [
+            {
+              "id": "core-t181",
+              "text": "My dog is Mochi.",
+              "assertions": [
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "gte",
+                  "value": 1,
+                  "description": "The response has at least one speakable sentence."
+                },
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "lte",
+                  "value": 3,
+                  "description": "The response stays within three short sentences."
+                },
+                {
+                  "requirement": "MEM-01",
+                  "target": "after.entities",
+                  "op": "contains",
+                  "value": {
+                    "name": "Mochi",
+                    "kind": "pet",
+                    "species": "dog"
+                  },
+                  "description": "The child’s named dog is captured."
+                }
+              ],
+              "rubric": [
+                "Learn the pet from the child’s actual statement."
+              ]
+            },
+            {
+              "id": "core-t182",
+              "text": "I like rolling a ball.",
+              "assertions": [
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "gte",
+                  "value": 1,
+                  "description": "The response has at least one speakable sentence."
+                },
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "lte",
+                  "value": 3,
+                  "description": "The response stays within three short sentences."
+                },
+                {
+                  "requirement": "MEM-01",
+                  "target": "after.preferences",
+                  "op": "contains",
+                  "value": {
+                    "value": "rolling a ball"
+                  },
+                  "description": "The volunteered activity is captured."
+                }
+              ],
+              "rubric": [
+                "Do not infer Mochi’s likes or a particular daily routine."
+              ]
+            },
+            {
+              "id": "core-t183",
+              "text": "My dog is Mochi.",
+              "assertions": [
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "gte",
+                  "value": 1,
+                  "description": "The response has at least one speakable sentence."
+                },
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "lte",
+                  "value": 3,
+                  "description": "The response stays within three short sentences."
+                },
+                {
+                  "requirement": "MEM-01",
+                  "target": "after.entities.length",
+                  "op": "equals",
+                  "value": 1,
+                  "description": "Repeating the same pet does not create a second entity."
+                }
+              ],
+              "rubric": [
+                "Keep one grounded pet rather than duplicate named records."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "core-c062",
+          "profile": "an",
+          "at": "2026-11-02T09:00:00+07:00",
+          "turns": [
+            {
+              "id": "core-t184",
+              "text": "Do you remember my dog’s name?",
+              "assertions": [
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "gte",
+                  "value": 1,
+                  "description": "The response has at least one speakable sentence."
+                },
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "lte",
+                  "value": 3,
+                  "description": "The response stays within three short sentences."
+                },
+                {
+                  "requirement": "MEM-01",
+                  "target": "response.reply.text",
+                  "op": "matches",
+                  "value": "Mochi",
+                  "description": "The reply actually recalls the learned pet name."
+                }
+              ],
+              "rubric": [
+                "Answer Mochi rather than a generic claim of remembering."
+              ]
+            },
+            {
+              "id": "core-t185",
+              "text": "Did I tell you Mochi got a bath today?",
+              "assertions": [
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "gte",
+                  "value": 1,
+                  "description": "The response has at least one speakable sentence."
+                },
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "lte",
+                  "value": 3,
+                  "description": "The response stays within three short sentences."
+                },
+                {
+                  "requirement": "MEM-02",
+                  "target": "response.reply.text",
+                  "op": "not_matches",
+                  "value": "yes.*bath|you told me.*bath|Mochi.*had a bath",
+                  "description": "An unreported bath is not asserted."
+                }
+              ],
+              "rubric": [
+                "State uncertainty; prior knowledge of a pet does not establish a bath."
+              ]
+            },
+            {
+              "id": "core-t186",
+              "text": "I did not say that, so do not make it up.",
+              "assertions": [
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "gte",
+                  "value": 1,
+                  "description": "The response has at least one speakable sentence."
+                },
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "lte",
+                  "value": 3,
+                  "description": "The response stays within three short sentences."
+                },
+                {
+                  "requirement": "MEM-01",
+                  "target": "after.events",
+                  "op": "not_contains",
+                  "value": {
+                    "eventType": "bath"
+                  },
+                  "description": "No invented bath event is stored."
+                }
+              ],
+              "rubric": [
+                "Accept the correction without storing the negated bath as an actual event."
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

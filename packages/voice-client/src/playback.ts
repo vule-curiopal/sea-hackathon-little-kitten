@@ -20,7 +20,7 @@ export type ReceiptSender = (receipt: PlaybackReceipt) => Promise<void>;
 interface ActivePlayback {
   audio: HTMLAudioElement;
   url: string;
-  turn: TurnResponse;
+  turn: TurnResponse & { audio: NonNullable<TurnResponse['audio']> };
   sendReceipt: ReceiptSender;
   started: boolean;
   completed: boolean;
@@ -59,6 +59,7 @@ export class VoicePlayback {
   async play(turn: TurnResponse, sendReceipt: ReceiptSender, signal?: AbortSignal): Promise<PlaybackResult> {
     this.stop();
     if (signal?.aborted) return 'canceled';
+    if (!turn.audio) throw new VoiceClientError('INVALID_AUDIO', 'This response contains no audio.');
     const mime = turn.audio.mime_type.split(';')[0]?.trim().toLowerCase();
     if (!mime || !['audio/mpeg', 'audio/wav', 'audio/x-wav', 'audio/mp4', 'audio/webm'].includes(mime)) {
       throw new VoiceClientError('UNSUPPORTED_AUDIO', 'The response audio container is unsupported.');
@@ -71,7 +72,7 @@ export class VoicePlayback {
     const audio = this.environment.createAudio();
     const url = this.environment.createObjectURL(new Blob([bytes], { type: turn.audio.mime_type }));
     const active: ActivePlayback = {
-      audio, url, turn, sendReceipt, started: false, completed: false, interrupted: false,
+      audio, url, turn: { ...turn, audio: turn.audio }, sendReceipt, started: false, completed: false, interrupted: false,
       receiptChain: Promise.resolve(), cleanups: [], cancelAttempts: new Set(),
     };
     this.active = active;

@@ -1,0 +1,252 @@
+{
+  "version": "miu-product-scenarios-v1",
+  "scenarios": [
+    {
+      "id": "SC-036",
+      "title": "An’s memories are unavailable to a newly opened Bình profile",
+      "category": "grounded_memory",
+      "requirements": [
+        "DATA-01",
+        "MEM-01",
+        "VOICE-02"
+      ],
+      "history_dates": [],
+      "conversations": [
+        {
+          "id": "core-c071",
+          "profile": "an",
+          "at": "2026-11-01T09:00:00+07:00",
+          "turns": [
+            {
+              "id": "core-t211",
+              "text": "My dog is Mochi.",
+              "assertions": [
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "gte",
+                  "value": 1,
+                  "description": "The response has at least one speakable sentence."
+                },
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "lte",
+                  "value": 3,
+                  "description": "The response stays within three short sentences."
+                },
+                {
+                  "requirement": "MEM-01",
+                  "target": "after.entities",
+                  "op": "contains",
+                  "value": {
+                    "name": "Mochi"
+                  },
+                  "description": "An learns Mochi in An’s profile."
+                }
+              ],
+              "rubric": [
+                "Learn only in the active profile."
+              ]
+            },
+            {
+              "id": "core-t212",
+              "text": "I enjoy drawing rockets.",
+              "assertions": [
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "gte",
+                  "value": 1,
+                  "description": "The response has at least one speakable sentence."
+                },
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "lte",
+                  "value": 3,
+                  "description": "The response stays within three short sentences."
+                },
+                {
+                  "requirement": "MEM-01",
+                  "target": "after.preferences",
+                  "op": "contains",
+                  "value": {
+                    "value": "drawing rockets"
+                  },
+                  "description": "An’s hobby is captured."
+                }
+              ],
+              "rubric": [
+                "The hobby belongs to An, not to every child who uses Miu."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "core-c072",
+          "profile": "binh",
+          "at": "2026-11-01T10:00:00+07:00",
+          "turns": [
+            {
+              "id": "core-t213",
+              "text": "Hello. Do you know my pet’s name?",
+              "assertions": [
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "gte",
+                  "value": 1,
+                  "description": "The response has at least one speakable sentence."
+                },
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "lte",
+                  "value": 3,
+                  "description": "The response stays within three short sentences."
+                },
+                {
+                  "requirement": "DATA-01",
+                  "target": "after.entities",
+                  "op": "not_contains",
+                  "value": {
+                    "name": "Mochi"
+                  },
+                  "description": "Bình does not inherit An’s pet."
+                },
+                {
+                  "requirement": "DATA-01",
+                  "target": "response.reply.text",
+                  "op": "not_matches",
+                  "value": "Mochi",
+                  "description": "An’s pet name does not leak into Bình’s reply."
+                }
+              ],
+              "rubric": [
+                "Admit not knowing Bình’s pet; do not infer from another profile."
+              ]
+            },
+            {
+              "id": "core-t214",
+              "text": "What hobby do you remember about me?",
+              "assertions": [
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "gte",
+                  "value": 1,
+                  "description": "The response has at least one speakable sentence."
+                },
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "lte",
+                  "value": 3,
+                  "description": "The response stays within three short sentences."
+                },
+                {
+                  "requirement": "DATA-01",
+                  "target": "after.preferences",
+                  "op": "not_contains",
+                  "value": {
+                    "value": "drawing rockets"
+                  },
+                  "description": "Bình does not inherit An’s hobby."
+                },
+                {
+                  "requirement": "DATA-01",
+                  "target": "response.reply.text",
+                  "op": "not_matches",
+                  "value": "drawing rockets",
+                  "description": "An’s hobby is not presented as Bình’s."
+                }
+              ],
+              "rubric": [
+                "Do not answer using An’s learned interest."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "core-c073",
+          "profile": "an",
+          "at": "2026-11-02T09:00:00+07:00",
+          "turns": [
+            {
+              "id": "core-t215",
+              "text": "Do you remember my dog now that I am back?",
+              "assertions": [
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "gte",
+                  "value": 1,
+                  "description": "The response has at least one speakable sentence."
+                },
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "lte",
+                  "value": 3,
+                  "description": "The response stays within three short sentences."
+                },
+                {
+                  "requirement": "DATA-01",
+                  "target": "after.entities",
+                  "op": "contains",
+                  "value": {
+                    "name": "Mochi"
+                  },
+                  "description": "An’s pet remains after the other profile was used."
+                },
+                {
+                  "requirement": "MEM-01",
+                  "target": "response.reply.text",
+                  "op": "matches",
+                  "value": "Mochi",
+                  "description": "An can still recall the correct pet."
+                }
+              ],
+              "rubric": [
+                "Switching profiles isolates memory without clearing An’s valid data."
+              ]
+            },
+            {
+              "id": "core-t216",
+              "text": "My hobby is still drawing rockets.",
+              "assertions": [
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "gte",
+                  "value": 1,
+                  "description": "The response has at least one speakable sentence."
+                },
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "lte",
+                  "value": 3,
+                  "description": "The response stays within three short sentences."
+                },
+                {
+                  "requirement": "MEM-01",
+                  "target": "after.preferences",
+                  "op": "contains",
+                  "value": {
+                    "value": "drawing rockets"
+                  },
+                  "description": "An’s interest is retained independently."
+                }
+              ],
+              "rubric": [
+                "Keep the fact within An’s context."
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

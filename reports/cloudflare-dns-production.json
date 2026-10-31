@@ -1,0 +1,67 @@
+{
+  "checked_at": "2026-10-31T06:05:35.023Z",
+  "stage": "dns_verification_before_integrated_deployment",
+  "hostname": "miu.curiopal.com",
+  "zone": "curiopal.com",
+  "operation": "unchanged_verified",
+  "mutations": 0,
+  "record": {
+    "type": "A",
+    "name": "miu.curiopal.com",
+    "origin_address_redacted": true,
+    "proxied": true,
+    "ttl": 1,
+    "target_match": true
+  },
+  "conflicting_address_records": 0,
+  "other_records_modified": false,
+  "public_dns": [
+    {
+      "type": "A",
+      "http_status": 200,
+      "status": 0,
+      "answers": [
+        {
+          "type": 1,
+          "name": "miu.curiopal.com",
+          "value": "104.21.40.27",
+          "ttl": 300
+        },
+        {
+          "type": 1,
+          "name": "miu.curiopal.com",
+          "value": "172.67.174.153",
+          "ttl": 300
+        }
+      ]
+    },
+    {
+      "type": "AAAA",
+      "http_status": 200,
+      "status": 0,
+      "answers": [
+        {
+          "type": 28,
+          "name": "miu.curiopal.com",
+          "value": "2606:4700:3036::6815:281b",
+          "ttl": 300
+        },
+        {
+          "type": 28,
+          "name": "miu.curiopal.com",
+          "value": "2606:4700:3037::ac43:ae99",
+          "ttl": 300
+        }
+      ]
+    }
+  ],
+  "https_health": {
+    "url": "https://miu.curiopal.com/api/health",
+    "status": 200,
+    "tls_verified": true,
+    "application_status": "ok",
+    "provider_mode": "real",
+    "engine_mode": "voice_stub"
+  },
+  "official_api": "https://developers.cloudflare.com/api/resources/dns/subresources/records/methods/list/"
+}

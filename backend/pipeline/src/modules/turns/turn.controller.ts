@@ -54,7 +54,7 @@ export class TurnController {
 
   readonly cancel = async (request: Request, response: Response) => {
     const session = this.session(request);
-    return response.json(this.turns.cancel(session, identifier(object(request.params).turn_id)));
+    return response.json(await this.turns.cancel(session, identifier(object(request.params).turn_id)));
   };
 
   readonly playback = async (request: Request, response: Response) => {
@@ -69,7 +69,7 @@ export class TurnController {
       || !Number.isSafeInteger(body.state_version)) {
       throw new PipelineError('invalid_request', 400);
     }
-    return response.json(this.turns.receipt(session, id, {
+    return response.json(await this.turns.receipt(session, id, {
       request_id: requestId,
       status: body.status as PlaybackReceipt['status'],
       played_ms: body.played_ms as number,

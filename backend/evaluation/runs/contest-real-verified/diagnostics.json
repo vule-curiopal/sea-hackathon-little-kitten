@@ -1,0 +1,24 @@
+{
+  "execution_errors": [
+    {
+      "scenario": "SC-026",
+      "turn": "core-t155",
+      "code": "model_output_rejected",
+      "stage": "prepare"
+    }
+  ],
+  "checker_rejections": [],
+  "scenario_assertions": {
+    "pass": 200,
+    "fail": 8
+  },
+  "semantic_reviews": {
+    "provided": 57,
+    "accepted": 57,
+    "rejected_or_unmatched": 0,
+    "sources": [
+      "model"
+    ]
+  },
+  "note": "Checker rejections require inspection of context and actual candidates; neither acceptance nor rejection alone establishes dialogue quality."
+}

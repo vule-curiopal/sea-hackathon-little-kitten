@@ -1,0 +1,97 @@
+{
+  "run_kind": "character_memory_evaluation",
+  "provider": "real",
+  "scope": "contest_smoke",
+  "status": "completed_with_failures",
+  "scenarios": [
+    "SC-011",
+    "SC-041",
+    "SC-048",
+    "SC-058",
+    "SC-061",
+    "SC-072",
+    "SC-036",
+    "SC-044",
+    "SC-026",
+    "SC-103"
+  ],
+  "concurrency": 4,
+  "completed_scenarios": [
+    {
+      "id": "SC-058",
+      "status": "completed",
+      "turns": 4
+    },
+    {
+      "id": "SC-048",
+      "status": "completed",
+      "turns": 6
+    },
+    {
+      "id": "SC-041",
+      "status": "completed",
+      "turns": 6
+    },
+    {
+      "id": "SC-011",
+      "status": "completed",
+      "turns": 6
+    },
+    {
+      "id": "SC-061",
+      "status": "completed",
+      "turns": 4
+    },
+    {
+      "id": "SC-072",
+      "status": "completed",
+      "turns": 6
+    },
+    {
+      "id": "SC-044",
+      "status": "completed",
+      "turns": 6
+    },
+    {
+      "id": "SC-036",
+      "status": "completed",
+      "turns": 6
+    },
+    {
+      "id": "SC-026",
+      "status": "completed",
+      "turns": 6
+    },
+    {
+      "id": "SC-103",
+      "status": "completed",
+      "turns": 7
+    }
+  ],
+  "elapsed_ms": 165001,
+  "judge_model": "gpt-6-astra",
+  "errors": [],
+  "behavior": {
+    "turns": 57,
+    "pass": 53,
+    "fail": 3,
+    "needs_review": 1,
+    "execution_errors": 1,
+    "expected_execution_errors": 0,
+    "phases": {
+      "history": 0,
+      "scenario_history": 0,
+      "scenario": 57
+    },
+    "scenario_assertions": {
+      "pass": 200,
+      "fail": 8
+    }
+  },
+  "limitations": [
+    "Focused scenario coverage; this does not verify the full historical year.",
+    "Sequential turns and isolated databases preserve causality within each scenario.",
+    "Semantic criteria without a successful independent review remain needs_review.",
+    "Text path only; playback receipts are simulated."
+  ]
+}

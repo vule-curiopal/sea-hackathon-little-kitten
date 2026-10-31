@@ -1,0 +1,10 @@
+{
+  "synthetic": true,
+  "source_engine_log": "/Users/canon193/Desktop/Projects/shoppee-hackathon/backend/evaluation/runs/2026-10-31-memory-assertion-fix-v2-real/turns.jsonl",
+  "model": "gpt-6-astra",
+  "store": false,
+  "requested_conversations": 6,
+  "reviewed_turns": 19,
+  "errors": [],
+  "note": "Model judgments are fallible evidence. Independent check failures cannot be overridden. Missing, malformed or stale judgments remain needs_review."
+}

@@ -6,6 +6,7 @@ import './styles/app.css';
 import './styles/talk.css';
 import './styles/demo.css';
 import './styles/miu.css';
+import './styles/memory.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode><App /></React.StrictMode>,

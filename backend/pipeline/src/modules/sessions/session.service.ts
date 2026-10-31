@@ -2,6 +2,7 @@ import { randomBytes, randomUUID } from 'node:crypto';
 import { DEFAULT_VOICE, VOICES } from '@miu/voice-contracts';
 import type { FamilyConfig, Language, PlaybackReceipt, TurnResponse } from '@miu/voice-contracts';
 import { PipelineError } from '../../errors.js';
+import type { EngineBridge, EngineProfileSnapshot } from '../../ports.js';
 import { InMemorySessionRepository, type SessionRepository } from './session.repository.js';
 import { MBTI, type Profile, type Session, type TurnRecord } from './session.types.js';
 import { fingerprint } from './session.utils.js';
@@ -12,6 +13,8 @@ const MAX_RECORDS = 100;
 
 /** Session/configuration, turn ownership and playback rules; independent of HTTP. */
 export class SessionService {
+  private bridge?: EngineBridge;
+  private readonly lifecycleQueues = new Map<string, Promise<unknown>>();
   constructor(
     private readonly voices: Record<Language, string> = DEFAULT_VOICE,
     private readonly now = Date.now,
@@ -38,9 +41,140 @@ export class SessionService {
     return this.repository.profiles;
   }
 
+  get engineBridge(): EngineBridge | undefined { return this.bridge; }
+
+  attachEngine(bridge: EngineBridge): void {
+    if (this.bridge && this.bridge !== bridge) throw new Error('Engine bridge already configured');
+    this.bridge = bridge;
+  }
+
+  private lifecycle<T>(key: string, operation: () => Promise<T>): Promise<T> {
+    const previous = this.lifecycleQueues.get(key) ?? Promise.resolve();
+    const current = previous.catch(() => {}).then(operation);
+    this.lifecycleQueues.set(key, current);
+    void current.finally(() => {
+      if (this.lifecycleQueues.get(key) === current) this.lifecycleQueues.delete(key);
+    }).catch(() => {});
+    return current;
+  }
+
+  applySnapshot(profile: Profile, snapshot: EngineProfileSnapshot): void {
+    if (profile.stateVersion !== snapshot.state_version || profile.clockVersion !== snapshot.clock_version) {
+      for (const session of this.repository.allSessions()) {
+        if (session.profile === profile) for (const turn of session.turns.values()) turn.response = undefined;
+      }
+    }
+    profile.configuration = { ...snapshot.configuration };
+    profile.stateVersion = snapshot.state_version;
+    profile.clockVersion = snapshot.clock_version;
+    profile.effectiveNow = snapshot.effective_now;
+  }
+
+  async reconcile(session: Session): Promise<void> {
+    if (!this.bridge) return;
+    this.applySnapshot(session.profile, await this.bridge.context(session.profile.token));
+  }
+
+  async createSession(key: string, requestId: string): Promise<Session> {
+    if (!this.bridge) return this.create(key, requestId);
+    if (!['an', 'binh'].includes(key)) throw new PipelineError('invalid_demo_profile', 400);
+    return this.lifecycle('bootstrap', async () => {
+      this.sweep();
+      const existing = this.repository.getBootstrap(requestId);
+      if (existing) {
+        if (existing.key !== key) throw new PipelineError('idempotency_conflict', 409);
+        const session = this.repository.getSession(existing.sessionId);
+        if (!session || session.closed) throw new PipelineError('session_closed', 409);
+        await this.reconcile(session);
+        return session;
+      }
+      const oldProfile = this.profiles.get(key);
+      if (oldProfile?.active) throw new PipelineError('turn_in_progress', 409);
+      const snapshot = await this.bridge!.openSession(key);
+      if (oldProfile?.sessionId) {
+        const previous = this.repository.getSession(oldProfile.sessionId);
+        if (previous) this.close(previous);
+      }
+      const profile: Profile = {
+        key, token: snapshot.demo_token, configuration: { ...snapshot.configuration },
+        stateVersion: snapshot.state_version, clockVersion: snapshot.clock_version,
+        effectiveNow: snapshot.effective_now, configRequests: new Map(), sessionId: snapshot.session_id,
+      };
+      const session: Session = { id: snapshot.session_id, profile, turns: new Map(), sequence: 0,
+        touchedAt: this.now(), closed: false };
+      this.profiles.set(key, profile);
+      this.repository.saveSession(session);
+      this.repository.saveBootstrap(requestId, { key, sessionId: session.id }, MAX_RECORDS);
+      this.repository.removeClosedSessions();
+      return session;
+    });
+  }
+
+  async configureProfile(profile: Profile, requestId: string, patch: Record<string, unknown>): Promise<unknown> {
+    if (!this.bridge) return this.configure(profile, requestId, patch);
+    return this.lifecycle(profile.key, async () => {
+      const bodyFingerprint = fingerprint(patch);
+      const old = profile.configRequests.get(requestId);
+      if (old) {
+        if (old.fingerprint !== bodyFingerprint) throw new PipelineError('idempotency_conflict', 409);
+        return old.result;
+      }
+      this.applySnapshot(profile, await this.bridge!.context(profile.token));
+      if (profile.active) throw new PipelineError('turn_in_progress', 409);
+      // Reuse the same allowlist against an isolated validation copy.
+      const validationProfile = { ...profile, configuration: { ...profile.configuration }, configRequests: new Map() };
+      this.configure(validationProfile, requestId, patch);
+      const snapshot = await this.bridge!.configure(profile.token, validationProfile.configuration);
+      this.applySnapshot(profile, snapshot);
+      const result = { ...snapshot };
+      profile.configRequests.set(requestId, { fingerprint: bodyFingerprint, result });
+      while (profile.configRequests.size > MAX_RECORDS) profile.configRequests.delete(profile.configRequests.keys().next().value!);
+      return result;
+    });
+  }
+
+  async closeSession(session: Session): Promise<void> {
+    this.close(session);
+    if (this.bridge) await this.bridge.closeSession(session.profile.token, session.id);
+  }
+
+  async cancelTurn(session: Session, turnId: string): Promise<void> {
+    this.cancel(session, turnId);
+    if (this.bridge) await this.bridge.cancel(session.profile.token, session.id, turnId);
+  }
+
+  async playback(session: Session, id: string, receipt: PlaybackReceipt): Promise<unknown> {
+    if (!this.bridge) return this.receipt(session, id, receipt);
+    return this.lifecycle(session.profile.key, async () => {
+      const turn = session.turns.get(id);
+      if (!turn) throw new PipelineError('turn_not_found', 404);
+      const old = turn.receipts.get(receipt.request_id);
+      if (old) {
+        if (old !== fingerprint(receipt)) throw new PipelineError('idempotency_conflict', 409);
+        return this.bridge!.playback(session.profile.token, session.id, id, receipt);
+      }
+      await this.reconcile(session);
+      const previous = { playback: turn.playback, playedMs: turn.playedMs };
+      this.receipt(session, id, receipt);
+      let result: unknown;
+      try {
+        result = await this.bridge!.playback(session.profile.token, session.id, id, receipt);
+      } catch (error) {
+        turn.playback = previous.playback;
+        turn.playedMs = previous.playedMs;
+        turn.receipts.delete(receipt.request_id);
+        throw error;
+      }
+      if (receipt.status !== 'started' && session.profile.active === turn) session.profile.active = undefined;
+      // A failed read after a committed receipt cannot undo learning or its receipt.
+      try { await this.reconcile(session); } catch { /* The next operation reconciles again. */ }
+      return result;
+    });
+  }
+
   sweep(): void {
     for (const session of this.repository.allSessions()) {
-      if (this.now() - session.touchedAt > SESSION_TTL) this.close(session);
+      if (!session.closed && this.now() - session.touchedAt > SESSION_TTL) void this.closeSession(session).catch(() => {});
       for (const turn of session.turns.values()) {
         if (turn.resultAt && this.now() - turn.resultAt > CACHE_TTL) {
           turn.response = undefined;
@@ -231,7 +365,8 @@ export class SessionService {
       || (turn.playback === 'started' && receipt.status === 'started')) {
       throw new PipelineError('invalid_playback_transition', 409);
     }
-    if (receipt.played_ms < turn.playedMs || receipt.played_ms > (turn.durationMs ?? 0) + 500) {
+    if (receipt.played_ms < turn.playedMs || receipt.played_ms > (turn.durationMs ?? 0) + 500
+      || (turn.textOnly && receipt.played_ms !== 0)) {
       throw new PipelineError('invalid_playback_position', 400);
     }
     turn.playback = receipt.status;
@@ -241,7 +376,7 @@ export class SessionService {
   }
 
   dispose(): void {
-    for (const session of this.repository.allSessions()) this.close(session);
+    for (const session of this.repository.allSessions()) void this.closeSession(session).catch(() => {});
     this.repository.clear();
   }
 
@@ -253,6 +388,7 @@ export class SessionService {
       playedMs: 0,
       receipts: new Map(),
       configVersion: session.profile.stateVersion,
+      configClockVersion: session.profile.clockVersion,
     };
     session.turns.set(id, record);
     return record;

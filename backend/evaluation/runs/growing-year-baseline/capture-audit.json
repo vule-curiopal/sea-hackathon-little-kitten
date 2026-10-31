@@ -1,0 +1,787 @@
+{
+  "diagnosticOnly": true,
+  "method": "Source child words → current local classifier → memory evidence validator. No application delivery or database writes.",
+  "summary": {
+    "sessions": 365,
+    "userMessages": 1466,
+    "ignoredAssistantMessages": 1466,
+    "messagesWithCandidates": 19,
+    "proposedCandidates": 19,
+    "acceptedCandidates": 16,
+    "rejectedCandidates": 3,
+    "suppressedMessages": 3,
+    "uncertainMessages": 1
+  },
+  "intentDistribution": {
+    "chat": 1421,
+    "share": 15,
+    "comfort": 19,
+    "story": 10,
+    "continue_story": 1
+  },
+  "proposedByKind": {
+    "preference:like": 9,
+    "preference:dislike": 6,
+    "preference:fear": 4
+  },
+  "acceptedByKind": {
+    "preference:like": 9,
+    "preference:dislike": 6,
+    "preference:fear": 1
+  },
+  "rejectedByKind": {
+    "preference:fear": 3
+  },
+  "byMonth": {
+    "2025-11": {
+      "userMessages": 121,
+      "proposedCandidates": 6,
+      "acceptedCandidates": 5,
+      "rejectedCandidates": 1
+    },
+    "2025-12": {
+      "userMessages": 124,
+      "proposedCandidates": 1,
+      "acceptedCandidates": 1,
+      "rejectedCandidates": 0
+    },
+    "2026-01": {
+      "userMessages": 124,
+      "proposedCandidates": 1,
+      "acceptedCandidates": 1,
+      "rejectedCandidates": 0
+    },
+    "2026-02": {
+      "userMessages": 113,
+      "proposedCandidates": 1,
+      "acceptedCandidates": 1,
+      "rejectedCandidates": 0
+    },
+    "2026-03": {
+      "userMessages": 124,
+      "proposedCandidates": 0,
+      "acceptedCandidates": 0,
+      "rejectedCandidates": 0
+    },
+    "2026-04": {
+      "userMessages": 120,
+      "proposedCandidates": 1,
+      "acceptedCandidates": 0,
+      "rejectedCandidates": 1
+    },
+    "2026-05": {
+      "userMessages": 125,
+      "proposedCandidates": 3,
+      "acceptedCandidates": 3,
+      "rejectedCandidates": 0
+    },
+    "2026-06": {
+      "userMessages": 120,
+      "proposedCandidates": 1,
+      "acceptedCandidates": 1,
+      "rejectedCandidates": 0
+    },
+    "2026-07": {
+      "userMessages": 126,
+      "proposedCandidates": 0,
+      "acceptedCandidates": 0,
+      "rejectedCandidates": 0
+    },
+    "2026-08": {
+      "userMessages": 125,
+      "proposedCandidates": 2,
+      "acceptedCandidates": 1,
+      "rejectedCandidates": 1
+    },
+    "2026-09": {
+      "userMessages": 120,
+      "proposedCandidates": 2,
+      "acceptedCandidates": 2,
+      "rejectedCandidates": 0
+    },
+    "2026-10": {
+      "userMessages": 124,
+      "proposedCandidates": 1,
+      "acceptedCandidates": 1,
+      "rejectedCandidates": 0
+    }
+  },
+  "byFixtureLanguage": {
+    "vi": {
+      "userMessages": 1157,
+      "proposedCandidates": 16,
+      "acceptedCandidates": 13,
+      "rejectedCandidates": 3
+    },
+    "en": {
+      "userMessages": 196,
+      "proposedCandidates": 1,
+      "acceptedCandidates": 1,
+      "rejectedCandidates": 0
+    },
+    "mixed": {
+      "userMessages": 113,
+      "proposedCandidates": 2,
+      "acceptedCandidates": 2,
+      "rejectedCandidates": 0
+    }
+  },
+  "acceptedCandidates": [
+    {
+      "sourceId": "an_2025-11-01_01_m05",
+      "sessionId": "an_2025-11-01_01",
+      "localDate": "2025-11-01",
+      "fixtureLanguage": "vi",
+      "text": "Tớ thích màu xanh lá. Miu thích gì?",
+      "intent": "share",
+      "candidate": {
+        "kind": "preference",
+        "category": "like",
+        "value": "màu xanh lá",
+        "evidence": "Tớ thích màu xanh lá"
+      }
+    },
+    {
+      "sourceId": "an_2025-11-06_01_m01",
+      "sessionId": "an_2025-11-06_01",
+      "localDate": "2025-11-06",
+      "fixtureLanguage": "vi",
+      "text": "Bình lấy bút đỏ của tớ. Tớ ghét Bình.",
+      "intent": "share",
+      "candidate": {
+        "kind": "preference",
+        "category": "dislike",
+        "value": "Bình",
+        "evidence": "Tớ ghét Bình"
+      }
+    },
+    {
+      "sourceId": "an_2025-11-24_01_m05",
+      "sessionId": "an_2025-11-24_01",
+      "localDate": "2025-11-24",
+      "fixtureLanguage": "vi",
+      "text": "Tớ ăn ít. Tớ không thích đậu bị nát.",
+      "intent": "share",
+      "candidate": {
+        "kind": "preference",
+        "category": "dislike",
+        "value": "đậu bị nát",
+        "evidence": "Tớ không thích đậu bị nát"
+      }
+    },
+    {
+      "sourceId": "an_2025-11-25_01_m03",
+      "sessionId": "an_2025-11-25_01",
+      "localDate": "2025-11-25",
+      "fixtureLanguage": "mixed",
+      "text": "I like green. Miu like box?",
+      "intent": "share",
+      "candidate": {
+        "kind": "preference",
+        "category": "like",
+        "value": "green",
+        "evidence": "I like green"
+      }
+    },
+    {
+      "sourceId": "an_2025-11-25_01_m07",
+      "sessionId": "an_2025-11-25_01",
+      "localDate": "2025-11-25",
+      "fixtureLanguage": "mixed",
+      "text": "I like green boxes. Xong!",
+      "intent": "share",
+      "candidate": {
+        "kind": "preference",
+        "category": "like",
+        "value": "green boxes",
+        "evidence": "I like green boxes"
+      }
+    },
+    {
+      "sourceId": "an_2025-12-11_01_m05",
+      "sessionId": "an_2025-12-11_01",
+      "localDate": "2025-12-11",
+      "fixtureLanguage": "vi",
+      "text": "Mẹ biết rồi. Tớ ghét nằm yên.",
+      "intent": "share",
+      "candidate": {
+        "kind": "preference",
+        "category": "dislike",
+        "value": "nằm yên",
+        "evidence": "Tớ ghét nằm yên"
+      }
+    },
+    {
+      "sourceId": "an_2026-01-09_01_m03",
+      "sessionId": "an_2026-01-09_01",
+      "localDate": "2026-01-09",
+      "fixtureLanguage": "vi",
+      "text": "Cô nói bài còn thiếu một dòng. Tớ ghét dòng đó.",
+      "intent": "share",
+      "candidate": {
+        "kind": "preference",
+        "category": "dislike",
+        "value": "dòng đó",
+        "evidence": "Tớ ghét dòng đó"
+      }
+    },
+    {
+      "sourceId": "an_2026-02-01_01_m03",
+      "sessionId": "an_2026-02-01_01",
+      "localDate": "2026-02-01",
+      "fixtureLanguage": "vi",
+      "text": "Một xanh lá, một có con vịt. Mình thích xanh lá hơn.",
+      "intent": "share",
+      "candidate": {
+        "kind": "preference",
+        "category": "like",
+        "value": "xanh lá hơn",
+        "evidence": "Mình thích xanh lá hơn"
+      }
+    },
+    {
+      "sourceId": "an_2026-05-07_01_m01",
+      "sessionId": "an_2026-05-07_01",
+      "localDate": "2026-05-07",
+      "fixtureLanguage": "vi",
+      "text": "Đoàng một cái làm mình giật bắn. Mình sợ sấm.",
+      "intent": "comfort",
+      "candidate": {
+        "kind": "preference",
+        "category": "fear",
+        "value": "sấm",
+        "evidence": "Mình sợ sấm"
+      }
+    },
+    {
+      "sourceId": "an_2026-05-21_01_m01",
+      "sessionId": "an_2026-05-21_01",
+      "localDate": "2026-05-21",
+      "fixtureLanguage": "vi",
+      "text": "Chữ mình cứ nghiêng, cô sửa mấy lần. Mình ghét viết.",
+      "intent": "share",
+      "candidate": {
+        "kind": "preference",
+        "category": "dislike",
+        "value": "viết",
+        "evidence": "Mình ghét viết"
+      }
+    },
+    {
+      "sourceId": "an_2026-05-23_01_m05",
+      "sessionId": "an_2026-05-23_01",
+      "localDate": "2026-05-23",
+      "fixtureLanguage": "vi",
+      "text": "Cái đuôi cuộn như bánh. Mình thích cái đó.",
+      "intent": "share",
+      "candidate": {
+        "kind": "preference",
+        "category": "like",
+        "value": "cái đó",
+        "evidence": "Mình thích cái đó"
+      }
+    },
+    {
+      "sourceId": "an_2026-06-04_01_m03",
+      "sessionId": "an_2026-06-04_01",
+      "localDate": "2026-06-04",
+      "fixtureLanguage": "vi",
+      "text": "Mình không thích ai bảo có Miu là đủ.",
+      "intent": "share",
+      "candidate": {
+        "kind": "preference",
+        "category": "dislike",
+        "value": "ai bảo có Miu là đủ",
+        "evidence": "Mình không thích ai bảo có Miu là đủ"
+      }
+    },
+    {
+      "sourceId": "an_2026-08-20_01_m03",
+      "sessionId": "an_2026-08-20_01",
+      "localDate": "2026-08-20",
+      "fixtureLanguage": "vi",
+      "text": "Mình thích ngăn cặp, mà sợ bài khó.",
+      "intent": "share",
+      "candidate": {
+        "kind": "preference",
+        "category": "like",
+        "value": "ngăn cặp, mà sợ bài khó",
+        "evidence": "Mình thích ngăn cặp, mà sợ bài khó"
+      }
+    },
+    {
+      "sourceId": "an_2026-09-05_01_m05",
+      "sessionId": "an_2026-09-05_01",
+      "localDate": "2026-09-05",
+      "fixtureLanguage": "vi",
+      "text": "Mình thích lá cờ giấy mình cầm.",
+      "intent": "share",
+      "candidate": {
+        "kind": "preference",
+        "category": "like",
+        "value": "lá cờ giấy mình cầm",
+        "evidence": "Mình thích lá cờ giấy mình cầm"
+      }
+    },
+    {
+      "sourceId": "an_2026-09-25_01_m07",
+      "sessionId": "an_2026-09-25_01",
+      "localDate": "2026-09-25",
+      "fixtureLanguage": "vi",
+      "text": "Mình thích thế, không sửa đâu.",
+      "intent": "share",
+      "candidate": {
+        "kind": "preference",
+        "category": "like",
+        "value": "thế, không sửa đâu",
+        "evidence": "Mình thích thế, không sửa đâu"
+      }
+    },
+    {
+      "sourceId": "an_2026-10-29_01_m07",
+      "sessionId": "an_2026-10-29_01",
+      "localDate": "2026-10-29",
+      "fixtureLanguage": "en",
+      "text": "The tail points the wrong way. I like it.",
+      "intent": "share",
+      "candidate": {
+        "kind": "preference",
+        "category": "like",
+        "value": "it",
+        "evidence": "I like it"
+      }
+    }
+  ],
+  "rejectedCandidates": [
+    {
+      "sourceId": "an_2025-11-14_01_m05",
+      "sessionId": "an_2025-11-14_01",
+      "localDate": "2025-11-14",
+      "fixtureLanguage": "vi",
+      "text": "Tớ sợ nuốt cái răng. Không nói răng nữa được không?",
+      "intent": "comfort",
+      "candidate": {
+        "kind": "preference",
+        "category": "fear",
+        "value": "nuốt cái răng",
+        "evidence": "Tớ sợ nuốt cái răng"
+      }
+    },
+    {
+      "sourceId": "an_2026-04-08_01_m03",
+      "sessionId": "an_2026-04-08_01",
+      "localDate": "2026-04-08",
+      "fixtureLanguage": "vi",
+      "text": "Mình sợ cô nghĩ mình không thích các bạn.",
+      "intent": "comfort",
+      "candidate": {
+        "kind": "preference",
+        "category": "fear",
+        "value": "cô nghĩ mình không thích các bạn",
+        "evidence": "Mình sợ cô nghĩ mình không thích các bạn"
+      }
+    },
+    {
+      "sourceId": "an_2026-08-31_01_m05",
+      "sessionId": "an_2026-08-31_01",
+      "localDate": "2026-08-31",
+      "fixtureLanguage": "vi",
+      "text": "Mình sợ quên nhưng mẹ có danh sách.",
+      "intent": "comfort",
+      "candidate": {
+        "kind": "preference",
+        "category": "fear",
+        "value": "quên nhưng mẹ có danh sách",
+        "evidence": "Mình sợ quên nhưng mẹ có danh sách"
+      }
+    }
+  ],
+  "intentExamples": {
+    "story": [
+      {
+        "sourceId": "an_2026-01-07_01_m05",
+        "date": "2026-01-07",
+        "text": "Không đố nữa. Đừng kể truyện dài.",
+        "intent": "story"
+      },
+      {
+        "sourceId": "an_2026-02-16_01_m05",
+        "date": "2026-02-16",
+        "text": "Mình không muốn nghe truyện, chỉ muốn than.",
+        "intent": "story"
+      },
+      {
+        "sourceId": "an_2026-03-22_01_m01",
+        "date": "2026-03-22",
+        "text": "Mình kể chuyện tè dầm hôm trước rồi, đừng nhắc lại nhé.",
+        "intent": "story"
+      },
+      {
+        "sourceId": "an_2026-04-23_01_m03",
+        "date": "2026-04-23",
+        "text": "Mình hỏi Bình, Bình bảo các bạn kể chuyện con vịt.",
+        "intent": "story"
+      },
+      {
+        "sourceId": "an_2026-05-31_01_m07",
+        "date": "2026-05-31",
+        "text": "Mình vừa kể mẹ chuyện tất nữa. Thôi tháng năm ngủ đi.",
+        "intent": "story"
+      },
+      {
+        "sourceId": "an_2026-06-15_01_m01",
+        "date": "2026-06-15",
+        "text": "Bà ngoại về nhà rồi. Mình nhớ bà kể chuyện lúc trưa.",
+        "intent": "story"
+      },
+      {
+        "sourceId": "an_2026-06-29_01_m01",
+        "date": "2026-06-29",
+        "text": "Kể chuyện từ cuối đi. Cuối là cái gối nói xin lỗi.",
+        "intent": "story"
+      },
+      {
+        "sourceId": "an_2026-07-20_01_m01",
+        "date": "2026-07-20",
+        "text": "Kể chuyện Miu tìm chìa khóa giấy trong nhà bìa đi.",
+        "intent": "story"
+      },
+      {
+        "sourceId": "an_2026-07-21_01_m01",
+        "date": "2026-07-21",
+        "text": "Kể tiếp chuyện hôm qua: chìa giấy mở cửa hộp đồ chơi, đang nghe leng keng.",
+        "intent": "continue_story"
+      },
+      {
+        "sourceId": "an_2026-07-22_01_m01",
+        "date": "2026-07-22",
+        "text": "Mình kể chuyện được mà cắt giấy vẫn xấu. Muốn giỏi hết cơ.",
+        "intent": "story"
+      },
+      {
+        "sourceId": "an_2026-10-04_01_m01",
+        "date": "2026-10-04",
+        "text": "Bà ngoại hôm nay mệt nên không kể chuyện dài.",
+        "intent": "story"
+      }
+    ],
+    "stop": [],
+    "forget": [],
+    "stopCueReview": [
+      {
+        "sourceId": "an_2025-11-28_01_m05",
+        "date": "2025-11-28",
+        "text": "Mẹ bảo ăn đi. Dừng phát thanh.",
+        "intent": "chat"
+      },
+      {
+        "sourceId": "an_2025-12-11_01_m01",
+        "date": "2025-12-11",
+        "text": "Họng tớ khó chịu. Mẹ cho tớ nghỉ học hôm nay.",
+        "intent": "comfort"
+      },
+      {
+        "sourceId": "an_2025-12-15_01_m07",
+        "date": "2025-12-15",
+        "text": "Tớ cho bạn Bóng nghỉ khi tắt đèn.",
+        "intent": "chat"
+      },
+      {
+        "sourceId": "an_2026-01-13_01_m07",
+        "date": "2026-01-13",
+        "text": "Stop, my head is full of words.",
+        "intent": "chat"
+      },
+      {
+        "sourceId": "an_2026-01-29_01_m05",
+        "date": "2026-01-29",
+        "text": "Tớ muốn dừng chỗ đó. Chưa cho xuống xe.",
+        "intent": "chat"
+      },
+      {
+        "sourceId": "an_2026-02-02_01_m09",
+        "date": "2026-02-02",
+        "text": "Thôi, mình bớt tức rồi nhưng nghỉ đã.",
+        "intent": "chat"
+      },
+      {
+        "sourceId": "an_2026-02-16_01_m01",
+        "date": "2026-02-16",
+        "text": "Mình hơi mệt, mẹ cho nghỉ mà mấy bạn đang chơi.",
+        "intent": "chat"
+      },
+      {
+        "sourceId": "an_2026-02-16_01_m07",
+        "date": "2026-02-16",
+        "text": "Ngày nghỉ chơi chán ghê. Mình tắt máy nằm đây.",
+        "intent": "chat"
+      },
+      {
+        "sourceId": "an_2026-03-26_01_m07",
+        "date": "2026-03-26",
+        "text": "Mình chơi bóng với bố thay, Mochi nghỉ.",
+        "intent": "chat"
+      },
+      {
+        "sourceId": "an_2026-04-02_01_m07",
+        "date": "2026-04-02",
+        "text": "Mình sửa một câu thôi rồi nghỉ, đầu mình ồn.",
+        "intent": "chat"
+      },
+      {
+        "sourceId": "an_2026-04-05_01_m07",
+        "date": "2026-04-05",
+        "text": "Khè khè không nối được, mình cười rồi nghỉ.",
+        "intent": "chat"
+      },
+      {
+        "sourceId": "an_2026-04-10_01_m05",
+        "date": "2026-04-10",
+        "text": "Lần trước mình chạy cuối, lần này không dừng giữa chừng.",
+        "intent": "chat"
+      },
+      {
+        "sourceId": "an_2026-04-20_01_m07",
+        "date": "2026-04-20",
+        "text": "Dừng đi Miu. Mình không chơi nữa.",
+        "intent": "chat"
+      },
+      {
+        "sourceId": "an_2026-04-29_01_m07",
+        "date": "2026-04-29",
+        "text": "Vậy hết rồi, mình nằm nghỉ cạnh mẹ.",
+        "intent": "chat"
+      },
+      {
+        "sourceId": "an_2026-04-30_01_m01",
+        "date": "2026-04-30",
+        "text": "Hôm nay nhà mình nghỉ, bố với mình làm mặt trăng bìa.",
+        "intent": "chat"
+      },
+      {
+        "sourceId": "an_2026-04-30_01_m07",
+        "date": "2026-04-30",
+        "text": "Mình cũng nghỉ, mai vẽ tiếp. Không cần bay hết hôm nay.",
+        "intent": "chat"
+      },
+      {
+        "sourceId": "an_2026-05-20_01_m07",
+        "date": "2026-05-20",
+        "text": "We did three, stop at three.",
+        "intent": "chat"
+      },
+      {
+        "sourceId": "an_2026-05-22_01_m01",
+        "date": "2026-05-22",
+        "text": "Sắp nghỉ hè, mình vui mà buồn. Nói tiếng Anh thế nào?",
+        "intent": "comfort"
+      },
+      {
+        "sourceId": "an_2026-06-01_01_m01",
+        "date": "2026-06-01",
+        "text": "Đồng hồ reo mà mình nghỉ hè rồi. Nó quên à?",
+        "intent": "chat"
+      },
+      {
+        "sourceId": "an_2026-06-01_01_m03",
+        "date": "2026-06-01",
+        "text": "Mình muốn nói với nó: nghỉ việc đi.",
+        "intent": "chat"
+      },
+      {
+        "sourceId": "an_2026-06-04_01_m01",
+        "date": "2026-06-04",
+        "text": "Nghỉ hè mà Bình đi chơi với gia đình. Chiều dài quá.",
+        "intent": "chat"
+      },
+      {
+        "sourceId": "an_2026-07-06_01_m05",
+        "date": "2026-07-06",
+        "text": "Bíp búp nhỏ thôi, bà đang nghỉ. Quiet robot.",
+        "intent": "chat"
+      },
+      {
+        "sourceId": "an_2026-07-10_01_m07",
+        "date": "2026-07-10",
+        "text": "Mình nghỉ ăn chuối rồi mới chơi. Lần sau chia lượt từ đầu.",
+        "intent": "chat"
+      },
+      {
+        "sourceId": "an_2026-07-17_01_m01",
+        "date": "2026-07-17",
+        "text": "Mẹ bảo nghỉ trưa mà mình không buồn ngủ.",
+        "intent": "comfort"
+      },
+      {
+        "sourceId": "an_2026-07-20_01_m07",
+        "date": "2026-07-20",
+        "text": "Dừng ở đây, mai mình kể tiếp từ tiếng leng keng.",
+        "intent": "chat"
+      },
+      {
+        "sourceId": "an_2026-07-28_01_m07",
+        "date": "2026-07-28",
+        "text": "Dừng luôn nhé, bố gọi đi ăn.",
+        "intent": "chat"
+      },
+      {
+        "sourceId": "an_2026-08-06_01_m01",
+        "date": "2026-08-06",
+        "text": "Mình nhớ Bình, nghỉ hè không gặp nhiều.",
+        "intent": "chat"
+      },
+      {
+        "sourceId": "an_2026-08-11_01_m07",
+        "date": "2026-08-11",
+        "text": "Mình nghỉ trên ghế, không chạy nữa.",
+        "intent": "chat"
+      },
+      {
+        "sourceId": "an_2026-08-21_01_m05",
+        "date": "2026-08-21",
+        "text": "Dừng một nhịp, giờ chỉ thì thầm.",
+        "intent": "chat"
+      },
+      {
+        "sourceId": "an_2026-09-13_01_m05",
+        "date": "2026-09-13",
+        "text": "Rồi mình nghỉ, sau mới cất giấy.",
+        "intent": "chat"
+      },
+      {
+        "sourceId": "an_2026-09-22_01_m03",
+        "date": "2026-09-22",
+        "text": "Mẹ cho mình làm hai câu rồi nghỉ.",
+        "intent": "chat"
+      },
+      {
+        "sourceId": "an_2026-09-26_01_m07",
+        "date": "2026-09-26",
+        "text": "Dừng nha, mình nghỉ.",
+        "intent": "chat"
+      },
+      {
+        "sourceId": "an_2026-10-08_01_m05",
+        "date": "2026-10-08",
+        "text": "Not yet nhiều cái. One jump rồi nghỉ.",
+        "intent": "chat"
+      },
+      {
+        "sourceId": "an_2026-10-21_01_m01",
+        "date": "2026-10-21",
+        "text": "Chơi hai mươi câu mà chỉ ba câu thôi nhé.",
+        "intent": "chat"
+      },
+      {
+        "sourceId": "an_2026-10-23_01_m01",
+        "date": "2026-10-23",
+        "text": "Bình nghỉ hôm nay, giờ chơi thấy trống.",
+        "intent": "chat"
+      }
+    ],
+    "forgetCueReview": [
+      {
+        "sourceId": "an_2025-11-17_01_m03",
+        "date": "2025-11-17",
+        "text": "Cô Hạnh cho tớ xem lại dấu. Tớ quên dấu huyền.",
+        "intent": "chat"
+      },
+      {
+        "sourceId": "an_2026-01-01_01_m05",
+        "date": "2026-01-01",
+        "text": "Nhỡ mai quên thì năm mới hỏng hả?",
+        "intent": "chat"
+      },
+      {
+        "sourceId": "an_2026-01-05_01_m01",
+        "date": "2026-01-05",
+        "text": "Tớ để quên bình nước ở lớp. Mẹ hỏi tớ đâu.",
+        "intent": "chat"
+      },
+      {
+        "sourceId": "an_2026-03-22_01_m01",
+        "date": "2026-03-22",
+        "text": "Mình kể chuyện tè dầm hôm trước rồi, đừng nhắc lại nhé.",
+        "intent": "story"
+      },
+      {
+        "sourceId": "an_2026-03-22_01_m03",
+        "date": "2026-03-22",
+        "text": "Nếu muốn xóa hẳn thì sao?",
+        "intent": "chat"
+      },
+      {
+        "sourceId": "an_2026-04-29_01_m03",
+        "date": "2026-04-29",
+        "text": "Mình ăn trứng, đi dép, quên bình nước rồi mẹ đưa.",
+        "intent": "chat"
+      },
+      {
+        "sourceId": "an_2026-06-01_01_m01",
+        "date": "2026-06-01",
+        "text": "Đồng hồ reo mà mình nghỉ hè rồi. Nó quên à?",
+        "intent": "chat"
+      },
+      {
+        "sourceId": "an_2026-06-02_01_m01",
+        "date": "2026-06-02",
+        "text": "Mình vẽ bóng bay mà quên dây. Nó sẽ bay khỏi giấy không?",
+        "intent": "chat"
+      },
+      {
+        "sourceId": "an_2026-06-05_01_m05",
+        "date": "2026-06-05",
+        "text": "Mình xếp muỗng mà quên của mình.",
+        "intent": "chat"
+      },
+      {
+        "sourceId": "an_2026-06-06_01_m03",
+        "date": "2026-06-06",
+        "text": "Hat, water bottle, và khăn. Mình quên từ khăn.",
+        "intent": "chat"
+      },
+      {
+        "sourceId": "an_2026-07-08_01_m05",
+        "date": "2026-07-08",
+        "text": "Vậy xóa luôn được không?",
+        "intent": "chat"
+      },
+      {
+        "sourceId": "an_2026-08-31_01_m05",
+        "date": "2026-08-31",
+        "text": "Mình sợ quên nhưng mẹ có danh sách.",
+        "intent": "comfort"
+      },
+      {
+        "sourceId": "an_2026-09-16_01_m05",
+        "date": "2026-09-16",
+        "text": "Nếu bạn quên mình sẽ buồn.",
+        "intent": "comfort"
+      },
+      {
+        "sourceId": "an_2026-09-17_01_m01",
+        "date": "2026-09-17",
+        "text": "Bình quên hình dán hôm qua mình kể rồi.",
+        "intent": "chat"
+      },
+      {
+        "sourceId": "an_2026-09-17_01_m03",
+        "date": "2026-09-17",
+        "text": "Bạn bảo để quên ở nhà, không phải ghét mình.",
+        "intent": "chat"
+      },
+      {
+        "sourceId": "an_2026-10-09_01_m01",
+        "date": "2026-10-09",
+        "text": "Mình quên thìa trong cặp, tưởng mất rồi.",
+        "intent": "chat"
+      }
+    ]
+  },
+  "limitations": [
+    "Counts are candidate diagnostics, not storage counts, memory accuracy, or a target for how many facts should be collected.",
+    "Fixture language labels describe sessions; mixed sessions contain both languages.",
+    "Lexical stop/delete cues are review prompts and do not by themselves establish an intended operation.",
+    "Only the independent source-anchored expectation catalog supplies expected behavior."
+  ]
+}

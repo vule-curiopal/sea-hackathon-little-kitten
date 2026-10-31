@@ -1,5 +1,6 @@
 export type Language = 'vi' | 'en';
 export type ProviderMode = 'fake' | 'real';
+export type EngineMode = 'voice_stub' | 'character_memory';
 export const VOICES = [
   { id: 'mgBpvrNosWzExdPuRbXP', label: 'Phan Anh', language: 'vi', is_default: true },
   { id: 'x4KAhuXs2G8TfK9Zr7Q4', label: 'Cam Hong', language: 'vi', is_default: false },
@@ -13,15 +14,17 @@ export interface FamilyConfig { personality: string; role: 'friend' | 'big_sibli
 export interface Versions { clock_version: number; state_version: number }
 export interface SessionResponse extends Versions {
   session_id: string; demo_token: string; configuration: FamilyConfig; effective_now: string;
-  provider_mode: ProviderMode; engine_mode: 'voice_stub';
+  provider_mode: ProviderMode; engine_mode: EngineMode;
 }
 export interface VoiceAudio { mime_type: string; data_base64: string; duration_ms: number }
 export interface TurnResponse extends Versions {
-  session_id: string; turn_id: string; sequence: number; provider_mode: ProviderMode; engine_mode: 'voice_stub';
+  session_id: string; turn_id: string; sequence: number; provider_mode: ProviderMode; engine_mode: EngineMode;
+  input_mode?: 'audio' | 'text' | 'greeting';
   transcript: { text: string; language: Language; uncertain_spans: unknown[] } | null;
   reply: { text: string; sentences: string[]; language: Language };
-  audio: VoiceAudio;
-  presentation: null; face: null; memory: null;
+  audio: VoiceAudio | null;
+  /** Character-owned structured metadata; clients validate before rendering. */
+  presentation: unknown; face: unknown; memory: unknown;
   timings_ms: { stt: number; reply: number; validation: number; tts: number; server_total: number };
   fixture_id?: string;
 }

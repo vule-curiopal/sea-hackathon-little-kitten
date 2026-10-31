@@ -1,0 +1,66 @@
+{
+  "schemaVersion": "miu-growth-replay-v1",
+  "runId": "2026-10-31T04-20-20-584Z-8e30afe8",
+  "synthetic": true,
+  "provider": "fake",
+  "outputDir": "/Users/canon193/Desktop/Projects/shoppee-hackathon/backend/evaluation/runs/growing-year-baseline",
+  "from": "2025-11-01",
+  "to": "2026-10-31",
+  "sessions": 365,
+  "sourceTurns": 1466,
+  "attemptedTurns": 1466,
+  "completedTurns": 1466,
+  "turnErrors": 0,
+  "firstGrowthDay": 0,
+  "finalGrowthDay": 364,
+  "nightJobCount": 365,
+  "distinctDiaryTemplates": 6,
+  "distinctGrowthThemes": 6,
+  "friendshipStages": {
+    "getting_acquainted": 365
+  },
+  "recordsCreatedDuringTurns": 23,
+  "recordsRemovedDuringTurns": 0,
+  "finalActiveRecords": 32,
+  "dayChecks": {
+    "pass": 4015,
+    "fail": 0
+  },
+  "failures": [],
+  "errorCodes": {},
+  "checks": [
+    {
+      "id": "complete_source_replay",
+      "status": "pass",
+      "evidence": "Every source child turn is attempted exactly once.",
+      "expected": 1466,
+      "actual": 1466
+    },
+    {
+      "id": "all_source_turns_completed",
+      "status": "pass",
+      "evidence": "Response and receipt failures remain visible; failures never become successful delivery.",
+      "expected": 1466,
+      "actual": 1466
+    },
+    {
+      "id": "one_job_per_source_date",
+      "status": "pass",
+      "evidence": "One completed night-job receipt for each replayed source date.",
+      "expected": 365,
+      "actual": 365
+    }
+  ],
+  "limitations": [
+    "Fake provider and text application only; this is not a real OpenAI quality, speech, or latency benchmark.",
+    "Playback is simulated with real application receipt semantics; no audio is generated or heard.",
+    "Reference assistant text and authored mood labels are inspection data only, never runtime replies, memory evidence, or inferred child emotion.",
+    "A growing day count and correct transactions do not prove nuanced character development or semantic answer quality.",
+    "Friendship stages are reported without assuming every visit grants familiarity or nickname permission.",
+    "Synthetic source text and bounded context are logged for analysis; the full SQL record list avoids masking retention defects."
+  ],
+  "evidenceClassification": "diagnostics_not_model_evaluation",
+  "modelPerformanceEvidence": false,
+  "realModelCalls": 0,
+  "notice": "Archived development diagnostic only. This run used authored/fake-provider output, invoked no real OpenAI model, and cannot support conclusions about actual model performance. Raw evidence is retained for provenance and must not be pooled with real-model evaluation."
+}

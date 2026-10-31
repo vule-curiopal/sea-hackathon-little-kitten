@@ -1,0 +1,10 @@
+{
+  "environment_file": "/etc/miu/api.env",
+  "updated_parameter": "NODE_OPTIONS",
+  "ipv4_preferred": true,
+  "running_process_ipv4_preferred": false,
+  "service_state": "active",
+  "openai_network": {
+    "http_status": 401
+  }
+}

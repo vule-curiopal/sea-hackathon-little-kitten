@@ -1,0 +1,64 @@
+{
+  "update": {
+    "environment_file": "/etc/miu/api.env",
+    "backup_file": "/etc/miu/api.env.backup-20261031T055412Z",
+    "mode": "real",
+    "enable_logging": true,
+    "updated_parameters": [
+      "MIU_PROVIDER",
+      "ELEVENLABS_ENABLE_LOGGING",
+      "ELEVENLABS_API_KEY",
+      "OPENAI_API_KEY",
+      "ELEVENLABS_BASE_URL",
+      "OPENAI_BASE_URL",
+      "ELEVENLABS_STT_MODEL",
+      "ELEVENLABS_TTS_MODEL",
+      "ELEVENLABS_VOICE_ID_VI",
+      "ELEVENLABS_VOICE_ID_EN",
+      "OPENAI_MODEL",
+      "OPENAI_MAX_OUTPUT_TOKENS",
+      "STT_TIMEOUT_MS",
+      "REPLY_TIMEOUT_MS",
+      "TTS_TIMEOUT_MS",
+      "TURN_PROCESSING_TIMEOUT_MS",
+      "OPENAI_CLASSIFY_MODEL",
+      "OPENAI_REPLY_MODEL",
+      "OPENAI_CHECK_MODEL",
+      "OPENAI_MODERATION_MODEL",
+      "DATABASE_URL",
+      "DATABASE_NAME",
+      "DATABASE_USER",
+      "DATABASE_SSH_TUNNEL"
+    ],
+    "preflight": "passed",
+    "restart_succeeded": true,
+    "service_state": "active",
+    "file_mode": "0o600"
+  },
+  "verification": {
+    "checked_at": "2026-10-31T05:55:05.453Z",
+    "environment_file": "/etc/miu/api.env",
+    "provider_mode": "real",
+    "enable_logging": true,
+    "checks": {
+      "health": {
+        "http_status": 200,
+        "status": "ok",
+        "provider_mode": "real",
+        "engine_mode": "voice_stub"
+      }
+    },
+    "limitations": "Synthetic spoken input; actual STT/OpenAI/TTS. No physical microphone, listening, or completed-playback memory learning was tested.",
+    "status": "failed",
+    "error": {
+      "http_status": 503,
+      "code": "provider_unavailable"
+    },
+    "session_cleanup": true,
+    "running_process": {
+      "real_mode": true,
+      "logging_enabled": true,
+      "provider_keys_present": true
+    }
+  }
+}

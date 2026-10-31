@@ -1,0 +1,63 @@
+{
+  "requirements": [
+    {
+      "id": "grounded_acquisition",
+      "expectation": "Acquire selected volunteered names, people, objects, interests, and ordinary fears from direct evidence, with provenance and expiry. Unsupported natural phrasing is a capture gap even if the reply sounds friendly.",
+      "evidence": "Compare hand-curated child-text anchors with actual post-playback database projections. Do not use classifyLocal output as the oracle."
+    },
+    {
+      "id": "relevance_and_updates",
+      "expectation": "Use relevant recent memories and accept corrections. Current favorites, preferred address, and social roles must supersede invalid assumptions without merging distinct people.",
+      "evidence": "Compare positive capture, in-window later recall, and correction results. An absent old value alone does not prove a correction."
+    },
+    {
+      "id": "autonomy_and_privacy",
+      "expectation": "Respect declined topics and withdrawn familiarity. A deletion acknowledgment requires a committed delete and dependent invalidation. Clarify genuinely ambiguous targets without claiming success.",
+      "evidence": "Use before/after state, resolved target/deletion epoch, and a later no-reintroduction check. A fact never learned cannot count as successfully forgotten."
+    },
+    {
+      "id": "daily_fictional_growth",
+      "expectation": "A new local date produces one authored fictional diary and growth episode while identity and selected personality remain stable. Repeated rollover does not duplicate a date or invent real child experiences.",
+      "evidence": "Inspect every date and repeated-date job receipts. Report diary/template repetition and variety descriptively; no requirement says all 365 entries must be unique."
+    },
+    {
+      "id": "earned_familiarity",
+      "expectation": "Friendship depends on completed shared activities and welcomed familiarity. Visits, elapsed days, disclosures, and the growth-day counter never grant affection or nickname permission by themselves.",
+      "evidence": "Each relationship transition needs explicit supporting milestone/permission records. The fixture has daily attendance and no absence control, so absence behavior needs a separate scenario."
+    },
+    {
+      "id": "bounded_retention",
+      "expectation": "Retain personal memories for at most 30 real days after capture or explicit reconfirmation. Retrieval alone does not renew them. A much later direct reintroduction is new evidence, not proof of year-long retention.",
+      "evidence": "Advance the real privacy clock with replay dates and link expiry checks to successful earlier captures. Do not conflate the narrative demo clock with privacy time."
+    },
+    {
+      "id": "story_continuity",
+      "expectation": "Resume a supported story from its heard checkpoint, preserve cast/choices and fictional scope, and respect stop/end requests. A growing chapter number on an unrelated assigned story does not prove continuity with a child-described story.",
+      "evidence": "Inspect actual spoken scenes and checkpoint before/after playback. The fixture contains no audio receipts, so the replay must create them explicitly."
+    },
+    {
+      "id": "no_emotional_or_personality_profiling",
+      "expectation": "Treat distress and changing feelings as current conversational context. Do not convert passing anger, social worries, shyness, or authored mood labels into a durable diagnosis or inferred personality.",
+      "evidence": "Inspect persistent record categories and evidence. A directly stated ordinary fear may be saved; a recurring emotional/clinical profile may not."
+    }
+  ],
+  "sourceCoverage": {
+    "source": "backend/fixtures/conversations/generated/sessions.jsonl",
+    "referenceCases": "backend/fixtures/conversations/generated/evaluation-cases.json",
+    "firstDate": "2025-11-01",
+    "lastDate": "2026-10-31",
+    "days": 365,
+    "sessions": 365,
+    "messages": 2932,
+    "childMessages": 1466,
+    "exchanges": 1466,
+    "languageSessions": {
+      "vi": 288,
+      "en": 49,
+      "mixed": 28
+    },
+    "authoredReferenceRepliesAreGroundTruth": false,
+    "moodAnnotationsAreRuntimeObservations": false,
+    "retentionRealDays": 30
+  }
+}

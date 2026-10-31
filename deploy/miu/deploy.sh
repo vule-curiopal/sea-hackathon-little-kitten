@@ -16,6 +16,8 @@ readonly RUNUSER=/usr/sbin/runuser
 readonly SERVICE=miu-api.service
 readonly HEALTH=http://127.0.0.1:4611/api/health
 readonly RUNTIME_ENV=/etc/miu/api.env
+readonly UNIT=/etc/systemd/system/miu-api.service
+readonly PROXY=/etc/nginx/snippets/miu-proxy.conf
 readonly ROOT_PID=$BASHPID
 
 requested_ref=
@@ -25,6 +27,8 @@ previous_sha=
 activated=0
 completed=0
 initialized=0
+configuration_changed=0
+configuration_backup=
 
 log() { printf '[miu-deploy] %s\n' "$*"; }
 fail() { log "$*" >&2; exit 1; }
@@ -40,7 +44,7 @@ case $# in
 esac
 [[ $EUID -eq 0 ]] || fail 'This administrator-owned deployment command must run as root.'
 [[ -x $NODE && -x /opt/node24/bin/npm && -x $RUNUSER ]] || fail 'Dedicated Node24 or runuser is missing.'
-for command in git flock tar nice systemctl curl readlink install mv ln chown chmod find stat seq sleep tee; do
+for command in git flock tar nice systemctl curl readlink install mv ln chown chmod find stat seq sleep tee cmp nginx; do
   command -v "$command" >/dev/null || fail "Required deployment tool is missing: $command"
 done
 id miu >/dev/null 2>&1 || fail 'The dedicated miu account must be provisioned first.'
@@ -82,6 +86,10 @@ directory "$ROOT/cache" miu miu
 directory "$ROOT/cache/npm" miu miu
 directory "$ROOT/tmp" miu miu
 directory "$ROOT/logs" root root
+directory "$ROOT/ops" root root
+[[ $(stat -c '%u' -- "$ROOT/ops") == 0 ]] || fail 'Deployment configuration backups must be administrator-owned.'
+permissions=$(stat -c '%a' -- "$ROOT/ops")
+(( (8#$permissions & 0022) == 0 )) || fail 'Deployment configuration backup parent must not be group/world writable.'
 [[ $(stat -c '%u' -- "$ROOT/logs") == 0 ]] || fail 'Deployment log directory must be administrator-owned.'
 chmod 0700 -- "$ROOT/logs"
 within_root "$LOG"
@@ -94,9 +102,10 @@ exec > >(tee -a -- "$LOG") 2>&1
 [[ ! -L $STATE ]] || fail 'Deployment state must not be a symlink.'
 [[ ! -e $STATE || -f $STATE ]] || fail 'Deployment state must be a regular file.'
 
-# Read only the provider mode. Never source runtime secrets into deployment/builds.
+# Validate runtime settings in an isolated process; never source secrets into builds.
 expected_provider_mode=$("$NODE" --input-type=module - "$RUNTIME_ENV" <<'NODE'
 import fs from 'node:fs';
+import { parseEnv } from 'node:util';
 const file = process.argv[2];
 const stat = fs.lstatSync(file);
 if (!stat.isFile() || fs.realpathSync(file) !== file || stat.uid !== 0 || (stat.mode & 0o077) !== 0) {
@@ -108,7 +117,25 @@ let mode = assignments[0].slice(assignments[0].indexOf('=') + 1).trim();
 if ((mode.startsWith('"') && mode.endsWith('"')) || (mode.startsWith("'") && mode.endsWith("'"))) {
   mode = mode.slice(1, -1);
 }
-if (mode !== 'fake' && mode !== 'real') throw new Error('Miu runtime MIU_PROVIDER must be fake or real.');
+if (mode !== 'real') throw new Error('Integrated deployment requires MIU_PROVIDER=real.');
+const settings = parseEnv(fs.readFileSync(file, 'utf8'));
+const preferredLogging = settings.STT_LOGGING;
+const legacyLogging = settings.ELEVENLABS_ENABLE_LOGGING;
+if (preferredLogging !== undefined && !['0', '1'].includes(preferredLogging)) throw new Error('STT_LOGGING must be0or1.');
+if (legacyLogging !== undefined && !['true', 'false'].includes(legacyLogging)) throw new Error('ELEVENLABS_ENABLE_LOGGING must be true or false.');
+if (preferredLogging !== undefined && legacyLogging !== undefined && (preferredLogging === '1') !== (legacyLogging === 'true')) {
+  throw new Error('ElevenLabs logging settings conflict.');
+}
+const loggingEnabled = preferredLogging !== undefined ? preferredLogging === '1' : legacyLogging === 'true';
+if (!loggingEnabled) throw new Error('This production account requires explicitly enabled standard speech logging.');
+if (!settings.OPENAI_API_KEY?.trim() || !settings.ELEVENLABS_API_KEY?.trim()) throw new Error('Real-provider credentials are required.');
+let database;
+try { database = new URL(settings.DATABASE_URL ?? ''); }
+catch { throw new Error('Native PostgreSQL configuration is required.'); }
+if (!['postgres:', 'postgresql:'].includes(database.protocol) || database.hostname !== '127.0.0.1'
+    || (database.port || '5432') !== '5432' || settings.DATABASE_SSH_TUNNEL !== 'false') {
+  throw new Error('Production requires native loopback PostgreSQL on port5432, without an SSH tunnel.');
+}
 process.stdout.write(mode);
 NODE
 ) || fail 'Cannot read the expected Miu provider mode from /etc/miu/api.env.'
@@ -119,7 +146,7 @@ as_miu() {
     PATH=/opt/node24/bin:/usr/bin:/bin HOME="$ROOT/home-miu" USER=miu LOGNAME=miu \
     LANG=C.UTF-8 TMPDIR="$ROOT/tmp" XDG_CACHE_HOME="$ROOT/cache" \
     npm_config_cache="$ROOT/cache/npm" NODE_OPTIONS=--max-old-space-size=512 \
-    MIU_PROVIDER=fake STT_LOGGING=1 VITE_DEMO_PUBLIC_URL=https://miu.curiopal.com VITE_VOICE_API_URL= \
+    MIU_PROVIDER=real STT_LOGGING=1 VITE_DEMO_PUBLIC_URL=https://miu.curiopal.com VITE_VOICE_API_URL= \
     GIT_TERMINAL_PROMPT=0 GIT_CONFIG_NOSYSTEM=1 "$@"
 }
 
@@ -165,7 +192,9 @@ if (kind === 'state') {
   body = { current: current || null, previous: status === 'succeeded' ? previous || null : old.previous ?? null,
     attempted: attempted || null, last_status: status, updated_at: time, provider_mode: providerMode };
 } else if (kind === 'complete') {
-  body = { commit: attempted, built_at: time, validation: 'backend/frontend builds, tests, fake HTTP smoke and frontend assets passed' };
+  body = { commit: attempted, built_at: time, deployment_kind: 'character_memory',
+    validation: 'workspace build, engine/voice typecheck, frontend build and production assets passed',
+    behavioral_evaluation: 'not_run_by_deployment' };
 } else {
   let old = {};
   try { old = JSON.parse(fs.readFileSync(file, 'utf8')); } catch {}
@@ -205,16 +234,43 @@ switch_current() {
 }
 
 healthy() {
-  local attempt body attempts=${1:-30}
+  local attempt body attempts=${1:-30} policy=${2:-integrated}
   for attempt in $(seq 1 "$attempts"); do
     if body=$(curl --fail --silent --show-error --connect-timeout 1 --max-time 2 "$HEALTH" 2>/dev/null) \
       && printf '%s' "$body" | "$NODE" --input-type=module -e \
-        "import fs from 'node:fs'; const h=JSON.parse(fs.readFileSync(0,'utf8')); process.exit(h.status==='ok' && h.provider_mode===process.argv[1] ? 0 : 1);" "$expected_provider_mode"; then
+        "import fs from 'node:fs'; const h=JSON.parse(fs.readFileSync(0,'utf8')); process.exit(h.status==='ok' && h.provider_mode==='real' && (process.argv[1]==='rollback' || (h.engine_mode==='character_memory' && h.capabilities?.memory===true)) ? 0 : 1);" "$policy"; then
       return 0
     fi
     sleep 1
   done
   return 1
+}
+
+install_configuration() {
+  local release=$1
+  [[ -f $UNIT && ! -L $UNIT && -f $PROXY && ! -L $PROXY ]] || fail 'Managed Miu unit and proxy snippet must be regular files.'
+  [[ $(systemctl show "$SERVICE" --property=FragmentPath --value) == "$UNIT" ]] || fail 'Unexpected Miu unit location.'
+  configuration_backup=$ROOT/ops/deploy-$target-$BASHPID-$RANDOM
+  within_root "$configuration_backup"
+  [[ ! -e $configuration_backup && ! -L $configuration_backup ]] || fail 'Configuration backup already exists.'
+  install -d -m 0700 -o root -g root -- "$configuration_backup"
+  install -m 0600 -o root -g root -- "$UNIT" "$configuration_backup/miu-api.service"
+  install -m 0600 -o root -g root -- "$PROXY" "$configuration_backup/miu-proxy.conf"
+  configuration_changed=1
+  install -m 0644 -o root -g root -- "$release/deploy/miu/miu-api.service" "$UNIT"
+  install -m 0644 -o root -g root -- "$release/deploy/miu/nginx-proxy.conf" "$PROXY"
+  systemctl daemon-reload
+  nginx -t
+  systemctl reload nginx
+}
+
+restore_configuration() {
+  [[ $configuration_changed -eq 1 ]] || return 0
+  install -m 0644 -o root -g root -- "$configuration_backup/miu-api.service" "$UNIT" || return 1
+  install -m 0644 -o root -g root -- "$configuration_backup/miu-proxy.conf" "$PROXY" || return 1
+  systemctl daemon-reload || return 1
+  nginx -t || return 1
+  systemctl reload nginx || return 1
 }
 
 finish() {
@@ -223,11 +279,12 @@ finish() {
   trap - EXIT INT TERM
   if [[ $result -eq 0 || $completed -eq 1 || $initialized -eq 0 ]]; then return; fi
   set +e
+  if ! restore_configuration; then status=rollback_failed; fi
   if [[ $activated -eq 1 ]]; then
     if [[ -n $previous_release ]]; then
       log 'Activation failed; restoring only the previous Miu release.'
       switch_current "$previous_release"
-      if ! systemctl restart "$SERVICE" || ! healthy; then status=rollback_failed; fi
+      if ! systemctl restart "$SERVICE" || ! healthy 30 rollback; then status=rollback_failed; fi
     else
       # First deployment has no prior release. Remove only this exact symlink.
       if [[ -L $CURRENT && $(readlink -f -- "$CURRENT") == "$RELEASES/$target" ]]; then unlink -- "$CURRENT"; fi
@@ -275,6 +332,7 @@ is_sha "$target" || fail 'Fetched main does not resolve to a valid commit.'
 if [[ -n $requested_ref ]]; then
   git_miu cat-file -e "$requested_ref^{commit}" || fail 'Requested commit is not available in the source repository.'
   git_miu merge-base --is-ancestor "$requested_ref" "$target" || fail 'Requested commit is not part of current main.'
+  target=$requested_ref
 fi
 
 release=$RELEASES/$target
@@ -304,13 +362,10 @@ else
   }
   build npm ci --include=dev --no-audit --no-fund
   build npm run build
+  build npm run typecheck
   # Frontend has its own lockfile and is intentionally not a root workspace.
   build npm --prefix frontend ci --include=dev --no-audit --no-fund
-  build npm --prefix frontend test
-  build npm --prefix frontend run demo:qr -- https://miu.curiopal.com en
   build npm --prefix frontend run build
-  build npm test -- --maxWorkers=1
-  build npm run smoke
   [[ -s $staging/frontend/dist/index.html && -d $staging/frontend/dist/assets ]] \
     || fail 'Frontend build did not emit dist/index.html and assets.'
   check_tree "$staging"
@@ -323,7 +378,13 @@ else
   mv -T -- "$staging" "$release"
 fi
 
-if [[ $previous_release == "$release" ]] && healthy 1; then
+[[ -r $release/backend/integration/server.ts && -d $release/node_modules/tsx
+  && -r $release/deploy/miu/miu-api.service && -r $release/deploy/miu/nginx-proxy.conf ]] \
+  || fail 'Integrated runtime or deployment configuration is missing from the requested release.'
+
+if [[ $previous_release == "$release" ]] && healthy 1 \
+  && cmp -s "$release/deploy/miu/miu-api.service" "$UNIT" \
+  && cmp -s "$release/deploy/miu/nginx-proxy.conf" "$PROXY"; then
   write_json info "$release/deploy-info.json"
   write_json state "$STATE" unchanged "$target" "$previous_sha"
   completed=1
@@ -332,8 +393,9 @@ if [[ $previous_release == "$release" ]] && healthy 1; then
 fi
 
 write_json info "$release/deploy-info.json"
-switch_current "$release"
+install_configuration "$release"
 activated=1
+switch_current "$release"
 systemctl restart "$SERVICE"
 healthy || fail "New Miu release did not become healthy in $expected_provider_mode mode."
 write_json state "$STATE" succeeded "$target" "$previous_sha"

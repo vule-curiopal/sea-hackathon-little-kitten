@@ -1,0 +1,34 @@
+{
+  "schema_version": "miu-engine-evaluation-v1",
+  "run_id": "2026-10-31T04-39-27-194Z-real-30690942",
+  "synthetic": true,
+  "run_kind": "character_memory_evaluation",
+  "character_memory_quality_evidence": true,
+  "status": "complete",
+  "started_at": "2026-10-31T04:39:27.206Z",
+  "completed_at": "2026-10-31T04:40:05.870Z",
+  "blocked": null,
+  "provider": "real",
+  "audio": false,
+  "transport": "in_process_application",
+  "database": "isolated_in_memory_pglite",
+  "history": "none",
+  "scenario_catalog_version": "miu-product-scenarios-v1",
+  "scenario_count": 1,
+  "spec_sha256": "57947ee32149f449dfa646bcfea0afe40536f8cf5b4b8501305fca4c4b37c459",
+  "scenarios_sha256": "5f65b775785ca21ba4f1fd30fa31bd2da775cbba2039d031c21c3427111acdaf",
+  "history_sha256": "bdc720774844758606c6443deb05f933db1f4744209c1c25491e56d773c2cc65",
+  "models": {
+    "classify": "gpt-6-astra",
+    "reply": "gpt-6-astra",
+    "check": "gpt-6-astra",
+    "moderation": "omni-moderation-latest"
+  },
+  "limitations": [
+    "Text application path only. Playback receipts are simulated by the harness; no audible playback is measured.",
+    "Source assistant replies are never inserted as engine output or heard memory.",
+    "Each scenario has independent state; selected prior child turns are replayed through the actual application.",
+    "Raw text and state are logged only because every record belongs to fictional adult-authored test fixtures.",
+    "Rule checks are bounded; semantic rubrics require a separate judge or human review."
+  ]
+}

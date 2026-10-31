@@ -1,0 +1,110 @@
+{
+  "schema_version": "miu-engine-evaluation-v1",
+  "run_id": "2026-10-31T05-03-23-491Z-real-10e05b12",
+  "synthetic": true,
+  "run_kind": "character_memory_evaluation",
+  "character_memory_quality_evidence": true,
+  "status": "complete",
+  "started_at": "2026-10-31T05:03:23.497Z",
+  "completed_at": "2026-10-31T05:04:03.616Z",
+  "blocked": null,
+  "provider": "real",
+  "audio": false,
+  "transport": "in_process_application",
+  "database": "isolated_in_memory_pglite",
+  "history": "none",
+  "scenario_catalog_version": "miu-product-scenarios-v1",
+  "scenario_count": 1,
+  "spec_sha256": "57947ee32149f449dfa646bcfea0afe40536f8cf5b4b8501305fca4c4b37c459",
+  "scenarios_sha256": "d70f3a5eae4c2361175b7fb50e24805dcb17e9e144926a42d104f503e50ff64b",
+  "history_sha256": "bdc720774844758606c6443deb05f933db1f4744209c1c25491e56d773c2cc65",
+  "implementation_files": [
+    {
+      "path": "application.ts",
+      "sha256": "9eb8fcbcce3742d4e039c87f8f87f6ab6189e89b354040e3f23de08d46ebb0c3"
+    },
+    {
+      "path": "recall.ts",
+      "sha256": "aa2c9dbae4a88cf152f587377b47cbb7af2a399fa6fb8441e4df8a601bd87b1f"
+    },
+    {
+      "path": "shared/types.ts",
+      "sha256": "6f59e7e4565d95b9bc6394a7815efa9e77285ecdd1d3eda6f193c881e4e0b8f9"
+    },
+    {
+      "path": "pipeline/providers.ts",
+      "sha256": "4558fb7fcf554010409c248da9c16d24326b4f88bcfe9ae727137988dc1af3cd"
+    },
+    {
+      "path": "pipeline/observations.ts",
+      "sha256": "70d0ddd1b862afa3e71c3421122a6d432978507e28096c3d40606f0de8f47876"
+    },
+    {
+      "path": "character/director.ts",
+      "sha256": "72c311ee3f3d419255199ad671e1dce8fcaf55a8a8fec27e787caa1d22a54ae2"
+    },
+    {
+      "path": "character/prompt.ts",
+      "sha256": "6f299bcafa6a9c4a92851b55c97e61bfe857974b516a66b70f806dcecdb920dc"
+    },
+    {
+      "path": "character/validation.ts",
+      "sha256": "a80c10d8a60523b3ef4b992f539ffb8a171ad835017b060f736e0f34d5961fdb"
+    },
+    {
+      "path": "character/templates.ts",
+      "sha256": "6cca7f615610b5d60a5f37af190a2aeb817bda0ac2d6d75e7466f04043fae337"
+    },
+    {
+      "path": "memory/index.ts",
+      "sha256": "f46ebc13f2d286817ceee608d8f43334d88168ee348b875a41b265c64b8d2889"
+    },
+    {
+      "path": "memory/assertions.ts",
+      "sha256": "052c63ce2013f3142dd0a3f61502b5bca3a11f302155ad4046552a10f56c0cf0"
+    },
+    {
+      "path": "memory/evidence.ts",
+      "sha256": "fc8571109b022dc1ac5b46176d8496b5aba654645eebc8add3297683f82314e8"
+    },
+    {
+      "path": "evaluation/runner.ts",
+      "sha256": "0c859eb967f1923de75a0d5b8d6f596e0d0334bf27daa2ef3f0f07ec4a534c05"
+    },
+    {
+      "path": "memory/migrations/001_character_memory.sql",
+      "sha256": "313b3a4d165310132aaf83881109bb6db518cf4a200f0637e2864b343e5d0290"
+    },
+    {
+      "path": "memory/migrations/002_story_assignments.sql",
+      "sha256": "f591d9d4421d04f783a06a4d0f2acaf956575a21b8b6af09b4b37fa00ac3bc1a"
+    },
+    {
+      "path": "memory/migrations/003_synthetic_history.sql",
+      "sha256": "6a47d3be966d9a4a8ac2fcda51123e1193203f4c0f65f649db387bac9e74fd34"
+    },
+    {
+      "path": "memory/migrations/004_event_assertions.sql",
+      "sha256": "1bd1d0237ce6feacb8d3caed0497548174b4f0bbe99e8d1adcf660f2431e774d"
+    },
+    {
+      "path": "memory/migrations/005_memory_operation_receipts.sql",
+      "sha256": "8f08ea7b5e1fd846e7b7e93d2cbe7ddf277f1cfe6a00e991c360d18c10f3cf4c"
+    }
+  ],
+  "fixture_preconditions": [],
+  "models": {
+    "classify": "gpt-6-astra",
+    "reply": "gpt-6-astra",
+    "check": "gpt-6-astra",
+    "moderation": "omni-moderation-latest"
+  },
+  "limitations": [
+    "Text application path only. Playback receipts are simulated by the harness; no audible playback is measured.",
+    "Source assistant replies are never inserted as engine output or heard memory.",
+    "Each scenario has independent state; selected prior child turns are replayed through the actual application.",
+    "Raw text and state are logged only because every record belongs to fictional adult-authored test fixtures.",
+    "Rule checks are bounded; semantic rubrics require a separate judge or human review.",
+    "Explicit synthetic legacy-memory preconditions test repair only; their authored records are not evidence of learning."
+  ]
+}

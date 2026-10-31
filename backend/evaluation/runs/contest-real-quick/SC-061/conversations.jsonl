@@ -1,0 +1,2 @@
+{"phase":"scenario","scenario_id":"SC-061","conversation_id":"start","profile_key":"an","at":"2026-11-01T18:00:00+07:00","transition":null,"turns":2,"errors":0}
+{"phase":"scenario","scenario_id":"SC-061","conversation_id":"resume","profile_key":"an","at":"2026-11-02T18:00:00+07:00","transition":{"type":"reload"},"turns":2,"errors":1}

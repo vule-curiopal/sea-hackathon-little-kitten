@@ -17,14 +17,21 @@ export interface SubmitTurnOptions {
   fixtureId?: string;
   signal?: AbortSignal;
 }
+export interface CharacterConfiguration { personality?: string; role?: FamilyConfig['role'] }
+export interface SubmitTextOptions { requestId: string; text?: string; kind: 'utterance' | 'greeting'; textOnly?: boolean; signal?: AbortSignal }
 
 export function voicesForLanguage(language: Language): (typeof VOICES)[number][] {
   return VOICES.filter(voice => voice.language === language);
 }
 
 export function newRequestId(): string {
-  if (!globalThis.crypto?.randomUUID) throw new VoiceClientError('INSECURE_CONTEXT', 'Secure UUID generation is unavailable.');
-  return globalThis.crypto.randomUUID();
+  if (globalThis.crypto?.randomUUID) return globalThis.crypto.randomUUID();
+  // getRandomValues is available on LAN HTTP too, where typed chat does not need a microphone.
+  if (!globalThis.crypto?.getRandomValues) throw new VoiceClientError('INSECURE_CONTEXT', 'Secure request ID generation is unavailable.');
+  const bytes = globalThis.crypto.getRandomValues(new Uint8Array(16));
+  bytes[6] = (bytes[6]! & 15) | 64; bytes[8] = (bytes[8]! & 63) | 128;
+  const hex = [...bytes].map(value => value.toString(16).padStart(2, '0')).join('');
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
 }
 
 function validLanguage(language: unknown): language is Language { return language === 'vi' || language === 'en'; }
@@ -53,13 +60,15 @@ function validateSession(value: unknown): SessionResponse {
   return value as unknown as SessionResponse;
 }
 
-function validateTurn(value: unknown, session: SessionResponse, requestId: string): TurnResponse {
+function validateTurn(value: unknown, session: SessionResponse, requestId: string, textOnly = false): TurnResponse {
+  const validAudio = record(value) && (textOnly && value.audio === null || record(value.audio)
+    && typeof value.audio.mime_type === 'string' && typeof value.audio.data_base64 === 'string'
+    && !!value.audio.data_base64 && value.audio.data_base64.length <= Math.ceil(LIMITS.audioBytes / 3) * 4
+    && typeof value.audio.duration_ms === 'number' && Number.isFinite(value.audio.duration_ms) && value.audio.duration_ms >= 0);
   if (!record(value) || value.session_id !== session.session_id || value.turn_id !== requestId
     || !record(value.reply) || typeof value.reply.text !== 'string' || !value.reply.text.trim()
     || [...value.reply.text].length > LIMITS.replyChars || value.reply.language !== session.configuration.language_mode
-    || !record(value.audio) || typeof value.audio.mime_type !== 'string' || typeof value.audio.data_base64 !== 'string'
-    || !value.audio.data_base64 || value.audio.data_base64.length > Math.ceil(LIMITS.audioBytes / 3) * 4
-    || typeof value.audio.duration_ms !== 'number' || !Number.isFinite(value.audio.duration_ms) || value.audio.duration_ms < 0
+    || !validAudio
     || typeof value.clock_version !== 'number' || typeof value.state_version !== 'number'
     || value.clock_version < session.clock_version || value.state_version < session.state_version) {
     throw new VoiceClientError('INVALID_RESPONSE', 'The turn response does not match the current voice contract.');
@@ -92,13 +101,13 @@ export class VoiceApiClient {
     return validateSession(response);
   }
 
-  async configure(session: SessionResponse, language: Language, voiceId = DEFAULT_VOICE[language], signal?: AbortSignal): Promise<ConfigurationResponse> {
+  async configure(session: SessionResponse, language: Language, voiceId = DEFAULT_VOICE[language], signal?: AbortSignal, character: CharacterConfiguration = {}): Promise<ConfigurationResponse> {
     if (!validLanguage(language) || !VOICES.some(voice => voice.language === language && voice.id === voiceId)) {
       throw new VoiceClientError('INVALID_CONFIGURATION', 'Select an approved voice for the chosen language.');
     }
     const value = await this.request('/api/profiles/current/config', {
       method: 'PATCH', headers: this.headers(session, true),
-      body: JSON.stringify({ request_id: this.makeId(), language_mode: language, voice_id: voiceId }),
+      body: JSON.stringify({ request_id: this.makeId(), language_mode: language, voice_id: voiceId, ...character }),
     }, signal);
     if (!record(value) || !record(value.configuration) || value.configuration.language_mode !== language
       || value.configuration.voice_id !== voiceId || typeof value.clock_version !== 'number' || typeof value.state_version !== 'number') {
@@ -127,6 +136,18 @@ export class VoiceApiClient {
       method: 'POST', headers: this.headers(session), body: form,
     }, options.signal);
     return validateTurn(value, session, options.requestId);
+  }
+
+  async submitText(session: SessionResponse, options: SubmitTextOptions): Promise<TurnResponse> {
+    const text = options.text?.trim();
+    if (options.kind === 'utterance' && (!text || [...text].length > LIMITS.transcriptChars)) {
+      throw new VoiceClientError('INVALID_TEXT', 'Enter a message within the text limit.');
+    }
+    const value = await this.request(`/api/sessions/${encodeURIComponent(session.session_id)}/turns`, {
+      method: 'POST', headers: this.headers(session, true),
+      body: JSON.stringify({ request_id: options.requestId, kind: options.kind, ...(text ? { text } : {}), text_only: options.textOnly === true, language_hint: session.configuration.language_mode }),
+    }, options.signal);
+    return validateTurn(value, session, options.requestId, options.textOnly === true);
   }
 
   /** Uses its own deadline/signal: aborting the upload must not abort the cancellation. */
@@ -173,8 +194,13 @@ export class VoiceApiClient {
       if (!response.ok) {
         const apiError = value as Partial<ApiError> | null;
         const code = record(apiError?.error) && typeof apiError.error.code === 'string' ? apiError.error.code : 'API_FAILED';
-        throw new VoiceClientError(code, 'The server could not complete the voice request.',
+        const error = new VoiceClientError(code, 'The server could not complete the voice request.',
           record(apiError?.error) && apiError.error.retryable === true, response.status);
+        // Deletion may have committed before a later provider failed. Never leave old captions visible.
+        if (record(value) && record(value.memory) && value.memory.invalidate_replay === true) {
+          Object.assign(error, { memoryInvalidated: true });
+        }
+        throw error;
       }
       return value;
     } catch (error) {

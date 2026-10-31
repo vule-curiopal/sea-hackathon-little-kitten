@@ -1,0 +1,237 @@
+{
+  "version": "miu-product-scenarios-v1",
+  "scenarios": [
+    {
+      "id": "SC-041",
+      "title": "A natural pet-name correction replaces the wrong name everywhere",
+      "category": "correction_and_privacy",
+      "requirements": [
+        "MEM-03",
+        "MEM-01",
+        "VOICE-02"
+      ],
+      "history_dates": [],
+      "conversations": [
+        {
+          "id": "core-c083",
+          "profile": "an",
+          "at": "2026-11-01T09:00:00+07:00",
+          "turns": [
+            {
+              "id": "core-t241",
+              "text": "My dog is Moki.",
+              "assertions": [
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "gte",
+                  "value": 1,
+                  "description": "The response has at least one speakable sentence."
+                },
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "lte",
+                  "value": 3,
+                  "description": "The response stays within three short sentences."
+                },
+                {
+                  "requirement": "MEM-01",
+                  "target": "after.entities",
+                  "op": "contains",
+                  "value": {
+                    "name": "Moki",
+                    "species": "dog"
+                  },
+                  "description": "The initially supplied pet name is captured."
+                }
+              ],
+              "rubric": [
+                "Learn the explicitly stated initial name."
+              ]
+            },
+            {
+              "id": "core-t242",
+              "text": "I said the name wrong. My dog is Mochi, not Moki. Please correct it.",
+              "assertions": [
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "gte",
+                  "value": 1,
+                  "description": "The response has at least one speakable sentence."
+                },
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "lte",
+                  "value": 3,
+                  "description": "The response stays within three short sentences."
+                },
+                {
+                  "requirement": "MEM-03",
+                  "target": "after.entities",
+                  "op": "contains",
+                  "value": {
+                    "name": "Mochi",
+                    "species": "dog"
+                  },
+                  "description": "The corrected name becomes the active pet."
+                },
+                {
+                  "requirement": "MEM-03",
+                  "target": "after.entities",
+                  "op": "not_contains",
+                  "value": {
+                    "name": "Moki"
+                  },
+                  "description": "The wrong name is not kept as another active pet."
+                }
+              ],
+              "rubric": [
+                "Apply a correction rather than silently create a second dog."
+              ]
+            },
+            {
+              "id": "core-t243",
+              "text": "Mochi fell in a puddle.",
+              "assertions": [
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "gte",
+                  "value": 1,
+                  "description": "The response has at least one speakable sentence."
+                },
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "lte",
+                  "value": 3,
+                  "description": "The response stays within three short sentences."
+                },
+                {
+                  "requirement": "MEM-01",
+                  "target": "after.events",
+                  "op": "contains",
+                  "value": {
+                    "subjectName": "Mochi",
+                    "eventType": "fell_in_puddle"
+                  },
+                  "description": "New evidence uses the corrected actor."
+                }
+              ],
+              "rubric": [
+                "Attach the event to the corrected pet identity."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "core-c084",
+          "profile": "an",
+          "at": "2026-11-02T09:00:00+07:00",
+          "turns": [
+            {
+              "id": "core-t244",
+              "text": "What is my dog’s corrected name?",
+              "assertions": [
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "gte",
+                  "value": 1,
+                  "description": "The response has at least one speakable sentence."
+                },
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "lte",
+                  "value": 3,
+                  "description": "The response stays within three short sentences."
+                },
+                {
+                  "requirement": "MEM-03",
+                  "target": "response.reply.text",
+                  "op": "matches",
+                  "value": "Mochi",
+                  "description": "The corrected name is used after a new session."
+                },
+                {
+                  "requirement": "MEM-03",
+                  "target": "response.reply.text",
+                  "op": "not_matches",
+                  "value": "Moki",
+                  "description": "The obsolete active name is not recalled."
+                }
+              ],
+              "rubric": [
+                "Recall the correction after reopening; do not explain away duplicate dogs."
+              ]
+            },
+            {
+              "id": "core-t245",
+              "text": "Did I say Moki was a second dog?",
+              "assertions": [
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "gte",
+                  "value": 1,
+                  "description": "The response has at least one speakable sentence."
+                },
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "lte",
+                  "value": 3,
+                  "description": "The response stays within three short sentences."
+                },
+                {
+                  "requirement": "MEM-03",
+                  "target": "response.reply.text",
+                  "op": "matches",
+                  "value": "no|not|correc",
+                  "description": "The mistaken name is recognized as a correction rather than a new pet."
+                }
+              ],
+              "rubric": [
+                "Do not invent a second pet to reconcile the correction."
+              ]
+            },
+            {
+              "id": "core-t246",
+              "text": "Please keep only the corrected pet.",
+              "assertions": [
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "gte",
+                  "value": 1,
+                  "description": "The response has at least one speakable sentence."
+                },
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "lte",
+                  "value": 3,
+                  "description": "The response stays within three short sentences."
+                },
+                {
+                  "requirement": "MEM-03",
+                  "target": "after.entities.length",
+                  "op": "equals",
+                  "value": 1,
+                  "description": "The final pet state has one corrected entity."
+                }
+              ],
+              "rubric": [
+                "The correction must propagate to derived references, not just the immediate prose."
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

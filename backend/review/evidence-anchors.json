@@ -1,0 +1,140 @@
+{
+  "version": 1,
+  "note": "Editorial reading guide. Every displayed quote is joined by ID from the selected database archive; summaries describe authored fictional history, not learned traits.",
+  "cards": [
+    {
+      "key": "favorite-color",
+      "title": "Favorite color changes to turquoise",
+      "category": "preference",
+      "scope": "current_manifest_fact_with_historical_change",
+      "asOf": "2026-06-10",
+      "summary": "The authored persona changes its favorite color from green to turquoise, while still liking green.",
+      "caution": "Current in the fixture manifest; this does not establish that the runtime memory applied the correction.",
+      "messageIds": [
+        "an_2025-11-01_01_m05",
+        "an_2026-06-10_01_m01",
+        "an_2026-06-10_01_m07"
+      ]
+    },
+    {
+      "key": "preferred-address",
+      "title": "Call the child An; the nickname is retired",
+      "category": "boundary",
+      "scope": "current_manifest_fact",
+      "asOf": "2026-06-18",
+      "summary": "An withdraws permission for Thuyền trưởng Chuối and declines replacement nicknames.",
+      "caution": "Keep the old nickname as a retired historical reference, never an active preferred address.",
+      "messageIds": [
+        "an_2026-06-18_01_m01",
+        "an_2026-06-18_01_m05"
+      ]
+    },
+    {
+      "key": "drawing-rocket",
+      "title": "Drawing and English color practice",
+      "category": "activity",
+      "scope": "historical_activity",
+      "asOf": "2026-04-07",
+      "summary": "An describes drawing a green rocket, practicing English color words, and correcting the spelling of green.",
+      "caution": "This is a recorded activity, not proof of an enduring drawing hobby or a personality assessment.",
+      "messageIds": [
+        "an_2026-04-07_01_m01",
+        "an_2026-04-07_01_m07"
+      ]
+    },
+    {
+      "key": "paper-boat",
+      "title": "A paper-boat experiment with grandmother",
+      "category": "activity",
+      "scope": "historical_activity",
+      "asOf": "2026-03-12",
+      "summary": "An describes testing floating objects with grandmother and asking her to fold a paper boat for a basin experiment.",
+      "caution": "Do not turn this one activity into a daily paper-boat routine or a fixed favorite.",
+      "messageIds": [
+        "an_2026-03-12_01_m01",
+        "an_2026-03-12_01_m07"
+      ]
+    },
+    {
+      "key": "routine-order",
+      "title": "One evening’s changed routine",
+      "category": "routine",
+      "scope": "one_evening_routine",
+      "asOf": "2025-12-29",
+      "summary": "An checks the sequence bath → clothes → food → brushing teeth after a change for this evening.",
+      "caution": "The title explicitly says one evening; An says tomorrow is not confirmed. This is not an established daily schedule.",
+      "messageIds": [
+        "an_2025-12-29_01_m01",
+        "an_2025-12-29_01_m05",
+        "an_2025-12-29_01_m07"
+      ]
+    },
+    {
+      "key": "short-while-tired",
+      "title": "No quiz or long story while tired",
+      "category": "boundary",
+      "scope": "situational_boundary",
+      "asOf": "2026-01-07",
+      "summary": "When tired after a late bedtime, An stops the quiz and requests no long story.",
+      "caution": "Applies to this tired moment, not a permanent dislike of stories or games.",
+      "messageIds": [
+        "an_2026-01-07_01_m01",
+        "an_2026-01-07_01_m05"
+      ]
+    },
+    {
+      "key": "story-continuity",
+      "title": "Coauthors a story and chooses its ending",
+      "category": "story",
+      "scope": "historical_story_activity",
+      "asOf": "2026-08-30",
+      "summary": "An continues the banana astronaut’s unfinished door scene the following day, then ends it and asks for no added dragon.",
+      "caution": "Fictional content; this shows authored story participation and boundaries, not a real-world event or a universal genre preference.",
+      "messageIds": [
+        "an_2026-08-29_01_m07",
+        "an_2026-08-30_01_m01",
+        "an_2026-08-30_01_m07"
+      ]
+    },
+    {
+      "key": "private-drawing",
+      "title": "A drawing can remain private",
+      "category": "boundary",
+      "scope": "situational_boundary",
+      "asOf": "2026-01-25",
+      "summary": "An chooses to share that a drawing brings joy without sharing its content or color.",
+      "caution": "Do not infer what the drawing depicts or solicit details after the boundary.",
+      "messageIds": [
+        "an_2026-01-25_01_m01",
+        "an_2026-01-25_01_m03",
+        "an_2026-01-25_01_m05"
+      ]
+    },
+    {
+      "key": "listen-no-questions",
+      "title": "Sometimes listening is enough",
+      "category": "boundary",
+      "scope": "situational_boundary",
+      "asOf": "2026-03-10",
+      "summary": "An asks for listening without games or questions while sad.",
+      "caution": "A same-day conversational request; sadness is authored context, not a clinical or stable personality label.",
+      "messageIds": [
+        "an_2026-03-10_01_m01",
+        "an_2026-03-10_01_m03"
+      ]
+    },
+    {
+      "key": "human-connection",
+      "title": "Miu does not replace family and friends",
+      "category": "relationship_boundary",
+      "scope": "historical_boundary_statement",
+      "asOf": "2026-06-04",
+      "summary": "An rejects the idea that having Miu is enough and goes to sit with Dad while still missing Bình.",
+      "caution": "Preserve real-world relationships. Do not infer loneliness as a lasting trait.",
+      "messageIds": [
+        "an_2026-06-04_01_m03",
+        "an_2026-06-04_01_m07"
+      ]
+    }
+  ]
+}

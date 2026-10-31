@@ -1,0 +1,112 @@
+{
+  "run_kind": "production_real_voice_probe",
+  "status": "passed",
+  "started_at": "2026-10-31T06:01:06.644Z",
+  "input": {
+    "source": "local_recorded_test_wav_uploaded_over_ssh_stdin",
+    "sha256": "723bff8a69511d5ad3ab55461d6b5013d172b4c460b7a53f0f1bd7596f7f150d",
+    "bytes": 281896
+  },
+  "configuration": {
+    "provider_mode": "real",
+    "elevenlabs_enable_logging": true,
+    "model": "gpt-6-luna",
+    "dns_ipv4first_configured": true
+  },
+  "stages": [
+    {
+      "stage": "health",
+      "method": "GET",
+      "path": "/api/health",
+      "http_status": 200,
+      "elapsed_ms": 139,
+      "error_code": null
+    },
+    {
+      "stage": "create_own_binh_session",
+      "method": "POST",
+      "path": "/api/sessions",
+      "http_status": 200,
+      "elapsed_ms": 31,
+      "error_code": null
+    },
+    {
+      "stage": "configure_english",
+      "method": "PATCH",
+      "path": "/api/profiles/current/config",
+      "http_status": 200,
+      "elapsed_ms": 9,
+      "error_code": null
+    },
+    {
+      "stage": "audio_turn",
+      "method": "POST",
+      "path": "/api/sessions/ae1b0b1f-9a0a-48fc-b740-711706400ce8/turns",
+      "http_status": 200,
+      "elapsed_ms": 3193,
+      "error_code": null
+    },
+    {
+      "stage": "cancel_own_unheard_turn",
+      "method": "DELETE",
+      "path": "/api/sessions/ae1b0b1f-9a0a-48fc-b740-711706400ce8/turns/6f170672-3c5d-4f38-871d-bfb85bc2fd05",
+      "http_status": 200,
+      "elapsed_ms": 7,
+      "error_code": null
+    },
+    {
+      "stage": "close_own_session",
+      "method": "DELETE",
+      "path": "/api/sessions/ae1b0b1f-9a0a-48fc-b740-711706400ce8",
+      "http_status": 200,
+      "elapsed_ms": 5,
+      "error_code": null
+    }
+  ],
+  "completed_receipt_sent": false,
+  "playback_receipts_sent": 0,
+  "limitations": [
+    "Actual service audio upload and generated audio are tested; physical microphone, playback and listening are not tested.",
+    "No playback receipt is sent. No memory learning or story-progress claim is made.",
+    "Upstream model request IDs are not exposed by the deployed voice contract; provider mode and actual live HTTP results are recorded."
+  ],
+  "health": {
+    "status": "ok",
+    "provider_mode": "real",
+    "engine_mode": "voice_stub"
+  },
+  "transcript": {
+    "text": "Miu, can you tell me a story about a little kitten?",
+    "language": "en",
+    "expected_content_recognized": true
+  },
+  "reply": {
+    "text": "Once, a little kitten named Pip found a shiny button beneath a tree. Pip carried it home and gave it to a lonely old owl, who smiled and made Pip a warm nest for the night.",
+    "language": "en"
+  },
+  "result": {
+    "provider_mode": "real",
+    "engine_mode": "voice_stub",
+    "audio": {
+      "mime_type": "audio/mpeg",
+      "bytes": 174750,
+      "duration_ms": 10893,
+      "codec": "mp3",
+      "sample_rate": 44100,
+      "channels": 1,
+      "sha256": "80a80aa341e63424a27fda50e6dd3aca475613677ffbc41e89a1a6567ac70ee2"
+    },
+    "timings_ms": {
+      "stt": 1144,
+      "reply": 1542,
+      "validation": 1,
+      "tts": 472,
+      "server_total": 3159
+    }
+  },
+  "cleanup": {
+    "own_turn_canceled": true,
+    "own_session_closed": true,
+    "temporary_audio_removed": true
+  }
+}

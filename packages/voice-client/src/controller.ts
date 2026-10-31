@@ -1,5 +1,5 @@
 import { type Language, type SessionResponse, type TurnResponse } from '@miu/voice-contracts';
-import { VoiceApiClient, type VoiceApiOptions } from './api.js';
+import { VoiceApiClient, type VoiceApiOptions, type CharacterConfiguration } from './api.js';
 import { BrowserVoiceCapture, type CaptureEvent, type CaptureOptions, type CapturedAudio } from './capture.js';
 import { asClientError, canceledError, isCanceled, notify, VoiceClientError } from './errors.js';
 import { VoicePlayback, type PlaybackEvent, type PlaybackOptions, type PlaybackResult, type ReceiptSender } from './playback.js';
@@ -26,7 +26,7 @@ export interface PlaybackPort {
   subscribe?(listener: (event: PlaybackEvent) => void): () => void;
 }
 export type VoiceApiPort = Pick<VoiceApiClient,
-  'createRequestId' | 'createSession' | 'configure' | 'submitTurn' | 'cancelTurn' | 'playback' | 'endSession'>;
+  'createRequestId' | 'createSession' | 'configure' | 'submitTurn' | 'cancelTurn' | 'playback' | 'endSession'> & Partial<Pick<VoiceApiClient, 'submitText'>>;
 export interface VoiceControllerOptions { api: VoiceApiPort; capture: CapturePort; playback: PlaybackPort }
 interface ActiveTurn { id: string; session: SessionResponse; abort: AbortController; response?: TurnResponse }
 
@@ -66,7 +66,7 @@ export class VoiceController {
     return () => this.listeners.delete(listener);
   }
 
-  async openProfile(demoProfileKey: string, language: Language, voiceId?: string): Promise<SessionResponse> {
+  async openProfile(demoProfileKey: string, language: Language, voiceId?: string, character: CharacterConfiguration = {}): Promise<SessionResponse> {
     this.ensureAvailable();
     const stopped = this.stop();
     const previous = this.currentSession;
@@ -78,12 +78,13 @@ export class VoiceController {
     let created: SessionResponse | null = null;
     try {
       await stopped;
+      await this.ports.playback.flushReceipts();
       if (abort.signal.aborted || generation !== this.setupGeneration) throw canceledError();
       if (previous) await this.ports.api.endSession(previous);
       if (abort.signal.aborted || generation !== this.setupGeneration) throw canceledError();
       created = await this.ports.api.createSession(demoProfileKey, abort.signal);
       if (abort.signal.aborted || generation !== this.setupGeneration) throw canceledError();
-      const configured = await this.ports.api.configure(created, language, voiceId, abort.signal);
+      const configured = await this.ports.api.configure(created, language, voiceId, abort.signal, character);
       if (abort.signal.aborted || generation !== this.setupGeneration) throw canceledError();
       this.currentSession = { ...created, ...configured };
       this.setupAbort = null;
@@ -130,6 +131,45 @@ export class VoiceController {
   }
 
   send(): boolean { return this.ports.capture.send(); }
+
+  text(text: string, options: { textOnly?: boolean } = {}): Promise<TurnResponse> {
+    return this.processText('utterance', text, options.textOnly === true);
+  }
+
+  greet(options: { textOnly?: boolean } = {}): Promise<TurnResponse> {
+    return this.processText('greeting', undefined, options.textOnly === true);
+  }
+
+  /** Call from an explicit "Done reading" action after displaying an approved text-only answer. */
+  async acknowledgeText(): Promise<void> {
+    const active = this.active;
+    if (!active?.response || active.response.audio !== null) return;
+    await this.ports.api.playback(active.session, active.id, {
+      request_id: this.ports.api.createRequestId(), status: 'started', played_ms: 0, state_version: active.response.state_version,
+    });
+    this.assertCurrent(active);
+    await this.ports.api.playback(active.session, active.id, {
+      request_id: this.ports.api.createRequestId(), status: 'completed', played_ms: 0, state_version: active.response.state_version,
+    });
+    this.assertCurrent(active);
+    this.active = null; this.setState('idle');
+  }
+
+  private async processText(kind: 'utterance' | 'greeting', text: string | undefined, textOnly: boolean): Promise<TurnResponse> {
+    this.ensureAvailable();
+    if (!this.currentSession || this.setupAbort) throw new VoiceClientError('SESSION_REQUIRED', 'Select a profile and language first.');
+    if (!this.ports.api.submitText) throw new VoiceClientError('TEXT_UNAVAILABLE', 'The configured client does not support text.');
+    const canceledPrevious = this.stop();
+    const active: ActiveTurn = { id: this.ports.api.createRequestId(), session: this.session!, abort: new AbortController() };
+    this.active = active; this.setState('processing');
+    try {
+      await canceledPrevious;
+      await this.ports.playback.flushReceipts();
+      this.assertCurrent(active);
+      const response = await this.ports.api.submitText(active.session, { requestId: active.id, kind, text, textOnly, signal: active.abort.signal });
+      return await this.present(active, response);
+    } catch (error) { this.failTurn(active, error); throw asClientError(error); }
+  }
 
   async resumePlayback(): Promise<PlaybackResult> {
     const active = this.active;
@@ -183,17 +223,24 @@ export class VoiceController {
   private async processTurn(active: ActiveTurn, capture: Promise<CapturedAudio>, canceledPrevious: Promise<void>, fixtureId?: string): Promise<TurnResponse> {
     try {
       // Observe both promises at once, even when cancellation fails while recording continues.
-      const [audio] = await Promise.all([capture, canceledPrevious]);
+      const [audio] = await Promise.all([capture, canceledPrevious, this.ports.playback.flushReceipts()]);
       this.assertCurrent(active);
       this.setState('processing');
       const response = await this.ports.api.submitTurn(active.session, {
         requestId: active.id, audio, fixtureId, signal: active.abort.signal,
       });
       this.assertCurrent(active);
+      return await this.present(active, response);
+    } catch (error) { this.failTurn(active, error); throw asClientError(error); }
+  }
+
+  private async present(active: ActiveTurn, response: TurnResponse): Promise<TurnResponse> {
+      this.assertCurrent(active);
       active.response = response;
       this.currentSession = { ...active.session, state_version: response.state_version, clock_version: response.clock_version };
       notify(this.listeners, { type: 'turn', response });
       this.assertCurrent(active);
+      if (response.audio === null) { this.setState('playback_blocked'); return response; }
       const result = await this.ports.playback.play(response,
         receipt => this.ports.api.playback(active.session, active.id, receipt), active.abort.signal);
       // A very short clip can finish before play() settles. Natural completion is not cancellation.
@@ -202,7 +249,9 @@ export class VoiceController {
       if (result === 'blocked') this.setState('playback_blocked');
       else if (result === 'playing') this.setState('speaking');
       return response;
-    } catch (error) {
+  }
+
+  private failTurn(active: ActiveTurn, error: unknown): void {
       if (this.active === active) {
         this.active = null;
         active.abort.abort();
@@ -211,8 +260,6 @@ export class VoiceController {
         void this.ports.api.cancelTurn(active.session, active.id).catch(() => {});
         this.handleError(error);
       }
-      throw asClientError(error);
-    }
   }
 
   private assertCurrent(active: ActiveTurn): void { if (this.active !== active || active.abort.signal.aborted) throw canceledError(); }

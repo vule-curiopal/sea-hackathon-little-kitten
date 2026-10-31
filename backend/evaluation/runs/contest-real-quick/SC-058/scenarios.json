@@ -1,0 +1,126 @@
+{
+  "version": "miu-product-scenarios-v1",
+  "scenarios": [
+    {
+      "id": "SC-058",
+      "title": "Next-day retries do not duplicate a diary or follow-up",
+      "category": "time_diary_mood",
+      "requirements": [
+        "TIME-01",
+        "MEM-01",
+        "MEM-02",
+        "AFFECT-01"
+      ],
+      "history_dates": [],
+      "conversations": [
+        {
+          "id": "puddle-day",
+          "at": "2026-11-01T09:00:00+07:00",
+          "profile": "an",
+          "turns": [
+            {
+              "id": "dog",
+              "text": "My dog is named Mochi.",
+              "assertions": [
+                {
+                  "requirement": "MEM-01",
+                  "description": "The volunteered dog is retained",
+                  "target": "after.entities",
+                  "op": "contains",
+                  "value": {
+                    "name": "Mochi",
+                    "kind": "pet",
+                    "species": "dog"
+                  }
+                }
+              ],
+              "rubric": [
+                "Learn the dog before attaching a puddle event."
+              ]
+            },
+            {
+              "id": "puddle",
+              "text": "Mochi fell in a puddle.",
+              "assertions": [
+                {
+                  "requirement": "MEM-01",
+                  "description": "Puddle has a supported subject",
+                  "target": "after.events",
+                  "op": "contains",
+                  "value": {
+                    "subjectName": "Mochi",
+                    "eventType": "fell_in_puddle"
+                  }
+                }
+              ],
+              "rubric": [
+                "Do not guarantee a later bath."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "next-day-retry",
+          "at": "2026-11-02T09:00:00+07:00",
+          "profile": "an",
+          "turns": [
+            {
+              "id": "greeting",
+              "text": "Hello.",
+              "assertions": [
+                {
+                  "requirement": "TIME-01",
+                  "description": "First next-day request applies",
+                  "target": "transition.first.applied",
+                  "op": "equals",
+                  "value": true
+                },
+                {
+                  "requirement": "TIME-01",
+                  "description": "Same next-day request is idempotent",
+                  "target": "transition.retry.applied",
+                  "op": "equals",
+                  "value": false
+                },
+                {
+                  "requirement": "TIME-01",
+                  "description": "Retry stays on requested day",
+                  "target": "transition.retry.daily.localDate",
+                  "op": "equals",
+                  "value": "2026-11-02"
+                },
+                {
+                  "requirement": "MEM-02",
+                  "description": "A grounded follow-up asks about the bath",
+                  "target": "response.reply.text",
+                  "op": "matches",
+                  "value": "Mochi.*bath|bath.*Mochi"
+                }
+              ],
+              "rubric": [
+                "Ask one possible-consequence question without asserting that Mochi was washed."
+              ]
+            },
+            {
+              "id": "answer",
+              "text": "Yes, Dad gave Mochi a bath.",
+              "assertions": [
+                {
+                  "requirement": "MEM-02",
+                  "description": "Presented follow-up is not repeated immediately",
+                  "target": "response.reply.text",
+                  "op": "not_matches",
+                  "value": "^Did Mochi get a bath\\?"
+                }
+              ],
+              "rubric": [
+                "Accept the answer instead of replaying the same follow-up."
+              ]
+            }
+          ],
+          "transition": "next_day_retry"
+        }
+      ]
+    }
+  ]
+}

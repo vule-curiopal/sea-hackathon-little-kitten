@@ -1,0 +1,212 @@
+{
+  "status": "passed",
+  "provider_mode": "real",
+  "engine_mode": "character_memory",
+  "checks": [
+    "visible_delivery_gates_learning",
+    "memory_panel_uses_postgresql_state",
+    "next_day_retains_memory",
+    "real_output_tts",
+    "real_tts_html_audio_completed_receipt"
+  ],
+  "stages": [
+    {
+      "stage": "initial_session",
+      "at": "2026-10-31T05:44:48.915Z"
+    },
+    {
+      "stage": "text_only_settings",
+      "at": "2026-10-31T05:44:56.401Z"
+    },
+    {
+      "stage": "typed_reply",
+      "at": "2026-10-31T05:44:56.573Z"
+    },
+    {
+      "stage": "before_reading",
+      "at": "2026-10-31T05:45:10.530Z"
+    },
+    {
+      "stage": "reading_acknowledgment",
+      "at": "2026-10-31T05:45:11.583Z"
+    },
+    {
+      "stage": "memory_panel",
+      "at": "2026-10-31T05:45:22.713Z"
+    },
+    {
+      "stage": "next_day_http",
+      "at": "2026-10-31T05:45:24.089Z"
+    },
+    {
+      "stage": "next_day_fresh_session_and_configuration",
+      "at": "2026-10-31T05:45:27.009Z"
+    },
+    {
+      "stage": "next_day_retained_memory",
+      "at": "2026-10-31T05:45:33.589Z"
+    },
+    {
+      "stage": "audio_settings",
+      "at": "2026-10-31T05:45:35.643Z"
+    },
+    {
+      "stage": "actual_model_and_output_tts",
+      "at": "2026-10-31T05:45:35.771Z"
+    },
+    {
+      "stage": "html_audio_completed_receipt",
+      "at": "2026-10-31T05:45:49.801Z"
+    }
+  ],
+  "http": [
+    {
+      "method": "POST",
+      "path": "/api/sessions",
+      "status": 200,
+      "stage": "initial_session",
+      "elapsed_ms": 3345,
+      "error_code": null
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/profiles/current/config",
+      "status": 200,
+      "stage": "initial_session",
+      "elapsed_ms": 3390,
+      "error_code": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/sessions/39973542-ba5b-4572-a6d9-6dde268d99c7/turns",
+      "status": 200,
+      "stage": "typed_reply",
+      "elapsed_ms": 13775,
+      "error_code": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/demo/panel",
+      "status": 200,
+      "stage": "before_reading",
+      "elapsed_ms": 1042,
+      "error_code": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/sessions/39973542-ba5b-4572-a6d9-6dde268d99c7/turns/29fb6663-de54-4ed9-be32-1112df8b0406/playback",
+      "status": 200,
+      "stage": "reading_acknowledgment",
+      "elapsed_ms": 5161,
+      "error_code": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/sessions/39973542-ba5b-4572-a6d9-6dde268d99c7/turns/29fb6663-de54-4ed9-be32-1112df8b0406/playback",
+      "status": 200,
+      "stage": "reading_acknowledgment",
+      "elapsed_ms": 4840,
+      "error_code": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/demo/panel",
+      "status": 200,
+      "stage": "reading_acknowledgment",
+      "elapsed_ms": 994,
+      "error_code": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/demo/panel",
+      "status": 200,
+      "stage": "memory_panel",
+      "elapsed_ms": 999,
+      "error_code": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/demo/next-day",
+      "status": 200,
+      "stage": "next_day_http",
+      "elapsed_ms": 2871,
+      "error_code": null
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/sessions/39973542-ba5b-4572-a6d9-6dde268d99c7",
+      "status": 200,
+      "stage": "next_day_fresh_session_and_configuration",
+      "elapsed_ms": 2,
+      "error_code": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/sessions",
+      "status": 200,
+      "stage": "next_day_fresh_session_and_configuration",
+      "elapsed_ms": 3291,
+      "error_code": null
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/profiles/current/config",
+      "status": 200,
+      "stage": "next_day_fresh_session_and_configuration",
+      "elapsed_ms": 3270,
+      "error_code": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/demo/panel",
+      "status": 200,
+      "stage": "next_day_fresh_session_and_configuration",
+      "elapsed_ms": 987,
+      "error_code": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/demo/panel",
+      "status": 200,
+      "stage": "next_day_retained_memory",
+      "elapsed_ms": 2011,
+      "error_code": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/sessions/37e81a71-32b2-467b-9c77-4a2aa7ac5eac/turns",
+      "status": 200,
+      "stage": "actual_model_and_output_tts",
+      "elapsed_ms": 13970,
+      "error_code": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/sessions/37e81a71-32b2-467b-9c77-4a2aa7ac5eac/turns/843c8521-a135-43ea-aeaf-6227dd5f506a/playback",
+      "status": 200,
+      "stage": "html_audio_completed_receipt",
+      "elapsed_ms": 3260,
+      "error_code": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/sessions/37e81a71-32b2-467b-9c77-4a2aa7ac5eac/turns/843c8521-a135-43ea-aeaf-6227dd5f506a/playback",
+      "status": 200,
+      "stage": "html_audio_completed_receipt",
+      "elapsed_ms": 4648,
+      "error_code": null
+    }
+  ],
+  "audio_input_stt": "not_in_scope",
+  "text_reply": "Nori is a lovely name! What kind of toy is Nori?",
+  "audio_reply": "Good morning! I’m Miu, a talking AI kitten, and I’m happy to chat with you.",
+  "growth_days": 1,
+  "audio_mime_type": "audio/mpeg",
+  "audio_duration_ms": 5094,
+  "screenshots": [
+    "conversation.png",
+    "memory-panel.png",
+    "approved-audio.png"
+  ],
+  "limitations": "Desktop headless Chrome exercised actual DOM controls and HTML audio events. No physical microphone, speaker, iPad, or child listening was verified."
+}

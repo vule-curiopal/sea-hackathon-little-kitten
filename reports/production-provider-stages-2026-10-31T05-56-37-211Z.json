@@ -1,0 +1,12 @@
+{
+  "checked_at": "2026-10-31T05:56:27.006Z",
+  "operation": "deployed_provider_stage_diagnostics",
+  "events": [],
+  "checks": {},
+  "reply_model": "gpt-6-astra",
+  "status": "failed",
+  "error": {
+    "code": "provider_unavailable",
+    "name": "PipelineError"
+  }
+}

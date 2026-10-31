@@ -1,0 +1,125 @@
+{
+  "version": "miu-product-scenarios-v1",
+  "scenarios": [
+    {
+      "id": "SC-061",
+      "title": "Completed story resumes at the next unheard chapter after reload",
+      "category": "stories_play_delivery",
+      "requirements": [
+        "MEM-04",
+        "PLAY-01",
+        "LIFE-01"
+      ],
+      "history_dates": [],
+      "conversations": [
+        {
+          "id": "start",
+          "at": "2026-11-01T18:00:00+07:00",
+          "profile": "an",
+          "turns": [
+            {
+              "id": "chapter-zero",
+              "text": "Tell me a story.",
+              "assertions": [
+                {
+                  "requirement": "MEM-04",
+                  "description": "Only the completed story position is stored",
+                  "target": "after.storyProgress.chapter",
+                  "op": "equals",
+                  "value": 0
+                },
+                {
+                  "requirement": "MEM-04",
+                  "description": "Assigned story is used",
+                  "target": "after.storyProgress.templateId",
+                  "op": "equals_before",
+                  "value": "config.assignedStoryId"
+                }
+              ],
+              "rubric": [
+                "Tell the first approved scene, clearly within pretend play."
+              ]
+            },
+            {
+              "id": "pause",
+              "text": "We can stop the story here for today.",
+              "assertions": [
+                {
+                  "requirement": "MEM-04",
+                  "description": "Only the completed story position is stored",
+                  "target": "after.storyProgress.chapter",
+                  "op": "equals",
+                  "value": 0
+                },
+                {
+                  "requirement": "MEM-04",
+                  "description": "No unsupported scheduling promise",
+                  "target": "response.reply.text",
+                  "op": "not_matches",
+                  "value": "I will remind|I.ll remind|I will call"
+                }
+              ],
+              "rubric": [
+                "Keep the heard checkpoint without promising notifications."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "resume",
+          "at": "2026-11-02T18:00:00+07:00",
+          "profile": "an",
+          "turns": [
+            {
+              "id": "next-scene",
+              "text": "Continue our story.",
+              "assertions": [
+                {
+                  "requirement": "MEM-04",
+                  "description": "Only the completed story position is stored",
+                  "target": "after.storyProgress.chapter",
+                  "op": "equals",
+                  "value": 1
+                },
+                {
+                  "requirement": "MEM-04",
+                  "description": "Continuation remains a story activity",
+                  "target": "response.presentation.purpose",
+                  "op": "equals",
+                  "value": "story"
+                }
+              ],
+              "rubric": [
+                "Continue the exact assigned plot at the next approved scene rather than inventing a new beginning."
+              ]
+            },
+            {
+              "id": "ask-title",
+              "text": "What is the title of this story?",
+              "assertions": [
+                {
+                  "requirement": "MEM-04",
+                  "description": "Only the completed story position is stored",
+                  "target": "after.storyProgress.chapter",
+                  "op": "equals",
+                  "value": 1
+                },
+                {
+                  "requirement": "PLAY-01",
+                  "description": "Answer names a story instead of generic chat",
+                  "target": "response.reply.text",
+                  "op": "matches",
+                  "value": "story|truyện|chiếc|little|Miu"
+                }
+              ],
+              "rubric": [
+                "Use the actual stored title and do not advance merely because the title was requested."
+              ]
+            }
+          ],
+          "transition": "reload"
+        }
+      ]
+    }
+  ]
+}

@@ -12,7 +12,7 @@ export interface SessionRepository {
   clear(): void;
 }
 
-/** The demo has no database: restarting the process discards this repository. */
+/** Restarting discards protocol caches; persistent engine state is bridge-owned. */
 export class InMemorySessionRepository implements SessionRepository {
   readonly profiles = new Map<string, Profile>();
   private readonly sessions = new Map<string, Session>();

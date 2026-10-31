@@ -16,6 +16,7 @@ export function createTurnUploadMiddleware(): RequestHandler {
       fieldSize: 256, fieldNameSize: 64, headerPairs: 100 },
   }).single('audio');
   return (request, response, next) => {
+    if (request.is('application/json')) return next();
     if (!request.is('multipart/form-data')) return next(new PipelineError('invalid_request', 400));
     upload(request, response, error => {
       // The body limiter already forwarded its error; never resume a rejected route.
@@ -34,6 +35,25 @@ export async function readTurnSubmission(
   request: Request, signal: AbortSignal, onRequestId?: (id: string) => void,
 ): Promise<TurnSubmission> {
   abortError(signal);
+  if (request.is('application/json')) {
+    const fields = object(request.body);
+    if (Object.keys(fields).some(key => !['request_id', 'kind', 'text', 'text_only', 'language_hint'].includes(key))) {
+      throw new PipelineError('invalid_request', 400);
+    }
+    const requestId = identifier(fields.request_id);
+    onRequestId?.(requestId);
+    const kind = fields.kind;
+    if ((kind !== 'utterance' && kind !== 'greeting')
+      || (fields.text_only !== undefined && typeof fields.text_only !== 'boolean')
+      || (fields.language_hint !== undefined && typeof fields.language_hint !== 'string')
+      || (kind === 'utterance' && (typeof fields.text !== 'string' || !fields.text.trim() || [...fields.text].length > LIMITS.transcriptChars))
+      || (kind === 'greeting' && fields.text !== undefined)) {
+      throw new PipelineError('invalid_request', 400);
+    }
+    return { requestId, kind, textOnly: fields.text_only === true,
+      ...(typeof fields.text === 'string' ? { text: fields.text } : {}),
+      ...(typeof fields.language_hint === 'string' ? { languageHint: fields.language_hint } : {}) };
+  }
   if (!request.is('multipart/form-data')) throw new PipelineError('invalid_request', 400);
   const fields = object(request.body);
   for (const [name, value] of Object.entries(fields)) {

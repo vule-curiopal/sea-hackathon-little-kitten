@@ -1,5 +1,5 @@
 [Unit]
-Description=Miu Express voice API
+Description=Miu integrated character, memory and voice API
 After=network.target
 
 [Service]
@@ -8,7 +8,8 @@ User=miu
 Group=miu
 WorkingDirectory=/opt/miu/current
 EnvironmentFile=/etc/miu/api.env
-ExecStart=/opt/node24/bin/node /opt/miu/current/backend/pipeline/dist/server.js
+Environment=TSX_DISABLE_CACHE=1
+ExecStart=/opt/node24/bin/node --import tsx /opt/miu/current/backend/integration/server.ts
 Restart=on-failure
 RestartSec=3
 TimeoutStopSec=15

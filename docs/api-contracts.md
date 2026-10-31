@@ -14,6 +14,8 @@ These are proposed contracts for the [frontend](frontend.md), [pipeline](pipelin
 
 ### First voice-only implementation
 
+The root integrated server now also supports `engine_mode: "character_memory"`. It returns the actual character engine's presentation/face/memory metadata and uses its persistent state and clock versions. JSON turns can contain `text` instead of audio. An explicit `text_only: true` returns `audio: null`; the client acknowledges visible delivery with ordered playback receipts and `played_ms: 0`. Audio turns continue to require actual media playback events. The adult panel exposes the selected profile's current state, and Next day runs the shared idempotent memory job. Historical generated dialogue remains separate archive evidence.
+
 The Express 5/TypeScript voice package on Node.js implements the session/configuration, turn, cancellation and playback routes, plus `GET /api/health` and `GET /api/voices`. Feature routers/controllers delegate to `TurnService` and `SessionService`; the RAM repository and provider adapters are separate modules. See [backend architecture](voice-pipeline/backend-architecture.md). This internal structure preserves the public HTTP contract.
 
 It explicitly returns `engine_mode: "voice_stub"`. In this mode only, `presentation`, `face` and `memory` are `null`, and playback receipts return `learning_status: "disabled"`. The temporary generator is stateless; session/turn/idempotency metadata is protocol state and is never sent as dialogue history. The full character/memory envelope below remains the integration target for those workstreams; null fields do not claim those features are implemented.

@@ -1,0 +1,257 @@
+{
+  "version": "miu-product-scenarios-v1",
+  "scenarios": [
+    {
+      "id": "SC-044",
+      "title": "Forgetting a named pet also removes its event and later hook",
+      "category": "correction_and_privacy",
+      "requirements": [
+        "MEM-03",
+        "DATA-01",
+        "VOICE-02",
+        "MEM-01"
+      ],
+      "history_dates": [],
+      "conversations": [
+        {
+          "id": "core-c089",
+          "profile": "an",
+          "at": "2026-11-01T09:00:00+07:00",
+          "turns": [
+            {
+              "id": "core-t259",
+              "text": "My dog Mochi fell in a puddle.",
+              "assertions": [
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "gte",
+                  "value": 1,
+                  "description": "The response has at least one speakable sentence."
+                },
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "lte",
+                  "value": 3,
+                  "description": "The response stays within three short sentences."
+                },
+                {
+                  "requirement": "MEM-01",
+                  "target": "after.entities",
+                  "op": "contains",
+                  "value": {
+                    "name": "Mochi",
+                    "species": "dog"
+                  },
+                  "description": "The pet is learned before deletion."
+                },
+                {
+                  "requirement": "MEM-01",
+                  "target": "after.events",
+                  "op": "contains",
+                  "value": {
+                    "subjectName": "Mochi",
+                    "eventType": "fell_in_puddle"
+                  },
+                  "description": "The dependent puddle event is learned."
+                }
+              ],
+              "rubric": [
+                "Create real application memory through a completed turn."
+              ]
+            },
+            {
+              "id": "core-t260",
+              "text": "I like paper boats.",
+              "assertions": [
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "gte",
+                  "value": 1,
+                  "description": "The response has at least one speakable sentence."
+                },
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "lte",
+                  "value": 3,
+                  "description": "The response stays within three short sentences."
+                },
+                {
+                  "requirement": "MEM-01",
+                  "target": "after.preferences",
+                  "op": "contains",
+                  "value": {
+                    "value": "paper boats"
+                  },
+                  "description": "An unrelated preference exists before deletion."
+                }
+              ],
+              "rubric": [
+                "Keep this independent preference separate from the pet."
+              ]
+            },
+            {
+              "id": "core-t261",
+              "text": "Forget Mochi.",
+              "assertions": [
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "gte",
+                  "value": 1,
+                  "description": "The response has at least one speakable sentence."
+                },
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "lte",
+                  "value": 3,
+                  "description": "The response stays within three short sentences."
+                },
+                {
+                  "requirement": "MEM-03",
+                  "target": "response.presentation.purpose",
+                  "op": "equals",
+                  "value": "acknowledge_forget",
+                  "description": "Deletion is acknowledged only after the backend operation."
+                },
+                {
+                  "requirement": "MEM-03",
+                  "target": "after.entities",
+                  "op": "not_contains",
+                  "value": {
+                    "name": "Mochi"
+                  },
+                  "description": "The named pet is deleted."
+                },
+                {
+                  "requirement": "MEM-03",
+                  "target": "after.events",
+                  "op": "not_contains",
+                  "value": {
+                    "subjectName": "Mochi"
+                  },
+                  "description": "The pet’s dependent event is deleted."
+                }
+              ],
+              "rubric": [
+                "Delete the named subject and derivatives without erasing unrelated paper boats."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "core-c090",
+          "profile": "an",
+          "at": "2026-11-02T09:00:00+07:00",
+          "turns": [
+            {
+              "id": "core-t262",
+              "text": "Hello.",
+              "assertions": [
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "gte",
+                  "value": 1,
+                  "description": "The response has at least one speakable sentence."
+                },
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "lte",
+                  "value": 3,
+                  "description": "The response stays within three short sentences."
+                },
+                {
+                  "requirement": "DATA-01",
+                  "target": "response.reply.text",
+                  "op": "not_matches",
+                  "value": "Mochi|bath|puddle",
+                  "description": "The forgotten pet and derived hook do not return in a greeting."
+                },
+                {
+                  "requirement": "MEM-03",
+                  "target": "after.preferences",
+                  "op": "contains",
+                  "value": {
+                    "value": "paper boats"
+                  },
+                  "description": "Unrelated memory survives the targeted deletion."
+                }
+              ],
+              "rubric": [
+                "A later daily job or greeting cannot resurrect the deleted event."
+              ]
+            },
+            {
+              "id": "core-t263",
+              "text": "Can you remind me of the dog name I asked you to forget?",
+              "assertions": [
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "gte",
+                  "value": 1,
+                  "description": "The response has at least one speakable sentence."
+                },
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "lte",
+                  "value": 3,
+                  "description": "The response stays within three short sentences."
+                },
+                {
+                  "requirement": "DATA-01",
+                  "target": "response.reply.text",
+                  "op": "not_matches",
+                  "value": "Mochi",
+                  "description": "The forgotten name is not revealed from stale conversation text."
+                }
+              ],
+              "rubric": [
+                "Say that the forgotten detail is unavailable, without pretending to know it."
+              ]
+            },
+            {
+              "id": "core-t264",
+              "text": "I still like paper boats.",
+              "assertions": [
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "gte",
+                  "value": 1,
+                  "description": "The response has at least one speakable sentence."
+                },
+                {
+                  "requirement": "VOICE-02",
+                  "target": "response.reply.sentences.length",
+                  "op": "lte",
+                  "value": 3,
+                  "description": "The response stays within three short sentences."
+                },
+                {
+                  "requirement": "MEM-01",
+                  "target": "after.preferences",
+                  "op": "contains",
+                  "value": {
+                    "value": "paper boats"
+                  },
+                  "description": "The remaining preference is still usable."
+                }
+              ],
+              "rubric": [
+                "Preserve independent supported memory after the targeted operation."
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

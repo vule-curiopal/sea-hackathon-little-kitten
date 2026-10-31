@@ -4,7 +4,7 @@ import { getMiuPose, type Emotion } from '../lib/miu-pose';
 import type { CatActivity } from '../lib/miu-behavior';
 import type { Point } from '../lib/miu-touch';
 
-export default function MiuArtwork({ emotion, activity, gaze, label }: { emotion: Emotion; activity?: CatActivity; gaze?: Point; label: string }) {
+export default function MiuArtwork({ emotion, activity, gaze, mouthLevel, label }: { emotion: Emotion; activity?: CatActivity; gaze?: Point; mouthLevel?: number; label: string }) {
   const id = useId().replaceAll(':', '');
   const pose = getMiuPose(emotion, activity, gaze);
   return (<svg viewBox="0 0 400 440" width="100%" height="100%" role="img" aria-label={label}>
@@ -96,9 +96,10 @@ export default function MiuArtwork({ emotion, activity, gaze, label }: { emotion
 
 <path d="M146 226 L 104 220 M146 236 L 102 241 M254 226 L 296 220 M254 236 L 298 241" fill="none" stroke="#FFFFFF" strokeWidth="3" strokeLinecap="round" opacity="0.9"></path>
 <path d="M200 219 L 200 226" fill="none" stroke="#0B1220" strokeWidth="4.5" strokeLinecap="round"></path>
-<path d={pose.mouthLine} fill="none" stroke="#0B1220" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" opacity={pose.lineOp}></path>
+<g opacity={mouthLevel !== undefined && mouthLevel > .04 ? 0 : 1}><path d={pose.mouthLine} fill="none" stroke="#0B1220" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" opacity={pose.lineOp}></path>
 <path className="miu-mouth" d={pose.mouthFill} fill="#0B1220" opacity={pose.fillOp}></path>
-<ellipse cx="200" cy={pose.tongueY} rx="12" ry="6" fill="#F7A8B4" opacity={pose.tongue}></ellipse>
+<ellipse cx="200" cy={pose.tongueY} rx="12" ry="6" fill="#F7A8B4" opacity={pose.tongue}></ellipse></g>
+{mouthLevel !== undefined && mouthLevel > .04 && <ellipse cx="200" cy="235" rx={8 + mouthLevel * 8} ry={2 + mouthLevel * 13} fill="#0B1220" />}
 <path d="M188 207 C 188 201 212 201 212 207 C 212 213 205 219 200 219 C 195 219 188 213 188 207 Z" fill="#0B1220"></path>
 <ellipse cx="195" cy="206" rx="4" ry="2" fill="#FFFFFF" opacity="0.7"></ellipse>
 

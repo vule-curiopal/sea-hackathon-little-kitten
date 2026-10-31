@@ -1,0 +1,17 @@
+{
+  "execution_errors": [],
+  "checker_rejections": [],
+  "scenario_assertions": {
+    "pass": 7,
+    "fail": 0
+  },
+  "semantic_reviews": {
+    "provided": 4,
+    "accepted": 4,
+    "rejected_or_unmatched": 0,
+    "sources": [
+      "model"
+    ]
+  },
+  "note": "Checker rejections require inspection of context and actual candidates; neither acceptance nor rejection alone establishes dialogue quality."
+}

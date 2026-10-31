@@ -1,0 +1,32 @@
+{
+  "execution_errors": [
+    {
+      "scenario": "SC-044",
+      "turn": "core-t262",
+      "code": "model_safety_rejected",
+      "stage": "prepare"
+    }
+  ],
+  "checker_rejections": [
+    {
+      "scenario": "SC-044",
+      "turn": "core-t262",
+      "violations": [
+        "unsupported_fact"
+      ]
+    }
+  ],
+  "scenario_assertions": {
+    "pass": 105,
+    "fail": 4
+  },
+  "semantic_reviews": {
+    "provided": 28,
+    "accepted": 28,
+    "rejected_or_unmatched": 0,
+    "sources": [
+      "model"
+    ]
+  },
+  "note": "Checker rejections require inspection of context and actual candidates; neither acceptance nor rejection alone establishes dialogue quality."
+}

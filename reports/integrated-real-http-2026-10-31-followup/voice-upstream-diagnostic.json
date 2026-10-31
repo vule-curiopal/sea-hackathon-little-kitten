@@ -1,0 +1,9 @@
+{
+  "stage": "speech_to_text",
+  "endpoint": "/v1/speech-to-text",
+  "enable_logging": false,
+  "status": 403,
+  "upstream_code": "not_allowed",
+  "validation_fields": [],
+  "transcript_present": false
+}

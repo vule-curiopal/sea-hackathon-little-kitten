@@ -1,0 +1,10 @@
+{
+  "synthetic": true,
+  "source_engine_log": "/Users/canon193/Desktop/Projects/shoppee-hackathon/backend/evaluation/runs/2026-10-31T04-33-31-024Z-real/turns.jsonl",
+  "model": "gpt-6-astra",
+  "store": false,
+  "requested_conversations": 2,
+  "reviewed_turns": 6,
+  "errors": [],
+  "note": "Model judgments are fallible evidence. Independent check failures cannot be overridden. Missing, malformed or stale judgments remain needs_review."
+}

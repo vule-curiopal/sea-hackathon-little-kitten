@@ -1,0 +1,105 @@
+{
+  "schemaVersion": "miu-growth-replay-v1",
+  "runId": "2026-10-31T04-30-58-751Z-714b1b75",
+  "synthetic": true,
+  "provider": "real",
+  "status": "complete",
+  "blocked": null,
+  "processedSessions": 1,
+  "models": {
+    "classify": "gpt-6-astra",
+    "reply": "gpt-6-astra",
+    "check": "gpt-6-astra",
+    "moderation": "omni-moderation-latest"
+  },
+  "providerCallCounts": {
+    "classify": 5,
+    "reply": 5,
+    "check": 5
+  },
+  "apiCallCounts": {
+    "classify": 5,
+    "reply": 5,
+    "check": 5,
+    "moderation_input": 5,
+    "moderation_output": 5
+  },
+  "modelAuthoredTurns": 5,
+  "authoredReplyBypasses": 0,
+  "unverifiedReplyTurns": 0,
+  "outputDir": "/Users/canon193/Desktop/Projects/shoppee-hackathon/backend/evaluation/runs/growing-real-preflight",
+  "from": "2025-11-01",
+  "to": "2025-11-01",
+  "sessions": 1,
+  "sourceTurns": 5,
+  "attemptedTurns": 5,
+  "completedTurns": 4,
+  "turnErrors": 1,
+  "firstGrowthDay": 0,
+  "finalGrowthDay": 0,
+  "nightJobCount": 1,
+  "distinctDiaryTemplates": 1,
+  "distinctGrowthThemes": 1,
+  "friendshipStages": {
+    "getting_acquainted": 1
+  },
+  "recordsCreatedDuringTurns": 2,
+  "recordsRemovedDuringTurns": 0,
+  "finalActiveRecords": 3,
+  "dayChecks": {
+    "pass": 11,
+    "fail": 0
+  },
+  "failures": [],
+  "errorCodes": {
+    "model_safety_rejected": 1
+  },
+  "checks": [
+    {
+      "id": "complete_source_replay",
+      "status": "pass",
+      "evidence": "Every source child turn is attempted exactly once.",
+      "expected": 5,
+      "actual": 5
+    },
+    {
+      "id": "all_source_turns_completed",
+      "status": "fail",
+      "evidence": "Response and receipt failures remain visible; failures never become successful delivery.",
+      "expected": 5,
+      "actual": 4
+    },
+    {
+      "id": "one_job_per_source_date",
+      "status": "pass",
+      "evidence": "One completed night-job receipt for each replayed source date.",
+      "expected": 1,
+      "actual": 1
+    },
+    {
+      "id": "actual_model_reply_requested_for_each_turn",
+      "status": "pass",
+      "evidence": "Requires observable API request evidence, not only a provider method call.",
+      "expected": 5,
+      "actual": 5
+    },
+    {
+      "id": "published_replies_have_model_evidence",
+      "status": "pass",
+      "evidence": "A completed reply API response ID establishes model authorship; authored bypasses and unverified replies do not pass.",
+      "expected": 0,
+      "actual": 0
+    }
+  ],
+  "limitations": [
+    "Real model text application only; speech synthesis, audible playback, and voice latency are not measured.",
+    "Provider method calls and underlying API requests are counted separately; only completed reply API responses with IDs establish model authorship.",
+    "Playback is simulated with real application receipt semantics; no audio is generated or heard.",
+    "Reference assistant text and authored mood labels are inspection data only, never runtime replies, memory evidence, or inferred child emotion.",
+    "A growing day count and correct transactions do not prove nuanced character development or semantic answer quality.",
+    "Friendship stages are reported without assuming every visit grants familiarity or nickname permission.",
+    "Synthetic source text and bounded context are logged for analysis; the full SQL record list avoids masking retention defects."
+  ],
+  "run_kind": "character_memory_evaluation",
+  "character_memory_quality_evidence": true
+}

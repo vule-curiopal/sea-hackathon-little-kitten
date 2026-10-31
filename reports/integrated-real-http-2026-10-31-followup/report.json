@@ -1,0 +1,728 @@
+{
+  "run_kind": "integrated_real_http_verification",
+  "provider": "real",
+  "status": "completed_with_unresolved_failures",
+  "scope": "voice_isolation_browser_followup",
+  "prior_report": "/Users/canon193/Desktop/Projects/shoppee-hackathon/reports/integrated-real-http-2026-10-31-r2",
+  "started_at": "2026-10-31T05:34:55.553Z",
+  "elapsed_ms": 176982,
+  "database": {
+    "engine": "postgresql",
+    "isolated_schema": "miu_integration_eval_7d4fea607e63445a858d0b530382729a",
+    "schema_removed": true,
+    "preserved_by_request": false,
+    "public_counts_before": {
+      "character_growth": 2,
+      "child_stories": 0,
+      "clock_requests": 0,
+      "daily_states": 2,
+      "demo_clocks": 2,
+      "diary_entries": 2,
+      "entities": 0,
+      "entity_aliases": 0,
+      "events": 0,
+      "facts": 0,
+      "followups": 0,
+      "historical_datasets": 1,
+      "historical_messages": 2932,
+      "historical_profiles": 1,
+      "historical_sessions": 365,
+      "integration_voice_settings": 0,
+      "memory_dependencies": 0,
+      "memory_operation_receipts": 0,
+      "memory_records": 2,
+      "miu_configs": 2,
+      "miu_self_statements": 0,
+      "night_job_runs": 2,
+      "profiles": 2,
+      "promises": 0,
+      "relationship_states": 2,
+      "schema_migrations": 6,
+      "social_connections": 0,
+      "story_checkpoints": 0,
+      "turn_learning": 0
+    },
+    "public_counts_after": {
+      "character_growth": 2,
+      "child_stories": 0,
+      "clock_requests": 0,
+      "daily_states": 2,
+      "demo_clocks": 2,
+      "diary_entries": 2,
+      "entities": 0,
+      "entity_aliases": 0,
+      "events": 0,
+      "facts": 0,
+      "followups": 0,
+      "historical_datasets": 1,
+      "historical_messages": 2932,
+      "historical_profiles": 1,
+      "historical_sessions": 365,
+      "integration_voice_settings": 0,
+      "memory_dependencies": 0,
+      "memory_operation_receipts": 0,
+      "memory_records": 2,
+      "miu_configs": 2,
+      "miu_self_statements": 0,
+      "night_job_runs": 2,
+      "profiles": 2,
+      "promises": 0,
+      "relationship_states": 2,
+      "schema_migrations": 6,
+      "social_connections": 0,
+      "story_checkpoints": 0,
+      "turn_learning": 0
+    }
+  },
+  "coverage": {
+    "attempted": 8,
+    "passed": 6,
+    "failed": 2,
+    "blocked": 0,
+    "not_attempted": 0
+  },
+  "actual_api_requests": {
+    "total": 15,
+    "completed": 15,
+    "responses_with_ids": 9,
+    "replies_with_ids": 3,
+    "models": {
+      "classify": "gpt-6-astra",
+      "reply": "gpt-6-astra",
+      "check": "gpt-6-astra",
+      "moderation": "omni-moderation-latest"
+    }
+  },
+  "delivery_evidence": "Playback receipts are simulated HTTP started/completed/interrupted messages. No physical iPad, microphone, speaker playback, or child listening was verified.",
+  "voice_input": "When attempted, a fictional utterance is synthesized through real ElevenLabs TTS, transcoded from MP3 to PCM WAV by ffmpeg, uploaded as actual WAV bytes, transcribed by real STT, answered by the real character engine, and synthesized by real TTS.",
+  "limitations": [
+    "Focused integration coverage does not establish full character or memory quality.",
+    "HTTP assertions use explicit fictional inputs and saved state; authored reference answers and fake providers are never used.",
+    "A missing/failed real request is recorded as failed or blocked and is never replaced.",
+    "Public table count comparison detects changes during this run; concurrent external writes could also change those counts."
+  ],
+  "fatal_error": null,
+  "cleanup_error": null,
+  "steps": [
+    {
+      "name": "startup",
+      "status": "passed",
+      "elapsed_ms": 8275,
+      "evidence": {
+        "current_schema": "miu_integration_eval_7d4fea607e63445a858d0b530382729a",
+        "health": {
+          "status": "ok",
+          "provider_mode": "real",
+          "engine_mode": "character_memory",
+          "capabilities": {
+            "text": true,
+            "audio": true,
+            "memory": true
+          },
+          "retention": "not_verified_by_this_service"
+        }
+      }
+    },
+    {
+      "name": "an_session_config",
+      "status": "passed",
+      "elapsed_ms": 7584,
+      "evidence": {
+        "entities": 0,
+        "preferences": 0,
+        "state_version": 3
+      }
+    },
+    {
+      "name": "seed_pet_for_followup_isolation",
+      "status": "passed",
+      "elapsed_ms": 28328,
+      "evidence": {
+        "entity_id": "0aef4688-3a87-42ee-8421-74c8ef50c1a4",
+        "reply": {
+          "text": "Mochi is such a sweet name for your dog! What does Mochi like to do?",
+          "sentences": [
+            "Mochi is such a sweet name for your dog!",
+            "What does Mochi like to do?"
+          ],
+          "language": "en"
+        }
+      }
+    },
+    {
+      "name": "binh_profile_isolation",
+      "status": "passed",
+      "elapsed_ms": 31659,
+      "evidence": {
+        "reply": {
+          "text": "I don’t have your dog’s name stored, so I don’t know it yet.",
+          "sentences": [
+            "I don’t have your dog’s name stored, so I don’t know it yet."
+          ],
+          "language": "en"
+        },
+        "entities": 0
+      }
+    },
+    {
+      "name": "real_audio_stt_engine_tts",
+      "status": "failed",
+      "elapsed_ms": 6741,
+      "error_code": "provider_unavailable"
+    },
+    {
+      "name": "real_browser_ui",
+      "status": "failed",
+      "elapsed_ms": 91613,
+      "error_code": "browser_ui_timeout"
+    },
+    {
+      "name": "actual_openai_request_provenance",
+      "status": "passed",
+      "elapsed_ms": 0,
+      "evidence": {
+        "actual_requests": 15,
+        "completed_reply_response_ids": [
+          "resp_067c5c5f4d9ed66e016ae57e17729087d2b13d61cb0e9b68b9",
+          "resp_0dea57b3f883a52e016ae57e39cfd487d29211f142d5063717",
+          "resp_06542b2d233b5b55016ae57e65eb6087d295dd8d633863d92c"
+        ],
+        "models": {
+          "classify": "gpt-6-astra",
+          "reply": "gpt-6-astra",
+          "check": "gpt-6-astra",
+          "moderation": "omni-moderation-latest"
+        }
+      }
+    },
+    {
+      "name": "public_database_preserved",
+      "status": "passed",
+      "elapsed_ms": 0
+    }
+  ],
+  "snapshots": {
+    "an_initial": {
+      "profile": {
+        "id": "d599a6bb-7705-4a6b-9fd4-ecf4c9103a1e",
+        "demoKey": "an",
+        "displayName": "An",
+        "ageBand": "6-8",
+        "languageMode": "en",
+        "timezone": "Asia/Ho_Chi_Minh",
+        "stateVersion": 3,
+        "deletionEpoch": 0
+      },
+      "config": {
+        "personality": "ENFP",
+        "role": "friend",
+        "voiceId": "miu-default",
+        "canonVersion": "miu-v1",
+        "assignedStoryId": "miu-b-double-count-storybook-nook-v1"
+      },
+      "clock": {
+        "mode": "demo",
+        "effectiveNow": "2026-10-31T05:35:10.832Z",
+        "localDate": "2026-10-31",
+        "timezone": "Asia/Ho_Chi_Minh",
+        "version": 1
+      },
+      "daily": {
+        "localDate": "2026-10-31",
+        "mood": "content",
+        "growthDays": 0,
+        "growthTheme": "curiosity",
+        "diary": {
+          "templateId": "cardboard-fort",
+          "en": "In my pretend house, I made a tiny cardboard fort.",
+          "vi": "Trong ngôi nhà tưởng tượng, Miu làm một pháo đài bìa nhỏ."
+        },
+        "storyEpisode": {
+          "templateId": "lantern-1",
+          "en": "In our pretend story, Miu and Pip the paper bird find a little lantern.",
+          "vi": "Trong truyện tưởng tượng, Miu và chim giấy Pip tìm thấy một chiếc đèn nhỏ.",
+          "chapter": 1
+        }
+      },
+      "entities": [],
+      "preferences": [],
+      "socialCircle": [],
+      "events": [],
+      "stories": [],
+      "storyProgress": null,
+      "friendship": "getting_acquainted",
+      "configuration": {
+        "personality": "ENFP",
+        "role": "friend",
+        "language_mode": "en",
+        "voice_id": "fBD19tfE58bkETeiwUoC"
+      },
+      "state_version": 3,
+      "clock_version": 1,
+      "effective_now": "2026-10-31T05:35:10.832Z",
+      "provider_mode": "real",
+      "engine_mode": "character_memory",
+      "context": {
+        "profile": {
+          "id": "d599a6bb-7705-4a6b-9fd4-ecf4c9103a1e",
+          "demoKey": "an",
+          "displayName": "An",
+          "ageBand": "6-8",
+          "languageMode": "en",
+          "timezone": "Asia/Ho_Chi_Minh",
+          "stateVersion": 3,
+          "deletionEpoch": 0
+        },
+        "config": {
+          "personality": "ENFP",
+          "role": "friend",
+          "voiceId": "miu-default",
+          "canonVersion": "miu-v1",
+          "assignedStoryId": "miu-b-double-count-storybook-nook-v1"
+        },
+        "clock": {
+          "mode": "demo",
+          "effectiveNow": "2026-10-31T05:35:10.832Z",
+          "localDate": "2026-10-31",
+          "timezone": "Asia/Ho_Chi_Minh",
+          "version": 1
+        },
+        "daily": {
+          "localDate": "2026-10-31",
+          "mood": "content",
+          "growthDays": 0,
+          "growthTheme": "curiosity",
+          "diary": {
+            "templateId": "cardboard-fort",
+            "en": "In my pretend house, I made a tiny cardboard fort.",
+            "vi": "Trong ngôi nhà tưởng tượng, Miu làm một pháo đài bìa nhỏ."
+          },
+          "storyEpisode": {
+            "templateId": "lantern-1",
+            "en": "In our pretend story, Miu and Pip the paper bird find a little lantern.",
+            "vi": "Trong truyện tưởng tượng, Miu và chim giấy Pip tìm thấy một chiếc đèn nhỏ.",
+            "chapter": 1
+          }
+        },
+        "entities": [],
+        "preferences": [],
+        "socialCircle": [],
+        "events": [],
+        "stories": [],
+        "storyProgress": null,
+        "friendship": "getting_acquainted",
+        "configuration": {
+          "personality": "ENFP",
+          "role": "friend",
+          "language_mode": "en",
+          "voice_id": "fBD19tfE58bkETeiwUoC"
+        },
+        "state_version": 3,
+        "clock_version": 1,
+        "effective_now": "2026-10-31T05:35:10.832Z",
+        "provider_mode": "real",
+        "engine_mode": "character_memory"
+      },
+      "memory_available": true,
+      "character_engine_available": true,
+      "active_turn": null,
+      "storage": "postgresql"
+    },
+    "followup_an_seeded": {
+      "profile": {
+        "id": "d599a6bb-7705-4a6b-9fd4-ecf4c9103a1e",
+        "demoKey": "an",
+        "displayName": "An",
+        "ageBand": "6-8",
+        "languageMode": "en",
+        "timezone": "Asia/Ho_Chi_Minh",
+        "stateVersion": 4,
+        "deletionEpoch": 0
+      },
+      "config": {
+        "personality": "ENFP",
+        "role": "friend",
+        "voiceId": "miu-default",
+        "canonVersion": "miu-v1",
+        "assignedStoryId": "miu-b-double-count-storybook-nook-v1"
+      },
+      "clock": {
+        "mode": "demo",
+        "effectiveNow": "2026-10-31T05:35:39.056Z",
+        "localDate": "2026-10-31",
+        "timezone": "Asia/Ho_Chi_Minh",
+        "version": 1
+      },
+      "daily": {
+        "localDate": "2026-10-31",
+        "mood": "content",
+        "growthDays": 0,
+        "growthTheme": "curiosity",
+        "diary": {
+          "templateId": "cardboard-fort",
+          "en": "In my pretend house, I made a tiny cardboard fort.",
+          "vi": "Trong ngôi nhà tưởng tượng, Miu làm một pháo đài bìa nhỏ."
+        },
+        "storyEpisode": {
+          "templateId": "lantern-1",
+          "en": "In our pretend story, Miu and Pip the paper bird find a little lantern.",
+          "vi": "Trong truyện tưởng tượng, Miu và chim giấy Pip tìm thấy một chiếc đèn nhỏ.",
+          "chapter": 1
+        }
+      },
+      "entities": [
+        {
+          "id": "0aef4688-3a87-42ee-8421-74c8ef50c1a4",
+          "kind": "pet",
+          "name": "Mochi",
+          "species": "dog",
+          "aliases": [],
+          "expiresAt": "2026-11-30T05:35:36.216Z"
+        }
+      ],
+      "preferences": [],
+      "socialCircle": [],
+      "events": [],
+      "stories": [],
+      "storyProgress": null,
+      "friendship": "getting_acquainted",
+      "configuration": {
+        "personality": "ENFP",
+        "role": "friend",
+        "language_mode": "en",
+        "voice_id": "fBD19tfE58bkETeiwUoC"
+      },
+      "state_version": 4,
+      "clock_version": 1,
+      "effective_now": "2026-10-31T05:35:39.056Z",
+      "provider_mode": "real",
+      "engine_mode": "character_memory",
+      "context": {
+        "profile": {
+          "id": "d599a6bb-7705-4a6b-9fd4-ecf4c9103a1e",
+          "demoKey": "an",
+          "displayName": "An",
+          "ageBand": "6-8",
+          "languageMode": "en",
+          "timezone": "Asia/Ho_Chi_Minh",
+          "stateVersion": 4,
+          "deletionEpoch": 0
+        },
+        "config": {
+          "personality": "ENFP",
+          "role": "friend",
+          "voiceId": "miu-default",
+          "canonVersion": "miu-v1",
+          "assignedStoryId": "miu-b-double-count-storybook-nook-v1"
+        },
+        "clock": {
+          "mode": "demo",
+          "effectiveNow": "2026-10-31T05:35:39.056Z",
+          "localDate": "2026-10-31",
+          "timezone": "Asia/Ho_Chi_Minh",
+          "version": 1
+        },
+        "daily": {
+          "localDate": "2026-10-31",
+          "mood": "content",
+          "growthDays": 0,
+          "growthTheme": "curiosity",
+          "diary": {
+            "templateId": "cardboard-fort",
+            "en": "In my pretend house, I made a tiny cardboard fort.",
+            "vi": "Trong ngôi nhà tưởng tượng, Miu làm một pháo đài bìa nhỏ."
+          },
+          "storyEpisode": {
+            "templateId": "lantern-1",
+            "en": "In our pretend story, Miu and Pip the paper bird find a little lantern.",
+            "vi": "Trong truyện tưởng tượng, Miu và chim giấy Pip tìm thấy một chiếc đèn nhỏ.",
+            "chapter": 1
+          }
+        },
+        "entities": [
+          {
+            "id": "0aef4688-3a87-42ee-8421-74c8ef50c1a4",
+            "kind": "pet",
+            "name": "Mochi",
+            "species": "dog",
+            "aliases": [],
+            "expiresAt": "2026-11-30T05:35:36.216Z"
+          }
+        ],
+        "preferences": [],
+        "socialCircle": [],
+        "events": [],
+        "stories": [],
+        "storyProgress": null,
+        "friendship": "getting_acquainted",
+        "configuration": {
+          "personality": "ENFP",
+          "role": "friend",
+          "language_mode": "en",
+          "voice_id": "fBD19tfE58bkETeiwUoC"
+        },
+        "state_version": 4,
+        "clock_version": 1,
+        "effective_now": "2026-10-31T05:35:39.056Z",
+        "provider_mode": "real",
+        "engine_mode": "character_memory"
+      },
+      "memory_available": true,
+      "character_engine_available": true,
+      "active_turn": null,
+      "storage": "postgresql"
+    },
+    "binh_initial": {
+      "profile": {
+        "id": "9124a483-cb23-4438-ba25-0bf6cff478e7",
+        "demoKey": "binh",
+        "displayName": "Bình",
+        "ageBand": "6-8",
+        "languageMode": "en",
+        "timezone": "Asia/Ho_Chi_Minh",
+        "stateVersion": 3,
+        "deletionEpoch": 0
+      },
+      "config": {
+        "personality": "ENFP",
+        "role": "friend",
+        "voiceId": "miu-default",
+        "canonVersion": "miu-v1",
+        "assignedStoryId": "miu-b-soup-portions-ribbon-station-v1"
+      },
+      "clock": {
+        "mode": "demo",
+        "effectiveNow": "2026-10-31T05:35:47.023Z",
+        "localDate": "2026-10-31",
+        "timezone": "Asia/Ho_Chi_Minh",
+        "version": 1
+      },
+      "daily": {
+        "localDate": "2026-10-31",
+        "mood": "content",
+        "growthDays": 0,
+        "growthTheme": "curiosity",
+        "diary": {
+          "templateId": "cardboard-fort",
+          "en": "In my pretend house, I made a tiny cardboard fort.",
+          "vi": "Trong ngôi nhà tưởng tượng, Miu làm một pháo đài bìa nhỏ."
+        },
+        "storyEpisode": {
+          "templateId": "lantern-1",
+          "en": "In our pretend story, Miu and Pip the paper bird find a little lantern.",
+          "vi": "Trong truyện tưởng tượng, Miu và chim giấy Pip tìm thấy một chiếc đèn nhỏ.",
+          "chapter": 1
+        }
+      },
+      "entities": [],
+      "preferences": [],
+      "socialCircle": [],
+      "events": [],
+      "stories": [],
+      "storyProgress": null,
+      "friendship": "getting_acquainted",
+      "configuration": {
+        "personality": "ENFP",
+        "role": "friend",
+        "language_mode": "en",
+        "voice_id": "fBD19tfE58bkETeiwUoC"
+      },
+      "state_version": 3,
+      "clock_version": 1,
+      "effective_now": "2026-10-31T05:35:47.023Z",
+      "provider_mode": "real",
+      "engine_mode": "character_memory",
+      "context": {
+        "profile": {
+          "id": "9124a483-cb23-4438-ba25-0bf6cff478e7",
+          "demoKey": "binh",
+          "displayName": "Bình",
+          "ageBand": "6-8",
+          "languageMode": "en",
+          "timezone": "Asia/Ho_Chi_Minh",
+          "stateVersion": 3,
+          "deletionEpoch": 0
+        },
+        "config": {
+          "personality": "ENFP",
+          "role": "friend",
+          "voiceId": "miu-default",
+          "canonVersion": "miu-v1",
+          "assignedStoryId": "miu-b-soup-portions-ribbon-station-v1"
+        },
+        "clock": {
+          "mode": "demo",
+          "effectiveNow": "2026-10-31T05:35:47.023Z",
+          "localDate": "2026-10-31",
+          "timezone": "Asia/Ho_Chi_Minh",
+          "version": 1
+        },
+        "daily": {
+          "localDate": "2026-10-31",
+          "mood": "content",
+          "growthDays": 0,
+          "growthTheme": "curiosity",
+          "diary": {
+            "templateId": "cardboard-fort",
+            "en": "In my pretend house, I made a tiny cardboard fort.",
+            "vi": "Trong ngôi nhà tưởng tượng, Miu làm một pháo đài bìa nhỏ."
+          },
+          "storyEpisode": {
+            "templateId": "lantern-1",
+            "en": "In our pretend story, Miu and Pip the paper bird find a little lantern.",
+            "vi": "Trong truyện tưởng tượng, Miu và chim giấy Pip tìm thấy một chiếc đèn nhỏ.",
+            "chapter": 1
+          }
+        },
+        "entities": [],
+        "preferences": [],
+        "socialCircle": [],
+        "events": [],
+        "stories": [],
+        "storyProgress": null,
+        "friendship": "getting_acquainted",
+        "configuration": {
+          "personality": "ENFP",
+          "role": "friend",
+          "language_mode": "en",
+          "voice_id": "fBD19tfE58bkETeiwUoC"
+        },
+        "state_version": 3,
+        "clock_version": 1,
+        "effective_now": "2026-10-31T05:35:47.023Z",
+        "provider_mode": "real",
+        "engine_mode": "character_memory"
+      },
+      "memory_available": true,
+      "character_engine_available": true,
+      "active_turn": null,
+      "storage": "postgresql"
+    },
+    "binh_after_recall": {
+      "profile": {
+        "id": "9124a483-cb23-4438-ba25-0bf6cff478e7",
+        "demoKey": "binh",
+        "displayName": "Bình",
+        "ageBand": "6-8",
+        "languageMode": "en",
+        "timezone": "Asia/Ho_Chi_Minh",
+        "stateVersion": 3,
+        "deletionEpoch": 0
+      },
+      "config": {
+        "personality": "ENFP",
+        "role": "friend",
+        "voiceId": "miu-default",
+        "canonVersion": "miu-v1",
+        "assignedStoryId": "miu-b-soup-portions-ribbon-station-v1"
+      },
+      "clock": {
+        "mode": "demo",
+        "effectiveNow": "2026-10-31T05:36:10.812Z",
+        "localDate": "2026-10-31",
+        "timezone": "Asia/Ho_Chi_Minh",
+        "version": 1
+      },
+      "daily": {
+        "localDate": "2026-10-31",
+        "mood": "content",
+        "growthDays": 0,
+        "growthTheme": "curiosity",
+        "diary": {
+          "templateId": "cardboard-fort",
+          "en": "In my pretend house, I made a tiny cardboard fort.",
+          "vi": "Trong ngôi nhà tưởng tượng, Miu làm một pháo đài bìa nhỏ."
+        },
+        "storyEpisode": {
+          "templateId": "lantern-1",
+          "en": "In our pretend story, Miu and Pip the paper bird find a little lantern.",
+          "vi": "Trong truyện tưởng tượng, Miu và chim giấy Pip tìm thấy một chiếc đèn nhỏ.",
+          "chapter": 1
+        }
+      },
+      "entities": [],
+      "preferences": [],
+      "socialCircle": [],
+      "events": [],
+      "stories": [],
+      "storyProgress": null,
+      "friendship": "getting_acquainted",
+      "configuration": {
+        "personality": "ENFP",
+        "role": "friend",
+        "language_mode": "en",
+        "voice_id": "fBD19tfE58bkETeiwUoC"
+      },
+      "state_version": 3,
+      "clock_version": 1,
+      "effective_now": "2026-10-31T05:36:10.812Z",
+      "provider_mode": "real",
+      "engine_mode": "character_memory",
+      "context": {
+        "profile": {
+          "id": "9124a483-cb23-4438-ba25-0bf6cff478e7",
+          "demoKey": "binh",
+          "displayName": "Bình",
+          "ageBand": "6-8",
+          "languageMode": "en",
+          "timezone": "Asia/Ho_Chi_Minh",
+          "stateVersion": 3,
+          "deletionEpoch": 0
+        },
+        "config": {
+          "personality": "ENFP",
+          "role": "friend",
+          "voiceId": "miu-default",
+          "canonVersion": "miu-v1",
+          "assignedStoryId": "miu-b-soup-portions-ribbon-station-v1"
+        },
+        "clock": {
+          "mode": "demo",
+          "effectiveNow": "2026-10-31T05:36:10.812Z",
+          "localDate": "2026-10-31",
+          "timezone": "Asia/Ho_Chi_Minh",
+          "version": 1
+        },
+        "daily": {
+          "localDate": "2026-10-31",
+          "mood": "content",
+          "growthDays": 0,
+          "growthTheme": "curiosity",
+          "diary": {
+            "templateId": "cardboard-fort",
+            "en": "In my pretend house, I made a tiny cardboard fort.",
+            "vi": "Trong ngôi nhà tưởng tượng, Miu làm một pháo đài bìa nhỏ."
+          },
+          "storyEpisode": {
+            "templateId": "lantern-1",
+            "en": "In our pretend story, Miu and Pip the paper bird find a little lantern.",
+            "vi": "Trong truyện tưởng tượng, Miu và chim giấy Pip tìm thấy một chiếc đèn nhỏ.",
+            "chapter": 1
+          }
+        },
+        "entities": [],
+        "preferences": [],
+        "socialCircle": [],
+        "events": [],
+        "stories": [],
+        "storyProgress": null,
+        "friendship": "getting_acquainted",
+        "configuration": {
+          "personality": "ENFP",
+          "role": "friend",
+          "language_mode": "en",
+          "voice_id": "fBD19tfE58bkETeiwUoC"
+        },
+        "state_version": 3,
+        "clock_version": 1,
+        "effective_now": "2026-10-31T05:36:10.812Z",
+        "provider_mode": "real",
+        "engine_mode": "character_memory"
+      },
+      "memory_available": true,
+      "character_engine_available": true,
+      "active_turn": null,
+      "storage": "postgresql"
+    }
+  }
+}

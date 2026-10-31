@@ -1,0 +1,14 @@
+{
+  "verified_at": "2026-10-31T05:35:21.501Z",
+  "engine": "postgresql",
+  "database": "miu_character_memory",
+  "role": "miu_character_memory_app",
+  "version": "PostgreSQL 16.15",
+  "ssh_tunnel": true,
+  "historical_sessions": 365,
+  "historical_messages": 2932,
+  "runtime_profiles": 2,
+  "first_historical_date": "2025-11-01",
+  "environment_file": ".env",
+  "checksum": "e766b1b4d130f5de0f99336ded1e869b599a29a8c0fcd8e535e502b65421682d"
+}
