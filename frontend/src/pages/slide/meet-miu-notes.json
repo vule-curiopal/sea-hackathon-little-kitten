@@ -13,10 +13,6 @@
         "For a child, a muddy dog or a new game can be a big story. We created Miu so those small stories have a familiar friend to listen.",
         "Miu is an AI kitten for children aged four to eight, speaking Vietnamese and English. Children hold a button to talk, release to send, and hear Miu reply. We want conversations to continue across days, while encouraging offline play and connections with family."
       ]
-    },
-    "cue": {
-      "vi": "Mở đầu chậm, nhấn vào “câu chuyện nhỏ” và “người bạn quen thuộc”; chuyển sang bốn yếu tố tạo nên Miu.",
-      "en": "Start slowly. Emphasize “small stories” and “familiar friend,” then introduce the four elements behind Miu."
     }
   },
   {
@@ -37,10 +33,6 @@
         "Memory selectively keeps shared details for natural follow-ups, without inventing outcomes. Children can ask Miu to correct or forget information.",
         "Growing builds familiarity through shared experiences that the child welcomes, rather than time spent or return visits. Miu stays warm after an absence and always leaves room for real family and friends."
       ]
-    },
-    "cue": {
-      "vi": "Đi lần lượt qua bốn ô. Nhấn mạnh: một Miu nhất quán, ký ức chọn lọc và tình bạn không tạo áp lực.",
-      "en": "Follow the four cards in order. Emphasize a consistent Miu, selective memory, and friendship without pressure."
     }
   },
   {
@@ -55,10 +47,6 @@
       "en": [
         "Next is the demo segment. We want to show how a child starts a spoken turn, how Miu responds with voice and expression, and how a shared detail can become a natural follow-up in the next conversation."
       ]
-    },
-    "cue": {
-      "vi": "Clip YouTube hiện tại là video mẫu về ô tô, không phải demo Miu. Chọn “Use local video” khi có bản ghi Miu; hoặc mở “Open live demo”.",
-      "en": "The current YouTube clip is a car video used as a placeholder, not a Miu demo. Choose “Use local video” for a Miu recording, or open “Open live demo.”"
     }
   },
   {
@@ -79,10 +67,6 @@
         "Third, a Smart TV app combining a webcam or camera with a built-in microphone could create a virtual space for children to talk, play, and interact with Miu on a larger screen.",
         "These are future directions. Our goal remains a familiar Miu, with the child leading the play."
       ]
-    },
-    "cue": {
-      "vi": "Trình bày đây là đề xuất tương lai. Nhấn ba hướng: giọng nói, robot mèo có mặt LCD và không gian chơi trên Smart TV.",
-      "en": "Present these as future proposals. Emphasize voice, a cat robot with an LCD face, and a Smart TV play space."
     }
   }
 ]
