@@ -46,7 +46,13 @@ The dialogue model writes plain words. Application code decides character state,
 - The nightly rollover and the panel's **Next day** action invoke the same idempotent job.
 - The panel is for the supervised fictional-data demo. It is not a parent monitoring dashboard.
 
-## Planned full-product acceptance walkthrough
+## Current memory implementation
+
+The optional [vector-memory implementation](vector-memory.md) adds real OpenAI embeddings, pgvector storage, guarded asynchronous indexing and canonical source rehydration. Its verification reports distinguish real-model results from offline contract/database mechanics. The [durable-memory policy](memory-retention-and-recall-policy.md) replaces automatic 30-day deletion in the feature branch.
+
+Character and memory quality evaluation uses real providers under `AGENTS.md`. The fixture walkthrough below is frontend/pipeline development diagnostics only and establishes no model-quality or real-audio performance claim.
+
+## Frontend/pipeline fixture walkthrough — diagnostics only
 
 1. Run the app with PostgreSQL and `MIU_PROVIDER=fake`, with no AI keys configured. Select a fictional profile and the `mochi_puddle_en` fixture in the demo panel.
 2. Tap Talk, say **“My dog Mochi fell in a puddle”**, then end recording. Fake mode explicitly uses the selected fixture transcript; the submitted microphone audio is not actually recognized.

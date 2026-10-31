@@ -5,6 +5,7 @@ import { createMemoryStore, type MemoryStore } from '../memory/index.js';
 import { OpenAIProvider } from '../pipeline/providers.js';
 import type { EngineBridge, EnginePreparedTurn, EngineProfileSnapshot, EngineSessionSnapshot } from '../pipeline/src/ports.js';
 import { AppError, PERSONALITIES, type MemoryContext, type Personality } from '../shared/types.js';
+import { createVectorMemoryFromEnv, vectorBackend, vectorSearchEnabled } from '../memory/vector/service.js';
 
 export interface EngineBridgeOptions {
   /** Passing an environment makes startup hermetic; this module never reads .env files. */
@@ -246,10 +247,15 @@ export async function createEngineBridge(options: EngineBridgeOptions = {}): Pro
     dataDir: databaseUrl ? undefined : options.dataDir ?? env.MIU_DATA_DIR ?? resolve('.miu-data'),
     now,
     clockMode: options.clockMode ?? 'demo',
+    vectorExtension: vectorSearchEnabled(env) && vectorBackend(env) === 'pgvector',
   });
+  let retrieval;
+  try { retrieval = await createVectorMemoryFromEnv(memory, env); }
+  catch (error) { await memory.close(); throw error; }
   const application = new MiuApplication(memory, provider, () => now().getTime(), {
     evaluateRealModel: true,
     turnTimeoutMs: positiveTimeout(options.turnTimeoutMs, env.ENGINE_TURN_TIMEOUT_MS, 180_000),
+    retrieval,
   });
   try {
     await memory.db.exec(`CREATE TABLE IF NOT EXISTS integration_voice_settings (

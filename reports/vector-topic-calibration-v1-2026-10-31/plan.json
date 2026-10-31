@@ -1,0 +1,185 @@
+{
+  "plan": {
+    "version": "vector-topic-calibration-v1",
+    "model": "text-embedding-3-large",
+    "dimensions": 1536,
+    "thresholds": [
+      0.35,
+      0.3,
+      0.28
+    ],
+    "documents": [
+      {
+        "sourceId": "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+        "text": "{\"kind\":\"preference\",\"scope\":\"reported_real\",\"evidence_kind\":\"child_reported\",\"category\":\"like\",\"qualifiers\":{},\"literal_value\":\"drawing little rockets\"}"
+      },
+      {
+        "sourceId": "51cf894d-af56-4c85-b4ee-94c548f68917",
+        "text": "{\"kind\":\"preference\",\"scope\":\"reported_real\",\"evidence_kind\":\"child_reported\",\"category\":\"hobby\",\"qualifiers\":{},\"literal_value\":\"drawing little rockets\"}"
+      },
+      {
+        "sourceId": "56626c26-8b58-4105-ae92-3b54ca105f2c",
+        "text": "{\"kind\":\"event\",\"scope\":\"reported_real\",\"evidence_kind\":\"child_reported\",\"event_type\":\"fell_in_puddle\",\"subject\":\"Moki\",\"local_date\":\"2026-11-01\",\"conditions\":[],\"literal_value\":\"Moki fell in a puddle.\"}"
+      },
+      {
+        "sourceId": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+        "text": "{\"kind\":\"preference\",\"scope\":\"reported_real\",\"evidence_kind\":\"child_reported\",\"category\":\"like\",\"qualifiers\":{},\"literal_value\":\"xếp mô hình bằng giấy\"}"
+      },
+      {
+        "sourceId": "c5cfc887-079b-4e26-ab34-70e3a56aadc1",
+        "text": "{\"kind\":\"child_story\",\"scope\":\"fictional\",\"evidence_kind\":\"child_reported\",\"literal_title\":\"Pip and the Pillow Planet\",\"literal_text\":\"Pip is a pretend rabbit who lands on a pillow planet.\",\"cast\":[\"Pip\"]}"
+      },
+      {
+        "sourceId": "ee74bdfd-b044-48db-8054-2df9e664af89",
+        "text": "{\"kind\":\"event\",\"scope\":\"reported_real\",\"evidence_kind\":\"child_reported\",\"event_type\":\"reported_event\",\"subject\":\"Bông\",\"local_date\":\"2026-11-01\",\"conditions\":[],\"literal_value\":\"Bông làm đổ chậu cây.\"}"
+      }
+    ],
+    "queries": [
+      {
+        "key": "en_event_paraphrase",
+        "capture": "en_pet_event",
+        "text": "pet tumble involving water",
+        "group": "existing_monolingual",
+        "expectedSourceIds": [
+          "56626c26-8b58-4105-ae92-3b54ca105f2c"
+        ]
+      },
+      {
+        "key": "en_hobby_paraphrase",
+        "capture": "en_hobby",
+        "text": "sketching tiny spacecraft",
+        "group": "existing_monolingual",
+        "expectedSourceIds": [
+          "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+          "51cf894d-af56-4c85-b4ee-94c548f68917"
+        ]
+      },
+      {
+        "key": "vi_hobby_paraphrase",
+        "capture": "vi_hobby",
+        "text": "làm đồ chơi bằng giấy",
+        "group": "existing_monolingual",
+        "expectedSourceIds": [
+          "622c299b-c230-47d2-9976-48b0fadb5c9e"
+        ]
+      },
+      {
+        "key": "vi_to_en_event",
+        "capture": "en_pet_event",
+        "text": "con chó ngã vào nước",
+        "group": "existing_crosslanguage",
+        "expectedSourceIds": [
+          "56626c26-8b58-4105-ae92-3b54ca105f2c"
+        ]
+      },
+      {
+        "key": "en_to_vi_event",
+        "capture": "vi_pet_event",
+        "text": "plant-container mishap",
+        "group": "existing_crosslanguage",
+        "expectedSourceIds": [
+          "ee74bdfd-b044-48db-8054-2df9e664af89"
+        ]
+      },
+      {
+        "key": "fictional_story_paraphrase",
+        "capture": "child_story",
+        "text": "make-believe rabbit’s landing place",
+        "group": "existing_monolingual",
+        "expectedSourceIds": [
+          "c5cfc887-079b-4e26-ab34-70e3a56aadc1"
+        ]
+      },
+      {
+        "key": "new_vi_to_en_hobby",
+        "capture": "en_hobby",
+        "text": "vẽ tên lửa nhỏ",
+        "group": "new_crosslanguage",
+        "expectedSourceIds": [
+          "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+          "51cf894d-af56-4c85-b4ee-94c548f68917"
+        ]
+      },
+      {
+        "key": "new_en_to_vi_hobby",
+        "capture": "vi_hobby",
+        "text": "assembling paper models",
+        "group": "new_crosslanguage",
+        "expectedSourceIds": [
+          "622c299b-c230-47d2-9976-48b0fadb5c9e"
+        ]
+      },
+      {
+        "key": "unknown_far_chess",
+        "capture": null,
+        "text": "a submarine chess tournament",
+        "group": "new_unknown_far",
+        "expectedSourceIds": []
+      },
+      {
+        "key": "unknown_far_music",
+        "capture": null,
+        "text": "a piano recital with grandma",
+        "group": "new_unknown_far",
+        "expectedSourceIds": []
+      },
+      {
+        "key": "unknown_near_dog",
+        "capture": null,
+        "text": "a dog swimming across a lake",
+        "group": "new_unknown_near",
+        "expectedSourceIds": []
+      },
+      {
+        "key": "unknown_near_cat",
+        "capture": null,
+        "text": "a cat breaking a flower pot",
+        "group": "new_unknown_near",
+        "expectedSourceIds": []
+      }
+    ],
+    "input_sha256": [
+      "72584f7618b8a837a93a158128b827579ed73cddace56e24c30e1225abba1eed",
+      "c81be3296696bd807c963d064fbb9b0872ef4211073e8b68afdbf9af2b20921f",
+      "d30ebc1faf784517be0184bb9cef167e866f4af21b2754a413cda182aee104fd",
+      "b138580f25bb8a683ae57c786482d3036fe07767da1c8e07f26e4d7dde95f7b4",
+      "2a99570a2c3c61d9cc1684c3e611f908bbe9f1877abce65adfdbe2fb5cc42325",
+      "935900b2fa958d828d7632f47e35816f26d1479e969529750d7ce13d0df9f55e",
+      "125c9a650592148a4ea8eab251cf4ae4db6fbf78f95a5ac7f85ef8646ee47d44",
+      "491ebbd7a74b33fcae6842d90f424a9d626d813a24ad0ac7b8c4364c2df6c336",
+      "07cff61c8fec7ce3d1b9ff1bdd2e6d11c1d6842d45352a517864c737babefa4d",
+      "f34dd0107975782758e1260f3b1d08ca3189e1e32945eb62a13cdf26df39e8b6",
+      "d1e031662783cb3e4f91874b452f8e64a4159e93247d9f6c7e8ca8b4adf74e8e",
+      "c191e131a31ccfdfda2ef00034dc1e6623e43082e2498cd344b2d384dba0382e",
+      "66a2fa36eaa6f7a9cab48765f05427614906ef8db8b3baae376c64db2f847437",
+      "177cc633850d88428840aeed9a887d81076060e2f002f32aff457d36a6a3961d",
+      "44070c93e61260a70f3ec2e9a9c57d6882eb2e8d2a9cbe57b4bc2dd0d6b47f37",
+      "350275be936d9848819a43e01978f303f2241f9fbee604c011b8ec896b2353dd",
+      "60ef14a9ff35c36b638d706b63f94e5bd371ba4ca8bd9076cdf0c84d0686c9aa",
+      "efd4e0e4bc9f62a6016c14ebc416fe1406d8de17509aa0440ea9e60f6c6b4933"
+    ],
+    "input_bytes": [
+      153,
+      154,
+      203,
+      160,
+      205,
+      211,
+      26,
+      25,
+      30,
+      26,
+      22,
+      37,
+      21,
+      23,
+      28,
+      28,
+      28,
+      27
+    ],
+    "gold": "Recorded canonical source IDs. Unknown dog-swim and cat-break are unsupported propositions, distinct from the recorded puddle fall and plant-pot spill.",
+    "label": "Calibration, not held-out evaluation. No production policy or threshold is adopted."
+  },
+  "sha256": "de1790a4b6feaef3c567fef5d4a4afc86d2c9726de56b65ba54cc5bb36c012cd"
+}

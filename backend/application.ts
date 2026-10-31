@@ -9,6 +9,8 @@ import { isExplicitGameRequest, resolveTurnAction } from './character/action-pla
 import { classifyLocal, isPriorReportQuestion, validateObservation } from './pipeline/observations.js';
 import { AppError, type ActiveGame, type ActivityBoundaries, type DirectorPlan, type GenerationDiagnostics, type Language, type LearningInput, type MemoryContext, type MemoryOperation, type Observation, type Provider, type SessionExchange } from './shared/types.js';
 import { recallFromProfile } from './recall.js';
+import type { VectorMemoryService } from './memory/vector/service.js';
+import { typedDispositionForAction } from './memory/vector/ranking.js';
 
 type TurnStatus = 'processing' | 'ready' | 'started' | 'completed' | 'interrupted' | 'canceled' | 'failed';
 export interface TurnRequest { request_id: string; kind: 'utterance' | 'greeting'; text?: string }
@@ -86,6 +88,7 @@ export interface ApplicationOptions {
   /** Evaluation output must originate from a live provider, including authored plans. */
   evaluateRealModel?: boolean;
   turnTimeoutMs?: number;
+  retrieval?: VectorMemoryService;
 }
 
 /** Text integration harness; the voice pipeline can call these same boundaries. */
@@ -195,8 +198,10 @@ export class MiuApplication {
     });
     if (allocation.existing) {
       if (allocation.turn.result) {
-        const current = await this.memory.getContext(profileId);
+        const current = await this.memory.getContext(profileId, allocation.session.id);
         if (current.profile.deletionEpoch !== allocation.turn.learning?.deletionEpoch || current.clock.version !== allocation.turn.result.clock_version || current.profile.stateVersion !== allocation.turn.cacheStateVersion) throw new AppError('stale_state', 409);
+        if (allocation.turn.result.presentation.memoryEvidence?.length
+          && !await this.options.retrieval?.validateEvidence(profileId, allocation.turn.result.presentation.memoryEvidence)) throw new AppError('stale_state', 409);
         return allocation.turn.result;
       }
       if (allocation.turn.promise) return allocation.turn.promise;
@@ -285,12 +290,12 @@ export class MiuApplication {
   }
 
   private async resolveCorrection(session: Session, turn: Turn, observation: Observation, context: MemoryContext): Promise<MemoryOperation | undefined> {
-    const patches = extractMemoryPatches(turn.sourceText, context);
+    const patches = extractMemoryPatches(turn.sourceText, context, session.id);
     if (patches.length) {
       let epoch = context.profile.deletionEpoch;
       const details: string[] = [];
       for (const patch of patches) {
-        const changed = await this.memory.applyPatch(session.profileId, turn.id, patch, epoch);
+        const changed = await this.memory.applyPatch(session.profileId, turn.id, patch, epoch, session.id);
         if (!changed.applied) continue;
         epoch = changed.deletionEpoch;
         details.push(changed.detail);
@@ -348,7 +353,7 @@ export class MiuApplication {
   private async generate(session: Session, turn: Turn, kind: 'utterance' | 'greeting'): Promise<TurnResponse> {
     const profileId = session.profileId;
     const signal = AbortSignal.any([turn.controller.signal, AbortSignal.timeout(this.options.turnTimeoutMs ?? (this.options.evaluateRealModel ? 180_000 : 15_000))]);
-    let context = await this.memory.getContext(profileId);
+    let context = await this.memory.getContext(profileId, session.id);
     this.assertLive(session, turn);
     const local = classifyLocal(turn.sourceText, session.language);
     const classificationContext = { entities: context.entities.slice(0, 40), recent: session.history.slice(-6) };
@@ -374,7 +379,7 @@ export class MiuApplication {
       if (!operation && observation.suppressLearning && noSaveDirective(turn.sourceText)) {
         operation = { type: 'capture_suppressed', detail: 'Durable memory capture is disabled for this utterance. Existing memories were not deleted.' };
       }
-      if (operation?.type === 'forgotten' || operation?.type === 'corrected' || operation?.type === 'renamed' || operation?.type === 'memory_patched') context = await this.memory.getContext(profileId);
+      if (operation?.type === 'forgotten' || operation?.type === 'corrected' || operation?.type === 'renamed' || operation?.type === 'memory_patched') context = await this.memory.getContext(profileId, session.id);
       action = resolveTurnAction({ context, observation, text: turn.sourceText, history: session.history, boundaries, activeGame: session.activeGame });
       if (!operation && !['comfort', 'unsafe', 'forget', 'correct', 'story', 'continue_story', 'stop'].includes(observation.intent) && !session.comfortActive && ['conversation', 'memory'].includes(action.domain)) {
         recall = recallFromProfile(context, turn.sourceText) ?? (observation.uncertain ? null : await this.memory.reserveRecall(profileId, turn.id));
@@ -383,8 +388,14 @@ export class MiuApplication {
         context = { ...context, storyProgress: await this.memory.previewStory(profileId, action.stateEffect === 'catalog_start' ? 'start' : 'continue') };
       }
     });
+    const retrieval = !operation && kind === 'utterance' && !session.comfortActive
+      ? await this.options.retrieval?.search({ profileId, topic: turn.sourceText,
+        typedDisposition: typedDispositionForAction(action), actionDomain: action.domain, intent: observation.intent,
+        safetyApproved: observation.intent !== 'unsafe', suppressLearning: observation.suppressLearning, signal }) : undefined;
+    this.assertLive(session, turn);
     const input = { context, observation, text: turn.sourceText, recall, comfortActive: session.comfortActive, history: session.history, activeGame: session.activeGame, operation, boundaries,
       action,
+      ...(retrieval ? { retrieval } : {}),
       turnEvidence: { kind: 'current_turn' as const, facts: observation.candidates.map(candidate => candidate.evidence), persistable: !observation.suppressLearning && !operation } };
     let plan = decide(input);
     const affect = context.affect ? previewAffect({
@@ -448,8 +459,9 @@ export class MiuApplication {
 
     return this.exclusive(profileId, async () => {
       this.assertLive(session, turn);
-      const current = await this.memory.getContext(profileId);
+      const current = await this.memory.getContext(profileId, session.id);
       if (context.profile.deletionEpoch !== current.profile.deletionEpoch || context.profile.stateVersion !== current.profile.stateVersion || context.clock.version !== current.clock.version) throw new AppError('stale_state', 409);
+      if (plan.memoryEvidence?.length && !await this.options.retrieval?.validateEvidence(profileId, plan.memoryEvidence)) throw new AppError('stale_state', 409);
       turn.referenceId = plan.memoryReferenceId;
       turn.learning = {
         profileId, turnId: turn.id, deletionEpoch: current.profile.deletionEpoch, localDate: context.clock.localDate,
@@ -477,7 +489,7 @@ export class MiuApplication {
   }
 
   async playback(profileId: string, sessionId: string, turnId: string, receipt: { request_id: string; status: 'started' | 'completed' | 'interrupted'; state_version: number }) {
-    return this.exclusive(profileId, async () => {
+    const result = await this.exclusive(profileId, async () => {
       const session = this.session(profileId, sessionId);
       const receiptSignature = signature({ turnId, ...receipt });
       const previous = session.receipts.get(receipt.request_id);
@@ -495,14 +507,16 @@ export class MiuApplication {
       if (['completed', 'interrupted', 'canceled', 'failed'].includes(turn.status)) throw new AppError('invalid_receipt_transition', 409);
       if (receipt.status === 'completed' && turn.status !== 'started') throw new AppError('invalid_receipt_transition', 409);
       if (receipt.status === 'started' && turn.status !== 'ready') throw new AppError('invalid_receipt_transition', 409);
-      const current = await this.memory.getContext(profileId);
+      const current = await this.memory.getContext(profileId, session.id);
       if (current.profile.deletionEpoch !== turn.learning?.deletionEpoch || current.clock.version !== turn.result.clock_version) throw new AppError('stale_state', 409);
+      if (turn.result.presentation.memoryEvidence?.length
+        && !await this.options.retrieval?.validateEvidence(profileId, turn.result.presentation.memoryEvidence)) throw new AppError('stale_state', 409);
       if (receipt.status === 'started') {
         await this.memory.markPresented(profileId, turn.id);
         session.lastReferenceId = turn.referenceId;
       } else if (receipt.status === 'completed') {
         const learned = await this.memory.learn(turn.learning!);
-        turn.cacheStateVersion = (await this.memory.getContext(profileId)).profile.stateVersion;
+        turn.cacheStateVersion = (await this.memory.getContext(profileId, session.id)).profile.stateVersion;
         turn.learnedIds = learned.learnedIds;
         if (learned.learnedIds.length) session.lastLearnedIds = learned.learnedIds;
         if (turn.armForgetAll) session.pendingForgetAll = true;
@@ -530,6 +544,8 @@ export class MiuApplication {
       session.receipts.set(receipt.request_id, { signature: receiptSignature, response });
       return response;
     });
+    if (receipt.status === 'completed') this.options.retrieval?.wake();
+    return result;
   }
 
   async cancel(profileId: string, sessionId: string, turnId: string) {
@@ -606,6 +622,7 @@ export class MiuApplication {
   async close() {
     for (const session of this.sessions.values()) this.clearSession(session);
     this.tokens.clear();
+    await this.options.retrieval?.close();
     await this.memory.close();
   }
 }

@@ -15,7 +15,7 @@ export interface Database extends Queryable {
   close(): Promise<void>;
 }
 
-export async function createDatabase(options: { databaseUrl?: string; dataDir?: string } = {}): Promise<Database> {
+export async function createDatabase(options: { databaseUrl?: string; dataDir?: string; vectorExtension?: boolean } = {}): Promise<Database> {
   if (options.databaseUrl) {
     const pool = new pg.Pool({
       connectionString: options.databaseUrl, max: 5, connectionTimeoutMillis: 10_000,
@@ -65,13 +65,25 @@ export async function createDatabase(options: { databaseUrl?: string; dataDir?: 
       async close() { await pool.end(); },
     };
   }
-  const lite = new PGlite(options.dataDir);
+  // The pinned 0.3.x package bundles this optional extension. Do not load it for
+  // feature-off startup; newer split-package upgrades require separate review.
+  const vector = options.vectorExtension ? (await import('@electric-sql/pglite/vector')).vector : undefined;
+  const lite = vector ? new PGlite({ dataDir: options.dataDir, extensions: { vector } }) : new PGlite(options.dataDir);
   await lite.waitReady;
   const wrap = (client: Pick<PGlite, 'query' | 'exec'>): Queryable => ({
     async exec(sql) { await client.exec(sql); },
     async query<T>(sql: string, values: unknown[] = []) {
       const result = await client.query<T>(sql, values);
-      return { rows: result.rows, rowCount: result.affectedRows ?? result.rows.length };
+      // PGlite 0.3.x returns DATE as UTC-midnight Date, whereas native pg is
+      // configured above to preserve calendar strings. Normalize only DATE OID;
+      // timestamps remain real instants, independent of the process timezone.
+      const dates = result.fields.filter(field => field.dataTypeID === 1082).map(field => field.name);
+      const rows = dates.length ? result.rows.map(row => {
+        const copy = { ...row } as Record<string, unknown>;
+        for (const name of dates) if (copy[name] instanceof Date) copy[name] = (copy[name] as Date).toISOString().slice(0, 10);
+        return copy as T;
+      }) : result.rows;
+      return { rows, rowCount: result.affectedRows ?? result.rows.length };
     },
   });
   return {

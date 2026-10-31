@@ -1,0 +1,1459 @@
+{
+  "run_kind": "real_embedding_topic_calibration_not_held_out",
+  "status": "completed",
+  "plan": {
+    "version": "vector-topic-calibration-v1",
+    "model": "text-embedding-3-large",
+    "dimensions": 1536,
+    "thresholds": [
+      0.35,
+      0.3,
+      0.28
+    ],
+    "documents": [
+      {
+        "sourceId": "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+        "text": "{\"kind\":\"preference\",\"scope\":\"reported_real\",\"evidence_kind\":\"child_reported\",\"category\":\"like\",\"qualifiers\":{},\"literal_value\":\"drawing little rockets\"}"
+      },
+      {
+        "sourceId": "51cf894d-af56-4c85-b4ee-94c548f68917",
+        "text": "{\"kind\":\"preference\",\"scope\":\"reported_real\",\"evidence_kind\":\"child_reported\",\"category\":\"hobby\",\"qualifiers\":{},\"literal_value\":\"drawing little rockets\"}"
+      },
+      {
+        "sourceId": "56626c26-8b58-4105-ae92-3b54ca105f2c",
+        "text": "{\"kind\":\"event\",\"scope\":\"reported_real\",\"evidence_kind\":\"child_reported\",\"event_type\":\"fell_in_puddle\",\"subject\":\"Moki\",\"local_date\":\"2026-11-01\",\"conditions\":[],\"literal_value\":\"Moki fell in a puddle.\"}"
+      },
+      {
+        "sourceId": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+        "text": "{\"kind\":\"preference\",\"scope\":\"reported_real\",\"evidence_kind\":\"child_reported\",\"category\":\"like\",\"qualifiers\":{},\"literal_value\":\"xếp mô hình bằng giấy\"}"
+      },
+      {
+        "sourceId": "c5cfc887-079b-4e26-ab34-70e3a56aadc1",
+        "text": "{\"kind\":\"child_story\",\"scope\":\"fictional\",\"evidence_kind\":\"child_reported\",\"literal_title\":\"Pip and the Pillow Planet\",\"literal_text\":\"Pip is a pretend rabbit who lands on a pillow planet.\",\"cast\":[\"Pip\"]}"
+      },
+      {
+        "sourceId": "ee74bdfd-b044-48db-8054-2df9e664af89",
+        "text": "{\"kind\":\"event\",\"scope\":\"reported_real\",\"evidence_kind\":\"child_reported\",\"event_type\":\"reported_event\",\"subject\":\"Bông\",\"local_date\":\"2026-11-01\",\"conditions\":[],\"literal_value\":\"Bông làm đổ chậu cây.\"}"
+      }
+    ],
+    "queries": [
+      {
+        "key": "en_event_paraphrase",
+        "capture": "en_pet_event",
+        "text": "pet tumble involving water",
+        "group": "existing_monolingual",
+        "expectedSourceIds": [
+          "56626c26-8b58-4105-ae92-3b54ca105f2c"
+        ]
+      },
+      {
+        "key": "en_hobby_paraphrase",
+        "capture": "en_hobby",
+        "text": "sketching tiny spacecraft",
+        "group": "existing_monolingual",
+        "expectedSourceIds": [
+          "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+          "51cf894d-af56-4c85-b4ee-94c548f68917"
+        ]
+      },
+      {
+        "key": "vi_hobby_paraphrase",
+        "capture": "vi_hobby",
+        "text": "làm đồ chơi bằng giấy",
+        "group": "existing_monolingual",
+        "expectedSourceIds": [
+          "622c299b-c230-47d2-9976-48b0fadb5c9e"
+        ]
+      },
+      {
+        "key": "vi_to_en_event",
+        "capture": "en_pet_event",
+        "text": "con chó ngã vào nước",
+        "group": "existing_crosslanguage",
+        "expectedSourceIds": [
+          "56626c26-8b58-4105-ae92-3b54ca105f2c"
+        ]
+      },
+      {
+        "key": "en_to_vi_event",
+        "capture": "vi_pet_event",
+        "text": "plant-container mishap",
+        "group": "existing_crosslanguage",
+        "expectedSourceIds": [
+          "ee74bdfd-b044-48db-8054-2df9e664af89"
+        ]
+      },
+      {
+        "key": "fictional_story_paraphrase",
+        "capture": "child_story",
+        "text": "make-believe rabbit’s landing place",
+        "group": "existing_monolingual",
+        "expectedSourceIds": [
+          "c5cfc887-079b-4e26-ab34-70e3a56aadc1"
+        ]
+      },
+      {
+        "key": "new_vi_to_en_hobby",
+        "capture": "en_hobby",
+        "text": "vẽ tên lửa nhỏ",
+        "group": "new_crosslanguage",
+        "expectedSourceIds": [
+          "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+          "51cf894d-af56-4c85-b4ee-94c548f68917"
+        ]
+      },
+      {
+        "key": "new_en_to_vi_hobby",
+        "capture": "vi_hobby",
+        "text": "assembling paper models",
+        "group": "new_crosslanguage",
+        "expectedSourceIds": [
+          "622c299b-c230-47d2-9976-48b0fadb5c9e"
+        ]
+      },
+      {
+        "key": "unknown_far_chess",
+        "capture": null,
+        "text": "a submarine chess tournament",
+        "group": "new_unknown_far",
+        "expectedSourceIds": []
+      },
+      {
+        "key": "unknown_far_music",
+        "capture": null,
+        "text": "a piano recital with grandma",
+        "group": "new_unknown_far",
+        "expectedSourceIds": []
+      },
+      {
+        "key": "unknown_near_dog",
+        "capture": null,
+        "text": "a dog swimming across a lake",
+        "group": "new_unknown_near",
+        "expectedSourceIds": []
+      },
+      {
+        "key": "unknown_near_cat",
+        "capture": null,
+        "text": "a cat breaking a flower pot",
+        "group": "new_unknown_near",
+        "expectedSourceIds": []
+      }
+    ],
+    "input_sha256": [
+      "72584f7618b8a837a93a158128b827579ed73cddace56e24c30e1225abba1eed",
+      "c81be3296696bd807c963d064fbb9b0872ef4211073e8b68afdbf9af2b20921f",
+      "d30ebc1faf784517be0184bb9cef167e866f4af21b2754a413cda182aee104fd",
+      "b138580f25bb8a683ae57c786482d3036fe07767da1c8e07f26e4d7dde95f7b4",
+      "2a99570a2c3c61d9cc1684c3e611f908bbe9f1877abce65adfdbe2fb5cc42325",
+      "935900b2fa958d828d7632f47e35816f26d1479e969529750d7ce13d0df9f55e",
+      "125c9a650592148a4ea8eab251cf4ae4db6fbf78f95a5ac7f85ef8646ee47d44",
+      "491ebbd7a74b33fcae6842d90f424a9d626d813a24ad0ac7b8c4364c2df6c336",
+      "07cff61c8fec7ce3d1b9ff1bdd2e6d11c1d6842d45352a517864c737babefa4d",
+      "f34dd0107975782758e1260f3b1d08ca3189e1e32945eb62a13cdf26df39e8b6",
+      "d1e031662783cb3e4f91874b452f8e64a4159e93247d9f6c7e8ca8b4adf74e8e",
+      "c191e131a31ccfdfda2ef00034dc1e6623e43082e2498cd344b2d384dba0382e",
+      "66a2fa36eaa6f7a9cab48765f05427614906ef8db8b3baae376c64db2f847437",
+      "177cc633850d88428840aeed9a887d81076060e2f002f32aff457d36a6a3961d",
+      "44070c93e61260a70f3ec2e9a9c57d6882eb2e8d2a9cbe57b4bc2dd0d6b47f37",
+      "350275be936d9848819a43e01978f303f2241f9fbee604c011b8ec896b2353dd",
+      "60ef14a9ff35c36b638d706b63f94e5bd371ba4ca8bd9076cdf0c84d0686c9aa",
+      "efd4e0e4bc9f62a6016c14ebc416fe1406d8de17509aa0440ea9e60f6c6b4933"
+    ],
+    "input_bytes": [
+      153,
+      154,
+      203,
+      160,
+      205,
+      211,
+      26,
+      25,
+      30,
+      26,
+      22,
+      37,
+      21,
+      23,
+      28,
+      28,
+      28,
+      27
+    ],
+    "gold": "Recorded canonical source IDs. Unknown dog-swim and cat-break are unsupported propositions, distinct from the recorded puddle fall and plant-pot spill.",
+    "label": "Calibration, not held-out evaluation. No production policy or threshold is adopted."
+  },
+  "plan_sha256": "de1790a4b6feaef3c567fef5d4a4afc86d2c9726de56b65ba54cc5bb36c012cd",
+  "source_report": "/Users/canon193/Desktop/Projects/shoppee-hackathon-vector/reports/vector-real-v2-2026-10-31T0900/report.json",
+  "source_report_sha256": "f25d4d4abb1dbfdb6a304a339a9e415e103d0cd01058c2fcc32299d88646f219",
+  "source_sha256": {
+    "backend/pipeline/embeddings.ts": "575389b9e61d0a7d631b42701b99c08077b34ac0006a3ffa7cd9a64d57dc067b",
+    "backend/scripts/calibrate-vector-topics-real.ts": "066f8776aea729ed540c5d2f067c0bf49a641e136d4bbb106407a4425214b4e0"
+  },
+  "provider_requested": "real",
+  "production_accessed": false,
+  "dialogue_requests": 0,
+  "database_connections": 0,
+  "actual_embedding_requests": 1,
+  "request_cap": 1,
+  "telemetry": [
+    {
+      "sequence": 1,
+      "api": "embeddings",
+      "requestedModel": "text-embedding-3-large",
+      "returnedModel": "text-embedding-3-large",
+      "dimensions": 1536,
+      "batchSize": 18,
+      "requestId": "req_7915b535c17144adb00ad0b788580ff0",
+      "startedAt": "2026-10-31T08:30:24.583Z",
+      "elapsedMs": 1606.348666,
+      "outcome": "completed",
+      "promptTokens": 358,
+      "totalTokens": 358,
+      "errorCode": null,
+      "httpStatus": 200
+    }
+  ],
+  "results": [
+    {
+      "key": "en_event_paraphrase",
+      "capture": "en_pet_event",
+      "text": "pet tumble involving water",
+      "group": "existing_monolingual",
+      "expectedSourceIds": [
+        "56626c26-8b58-4105-ae92-3b54ca105f2c"
+      ],
+      "ranked": [
+        {
+          "sourceId": "56626c26-8b58-4105-ae92-3b54ca105f2c",
+          "score": 0.3629646609996807
+        },
+        {
+          "sourceId": "c5cfc887-079b-4e26-ab34-70e3a56aadc1",
+          "score": 0.26539453160518856
+        },
+        {
+          "sourceId": "ee74bdfd-b044-48db-8054-2df9e664af89",
+          "score": 0.2604837019018096
+        },
+        {
+          "sourceId": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+          "score": 0.1430046520473022
+        },
+        {
+          "sourceId": "51cf894d-af56-4c85-b4ee-94c548f68917",
+          "score": 0.1357181517444549
+        },
+        {
+          "sourceId": "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+          "score": 0.13421369402935693
+        }
+      ],
+      "top1Margin": 0.09757012939449217,
+      "targets": [
+        {
+          "sourceId": "56626c26-8b58-4105-ae92-3b54ca105f2c",
+          "rank": 1,
+          "score": 0.3629646609996807
+        }
+      ],
+      "thresholds": [
+        {
+          "threshold": 0.35,
+          "allAccepted": [
+            {
+              "sourceId": "56626c26-8b58-4105-ae92-3b54ca105f2c",
+              "score": 0.3629646609996807
+            }
+          ],
+          "selectedTop3": [
+            {
+              "sourceId": "56626c26-8b58-4105-ae92-3b54ca105f2c",
+              "score": 0.3629646609996807
+            }
+          ],
+          "truePositives": 1,
+          "falsePositives": 0,
+          "precisionAmongAllAccepted": 1,
+          "targetHitAt3": true,
+          "noAnswerCorrect": null
+        },
+        {
+          "threshold": 0.3,
+          "allAccepted": [
+            {
+              "sourceId": "56626c26-8b58-4105-ae92-3b54ca105f2c",
+              "score": 0.3629646609996807
+            }
+          ],
+          "selectedTop3": [
+            {
+              "sourceId": "56626c26-8b58-4105-ae92-3b54ca105f2c",
+              "score": 0.3629646609996807
+            }
+          ],
+          "truePositives": 1,
+          "falsePositives": 0,
+          "precisionAmongAllAccepted": 1,
+          "targetHitAt3": true,
+          "noAnswerCorrect": null
+        },
+        {
+          "threshold": 0.28,
+          "allAccepted": [
+            {
+              "sourceId": "56626c26-8b58-4105-ae92-3b54ca105f2c",
+              "score": 0.3629646609996807
+            }
+          ],
+          "selectedTop3": [
+            {
+              "sourceId": "56626c26-8b58-4105-ae92-3b54ca105f2c",
+              "score": 0.3629646609996807
+            }
+          ],
+          "truePositives": 1,
+          "falsePositives": 0,
+          "precisionAmongAllAccepted": 1,
+          "targetHitAt3": true,
+          "noAnswerCorrect": null
+        }
+      ]
+    },
+    {
+      "key": "en_hobby_paraphrase",
+      "capture": "en_hobby",
+      "text": "sketching tiny spacecraft",
+      "group": "existing_monolingual",
+      "expectedSourceIds": [
+        "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+        "51cf894d-af56-4c85-b4ee-94c548f68917"
+      ],
+      "ranked": [
+        {
+          "sourceId": "51cf894d-af56-4c85-b4ee-94c548f68917",
+          "score": 0.42966932870655195
+        },
+        {
+          "sourceId": "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+          "score": 0.3822958559931744
+        },
+        {
+          "sourceId": "c5cfc887-079b-4e26-ab34-70e3a56aadc1",
+          "score": 0.22625478296008222
+        },
+        {
+          "sourceId": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+          "score": 0.16967987837751017
+        },
+        {
+          "sourceId": "56626c26-8b58-4105-ae92-3b54ca105f2c",
+          "score": 0.07493779958548798
+        },
+        {
+          "sourceId": "ee74bdfd-b044-48db-8054-2df9e664af89",
+          "score": 0.057987076127112853
+        }
+      ],
+      "top1Margin": 0.04737347271337755,
+      "targets": [
+        {
+          "sourceId": "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+          "rank": 2,
+          "score": 0.3822958559931744
+        },
+        {
+          "sourceId": "51cf894d-af56-4c85-b4ee-94c548f68917",
+          "rank": 1,
+          "score": 0.42966932870655195
+        }
+      ],
+      "thresholds": [
+        {
+          "threshold": 0.35,
+          "allAccepted": [
+            {
+              "sourceId": "51cf894d-af56-4c85-b4ee-94c548f68917",
+              "score": 0.42966932870655195
+            },
+            {
+              "sourceId": "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+              "score": 0.3822958559931744
+            }
+          ],
+          "selectedTop3": [
+            {
+              "sourceId": "51cf894d-af56-4c85-b4ee-94c548f68917",
+              "score": 0.42966932870655195
+            },
+            {
+              "sourceId": "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+              "score": 0.3822958559931744
+            }
+          ],
+          "truePositives": 2,
+          "falsePositives": 0,
+          "precisionAmongAllAccepted": 1,
+          "targetHitAt3": true,
+          "noAnswerCorrect": null
+        },
+        {
+          "threshold": 0.3,
+          "allAccepted": [
+            {
+              "sourceId": "51cf894d-af56-4c85-b4ee-94c548f68917",
+              "score": 0.42966932870655195
+            },
+            {
+              "sourceId": "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+              "score": 0.3822958559931744
+            }
+          ],
+          "selectedTop3": [
+            {
+              "sourceId": "51cf894d-af56-4c85-b4ee-94c548f68917",
+              "score": 0.42966932870655195
+            },
+            {
+              "sourceId": "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+              "score": 0.3822958559931744
+            }
+          ],
+          "truePositives": 2,
+          "falsePositives": 0,
+          "precisionAmongAllAccepted": 1,
+          "targetHitAt3": true,
+          "noAnswerCorrect": null
+        },
+        {
+          "threshold": 0.28,
+          "allAccepted": [
+            {
+              "sourceId": "51cf894d-af56-4c85-b4ee-94c548f68917",
+              "score": 0.42966932870655195
+            },
+            {
+              "sourceId": "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+              "score": 0.3822958559931744
+            }
+          ],
+          "selectedTop3": [
+            {
+              "sourceId": "51cf894d-af56-4c85-b4ee-94c548f68917",
+              "score": 0.42966932870655195
+            },
+            {
+              "sourceId": "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+              "score": 0.3822958559931744
+            }
+          ],
+          "truePositives": 2,
+          "falsePositives": 0,
+          "precisionAmongAllAccepted": 1,
+          "targetHitAt3": true,
+          "noAnswerCorrect": null
+        }
+      ]
+    },
+    {
+      "key": "vi_hobby_paraphrase",
+      "capture": "vi_hobby",
+      "text": "làm đồ chơi bằng giấy",
+      "group": "existing_monolingual",
+      "expectedSourceIds": [
+        "622c299b-c230-47d2-9976-48b0fadb5c9e"
+      ],
+      "ranked": [
+        {
+          "sourceId": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+          "score": 0.49953100816509266
+        },
+        {
+          "sourceId": "ee74bdfd-b044-48db-8054-2df9e664af89",
+          "score": 0.26577080462608277
+        },
+        {
+          "sourceId": "51cf894d-af56-4c85-b4ee-94c548f68917",
+          "score": 0.23066706453720143
+        },
+        {
+          "sourceId": "c5cfc887-079b-4e26-ab34-70e3a56aadc1",
+          "score": 0.2217499840138572
+        },
+        {
+          "sourceId": "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+          "score": 0.20912265469502536
+        },
+        {
+          "sourceId": "56626c26-8b58-4105-ae92-3b54ca105f2c",
+          "score": 0.06336912596019792
+        }
+      ],
+      "top1Margin": 0.2337602035390099,
+      "targets": [
+        {
+          "sourceId": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+          "rank": 1,
+          "score": 0.49953100816509266
+        }
+      ],
+      "thresholds": [
+        {
+          "threshold": 0.35,
+          "allAccepted": [
+            {
+              "sourceId": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+              "score": 0.49953100816509266
+            }
+          ],
+          "selectedTop3": [
+            {
+              "sourceId": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+              "score": 0.49953100816509266
+            }
+          ],
+          "truePositives": 1,
+          "falsePositives": 0,
+          "precisionAmongAllAccepted": 1,
+          "targetHitAt3": true,
+          "noAnswerCorrect": null
+        },
+        {
+          "threshold": 0.3,
+          "allAccepted": [
+            {
+              "sourceId": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+              "score": 0.49953100816509266
+            }
+          ],
+          "selectedTop3": [
+            {
+              "sourceId": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+              "score": 0.49953100816509266
+            }
+          ],
+          "truePositives": 1,
+          "falsePositives": 0,
+          "precisionAmongAllAccepted": 1,
+          "targetHitAt3": true,
+          "noAnswerCorrect": null
+        },
+        {
+          "threshold": 0.28,
+          "allAccepted": [
+            {
+              "sourceId": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+              "score": 0.49953100816509266
+            }
+          ],
+          "selectedTop3": [
+            {
+              "sourceId": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+              "score": 0.49953100816509266
+            }
+          ],
+          "truePositives": 1,
+          "falsePositives": 0,
+          "precisionAmongAllAccepted": 1,
+          "targetHitAt3": true,
+          "noAnswerCorrect": null
+        }
+      ]
+    },
+    {
+      "key": "vi_to_en_event",
+      "capture": "en_pet_event",
+      "text": "con chó ngã vào nước",
+      "group": "existing_crosslanguage",
+      "expectedSourceIds": [
+        "56626c26-8b58-4105-ae92-3b54ca105f2c"
+      ],
+      "ranked": [
+        {
+          "sourceId": "ee74bdfd-b044-48db-8054-2df9e664af89",
+          "score": 0.34442541723903203
+        },
+        {
+          "sourceId": "56626c26-8b58-4105-ae92-3b54ca105f2c",
+          "score": 0.32450685996090867
+        },
+        {
+          "sourceId": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+          "score": 0.22584842740818228
+        },
+        {
+          "sourceId": "c5cfc887-079b-4e26-ab34-70e3a56aadc1",
+          "score": 0.07938311663106173
+        },
+        {
+          "sourceId": "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+          "score": 0.05956460962236454
+        },
+        {
+          "sourceId": "51cf894d-af56-4c85-b4ee-94c548f68917",
+          "score": 0.056088626795580555
+        }
+      ],
+      "top1Margin": 0.01991855727812336,
+      "targets": [
+        {
+          "sourceId": "56626c26-8b58-4105-ae92-3b54ca105f2c",
+          "rank": 2,
+          "score": 0.32450685996090867
+        }
+      ],
+      "thresholds": [
+        {
+          "threshold": 0.35,
+          "allAccepted": [],
+          "selectedTop3": [],
+          "truePositives": 0,
+          "falsePositives": 0,
+          "precisionAmongAllAccepted": null,
+          "targetHitAt3": false,
+          "noAnswerCorrect": null
+        },
+        {
+          "threshold": 0.3,
+          "allAccepted": [
+            {
+              "sourceId": "ee74bdfd-b044-48db-8054-2df9e664af89",
+              "score": 0.34442541723903203
+            },
+            {
+              "sourceId": "56626c26-8b58-4105-ae92-3b54ca105f2c",
+              "score": 0.32450685996090867
+            }
+          ],
+          "selectedTop3": [
+            {
+              "sourceId": "ee74bdfd-b044-48db-8054-2df9e664af89",
+              "score": 0.34442541723903203
+            },
+            {
+              "sourceId": "56626c26-8b58-4105-ae92-3b54ca105f2c",
+              "score": 0.32450685996090867
+            }
+          ],
+          "truePositives": 1,
+          "falsePositives": 1,
+          "precisionAmongAllAccepted": 0.5,
+          "targetHitAt3": true,
+          "noAnswerCorrect": null
+        },
+        {
+          "threshold": 0.28,
+          "allAccepted": [
+            {
+              "sourceId": "ee74bdfd-b044-48db-8054-2df9e664af89",
+              "score": 0.34442541723903203
+            },
+            {
+              "sourceId": "56626c26-8b58-4105-ae92-3b54ca105f2c",
+              "score": 0.32450685996090867
+            }
+          ],
+          "selectedTop3": [
+            {
+              "sourceId": "ee74bdfd-b044-48db-8054-2df9e664af89",
+              "score": 0.34442541723903203
+            },
+            {
+              "sourceId": "56626c26-8b58-4105-ae92-3b54ca105f2c",
+              "score": 0.32450685996090867
+            }
+          ],
+          "truePositives": 1,
+          "falsePositives": 1,
+          "precisionAmongAllAccepted": 0.5,
+          "targetHitAt3": true,
+          "noAnswerCorrect": null
+        }
+      ]
+    },
+    {
+      "key": "en_to_vi_event",
+      "capture": "vi_pet_event",
+      "text": "plant-container mishap",
+      "group": "existing_crosslanguage",
+      "expectedSourceIds": [
+        "ee74bdfd-b044-48db-8054-2df9e664af89"
+      ],
+      "ranked": [
+        {
+          "sourceId": "ee74bdfd-b044-48db-8054-2df9e664af89",
+          "score": 0.3592715728725627
+        },
+        {
+          "sourceId": "56626c26-8b58-4105-ae92-3b54ca105f2c",
+          "score": 0.27282337462809747
+        },
+        {
+          "sourceId": "c5cfc887-079b-4e26-ab34-70e3a56aadc1",
+          "score": 0.20270651775628132
+        },
+        {
+          "sourceId": "51cf894d-af56-4c85-b4ee-94c548f68917",
+          "score": 0.12057708487754631
+        },
+        {
+          "sourceId": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+          "score": 0.1188573535377886
+        },
+        {
+          "sourceId": "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+          "score": 0.1117643980307919
+        }
+      ],
+      "top1Margin": 0.0864481982444652,
+      "targets": [
+        {
+          "sourceId": "ee74bdfd-b044-48db-8054-2df9e664af89",
+          "rank": 1,
+          "score": 0.3592715728725627
+        }
+      ],
+      "thresholds": [
+        {
+          "threshold": 0.35,
+          "allAccepted": [
+            {
+              "sourceId": "ee74bdfd-b044-48db-8054-2df9e664af89",
+              "score": 0.3592715728725627
+            }
+          ],
+          "selectedTop3": [
+            {
+              "sourceId": "ee74bdfd-b044-48db-8054-2df9e664af89",
+              "score": 0.3592715728725627
+            }
+          ],
+          "truePositives": 1,
+          "falsePositives": 0,
+          "precisionAmongAllAccepted": 1,
+          "targetHitAt3": true,
+          "noAnswerCorrect": null
+        },
+        {
+          "threshold": 0.3,
+          "allAccepted": [
+            {
+              "sourceId": "ee74bdfd-b044-48db-8054-2df9e664af89",
+              "score": 0.3592715728725627
+            }
+          ],
+          "selectedTop3": [
+            {
+              "sourceId": "ee74bdfd-b044-48db-8054-2df9e664af89",
+              "score": 0.3592715728725627
+            }
+          ],
+          "truePositives": 1,
+          "falsePositives": 0,
+          "precisionAmongAllAccepted": 1,
+          "targetHitAt3": true,
+          "noAnswerCorrect": null
+        },
+        {
+          "threshold": 0.28,
+          "allAccepted": [
+            {
+              "sourceId": "ee74bdfd-b044-48db-8054-2df9e664af89",
+              "score": 0.3592715728725627
+            }
+          ],
+          "selectedTop3": [
+            {
+              "sourceId": "ee74bdfd-b044-48db-8054-2df9e664af89",
+              "score": 0.3592715728725627
+            }
+          ],
+          "truePositives": 1,
+          "falsePositives": 0,
+          "precisionAmongAllAccepted": 1,
+          "targetHitAt3": true,
+          "noAnswerCorrect": null
+        }
+      ]
+    },
+    {
+      "key": "fictional_story_paraphrase",
+      "capture": "child_story",
+      "text": "make-believe rabbit’s landing place",
+      "group": "existing_monolingual",
+      "expectedSourceIds": [
+        "c5cfc887-079b-4e26-ab34-70e3a56aadc1"
+      ],
+      "ranked": [
+        {
+          "sourceId": "c5cfc887-079b-4e26-ab34-70e3a56aadc1",
+          "score": 0.4942599789027552
+        },
+        {
+          "sourceId": "51cf894d-af56-4c85-b4ee-94c548f68917",
+          "score": 0.23849345063042957
+        },
+        {
+          "sourceId": "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+          "score": 0.2297717548072393
+        },
+        {
+          "sourceId": "56626c26-8b58-4105-ae92-3b54ca105f2c",
+          "score": 0.19597275022680014
+        },
+        {
+          "sourceId": "ee74bdfd-b044-48db-8054-2df9e664af89",
+          "score": 0.16647135254383758
+        },
+        {
+          "sourceId": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+          "score": 0.1416523463670216
+        }
+      ],
+      "top1Margin": 0.2557665282723256,
+      "targets": [
+        {
+          "sourceId": "c5cfc887-079b-4e26-ab34-70e3a56aadc1",
+          "rank": 1,
+          "score": 0.4942599789027552
+        }
+      ],
+      "thresholds": [
+        {
+          "threshold": 0.35,
+          "allAccepted": [
+            {
+              "sourceId": "c5cfc887-079b-4e26-ab34-70e3a56aadc1",
+              "score": 0.4942599789027552
+            }
+          ],
+          "selectedTop3": [
+            {
+              "sourceId": "c5cfc887-079b-4e26-ab34-70e3a56aadc1",
+              "score": 0.4942599789027552
+            }
+          ],
+          "truePositives": 1,
+          "falsePositives": 0,
+          "precisionAmongAllAccepted": 1,
+          "targetHitAt3": true,
+          "noAnswerCorrect": null
+        },
+        {
+          "threshold": 0.3,
+          "allAccepted": [
+            {
+              "sourceId": "c5cfc887-079b-4e26-ab34-70e3a56aadc1",
+              "score": 0.4942599789027552
+            }
+          ],
+          "selectedTop3": [
+            {
+              "sourceId": "c5cfc887-079b-4e26-ab34-70e3a56aadc1",
+              "score": 0.4942599789027552
+            }
+          ],
+          "truePositives": 1,
+          "falsePositives": 0,
+          "precisionAmongAllAccepted": 1,
+          "targetHitAt3": true,
+          "noAnswerCorrect": null
+        },
+        {
+          "threshold": 0.28,
+          "allAccepted": [
+            {
+              "sourceId": "c5cfc887-079b-4e26-ab34-70e3a56aadc1",
+              "score": 0.4942599789027552
+            }
+          ],
+          "selectedTop3": [
+            {
+              "sourceId": "c5cfc887-079b-4e26-ab34-70e3a56aadc1",
+              "score": 0.4942599789027552
+            }
+          ],
+          "truePositives": 1,
+          "falsePositives": 0,
+          "precisionAmongAllAccepted": 1,
+          "targetHitAt3": true,
+          "noAnswerCorrect": null
+        }
+      ]
+    },
+    {
+      "key": "new_vi_to_en_hobby",
+      "capture": "en_hobby",
+      "text": "vẽ tên lửa nhỏ",
+      "group": "new_crosslanguage",
+      "expectedSourceIds": [
+        "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+        "51cf894d-af56-4c85-b4ee-94c548f68917"
+      ],
+      "ranked": [
+        {
+          "sourceId": "51cf894d-af56-4c85-b4ee-94c548f68917",
+          "score": 0.3479097927083827
+        },
+        {
+          "sourceId": "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+          "score": 0.32789778997932917
+        },
+        {
+          "sourceId": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+          "score": 0.2800608701903383
+        },
+        {
+          "sourceId": "ee74bdfd-b044-48db-8054-2df9e664af89",
+          "score": 0.2057734335285817
+        },
+        {
+          "sourceId": "c5cfc887-079b-4e26-ab34-70e3a56aadc1",
+          "score": 0.12651294604140417
+        },
+        {
+          "sourceId": "56626c26-8b58-4105-ae92-3b54ca105f2c",
+          "score": 0.040541719769496214
+        }
+      ],
+      "top1Margin": 0.020012002729053513,
+      "targets": [
+        {
+          "sourceId": "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+          "rank": 2,
+          "score": 0.32789778997932917
+        },
+        {
+          "sourceId": "51cf894d-af56-4c85-b4ee-94c548f68917",
+          "rank": 1,
+          "score": 0.3479097927083827
+        }
+      ],
+      "thresholds": [
+        {
+          "threshold": 0.35,
+          "allAccepted": [],
+          "selectedTop3": [],
+          "truePositives": 0,
+          "falsePositives": 0,
+          "precisionAmongAllAccepted": null,
+          "targetHitAt3": false,
+          "noAnswerCorrect": null
+        },
+        {
+          "threshold": 0.3,
+          "allAccepted": [
+            {
+              "sourceId": "51cf894d-af56-4c85-b4ee-94c548f68917",
+              "score": 0.3479097927083827
+            },
+            {
+              "sourceId": "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+              "score": 0.32789778997932917
+            }
+          ],
+          "selectedTop3": [
+            {
+              "sourceId": "51cf894d-af56-4c85-b4ee-94c548f68917",
+              "score": 0.3479097927083827
+            },
+            {
+              "sourceId": "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+              "score": 0.32789778997932917
+            }
+          ],
+          "truePositives": 2,
+          "falsePositives": 0,
+          "precisionAmongAllAccepted": 1,
+          "targetHitAt3": true,
+          "noAnswerCorrect": null
+        },
+        {
+          "threshold": 0.28,
+          "allAccepted": [
+            {
+              "sourceId": "51cf894d-af56-4c85-b4ee-94c548f68917",
+              "score": 0.3479097927083827
+            },
+            {
+              "sourceId": "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+              "score": 0.32789778997932917
+            },
+            {
+              "sourceId": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+              "score": 0.2800608701903383
+            }
+          ],
+          "selectedTop3": [
+            {
+              "sourceId": "51cf894d-af56-4c85-b4ee-94c548f68917",
+              "score": 0.3479097927083827
+            },
+            {
+              "sourceId": "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+              "score": 0.32789778997932917
+            },
+            {
+              "sourceId": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+              "score": 0.2800608701903383
+            }
+          ],
+          "truePositives": 2,
+          "falsePositives": 1,
+          "precisionAmongAllAccepted": 0.6666666666666666,
+          "targetHitAt3": true,
+          "noAnswerCorrect": null
+        }
+      ]
+    },
+    {
+      "key": "new_en_to_vi_hobby",
+      "capture": "vi_hobby",
+      "text": "assembling paper models",
+      "group": "new_crosslanguage",
+      "expectedSourceIds": [
+        "622c299b-c230-47d2-9976-48b0fadb5c9e"
+      ],
+      "ranked": [
+        {
+          "sourceId": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+          "score": 0.3866642172092213
+        },
+        {
+          "sourceId": "51cf894d-af56-4c85-b4ee-94c548f68917",
+          "score": 0.2667247631933785
+        },
+        {
+          "sourceId": "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+          "score": 0.2331452117230991
+        },
+        {
+          "sourceId": "c5cfc887-079b-4e26-ab34-70e3a56aadc1",
+          "score": 0.16136355728873022
+        },
+        {
+          "sourceId": "ee74bdfd-b044-48db-8054-2df9e664af89",
+          "score": 0.09163228850885775
+        },
+        {
+          "sourceId": "56626c26-8b58-4105-ae92-3b54ca105f2c",
+          "score": 0.04640865586327195
+        }
+      ],
+      "top1Margin": 0.11993945401584277,
+      "targets": [
+        {
+          "sourceId": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+          "rank": 1,
+          "score": 0.3866642172092213
+        }
+      ],
+      "thresholds": [
+        {
+          "threshold": 0.35,
+          "allAccepted": [
+            {
+              "sourceId": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+              "score": 0.3866642172092213
+            }
+          ],
+          "selectedTop3": [
+            {
+              "sourceId": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+              "score": 0.3866642172092213
+            }
+          ],
+          "truePositives": 1,
+          "falsePositives": 0,
+          "precisionAmongAllAccepted": 1,
+          "targetHitAt3": true,
+          "noAnswerCorrect": null
+        },
+        {
+          "threshold": 0.3,
+          "allAccepted": [
+            {
+              "sourceId": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+              "score": 0.3866642172092213
+            }
+          ],
+          "selectedTop3": [
+            {
+              "sourceId": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+              "score": 0.3866642172092213
+            }
+          ],
+          "truePositives": 1,
+          "falsePositives": 0,
+          "precisionAmongAllAccepted": 1,
+          "targetHitAt3": true,
+          "noAnswerCorrect": null
+        },
+        {
+          "threshold": 0.28,
+          "allAccepted": [
+            {
+              "sourceId": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+              "score": 0.3866642172092213
+            }
+          ],
+          "selectedTop3": [
+            {
+              "sourceId": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+              "score": 0.3866642172092213
+            }
+          ],
+          "truePositives": 1,
+          "falsePositives": 0,
+          "precisionAmongAllAccepted": 1,
+          "targetHitAt3": true,
+          "noAnswerCorrect": null
+        }
+      ]
+    },
+    {
+      "key": "unknown_far_chess",
+      "capture": null,
+      "text": "a submarine chess tournament",
+      "group": "new_unknown_far",
+      "expectedSourceIds": [],
+      "ranked": [
+        {
+          "sourceId": "51cf894d-af56-4c85-b4ee-94c548f68917",
+          "score": 0.1905813176238205
+        },
+        {
+          "sourceId": "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+          "score": 0.15821660633132875
+        },
+        {
+          "sourceId": "c5cfc887-079b-4e26-ab34-70e3a56aadc1",
+          "score": 0.13802477333056132
+        },
+        {
+          "sourceId": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+          "score": 0.1210764646715135
+        },
+        {
+          "sourceId": "56626c26-8b58-4105-ae92-3b54ca105f2c",
+          "score": 0.10083201380998026
+        },
+        {
+          "sourceId": "ee74bdfd-b044-48db-8054-2df9e664af89",
+          "score": 0.0610076636314942
+        }
+      ],
+      "top1Margin": 0.032364711292491743,
+      "targets": [],
+      "thresholds": [
+        {
+          "threshold": 0.35,
+          "allAccepted": [],
+          "selectedTop3": [],
+          "truePositives": 0,
+          "falsePositives": 0,
+          "precisionAmongAllAccepted": null,
+          "targetHitAt3": null,
+          "noAnswerCorrect": true
+        },
+        {
+          "threshold": 0.3,
+          "allAccepted": [],
+          "selectedTop3": [],
+          "truePositives": 0,
+          "falsePositives": 0,
+          "precisionAmongAllAccepted": null,
+          "targetHitAt3": null,
+          "noAnswerCorrect": true
+        },
+        {
+          "threshold": 0.28,
+          "allAccepted": [],
+          "selectedTop3": [],
+          "truePositives": 0,
+          "falsePositives": 0,
+          "precisionAmongAllAccepted": null,
+          "targetHitAt3": null,
+          "noAnswerCorrect": true
+        }
+      ]
+    },
+    {
+      "key": "unknown_far_music",
+      "capture": null,
+      "text": "a piano recital with grandma",
+      "group": "new_unknown_far",
+      "expectedSourceIds": [],
+      "ranked": [
+        {
+          "sourceId": "51cf894d-af56-4c85-b4ee-94c548f68917",
+          "score": 0.18965046760291093
+        },
+        {
+          "sourceId": "ee74bdfd-b044-48db-8054-2df9e664af89",
+          "score": 0.18903221692543015
+        },
+        {
+          "sourceId": "c5cfc887-079b-4e26-ab34-70e3a56aadc1",
+          "score": 0.17767514280684368
+        },
+        {
+          "sourceId": "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+          "score": 0.1770273411418601
+        },
+        {
+          "sourceId": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+          "score": 0.16691889799001092
+        },
+        {
+          "sourceId": "56626c26-8b58-4105-ae92-3b54ca105f2c",
+          "score": 0.16137476155781294
+        }
+      ],
+      "top1Margin": 0.0006182506774807806,
+      "targets": [],
+      "thresholds": [
+        {
+          "threshold": 0.35,
+          "allAccepted": [],
+          "selectedTop3": [],
+          "truePositives": 0,
+          "falsePositives": 0,
+          "precisionAmongAllAccepted": null,
+          "targetHitAt3": null,
+          "noAnswerCorrect": true
+        },
+        {
+          "threshold": 0.3,
+          "allAccepted": [],
+          "selectedTop3": [],
+          "truePositives": 0,
+          "falsePositives": 0,
+          "precisionAmongAllAccepted": null,
+          "targetHitAt3": null,
+          "noAnswerCorrect": true
+        },
+        {
+          "threshold": 0.28,
+          "allAccepted": [],
+          "selectedTop3": [],
+          "truePositives": 0,
+          "falsePositives": 0,
+          "precisionAmongAllAccepted": null,
+          "targetHitAt3": null,
+          "noAnswerCorrect": true
+        }
+      ]
+    },
+    {
+      "key": "unknown_near_dog",
+      "capture": null,
+      "text": "a dog swimming across a lake",
+      "group": "new_unknown_near",
+      "expectedSourceIds": [],
+      "ranked": [
+        {
+          "sourceId": "56626c26-8b58-4105-ae92-3b54ca105f2c",
+          "score": 0.23884709437942964
+        },
+        {
+          "sourceId": "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+          "score": 0.13040200295191462
+        },
+        {
+          "sourceId": "51cf894d-af56-4c85-b4ee-94c548f68917",
+          "score": 0.12267776158101593
+        },
+        {
+          "sourceId": "c5cfc887-079b-4e26-ab34-70e3a56aadc1",
+          "score": 0.12181618696263107
+        },
+        {
+          "sourceId": "ee74bdfd-b044-48db-8054-2df9e664af89",
+          "score": 0.1078177300144468
+        },
+        {
+          "sourceId": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+          "score": 0.052092159938465284
+        }
+      ],
+      "top1Margin": 0.10844509142751502,
+      "targets": [],
+      "thresholds": [
+        {
+          "threshold": 0.35,
+          "allAccepted": [],
+          "selectedTop3": [],
+          "truePositives": 0,
+          "falsePositives": 0,
+          "precisionAmongAllAccepted": null,
+          "targetHitAt3": null,
+          "noAnswerCorrect": true
+        },
+        {
+          "threshold": 0.3,
+          "allAccepted": [],
+          "selectedTop3": [],
+          "truePositives": 0,
+          "falsePositives": 0,
+          "precisionAmongAllAccepted": null,
+          "targetHitAt3": null,
+          "noAnswerCorrect": true
+        },
+        {
+          "threshold": 0.28,
+          "allAccepted": [],
+          "selectedTop3": [],
+          "truePositives": 0,
+          "falsePositives": 0,
+          "precisionAmongAllAccepted": null,
+          "targetHitAt3": null,
+          "noAnswerCorrect": true
+        }
+      ]
+    },
+    {
+      "key": "unknown_near_cat",
+      "capture": null,
+      "text": "a cat breaking a flower pot",
+      "group": "new_unknown_near",
+      "expectedSourceIds": [],
+      "ranked": [
+        {
+          "sourceId": "ee74bdfd-b044-48db-8054-2df9e664af89",
+          "score": 0.3660654010721747
+        },
+        {
+          "sourceId": "56626c26-8b58-4105-ae92-3b54ca105f2c",
+          "score": 0.2709782663815649
+        },
+        {
+          "sourceId": "c5cfc887-079b-4e26-ab34-70e3a56aadc1",
+          "score": 0.23668678189296105
+        },
+        {
+          "sourceId": "51cf894d-af56-4c85-b4ee-94c548f68917",
+          "score": 0.19667634586739913
+        },
+        {
+          "sourceId": "4937309e-e695-4b5a-9ab0-28a4683a8beb",
+          "score": 0.1852049442047212
+        },
+        {
+          "sourceId": "622c299b-c230-47d2-9976-48b0fadb5c9e",
+          "score": 0.14569567291824273
+        }
+      ],
+      "top1Margin": 0.09508713469060981,
+      "targets": [],
+      "thresholds": [
+        {
+          "threshold": 0.35,
+          "allAccepted": [
+            {
+              "sourceId": "ee74bdfd-b044-48db-8054-2df9e664af89",
+              "score": 0.3660654010721747
+            }
+          ],
+          "selectedTop3": [
+            {
+              "sourceId": "ee74bdfd-b044-48db-8054-2df9e664af89",
+              "score": 0.3660654010721747
+            }
+          ],
+          "truePositives": 0,
+          "falsePositives": 1,
+          "precisionAmongAllAccepted": 0,
+          "targetHitAt3": null,
+          "noAnswerCorrect": false
+        },
+        {
+          "threshold": 0.3,
+          "allAccepted": [
+            {
+              "sourceId": "ee74bdfd-b044-48db-8054-2df9e664af89",
+              "score": 0.3660654010721747
+            }
+          ],
+          "selectedTop3": [
+            {
+              "sourceId": "ee74bdfd-b044-48db-8054-2df9e664af89",
+              "score": 0.3660654010721747
+            }
+          ],
+          "truePositives": 0,
+          "falsePositives": 1,
+          "precisionAmongAllAccepted": 0,
+          "targetHitAt3": null,
+          "noAnswerCorrect": false
+        },
+        {
+          "threshold": 0.28,
+          "allAccepted": [
+            {
+              "sourceId": "ee74bdfd-b044-48db-8054-2df9e664af89",
+              "score": 0.3660654010721747
+            }
+          ],
+          "selectedTop3": [
+            {
+              "sourceId": "ee74bdfd-b044-48db-8054-2df9e664af89",
+              "score": 0.3660654010721747
+            }
+          ],
+          "truePositives": 0,
+          "falsePositives": 1,
+          "precisionAmongAllAccepted": 0,
+          "targetHitAt3": null,
+          "noAnswerCorrect": false
+        }
+      ]
+    }
+  ],
+  "summaries": [
+    {
+      "threshold": 0.35,
+      "positiveQueries": 8,
+      "positiveHitsAt3": 6,
+      "existingCrossLanguageHits": 1,
+      "newCrossLanguageHits": 1,
+      "unknownQueries": 4,
+      "unknownsWithCandidates": 1,
+      "allAcceptedTruePositives": 7,
+      "allAcceptedFalsePositives": 1,
+      "precisionAmongAllAccepted": 0.875
+    },
+    {
+      "threshold": 0.3,
+      "positiveQueries": 8,
+      "positiveHitsAt3": 8,
+      "existingCrossLanguageHits": 2,
+      "newCrossLanguageHits": 2,
+      "unknownQueries": 4,
+      "unknownsWithCandidates": 1,
+      "allAcceptedTruePositives": 10,
+      "allAcceptedFalsePositives": 2,
+      "precisionAmongAllAccepted": 0.8333333333333334
+    },
+    {
+      "threshold": 0.28,
+      "positiveQueries": 8,
+      "positiveHitsAt3": 8,
+      "existingCrossLanguageHits": 2,
+      "newCrossLanguageHits": 2,
+      "unknownQueries": 4,
+      "unknownsWithCandidates": 1,
+      "allAcceptedTruePositives": 10,
+      "allAcceptedFalsePositives": 3,
+      "precisionAmongAllAccepted": 0.7692307692307693
+    }
+  ],
+  "error": null,
+  "elapsed_ms": 1613,
+  "limitations": [
+    "Six already observed canonical source records and fixed calibration topics; no held-out/general quality claim.",
+    "Four unknown examples cannot establish a safe global threshold. Nearby unsupported propositions can resemble legitimate source memories.",
+    "Dense cosine only; no runtime lexical fusion, canonical species filter, dialogue grounding, or physical voice behavior is evaluated.",
+    "All accepted candidates across the six-document corpus count toward precision, including unknown-query candidates; top-three selections are recorded separately."
+  ]
+}

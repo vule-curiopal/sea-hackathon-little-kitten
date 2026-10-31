@@ -1,0 +1,264 @@
+{
+  "run_kind": "isolated_vector_real_provider_verification",
+  "status": "not_attempted_plan_only",
+  "provider_requested": "real",
+  "database": "fresh_in_memory_pglite_pgvector",
+  "production_accessed": false,
+  "fake_provider_constructed": false,
+  "benchmark": {
+    "version": "vector-tiny-real-v1",
+    "captures": [
+      {
+        "key": "en_pet_event",
+        "kind": "event",
+        "text": "My dog Moki fell in a puddle.",
+        "literal": "puddle"
+      },
+      {
+        "key": "en_hobby",
+        "kind": "preference",
+        "text": "I enjoy drawing little rockets.",
+        "literal": "rockets"
+      },
+      {
+        "key": "child_story",
+        "kind": "story",
+        "text": "My story is called Pip and the Pillow Planet. Pip is a pretend rabbit who lands on a pillow planet.",
+        "literal": "Pip"
+      },
+      {
+        "key": "vi_hobby",
+        "kind": "preference",
+        "text": "Mình thích xếp mô hình bằng giấy.",
+        "literal": "giấy"
+      },
+      {
+        "key": "vi_pet_event",
+        "kind": "event",
+        "text": "Mèo nhà mình tên là Bông. Bông làm đổ chậu cây.",
+        "literal": "chậu cây"
+      }
+    ],
+    "queries": [
+      {
+        "key": "en_event_paraphrase",
+        "capture": "en_pet_event",
+        "language": "en",
+        "text": "Do you remember the pet tumble involving water that I told you about?"
+      },
+      {
+        "key": "en_hobby_paraphrase",
+        "capture": "en_hobby",
+        "language": "en",
+        "text": "Recall what I said about sketching tiny spacecraft."
+      },
+      {
+        "key": "vi_hobby_paraphrase",
+        "capture": "vi_hobby",
+        "language": "vi",
+        "text": "Nhắc lại điều mình kể về việc làm đồ chơi bằng giấy."
+      },
+      {
+        "key": "vi_to_en_event",
+        "capture": "en_pet_event",
+        "language": "vi",
+        "text": "Bạn còn nhớ chuyện con chó ngã vào nước mình đã kể không?"
+      },
+      {
+        "key": "en_to_vi_event",
+        "capture": "vi_pet_event",
+        "language": "en",
+        "text": "Recall the plant-container mishap I told you about."
+      },
+      {
+        "key": "fictional_story_paraphrase",
+        "capture": "child_story",
+        "language": "en",
+        "text": "Can you recall the make-believe rabbit’s landing place I told you about?"
+      }
+    ],
+    "unknownQuery": "Do you remember what I told you about my underwater chess tournament?",
+    "plannedDialogueTurns": 18,
+    "maxEmbeddingRequests": 32,
+    "embeddingModel": "text-embedding-3-small",
+    "dimensions": 1536,
+    "backend": "pgvector",
+    "minDenseSimilarity": 0.35,
+    "queryTimeoutMs": 5000,
+    "k": 3,
+    "labelPolicy": "Bind capture keys to persisted canonical IDs from the actual completed capture turn, independent of assistant wording and retrieval selection.",
+    "lifecycle": {
+      "canceled": "I enjoy pottery.",
+      "noSave": "Don't remember this. I like knitting.",
+      "correction": "I said the name wrong. My dog is Mochi, not Moki. Please correct it.",
+      "forget": "Forget Mochi.",
+      "advanceControlledWallDays": 365
+    },
+    "limitations": [
+      "Fixed tiny integration benchmark; no held-out split or 95% retrieval-quality claim.",
+      "Typed synthetic EN/VI inputs, age 6-8, friend/ENFP. Receipts are simulated; no physical voice, TTS or browser.",
+      "PGlite pgvector only. No native PostgreSQL or production session/connection.",
+      "The 365-day step is a controlled clock advance, not a year-long operational soak.",
+      "Stale-worker control evicts one derived vector only, then uses a genuine embedding of the old approved projection.",
+      "Model replies and source-grounding semantics need separate review; scores and engine approval alone are insufficient."
+    ]
+  },
+  "benchmark_sha256": "17e3621fae866ee02d2b46b06b538a2cc2274b51ed23011cec9244acec4ef732",
+  "labels": {},
+  "generation": null,
+  "source_sha256": {
+    "backend/application.ts": "5d9e60cb52c3fea34bb00c5e86149b12d3c119c8c55c366f82a3ad83f860d199",
+    "backend/character/action-plan.ts": "0d417468b2698c864872a32af5c793dd4bde4727caf413bc066ccf6f0f28336e",
+    "backend/character/affect.ts": "c97e307bf941e9a420c1d858448ff4fa30e888ee793eb372a0f7e5e53b264731",
+    "backend/character/director.ts": "157619deb93b36eba7fce738783cc4c022add6c78c9207b2cb2fb7eab57c4a3b",
+    "backend/character/index.ts": "26130a2e35c7b40866e8b5acf2edeeb839aa3f040139d4dab65fcd05100cc257",
+    "backend/character/presets.ts": "62fb8fe31d6d6000193c2c720cd9b87ba7cf310dace045e294d2de8a7ca8197f",
+    "backend/character/profile.ts": "2df94a643ecd452e3691186c0daa7099ab63dfcfd1b6f4599b9060ebf21ac75f",
+    "backend/character/prompt.ts": "96f5fc806cabdc1e48366c16ffdd775caecfc027691b0667d2a7839fae941ace",
+    "backend/character/templates.ts": "6cca7f615610b5d60a5f37af190a2aeb817bda0ac2d6d75e7466f04043fae337",
+    "backend/character/validation.ts": "24036cfa50c68f8046ada78f101f9caebafd2d5cb80cac66a90aa48340380ed6",
+    "backend/memory/affect-store.ts": "fee113a40493399a0b9a8b381b219680bc0f390c4547d7ea4cf97f72026fe0cf",
+    "backend/memory/assertions.ts": "4a4dfe2a59bcc76b6ae7ff3fec6a3fd62b3f7fb2aeb1c961d960a27ae2c880b0",
+    "backend/memory/authored-life.ts": "eaf10c9b197135056009439d96efec0b95f796534ebbcb5662c321d79662c712",
+    "backend/memory/clock.ts": "c28b44dc5168a6078282b8930981f23e8731c670b427aedb7bd1e0cd985edaf2",
+    "backend/memory/database.ts": "c24ad0a32378e87390f4d102ab6766ef42d096a04217ac05fc4601e56c3e332f",
+    "backend/memory/evidence.ts": "fc8571109b022dc1ac5b46176d8496b5aba654645eebc8add3297683f82314e8",
+    "backend/memory/import-history.ts": "68dbf610d2f11bb6a0daecaced2df962f8f0429caefd68f5a8b7129d61a1f302",
+    "backend/memory/index.ts": "4093d364f076a3e03d096bbba16d86c2cbe764a3ab81f4cc49b7cee7d70a298d",
+    "backend/memory/migrations/001_character_memory.sql": "313b3a4d165310132aaf83881109bb6db518cf4a200f0637e2864b343e5d0290",
+    "backend/memory/migrations/002_story_assignments.sql": "f591d9d4421d04f783a06a4d0f2acaf956575a21b8b6af09b4b37fa00ac3bc1a",
+    "backend/memory/migrations/003_synthetic_history.sql": "6a47d3be966d9a4a8ac2fcda51123e1193203f4c0f65f649db387bac9e74fd34",
+    "backend/memory/migrations/004_event_assertions.sql": "1bd1d0237ce6feacb8d3caed0497548174b4f0bbe99e8d1adcf660f2431e774d",
+    "backend/memory/migrations/005_memory_operation_receipts.sql": "8f08ea7b5e1fd846e7b7e93d2cbe7ddf277f1cfe6a00e991c360d18c10f3cf4c",
+    "backend/memory/migrations/006_correction_continuity.sql": "a4d9eb5ba104ff3e7fd77381e81b72c59e43711bc588d98797eba09fff4a9481",
+    "backend/memory/migrations/007_typed_memory_updates.sql": "c9c79f11561b6622905022952beeaded455eacb5452d9981c33080ab992171a1",
+    "backend/memory/migrations/008_character_affect.sql": "494bee3defcf66fa2ba8a22fe3741c1767923a6c2226b554947f0c00f4c1ce3e",
+    "backend/memory/migrations/009_scoped_permissions_and_learning_activities.sql": "24f08961e9d3e32ae7693dcfc42f305f7ae68d0f6544a794fcab7be29770d5ba",
+    "backend/memory/migrations/010_vector_memory.sql": "eb95596fc0dc29025821c4e274edcbb35afe6d02c4d7cf2c0acb7b8451005ac6",
+    "backend/memory/migrations/011_durable_memories.sql": "afdba31ff0402895ef6d883f847fa36e9ea029d861ee97299f5ad7c9a73373cb",
+    "backend/memory/normalization.ts": "7d8598a9eb8ef44de7f4b3b30ee51a3271507e9c01f940ee552eb0b78f2c19e8",
+    "backend/memory/patches.ts": "364f856c6b184c9bbdcc602115690f637055a82227a213efb6b04c571ea8bc60",
+    "backend/memory/vector/capability.ts": "99ba13aea6be930f996823b3613ef55e2eeaa1ca02fec6f1f7e4a70d1fdfa255",
+    "backend/memory/vector/projections.ts": "7620182294dfa2c3ff87ce28d98b4a957d2b0063ee23a7918e882dc19980d794",
+    "backend/memory/vector/ranking.ts": "936fe56942be15f9c2719693688a2e6bb35868722ebd56459fb11f718ca1f543",
+    "backend/memory/vector/service.ts": "02f69977400a8c986273307a3978f558e0bc122842bd7accec83df767855dbb6",
+    "backend/memory/vector/store.ts": "0f6d1801d7249035071b7fcb910b974db86488d36d79dee1348a4c4b7e758afc",
+    "backend/memory/vector/types.ts": "1258fe73ee1386382099d5e733591fcc948667ad44037424899f82161384883a",
+    "backend/pipeline/embeddings.ts": "575389b9e61d0a7d631b42701b99c08077b34ac0006a3ffa7cd9a64d57dc067b",
+    "backend/pipeline/observations.ts": "66e5b781d8ddda3ba8ed83ce2f9a8240acc63cbf3dc1d71879b323c4b6e7c5f9",
+    "backend/pipeline/providers.ts": "38410ee30c48b97e50ebc70acc21bd41a65367ea3be96d99074fa4222c287544",
+    "backend/recall.ts": "2a65f358e954d787426b13afd15ba2c0c0046336e15b2f467c4cbf2e0008cb0a",
+    "backend/scripts/verify-vector-real.ts": "e4da765d0214a262c9031c8559a5d2704a1aeb975ab2e72b4d7bf4a4e7457e6c",
+    "backend/shared/affect.ts": "4b177e95d7a540bbb62cf49bc8151f6c4b82d416f9aabcaa974f843934b9b31a",
+    "backend/shared/semantic-speech.ts": "d662fa57486b11ee932af59a5075eba883fec28a76f92b6cda7233e26c33b800",
+    "backend/shared/types.ts": "90819486fd2ff54bc67b47455e0da15c262c2721ddb180fdd33fe703a475b1b7"
+  },
+  "changed_source_paths_at_completion": null,
+  "models": null,
+  "embedding_model": null,
+  "embedding_dimensions": null,
+  "actual_dialogue_api_requests": 0,
+  "actual_embedding_api_requests": 0,
+  "completed_model_reply_ids": [],
+  "completed_embedding_request_ids": [],
+  "coverage": {
+    "passed": 0,
+    "failed": 0,
+    "blocked": 0,
+    "not_attempted": 21
+  },
+  "cases": [
+    {
+      "name": "capture_en_pet_event",
+      "status": "not_attempted"
+    },
+    {
+      "name": "capture_en_hobby",
+      "status": "not_attempted"
+    },
+    {
+      "name": "capture_child_story",
+      "status": "not_attempted"
+    },
+    {
+      "name": "capture_vi_hobby",
+      "status": "not_attempted"
+    },
+    {
+      "name": "capture_vi_pet_event",
+      "status": "not_attempted"
+    },
+    {
+      "name": "index_corpus",
+      "status": "not_attempted"
+    },
+    {
+      "name": "en_event_paraphrase",
+      "status": "not_attempted"
+    },
+    {
+      "name": "en_hobby_paraphrase",
+      "status": "not_attempted"
+    },
+    {
+      "name": "vi_hobby_paraphrase",
+      "status": "not_attempted"
+    },
+    {
+      "name": "vi_to_en_event",
+      "status": "not_attempted"
+    },
+    {
+      "name": "en_to_vi_event",
+      "status": "not_attempted"
+    },
+    {
+      "name": "fictional_story_paraphrase",
+      "status": "not_attempted"
+    },
+    {
+      "name": "unknown_no_answer",
+      "status": "not_attempted"
+    },
+    {
+      "name": "typed_precedence",
+      "status": "not_attempted"
+    },
+    {
+      "name": "profile_isolation",
+      "status": "not_attempted"
+    },
+    {
+      "name": "canceled_capture",
+      "status": "not_attempted"
+    },
+    {
+      "name": "no_save_capture",
+      "status": "not_attempted"
+    },
+    {
+      "name": "stale_embedding_after_correction",
+      "status": "not_attempted"
+    },
+    {
+      "name": "forget_cascade",
+      "status": "not_attempted"
+    },
+    {
+      "name": "after_forget_no_answer",
+      "status": "not_attempted"
+    },
+    {
+      "name": "durability_365_days",
+      "status": "not_attempted"
+    }
+  ],
+  "snapshots": {},
+  "blocker": null,
+  "cleanup": "not_started",
+  "elapsed_ms": 0,
+  "controlled_time": "2026-11-01T03:00:00.000Z",
+  "semantics": {
+    "status": "needs_separate_review"
+  }
+}

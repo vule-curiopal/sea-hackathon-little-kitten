@@ -20,12 +20,18 @@ export function isGenericPreferenceQuery(text: string): boolean {
 export function isPetIdentityQuery(text: string): boolean {
   const query = normalized(text);
   if (/\btoy rabbit\b|thỏ bông/iu.test(query) || !/\b(?:dog|cat|pet|rabbit|puppy|kitten)\b|(?:chó|mèo|thú cưng|thỏ)/iu.test(query)) return false;
-  const explicitName = /\b(?:name|called|named)\b|tên/iu.test(query);
-  const asks = /[?？]|\b(?:what|who|remember|recall|remind|know)\b|(?:nhớ|biết|gì|nào)/iu.test(query);
+  const explicitName = /\bname\b|(?<![\p{L}\p{M}])tên(?!\s+lửa)(?![\p{L}\p{M}])/iu.test(query)
+    || /\bwhat\b.{0,80}\b(?:called|named)(?:\s+(?:now|again|today|before))?[.!?。！？\s]*$/iu.test(query);
+  // A relative "who" or "called" inside a story assertion is not a request
+  // for a real pet's identity. Questions may follow a return greeting.
+  const asks = /[?？]|(?:^|[.!。]\s*)(?:what|who|which|do you|can you|could you|would you|remember|recall|remind me)\b|(?:nhớ|biết).{0,20}(?:chó|mèo|thú cưng|thỏ)|(?:chó|mèo|thú cưng|thỏ).{0,20}tên (?:là )?(?:gì|nào)/iu.test(query);
   if (explicitName && asks) return true;
-  const directRecall = /\b(?:remember|recall|know) (?:my|our|the) (?:dog|cat|pet|rabbit|puppy|kitten)\b|(?:nhớ|biết).{0,12}(?:chó|mèo|thú cưng|thỏ)(?: của (?:mình|tớ|tôi))?/iu.test(query);
-  const eventQuestion = /\b(?:bath|bathed|washed|fell|puddle|ate|eaten|eating|fed|food|went|got|died|lost|sick|injured|hurt|happened)\b|(?:tắm|vũng nước|rơi|ngã|ăn|bị ốm|bị đau|đi đâu|chuyện gì)/iu.test(query);
-  return directRecall && !eventQuestion;
+  // Bare identity recall must end at the entity or a bounded identity tail.
+  // An arbitrary following activity belongs to episodic retrieval regardless
+  // of whether its verb happens to appear in an event-keyword dictionary.
+  const directRecall = /\b(?:remember|recall|know) (?:my|our|the) (?:dog|cat|pet|rabbit|puppy|kitten)(?:\s+(?:again|still|now|today|from before|from last time|(?:that )?(?:i|we) (?:told you about|mentioned)))?[.!?。！？\s]*$/iu.test(query)
+    || /(?:nhớ|biết)\s+(?:(?:con|bé)\s+)?(?:chó|mèo|thú cưng|thỏ)(?:\s+(?:nhà|của)\s+(?:mình|tớ|tôi|con))?(?:\s+(?:hôm trước|lần trước))?(?:\s+(?:không|chưa|nhỉ|ạ))?[.!?。！？\s]*$/iu.test(query);
+  return asks && directRecall;
 }
 
 export function petIdentityMatches(context: MemoryContext, text: string): Entity[] {
@@ -78,7 +84,7 @@ export function relevantEntities(context: MemoryContext, text: string, history: 
 }
 
 export interface MemoryQueryResolution {
-  targetKind: 'object' | 'story_character' | 'child_story' | 'routine' | 'preferred_address' | 'preference';
+  targetKind: 'pet' | 'object' | 'story_character' | 'child_story' | 'routine' | 'preferred_address' | 'preference';
   slot: 'name' | 'kind' | 'fictional_scope' | 'title' | 'routine' | 'exact_time' | 'address' | 'value';
   status: 'resolved' | 'missing' | 'ambiguous';
   sourceIds: string[];
@@ -94,6 +100,9 @@ export function resolveMemoryQuery(context: MemoryContext, text: string, history
   const resolution = (targetKind: MemoryQueryResolution['targetKind'], slot: MemoryQueryResolution['slot'], records: { id: string; fact: string }[]): MemoryQueryResolution => ({
     targetKind, slot, status: records.length === 1 ? 'resolved' : records.length ? 'ambiguous' : 'missing', sourceIds: records.map(record => record.id).filter(Boolean), facts: records.map(record => record.fact),
   });
+  if (isPetIdentityQuery(text)) return resolution('pet', 'name', petIdentityMatches(context, text).map(entity => ({
+    id: entity.id, fact: `The child's explicitly reported ${entity.species ?? 'pet'} is named ${JSON.stringify(entity.name)}. Preserve this canonical spelling and identity. A name does not establish an event or outcome.`,
+  })));
   if (/\b(?:what.*(?:call me|want.*called)|(?:name|address).*(?:asked|wanted|preferred)|how.*address me)\b|(?:muốn được gọi|được gọi tên gì|gọi (?:mình|tớ|tôi).*(?:gì|đã nói))/iu.test(text)) {
     const address = context.addressPreference;
     return resolution('preferred_address', 'address', address ? [{ id: '', fact: `The child chose the form of address ${JSON.stringify(address.preferredAddress)}; nickname permission is ${address.allowNickname ? 'granted only for the explicitly stored nickname' : 'withdrawn'}. Do not restore a nickname merely because a story resumes.` }] : []);

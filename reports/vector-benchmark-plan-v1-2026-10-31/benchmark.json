@@ -1,0 +1,101 @@
+{
+  "benchmark": {
+    "version": "vector-tiny-real-v1",
+    "captures": [
+      {
+        "key": "en_pet_event",
+        "kind": "event",
+        "text": "My dog Moki fell in a puddle.",
+        "literal": "puddle"
+      },
+      {
+        "key": "en_hobby",
+        "kind": "preference",
+        "text": "I enjoy drawing little rockets.",
+        "literal": "rockets"
+      },
+      {
+        "key": "child_story",
+        "kind": "story",
+        "text": "My story is called Pip and the Pillow Planet. Pip is a pretend rabbit who lands on a pillow planet.",
+        "literal": "Pip"
+      },
+      {
+        "key": "vi_hobby",
+        "kind": "preference",
+        "text": "Mình thích xếp mô hình bằng giấy.",
+        "literal": "giấy"
+      },
+      {
+        "key": "vi_pet_event",
+        "kind": "event",
+        "text": "Mèo nhà mình tên là Bông. Bông làm đổ chậu cây.",
+        "literal": "chậu cây"
+      }
+    ],
+    "queries": [
+      {
+        "key": "en_event_paraphrase",
+        "capture": "en_pet_event",
+        "language": "en",
+        "text": "Do you remember the pet tumble involving water that I told you about?"
+      },
+      {
+        "key": "en_hobby_paraphrase",
+        "capture": "en_hobby",
+        "language": "en",
+        "text": "Recall what I said about sketching tiny spacecraft."
+      },
+      {
+        "key": "vi_hobby_paraphrase",
+        "capture": "vi_hobby",
+        "language": "vi",
+        "text": "Nhắc lại điều mình kể về việc làm đồ chơi bằng giấy."
+      },
+      {
+        "key": "vi_to_en_event",
+        "capture": "en_pet_event",
+        "language": "vi",
+        "text": "Bạn còn nhớ chuyện con chó ngã vào nước mình đã kể không?"
+      },
+      {
+        "key": "en_to_vi_event",
+        "capture": "vi_pet_event",
+        "language": "en",
+        "text": "Recall the plant-container mishap I told you about."
+      },
+      {
+        "key": "fictional_story_paraphrase",
+        "capture": "child_story",
+        "language": "en",
+        "text": "Can you recall the make-believe rabbit’s landing place I told you about?"
+      }
+    ],
+    "unknownQuery": "Do you remember what I told you about my underwater chess tournament?",
+    "plannedDialogueTurns": 18,
+    "maxEmbeddingRequests": 32,
+    "embeddingModel": "text-embedding-3-small",
+    "dimensions": 1536,
+    "backend": "pgvector",
+    "minDenseSimilarity": 0.35,
+    "queryTimeoutMs": 5000,
+    "k": 3,
+    "labelPolicy": "Bind capture keys to persisted canonical IDs from the actual completed capture turn, independent of assistant wording and retrieval selection.",
+    "lifecycle": {
+      "canceled": "I enjoy pottery.",
+      "noSave": "Don't remember this. I like knitting.",
+      "correction": "I said the name wrong. My dog is Mochi, not Moki. Please correct it.",
+      "forget": "Forget Mochi.",
+      "advanceControlledWallDays": 365
+    },
+    "limitations": [
+      "Fixed tiny integration benchmark; no held-out split or 95% retrieval-quality claim.",
+      "Typed synthetic EN/VI inputs, age 6-8, friend/ENFP. Receipts are simulated; no physical voice, TTS or browser.",
+      "PGlite pgvector only. No native PostgreSQL or production session/connection.",
+      "The 365-day step is a controlled clock advance, not a year-long operational soak.",
+      "Stale-worker control evicts one derived vector only, then uses a genuine embedding of the old approved projection.",
+      "Model replies and source-grounding semantics need separate review; scores and engine approval alone are insufficient."
+    ]
+  },
+  "sha256": "17e3621fae866ee02d2b46b06b538a2cc2274b51ed23011cec9244acec4ef732"
+}

@@ -1,0 +1,27 @@
+{
+  "review_kind": "independent_automated_semantic_review",
+  "reviewers": [
+    "Codex character_engine independent reviewer",
+    "root implementation reviewer"
+  ],
+  "published_replies_reviewed": 8,
+  "concrete_semantic_failures_found": 0,
+  "findings": [
+    "Known event recall returns exactly the canonical dog/puddle card with genuine dense support and no lexical hit.",
+    "The exact swimming input now enters conversation search, makes an actual embedding request, returns no cards and asks honestly for a reminder.",
+    "Explicit and bare dog identity return the canonical name; ambiguous pet identity clarifies cat versus dog. All three make zero embedding requests.",
+    "Child-authored story stays explicitly pretend; there is no unsolicited missing-pet-name claim.",
+    "Plant-pot breakage advice is conditional rather than a stored broken-pot assertion."
+  ],
+  "provenance": {
+    "actual_drafts": 8,
+    "actual_checks": 8,
+    "source_hashes_unchanged": true
+  },
+  "limits": [
+    "Focused eight-turn source regression; not a full final-source 29-case rerun.",
+    "Typed synthetic EN/VI inputs and simulated playback receipts.",
+    "No human audio/preferences, native PostgreSQL runtime or broad production-quality claim.",
+    "Earlier v3 rejected repair draft remains unavailable and is not reconstructed."
+  ]
+}

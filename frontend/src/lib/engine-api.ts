@@ -16,10 +16,10 @@ export type DemoContext = {
   clock: { effectiveNow: string; localDate: string; timezone: string; version: number; mode: string };
   daily: { localDate: string; mood: string; growthDays: number; growthTheme: string; diary: { en: string; vi: string }; storyEpisode: { chapter: number; en: string; vi: string } };
   friendship: string;
-  entities: { id: string; kind: string; name: string; species: string | null; aliases: string[]; expiresAt: string }[];
-  preferences: { id: string; category: string; value: string; expiresAt: string }[];
-  socialCircle: { id: string; name: string; relation: string; expiresAt: string }[];
-  events: { id: string; subjectName: string | null; value: string; evidenceKind: string; localDate: string; expiresAt: string }[];
+  entities: { id: string; kind: string; name: string; species: string | null; aliases: string[]; expiresAt: string | null }[];
+  preferences: { id: string; category: string; value: string; expiresAt: string | null }[];
+  socialCircle: { id: string; name: string; relation: string; expiresAt: string | null }[];
+  events: { id: string; subjectName: string | null; value: string; evidenceKind: string; localDate: string; expiresAt: string | null }[];
   stories: { id: string; title: string; summary: string; castNames: string[] }[];
   storyProgress: { title: { en: string; vi: string }; chapter: number; status: string } | null;
 };

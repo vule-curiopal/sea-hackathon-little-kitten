@@ -1,0 +1,1 @@
+{"sequence":1,"api":"embeddings","requestedModel":"text-embedding-3-large","returnedModel":"text-embedding-3-large","dimensions":1536,"batchSize":18,"requestId":"req_7915b535c17144adb00ad0b788580ff0","startedAt":"2026-10-31T08:30:24.583Z","elapsedMs":1606.348666,"outcome":"completed","promptTokens":358,"totalTokens":358,"errorCode":null,"httpStatus":200}

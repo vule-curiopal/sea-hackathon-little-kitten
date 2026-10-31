@@ -1,8 +1,8 @@
 # Vector memory retrieval: architecture and integration plan
 
-**Status: design only; implementation deferred at the user's request.**
+**Status: first implementation on `feat/vector-memory`, authorized by the later user request to create a branch and implement embeddings.** See [implemented behavior, configuration and verification](vector-memory.md). The pending age-availability policy, model comparisons, ANN rollout and broader benchmark gates below remain design work.
 
-Reviewed on 2026-10-31 against the current character/memory code and official provider/database documentation. No embedding request, vector extension, dependency, index, migration, backfill, feature flag, or production change is authorized by this document. A later implementation instruction is required before starting those changes.
+Reviewed on 2026-10-31 against the character/memory code and official provider/database documentation. The branch implements optional pgvector/exact-array search, derived indexing jobs and durable memory migrations; production remains unchanged. This design record preserves the larger roadmap and does not convert proposed quality targets into measured results.
 
 This plan extends the [character and memory technical proposal](character-memory-technical-proposal.md), [memory/time specification](memory-and-time.md), and [product specification](product-specification.md). **The user has replaced the former 30-day memory policy: saved memories remain durable until explicit forgetting; age may influence recall, not physical deletion.** Other ownership, playback, correction, permission and deletion rules still apply. Current runtime expiry and historical tests have not yet been migrated to this policy.
 

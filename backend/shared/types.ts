@@ -38,7 +38,7 @@ export interface Entity {
   aliases: string[];
   /** Scoped hashes support recognizing a corrected spelling supplied anew by the child. */
   retiredNameHashes?: string[];
-  expiresAt: string;
+  expiresAt: string | null;
 }
 export interface Preference {
   id: string;
@@ -46,14 +46,14 @@ export interface Preference {
   value: string;
   slot?: string;
   qualifiers?: { frequency?: 'sometimes' | 'usually' | 'often' | 'always'; timeRelation?: string; exactTime?: string | null };
-  expiresAt: string;
+  expiresAt: string | null;
 }
 export interface SocialConnection {
   id: string;
   entityId: string;
   name: string;
   relation: string;
-  expiresAt: string;
+  expiresAt: string | null;
 }
 export interface MemoryEvent {
   id: string;
@@ -64,7 +64,7 @@ export interface MemoryEvent {
   localDate: string;
   evidenceKind: 'child_reported' | 'reported_plan';
   conditions?: string[];
-  expiresAt: string;
+  expiresAt: string | null;
   source?: AssertionEvidence & { turnId: string };
 }
 export interface AssertionEvidence {
@@ -80,7 +80,7 @@ export interface ChildStory {
   title: string;
   summary: string;
   castNames: string[];
-  expiresAt: string;
+  expiresAt: string | null;
 }
 export interface DailyState {
   localDate: string;
@@ -114,6 +114,7 @@ export interface StoryProgress {
   scene: { en: string; vi: string };
 }
 export interface MemoryContext {
+  memoryPolicy?: 'durable_until_forgotten_v1';
   profile: ChildProfile;
   config: MiuConfig;
   clock: ClockState;
@@ -125,7 +126,7 @@ export interface MemoryContext {
   events: MemoryEvent[];
   stories: ChildStory[];
   storyProgress: StoryProgress | null;
-  addressPreference?: { preferredAddress: string; allowNickname: boolean; nickname: string | null; expiresAt: string } | null;
+  addressPreference?: { preferredAddress: string; allowNickname: boolean; nickname: string | null; expiresAt: string | null; scope?: 'persistent' | 'day' | 'session'; validLocalDate?: string; sessionId?: string } | null;
   friendship: 'getting_acquainted' | 'buddies' | 'best_friends';
 }
 
@@ -161,6 +162,19 @@ export interface MemoryOperation {
   reportStatus?: 'denied_by_child';
 }
 export interface ActivityBoundaries { noGames: boolean; noQuestions: boolean }
+export interface MemoryEvidenceCard {
+  sourceId: string; sourceRevision: number; contentHash: string;
+  projectionKey: string; projectionVersion: string; dependencies: { sourceId: string; revision: number }[];
+  kind: 'event' | 'preference' | 'child_story'; scope: 'reported_real' | 'fictional'; text: string;
+}
+export interface MemoryRetrievalResult {
+  status: 'available' | 'unresolved' | 'degraded' | 'skipped';
+  cards: MemoryEvidenceCard[];
+  reason?: string;
+  diagnostics?: { generationId: string; backend: 'pgvector' | 'array_exact'; mode: 'hybrid' | 'lexical';
+    embeddingRequested: boolean; embeddingErrorCode?: string; lexicalCandidates: number; denseCandidates: number;
+    returned: number; elapsedMs: number };
+}
 /** Ephemeral context established only by a completed, heard game reply. */
 export interface ActiveGame { premise: readonly string[] }
 export interface ProviderClassificationContext {
@@ -180,6 +194,7 @@ export interface DirectorInput {
   turnEvidence?: { kind: 'current_turn'; facts: string[]; persistable: boolean };
   action?: TurnAction;
   affect?: AffectPresentation;
+  retrieval?: MemoryRetrievalResult;
 }
 export interface DirectorPlan {
   purpose: 'chat' | 'comfort' | 'clarify' | 'follow_up' | 'story' | 'farewell' | 'refusal' | 'acknowledge_forget';
@@ -190,6 +205,7 @@ export interface DirectorPlan {
   emotion: Emotion;
   dailyMood: Mood;
   affect?: AffectPresentation;
+  memoryEvidence?: MemoryEvidenceCard[];
   rhythm: 'morning' | 'daytime' | 'evening' | 'bedtime';
   delivery: 'gentle' | 'normal' | 'playful' | 'sleepy';
   allowGiggle: boolean;

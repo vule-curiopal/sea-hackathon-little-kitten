@@ -2,7 +2,7 @@
 
 **User decision, 2026-10-31: retain saved memories; do not automatically delete them after 30 days.**
 
-An older memory may be less likely to come to mind, using an age-dependent random factor. This affects conversational recall, not whether the fact still exists in storage. The [vector integration plan](vector-memory-integration-plan.md) describes a proposed curve, seeded decisions, evaluation and later integration. Both the age policy and vector integration remain unimplemented by this documentation change.
+An older memory may be less likely to come to mind, using an age-dependent random factor. This affects conversational recall, not whether the fact still exists in storage. The [vector integration plan](vector-memory-integration-plan.md) describes a proposed curve, seeded decisions and evaluation. The `feat/vector-memory` branch now implements durable storage and vector retrieval; the random age-availability policy remains unimplemented pending its product decisions. See [implementation details](vector-memory.md).
 
 ## Storage and eligibility
 
@@ -23,11 +23,11 @@ Use a stable draw across retries, paraphrases and workers within a defined windo
 
 Safety, deletion/no-save decisions, current identity/corrections, permission boundaries and supported active commitments remain deterministic controls. The exact application to direct ordinary historical questions versus spontaneous recall is still a user preference to settle before implementation. Numerical grace/half-life/floor values in the vector plan are illustrative, not accepted defaults.
 
-## Current implementation gap
+## Migration and remaining age-policy work
 
-The existing memory implementation still uses the former 30-day expiry model, including non-null expiry columns, creation/reconfirmation deadlines and dependency purges. Some historical tests, including SC054/055 and the original frozen 100-case run, explicitly test that legacy behavior. They must remain labeled as evidence for the old policy.
+The frozen baseline used the former 30-day expiry model. In `feat/vector-memory`, migration 011 makes ordinary expiry nullable, preserves surviving canonical rows, records learned/reconfirmation dates, and separates technical cleanup and hard permission validity. Some historical tests, including SC054/055 and the original frozen 100-case run, explicitly test legacy deletion and remain evidence for that old policy.
 
-Before implementing the new policy:
+Completed storage work and remaining acceptance requirements:
 
 1. Inventory every canonical/derived expiry write and purge, including entities, events, facts, stories, learning checkpoints, correction/retired-name receipts and supported commitments. Preserve necessary correction controls while their canonical sources survive.
 2. Choose an explicit schema migration: nullable legacy expiry or separate durable-memory/hard-validity fields. Do not use a far-future timestamp to disguise indefinite storage.
@@ -35,4 +35,4 @@ Before implementing the new policy:
 4. Version the product policy, catalog, evaluator and source evidence. Test durable survival at 30 days, a year and multiple years, plus explicit forgetting and correction races.
 5. Add separately observable seeded recall behavior. Verify stored source/vector membership is unchanged by aging and skips, while output recall rates follow the configured curve.
 
-This document authorizes no production migration, retention job, provider request, dependency installation or vector implementation. It records the target design so those changes can be implemented deliberately in a later step.
+No production migration or configuration change was performed. The local branch's implementation is separate from deployment; the undecided age curve and direct-versus-spontaneous policy remain future work.

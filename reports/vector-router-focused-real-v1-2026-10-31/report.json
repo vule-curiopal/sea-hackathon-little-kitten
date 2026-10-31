@@ -1,0 +1,631 @@
+{
+  "run_kind": "isolated_vector_router_real_regression",
+  "status": "completed",
+  "plan": {
+    "version": "vector-pet-router-focused-real-v1",
+    "cases": [
+      {
+        "name": "capture_dog_fall",
+        "text": "My dog is named Moki. Moki fell in a puddle.",
+        "kind": "event"
+      },
+      {
+        "name": "capture_cat_pot",
+        "text": "M\u00e8o nh\u00e0 m\u00ecnh t\u00ean l\u00e0 B\u00f4ng. B\u00f4ng l\u00e0m \u0111\u1ed5 ch\u1eadu c\u00e2y.",
+        "kind": "event"
+      },
+      {
+        "name": "capture_child_story",
+        "text": "My story is called Pip and the Pillow Planet. Pip is a pretend rabbit who lands on a pillow planet.",
+        "kind": "story"
+      },
+      {
+        "name": "typed_explicit_dog_name",
+        "text": "What is my dog's name?",
+        "kind": "resolved"
+      },
+      {
+        "name": "typed_bare_dog",
+        "text": "Do you remember my dog?",
+        "kind": "resolved"
+      },
+      {
+        "name": "typed_ambiguous_pet_name",
+        "text": "Do you remember my pet's name?",
+        "kind": "ambiguous"
+      },
+      {
+        "name": "semantic_known_dog_fall",
+        "text": "Do you remember the pet tumble involving water that I told you about?",
+        "kind": "available"
+      },
+      {
+        "name": "semantic_unknown_dog_swim",
+        "text": "Do you recall my dog swimming across a lake?",
+        "kind": "unresolved"
+      }
+    ],
+    "plannedDialogueTurns": 8,
+    "maximumDraftsUnderExistingSingleRepairPolicy": 16,
+    "maxEmbeddingRequests": 12,
+    "model": "text-embedding-3-large",
+    "dimensions": 1536,
+    "minDenseSimilarity": 0.3,
+    "projectionVersion": "atomic-memory-v2",
+    "normalizerVersion": "nfc-lexical-v2",
+    "backend": "pgvector",
+    "queryTimeoutMs": 5000,
+    "scope": "Focused pet identity versus event routing regression, not a full v3 29-case rerun.",
+    "provenance": "Transparent delegation records every actual provider.reply draft and provider.check result with its own matching API metadata; returned values, arguments, errors and approval policy are unmodified."
+  },
+  "plan_sha256": "4c7d6713f06382c612a3544db6e4f21c1ac8b1b8de2a4c30e4b677694fb3ea09",
+  "provider_requested": "real",
+  "database": "fresh_in_memory_pglite_pgvector",
+  "production_accessed": false,
+  "source_sha256": {
+    "backend/application.ts": "fe7d45608aa04c929fc86b1e77fcfc0878eda92b7a183f15b51fadb0c28928c1",
+    "backend/character/action-plan.ts": "0d417468b2698c864872a32af5c793dd4bde4727caf413bc066ccf6f0f28336e",
+    "backend/character/affect.ts": "c97e307bf941e9a420c1d858448ff4fa30e888ee793eb372a0f7e5e53b264731",
+    "backend/character/director.ts": "d49bfb0fc4b2eabc6263765bb399c9abbc54cd6b66c97e07b3335e48b5419d70",
+    "backend/character/index.ts": "26130a2e35c7b40866e8b5acf2edeeb839aa3f040139d4dab65fcd05100cc257",
+    "backend/character/presets.ts": "62fb8fe31d6d6000193c2c720cd9b87ba7cf310dace045e294d2de8a7ca8197f",
+    "backend/character/profile.ts": "2df94a643ecd452e3691186c0daa7099ab63dfcfd1b6f4599b9060ebf21ac75f",
+    "backend/character/prompt.ts": "96f5fc806cabdc1e48366c16ffdd775caecfc027691b0667d2a7839fae941ace",
+    "backend/character/templates.ts": "6cca7f615610b5d60a5f37af190a2aeb817bda0ac2d6d75e7466f04043fae337",
+    "backend/character/validation.ts": "24036cfa50c68f8046ada78f101f9caebafd2d5cb80cac66a90aa48340380ed6",
+    "backend/memory/affect-store.ts": "fee113a40493399a0b9a8b381b219680bc0f390c4547d7ea4cf97f72026fe0cf",
+    "backend/memory/assertions.ts": "4a4dfe2a59bcc76b6ae7ff3fec6a3fd62b3f7fb2aeb1c961d960a27ae2c880b0",
+    "backend/memory/authored-life.ts": "eaf10c9b197135056009439d96efec0b95f796534ebbcb5662c321d79662c712",
+    "backend/memory/clock.ts": "c28b44dc5168a6078282b8930981f23e8731c670b427aedb7bd1e0cd985edaf2",
+    "backend/memory/database.ts": "c24ad0a32378e87390f4d102ab6766ef42d096a04217ac05fc4601e56c3e332f",
+    "backend/memory/evidence.ts": "fc8571109b022dc1ac5b46176d8496b5aba654645eebc8add3297683f82314e8",
+    "backend/memory/import-history.ts": "68dbf610d2f11bb6a0daecaced2df962f8f0429caefd68f5a8b7129d61a1f302",
+    "backend/memory/index.ts": "ffb842c70ecfe6d405d852618d203d35947a21fcba87681b3c7837e2dc6e542a",
+    "backend/memory/migrations/001_character_memory.sql": "313b3a4d165310132aaf83881109bb6db518cf4a200f0637e2864b343e5d0290",
+    "backend/memory/migrations/002_story_assignments.sql": "f591d9d4421d04f783a06a4d0f2acaf956575a21b8b6af09b4b37fa00ac3bc1a",
+    "backend/memory/migrations/003_synthetic_history.sql": "6a47d3be966d9a4a8ac2fcda51123e1193203f4c0f65f649db387bac9e74fd34",
+    "backend/memory/migrations/004_event_assertions.sql": "1bd1d0237ce6feacb8d3caed0497548174b4f0bbe99e8d1adcf660f2431e774d",
+    "backend/memory/migrations/005_memory_operation_receipts.sql": "8f08ea7b5e1fd846e7b7e93d2cbe7ddf277f1cfe6a00e991c360d18c10f3cf4c",
+    "backend/memory/migrations/006_correction_continuity.sql": "a4d9eb5ba104ff3e7fd77381e81b72c59e43711bc588d98797eba09fff4a9481",
+    "backend/memory/migrations/007_typed_memory_updates.sql": "c9c79f11561b6622905022952beeaded455eacb5452d9981c33080ab992171a1",
+    "backend/memory/migrations/008_character_affect.sql": "494bee3defcf66fa2ba8a22fe3741c1767923a6c2226b554947f0c00f4c1ce3e",
+    "backend/memory/migrations/009_scoped_permissions_and_learning_activities.sql": "24f08961e9d3e32ae7693dcfc42f305f7ae68d0f6544a794fcab7be29770d5ba",
+    "backend/memory/migrations/010_vector_memory.sql": "eb95596fc0dc29025821c4e274edcbb35afe6d02c4d7cf2c0acb7b8451005ac6",
+    "backend/memory/migrations/011_durable_memories.sql": "afdba31ff0402895ef6d883f847fa36e9ea029d861ee97299f5ad7c9a73373cb",
+    "backend/memory/normalization.ts": "7d8598a9eb8ef44de7f4b3b30ee51a3271507e9c01f940ee552eb0b78f2c19e8",
+    "backend/memory/patches.ts": "364f856c6b184c9bbdcc602115690f637055a82227a213efb6b04c571ea8bc60",
+    "backend/memory/vector/capability.ts": "99ba13aea6be930f996823b3613ef55e2eeaa1ca02fec6f1f7e4a70d1fdfa255",
+    "backend/memory/vector/projections.ts": "fb10983715f7665b9f8c471e10e7cf741dd90038e4e4c3b839f9fa920f707fb5",
+    "backend/memory/vector/ranking.ts": "56265c3e443ec76cab32b2e2254905435646037b476328f1dfc27e2d782cdff1",
+    "backend/memory/vector/service.ts": "9651c9494d98bf5ab18c975643476978cde8c93e7ac451495c267bcc64338cca",
+    "backend/memory/vector/store.ts": "709b6c9a06e5e0b36f5e94427236a5b88554f7b50cb1af4fdfb062d4ab946188",
+    "backend/memory/vector/types.ts": "9d372808be96b8eb4ed1cbc4f9b61d248c670fdbdb6f6a2cb6561f999396120b",
+    "backend/pipeline/embeddings.ts": "575389b9e61d0a7d631b42701b99c08077b34ac0006a3ffa7cd9a64d57dc067b",
+    "backend/pipeline/observations.ts": "66e5b781d8ddda3ba8ed83ce2f9a8240acc63cbf3dc1d71879b323c4b6e7c5f9",
+    "backend/pipeline/providers.ts": "38410ee30c48b97e50ebc70acc21bd41a65367ea3be96d99074fa4222c287544",
+    "backend/recall.ts": "2d7388617fbf2dd20e8040174288cc7361a62f879de3ac85b021c41fba3401ef",
+    "backend/scripts/verify-vector-router-real.ts": "e0408f494be9508c88a35766c432b0f57ae515ee845143ff63c1e7daa3c849ad",
+    "backend/shared/affect.ts": "4b177e95d7a540bbb62cf49bc8151f6c4b82d416f9aabcaa974f843934b9b31a",
+    "backend/shared/semantic-speech.ts": "d662fa57486b11ee932af59a5075eba883fec28a76f92b6cda7233e26c33b800",
+    "backend/shared/types.ts": "2a4ee9413d453e6f84a3722cb07c48161478953840c7232edac66bf470dea5d6"
+  },
+  "changed_source_paths_at_completion": [],
+  "labels": {
+    "capture_dog_fall": [
+      "ef3b7de7-af22-4b56-a880-b31a136e5abc"
+    ],
+    "capture_cat_pot": [
+      "966f883d-a0a0-4110-8ea4-6417b31af68a"
+    ],
+    "capture_child_story": [
+      "881e467d-1264-41a5-b282-3095b620113d"
+    ]
+  },
+  "indexing": {
+    "work": {
+      "processed": 3,
+      "committed": 3,
+      "discarded": 0,
+      "failed": 0
+    },
+    "documents": [
+      {
+        "id": "fcccd8a6-e329-4d1e-b2f3-559663dea248",
+        "source_id": "881e467d-1264-41a5-b282-3095b620113d",
+        "source_revision": 3,
+        "content_hash": "ccebc8872d75c5b799d4f10f3c42f173cbfa1696f9a9871d9bb450206fea39b4",
+        "document_text": "{\"kind\":\"child_story\",\"scope\":\"fictional\",\"evidence_kind\":\"child_reported\",\"literal_title\":\"Pip and the Pillow Planet\",\"literal_text\":\"Pip is a pretend rabbit who lands on a pillow planet.\",\"cast\":[\"Pip\"]}"
+      },
+      {
+        "id": "ec2a01e6-8880-455e-a9ea-85bd52207603",
+        "source_id": "966f883d-a0a0-4110-8ea4-6417b31af68a",
+        "source_revision": 3,
+        "content_hash": "f80640986525d3849f566f401195af91a1015156312000be1b6c6d7440761554",
+        "document_text": "{\"kind\":\"event\",\"scope\":\"reported_real\",\"evidence_kind\":\"child_reported\",\"event_type\":\"reported_event\",\"subject\":\"B\u00f4ng\",\"subject_kind\":\"pet\",\"subject_species\":\"cat\",\"local_date\":\"2026-11-01\",\"conditions\":[],\"literal_value\":\"B\u00f4ng l\u00e0m \u0111\u1ed5 ch\u1eadu c\u00e2y.\"}"
+      },
+      {
+        "id": "88a94f7d-258c-473b-9e4c-62e6a0112d48",
+        "source_id": "ef3b7de7-af22-4b56-a880-b31a136e5abc",
+        "source_revision": 3,
+        "content_hash": "5f0010f0821560497b7b7b6df0ffe1c5847817e7803b844f076335ab2bea9ed1",
+        "document_text": "{\"kind\":\"event\",\"scope\":\"reported_real\",\"evidence_kind\":\"child_reported\",\"event_type\":\"fell_in_puddle\",\"subject\":\"Moki\",\"subject_kind\":\"pet\",\"subject_species\":\"dog\",\"local_date\":\"2026-11-01\",\"conditions\":[],\"literal_value\":\"Moki fell in a puddle.\"}"
+      }
+    ],
+    "embeddings": [
+      {
+        "document_id": "88a94f7d-258c-473b-9e4c-62e6a0112d48",
+        "dimensions": 1536
+      },
+      {
+        "document_id": "ec2a01e6-8880-455e-a9ea-85bd52207603",
+        "dimensions": 1536
+      },
+      {
+        "document_id": "fcccd8a6-e329-4d1e-b2f3-559663dea248",
+        "dimensions": 1536
+      }
+    ]
+  },
+  "generation": {
+    "id": "0590066fddc3b66e5e6c0e0db4ad0e0fe4677305b8d7ead8fb68cca47fcca53a",
+    "model": "text-embedding-3-large",
+    "dimensions": 1536,
+    "projectionVersion": "atomic-memory-v2",
+    "normalizerVersion": "nfc-lexical-v2",
+    "distance": "cosine",
+    "backend": "pgvector",
+    "status": "active"
+  },
+  "models": {
+    "classify": "gpt-6-astra",
+    "reply": "gpt-6-astra",
+    "check": "gpt-6-astra",
+    "moderation": "omni-moderation-latest"
+  },
+  "attempted_turns": 8,
+  "actual_dialogue_api_requests": 40,
+  "actual_embedding_api_requests": 3,
+  "actual_reply_drafts": 8,
+  "reply_response_ids": [
+    "resp_0e55e8e401a30035016ae5aae84ea487d2816ee63fbb35f174",
+    "resp_0c5db2000ad1c984016ae5aaf0d83c87d28dc2698ff4123357",
+    "resp_01581988da067a33016ae5aaf9529c87d2bee545418bfe4031",
+    "resp_0ab3338b1f10b300016ae5ab01333c87d289e67bbf4abfd7e7",
+    "resp_07a2e5fd6e6b9a02016ae5ab0ab05487d2b395ff79ea14bdc9",
+    "resp_0e623a8792fea331016ae5ab1103c487d29bc62dded86b111e",
+    "resp_025c3d289cc97f90016ae5ab19960087d2a9fa5c8f824840f7",
+    "resp_056200e0e7a00d58016ae5ab20ba2487d28de97c80af73d31c"
+  ],
+  "captured_drafts": 8,
+  "captured_checks": 8,
+  "coverage": {
+    "passed": 8,
+    "failed": 0,
+    "blocked": 0,
+    "not_attempted": 0
+  },
+  "cases": [
+    {
+      "name": "capture_dog_fall",
+      "status": "passed",
+      "evidence": {
+        "action": {
+          "domain": "conversation",
+          "operation": "respond",
+          "stateEffect": "none",
+          "allowedFacts": [],
+          "responseGoal": "Respond directly to the current utterance using eligible evidence. Do not start an activity merely because a story or game was mentioned."
+        },
+        "memory_evidence": [],
+        "embedding_requests": 0,
+        "generation": {
+          "attempts": [
+            {
+              "attempt": 1,
+              "approved": true,
+              "localViolations": [],
+              "providerCheck": {
+                "approved": true,
+                "violations": [],
+                "diagnostics": {
+                  "local": {
+                    "approved": true,
+                    "violations": []
+                  },
+                  "moderation": {
+                    "approved": true
+                  },
+                  "contextual": {
+                    "approved": true,
+                    "violations": [],
+                    "issues": []
+                  }
+                }
+              }
+            }
+          ],
+          "repaired": false
+        }
+      },
+      "elapsed_ms": 10571
+    },
+    {
+      "name": "capture_cat_pot",
+      "status": "passed",
+      "evidence": {
+        "action": {
+          "domain": "conversation",
+          "operation": "respond",
+          "stateEffect": "none",
+          "allowedFacts": [],
+          "responseGoal": "Respond directly to the current utterance using eligible evidence. Do not start an activity merely because a story or game was mentioned."
+        },
+        "memory_evidence": [],
+        "embedding_requests": 0,
+        "generation": {
+          "attempts": [
+            {
+              "attempt": 1,
+              "approved": true,
+              "localViolations": [],
+              "providerCheck": {
+                "approved": true,
+                "violations": [],
+                "diagnostics": {
+                  "local": {
+                    "approved": true,
+                    "violations": []
+                  },
+                  "moderation": {
+                    "approved": true
+                  },
+                  "contextual": {
+                    "approved": true,
+                    "violations": [],
+                    "issues": []
+                  }
+                }
+              }
+            }
+          ],
+          "repaired": false
+        }
+      },
+      "elapsed_ms": 7955
+    },
+    {
+      "name": "capture_child_story",
+      "status": "passed",
+      "evidence": {
+        "action": {
+          "domain": "child_story",
+          "operation": "respond",
+          "stateEffect": "none",
+          "allowedFacts": [
+            "My story is called Pip and the Pillow Planet. Pip is a pretend rabbit who lands on a pillow planet."
+          ],
+          "responseGoal": "Acknowledge the child\u2019s fictional premise or constraint without adding an unrequested scene. Keep the supplied cast and choices distinct from real life and from the assigned catalog story.",
+          "activity": {
+            "kind": "child_story",
+            "premise": [
+              "My story is called Pip and the Pillow Planet. Pip is a pretend rabbit who lands on a pillow planet."
+            ],
+            "constraints": [],
+            "requestedEnding": null
+          }
+        },
+        "memory_evidence": [],
+        "embedding_requests": 1,
+        "generation": {
+          "attempts": [
+            {
+              "attempt": 1,
+              "approved": true,
+              "localViolations": [],
+              "providerCheck": {
+                "approved": true,
+                "violations": [],
+                "diagnostics": {
+                  "local": {
+                    "approved": true,
+                    "violations": []
+                  },
+                  "moderation": {
+                    "approved": true
+                  },
+                  "contextual": {
+                    "approved": true,
+                    "violations": [],
+                    "issues": []
+                  }
+                }
+              }
+            }
+          ],
+          "repaired": false
+        }
+      },
+      "elapsed_ms": 8988
+    },
+    {
+      "name": "typed_explicit_dog_name",
+      "status": "passed",
+      "evidence": {
+        "action": {
+          "domain": "memory",
+          "operation": "recall",
+          "stateEffect": "none",
+          "allowedFacts": [
+            "The child's explicitly reported dog is named \"Moki\". Preserve this canonical spelling and identity. A name does not establish an event or outcome."
+          ],
+          "responseGoal": "Answer the requested memory slot directly from the supplied source facts. Translate ordinary vocabulary naturally into the reply language; preserve every proper name, diacritic, and quoted story title. Distinguish objects, fictional characters, and real reported entities. Retain volunteered routine qualifiers and unknown precision. This read does not start or advance an activity.",
+          "target": {
+            "kind": "pet",
+            "slot": "name",
+            "sourceIds": [
+              "ba16f6c9-bf55-4d72-8016-05918c488dd3"
+            ],
+            "status": "resolved"
+          }
+        },
+        "memory_evidence": [],
+        "embedding_requests": 0,
+        "generation": {
+          "attempts": [
+            {
+              "attempt": 1,
+              "approved": true,
+              "localViolations": [],
+              "providerCheck": {
+                "approved": true,
+                "violations": [],
+                "diagnostics": {
+                  "local": {
+                    "approved": true,
+                    "violations": []
+                  },
+                  "moderation": {
+                    "approved": true
+                  },
+                  "contextual": {
+                    "approved": true,
+                    "violations": [],
+                    "issues": []
+                  }
+                }
+              }
+            }
+          ],
+          "repaired": false
+        }
+      },
+      "elapsed_ms": 6882
+    },
+    {
+      "name": "typed_bare_dog",
+      "status": "passed",
+      "evidence": {
+        "action": {
+          "domain": "memory",
+          "operation": "recall",
+          "stateEffect": "none",
+          "allowedFacts": [
+            "The child's explicitly reported dog is named \"Moki\". Preserve this canonical spelling and identity. A name does not establish an event or outcome."
+          ],
+          "responseGoal": "Answer the requested memory slot directly from the supplied source facts. Translate ordinary vocabulary naturally into the reply language; preserve every proper name, diacritic, and quoted story title. Distinguish objects, fictional characters, and real reported entities. Retain volunteered routine qualifiers and unknown precision. This read does not start or advance an activity.",
+          "target": {
+            "kind": "pet",
+            "slot": "name",
+            "sourceIds": [
+              "ba16f6c9-bf55-4d72-8016-05918c488dd3"
+            ],
+            "status": "resolved"
+          }
+        },
+        "memory_evidence": [],
+        "embedding_requests": 0,
+        "generation": {
+          "attempts": [
+            {
+              "attempt": 1,
+              "approved": true,
+              "localViolations": [],
+              "providerCheck": {
+                "approved": true,
+                "violations": [],
+                "diagnostics": {
+                  "local": {
+                    "approved": true,
+                    "violations": []
+                  },
+                  "moderation": {
+                    "approved": true
+                  },
+                  "contextual": {
+                    "approved": true,
+                    "violations": [],
+                    "issues": []
+                  }
+                }
+              }
+            }
+          ],
+          "repaired": false
+        }
+      },
+      "elapsed_ms": 9404
+    },
+    {
+      "name": "typed_ambiguous_pet_name",
+      "status": "passed",
+      "evidence": {
+        "action": {
+          "domain": "memory",
+          "operation": "clarify",
+          "stateEffect": "none",
+          "allowedFacts": [],
+          "responseGoal": "Several eligible records materially match this specific slot. Ask one focused distinction; do not substitute a catalog title or guess a name.",
+          "target": {
+            "kind": "pet",
+            "slot": "name",
+            "sourceIds": [
+              "931d9d58-bcb5-48f8-8a79-f68bfd169789",
+              "ba16f6c9-bf55-4d72-8016-05918c488dd3"
+            ],
+            "status": "ambiguous"
+          }
+        },
+        "memory_evidence": [],
+        "embedding_requests": 0,
+        "generation": {
+          "attempts": [
+            {
+              "attempt": 1,
+              "approved": true,
+              "localViolations": [],
+              "providerCheck": {
+                "approved": true,
+                "violations": [],
+                "diagnostics": {
+                  "local": {
+                    "approved": true,
+                    "violations": []
+                  },
+                  "moderation": {
+                    "approved": true
+                  },
+                  "contextual": {
+                    "approved": true,
+                    "violations": [],
+                    "issues": []
+                  }
+                }
+              }
+            }
+          ],
+          "repaired": false
+        }
+      },
+      "elapsed_ms": 8073
+    },
+    {
+      "name": "semantic_known_dog_fall",
+      "status": "passed",
+      "evidence": {
+        "action": {
+          "domain": "conversation",
+          "operation": "respond",
+          "stateEffect": "none",
+          "allowedFacts": [],
+          "responseGoal": "Respond directly to the current utterance using eligible evidence. Do not start an activity merely because a story or game was mentioned."
+        },
+        "memory_evidence": [
+          {
+            "sourceId": "ef3b7de7-af22-4b56-a880-b31a136e5abc",
+            "sourceRevision": 3,
+            "contentHash": "5f0010f0821560497b7b7b6df0ffe1c5847817e7803b844f076335ab2bea9ed1",
+            "projectionKey": "atomic",
+            "projectionVersion": "atomic-memory-v2",
+            "dependencies": [
+              {
+                "sourceId": "ba16f6c9-bf55-4d72-8016-05918c488dd3",
+                "revision": 2
+              }
+            ],
+            "kind": "event",
+            "scope": "reported_real",
+            "text": "{\"kind\":\"event\",\"scope\":\"reported_real\",\"evidence_kind\":\"child_reported\",\"event_type\":\"fell_in_puddle\",\"subject\":\"Moki\",\"subject_kind\":\"pet\",\"subject_species\":\"dog\",\"local_date\":\"2026-11-01\",\"conditions\":[],\"literal_value\":\"Moki fell in a puddle.\"}"
+          }
+        ],
+        "embedding_requests": 1,
+        "generation": {
+          "attempts": [
+            {
+              "attempt": 1,
+              "approved": true,
+              "localViolations": [],
+              "providerCheck": {
+                "approved": true,
+                "violations": [],
+                "diagnostics": {
+                  "local": {
+                    "approved": true,
+                    "violations": []
+                  },
+                  "moderation": {
+                    "approved": true
+                  },
+                  "contextual": {
+                    "approved": true,
+                    "violations": [],
+                    "issues": []
+                  }
+                }
+              }
+            }
+          ],
+          "repaired": false
+        }
+      },
+      "elapsed_ms": 6800
+    },
+    {
+      "name": "semantic_unknown_dog_swim",
+      "status": "passed",
+      "evidence": {
+        "action": {
+          "domain": "conversation",
+          "operation": "respond",
+          "stateEffect": "none",
+          "allowedFacts": [],
+          "responseGoal": "Respond directly to the current utterance using eligible evidence. Do not start an activity merely because a story or game was mentioned."
+        },
+        "memory_evidence": [],
+        "embedding_requests": 1,
+        "generation": {
+          "attempts": [
+            {
+              "attempt": 1,
+              "approved": true,
+              "localViolations": [],
+              "providerCheck": {
+                "approved": true,
+                "violations": [],
+                "diagnostics": {
+                  "local": {
+                    "approved": true,
+                    "violations": []
+                  },
+                  "moderation": {
+                    "approved": true
+                  },
+                  "contextual": {
+                    "approved": true,
+                    "violations": [],
+                    "issues": []
+                  }
+                }
+              }
+            }
+          ],
+          "repaired": false
+        }
+      },
+      "elapsed_ms": 7105
+    }
+  ],
+  "blocker": null,
+  "cleanup": "closed",
+  "elapsed_ms": 66403,
+  "semantics": {
+    "status": "independent_automated_review_complete_human_review_unperformed",
+    "review": "independent-semantic-review.json",
+    "concrete_failures_found": 0
+  },
+  "limitations": [
+    "Eight fresh synthetic typed turns with simulated receipts, age 6-8, EN/VI follow-child; no physical voice/browser testing.",
+    "Focused router regression only; full v3 source guards/lifecycle/365-day coverage was not rerun.",
+    "Prior v3 had one real repair whose first raw draft was not retained; this run does not reconstruct that missing evidence.",
+    "Every native reply/check invocation in this run is recorded, including local checker short circuits and any real constrained repair."
+  ]
+}
