@@ -125,6 +125,10 @@ Production can serve `frontend/dist` from the integrated Express app. Otherwise 
 
 ## Checks and production output
 
+Open the browser developer console and filter for `[Miu voice]` to follow a voice turn. Logs include `hold.start`, capture states, a microphone-level summary at most once per second, `hold.release`, `capture.send`, HTTP status/duration, `turn.received` with transcript availability and STT/reply/TTS timings, playback states, and technical error codes. `capture.send` reports whether releasing finalized a recording; releasing before permission is ready reports `accepted: false`. The diagnostic logger projects technical metadata only, excluding transcripts, reply words, memories, audio bytes, authorization headers, and session tokens. Logs remain in the browser console and are not sent to a logging service.
+
+A `401`, `session_closed`, or `session_not_found` invalidates the rejected client session. The frontend logs `session.expired` and reconnects once for a previously connected client, without retrying the audio or reopening the microphone. The child must hold Talk again after the connection is ready. An authentication failure during initial connection remains visible instead of causing a reconnect loop. Async errors from disposed clients cannot invalidate their replacements. Deployment restarts and opening the same shared fictional profile in another browser can invalidate an earlier session.
+
 ```sh
 npm test
 npm run build
