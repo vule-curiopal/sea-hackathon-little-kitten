@@ -1,13 +1,13 @@
 # Quyết định triển khai voice pipeline
 
-Cập nhật theo câu trả lời của bạn ngày **31/10/2026**. Các lựa chọn đã xác nhận là cơ sở triển khai, không cần trả lời lại. D08 đã bổ sung từ `little-buddy-impl`; chưa gọi API thật hoặc triển khai code.
+Cập nhật theo câu trả lời của bạn ngày **31/10/2026** và yêu cầu mới dùng Express + TypeScript. Các lựa chọn đã xác nhận là cơ sở triển khai, không cần trả lời lại. D08 đã bổ sung từ `little-buddy-impl`; code voice đã được triển khai với fake/mocked provider, chưa nghiệm thu trọn pipeline bằng API thật.
 
 ## Các quyết định đã chốt
 
 | Mã | Quyết định | Hệ quả triển khai |
 | --- | --- | --- |
 | D01 | ElevenLabs cho cả STT và TTS | Scribe v2 batch nhận audio nguyên bản; Flash v2.5 đọc câu trả lời; voice ID ở D08 |
-| D02 | A — React + TypeScript, Node.js + TypeScript | Backend/provider adapters bằng Node.js/TS; giao diện React/TS do thành viên frontend phụ trách |
+| D02 | A — React + TypeScript; backend Express 5 + TypeScript theo yêu cầu mới | Giữ Node.js runtime; Express routers/controllers tách khỏi services/repository/providers theo [kiến trúc backend](backend-architecture.md); giao diện React/TS do thành viên frontend phụ trách |
 | D03 | Chỉ batch | Thu xong mới upload; không triển khai realtime STT |
 | D04 | Cách số 4 — ngưỡng âm lượng thích nghi | Web Audio đo RMS/nền; MediaRecorder ghi; tự gửi khi mức âm thấp đủ lâu; Gửi thủ công dự phòng |
 | D05 | A — cân bằng | Im lặng 1.500 ms; chờ tín hiệu ban đầu 5.000 ms sau đo nền; thu tối đa 30.000 ms tính từ lúc recorder bắt đầu |

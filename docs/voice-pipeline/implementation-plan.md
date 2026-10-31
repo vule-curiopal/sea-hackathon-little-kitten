@@ -1,10 +1,10 @@
 # Kế hoạch triển khai voice pipeline
 
-Cập nhật ngày **31/10/2026** theo [các quyết định đã chốt](decisions.md). Tài liệu mô tả triển khai dự kiến; chưa cài package, viết code hoặc gọi API tính phí.
+Cập nhật ngày **31/10/2026** theo [các quyết định đã chốt](decisions.md), gồm yêu cầu dùng Express + TypeScript. Trạng thái thực tế ở [implementation-status.md](implementation-status.md), lệnh chạy ở [pipeline README](../../backend/pipeline/README.md), module/dependencies ở [backend-architecture.md](backend-architecture.md). Chưa nghiệm thu trọn pipeline provider thật; job riêng tạo bộ audio đầu vào đã dùng ElevenLabs TTS như ghi trong trạng thái triển khai.
 
 ## 1. Kiến trúc đã chọn
 
-- **Backend:** Node.js + TypeScript; giữ API keys, provider adapters, cancellation, timeout, chuẩn hóa lỗi, timing và tích hợp endpoint chung.
+- **Backend:** Express 5 + TypeScript trên Node.js. Routes/controllers xử lý HTTP; TurnService điều phối batch; SessionService và repository RAM giữ protocol state; adapters STT/GPT/TTS nằm riêng. Giữ API keys phía server, cancellation, timeout, chuẩn hóa lỗi, timing và endpoint chung.
 - **Frontend:** React + TypeScript, web responsive trên iPad; thành viên frontend phụ trách UI và nối controller audio theo tài liệu bàn giao.
 - **Input:** MediaRecorder ghi blob; Web Audio đo RMS với ngưỡng thích nghi; im lặng 1.500 ms sau tín hiệu thì chốt; có Gửi thủ công và Stop/Hủy.
 - **STT/GPT/TTS:** ElevenLabs Scribe v2 batch → GPT tạm `gpt-6-luna` stateless → ElevenLabs Flash v2.5. Chọn Việt/Anh trước phiên; mặc định Phan Anh `mgBpvrNosWzExdPuRbXP` cho Việt, Little Dude II `fBD19tfE58bkETeiwUoC` cho Anh, kế thừa bản local little-buddy-impl. [Danh sách voice](voices.md).
@@ -14,7 +14,7 @@ Cập nhật ngày **31/10/2026** theo [các quyết định đã chốt](decisi
 sequenceDiagram
     participant U as Người dùng trên iPad
     participant F as Frontend React/TS
-    participant B as Node/TS turn orchestrator
+    participant B as Express/TS TurnService
     participant S as ElevenLabs STT batch
     participant G as GPT tạm / engine adapter
     participant T as ElevenLabs TTS
@@ -40,25 +40,28 @@ Server orchestrator/session/envelope dùng hợp đồng chung. Voice adapter ch
 
 Trong lúc một request batch đang chờ, frontend hiển thị đang xử lý. Các stage STT/GPT/TTS là trạng thái nội bộ backend; không tạo tiến trình giả bằng timer. Debug panel có thể đọc diagnostics theo API chung nếu cần.
 
-## 2. Phân chia công việc và module dự kiến
+## 2. Phân chia công việc và module đã triển khai
 
 | Phần của bạn | Bàn giao cho người khác |
 | --- | --- |
-| Backend Node/TS, STT/TTS adapters, GPT stub, internal interfaces, timing/lỗi/hủy và API integration | Engine thật tiếp nhận transcript và trả lời thoại đã kiểm định |
+| Backend Express/TS trên Node, STT/TTS adapters, GPT stub, internal interfaces, timing/lỗi/hủy và API integration | Engine thật tiếp nhận transcript và trả lời thoại đã kiểm định |
 | Spec/cấu hình RMS, recorder MIME, lifecycle, API types và bài kiểm thử voice | Người làm frontend tích hợp mic/detector/player và responsive layout trên iPad |
 | Benchmark voice và phối hợp chỉnh margin/ngưỡng trên thiết bị thật | Frontend sửa layout/touch/portrait/landscape/split view; không giao thiết kế UI sang phần backend |
 
 ```text
-backend/pipeline/
-  config                    # validate env, allowlist model/voice, language
-  contracts                 # types theo shared API + internal adapters
-  turn-orchestrator         # STT → reply adapter → output checks → TTS
-  providers/eleven-stt       # batch, forward blob gốc
-  providers/gpt-response     # chỉ transcript hiện tại
-  providers/eleven-tts
-  response-generator        # interface thay bằng engine thật
-  errors-and-cancellation
-  timings
+backend/pipeline/src/
+  app.ts                          # lắp dependencies, HTTP middleware và routers
+  server.ts / server-runtime.ts   # listen, process signals, dispose và sockets
+  config.ts / ports.ts             # env và interfaces nội bộ
+  http/                           # auth input, multipart RAM, error mapping
+  modules/sessions/               # routes → controller → service → repository RAM
+  modules/turns/                  # routes → controller → TurnService, reply policy
+  modules/system/                 # health, voices, demo panel
+  providers/elevenlabs/            # STT batch và TTS adapters riêng
+  providers/openai/                # GPT response generator stateless
+  providers/fake.ts                # fixture path không gọi provider
+  audio.ts / multipart-limit.ts    # codec/duration và giới hạn wire bytes
+  state.ts                        # compatibility exports cho caller cũ
 frontend integration contract (người làm frontend thực hiện):
   microphone / recorder     # một stream, MIME thực, flush chunk cuối
   adaptive-silence          # RMS/noise floor/hysteresis/timer
@@ -66,14 +69,14 @@ frontend integration contract (người làm frontend thực hiện):
   playback                  # async play, receipt, cleanup
 ```
 
-Đây là module dự kiến, chưa tạo file code. Không thêm công việc ở `backend/memory/`. Hợp đồng toàn app có memory/character; các stage đó do người phụ trách tương ứng cung cấp, không được mô tả là tính năng voice đã hoàn thiện.
+Code backend ở `backend/pipeline/src`, types chung ở `packages/voice-contracts`, logic browser ở `packages/voice-client`; frontend owner nối library vào UI. Không thêm công việc ở `backend/memory/`. Hợp đồng toàn app có memory/character; các stage đó do người phụ trách tương ứng cung cấp, không được mô tả là tính năng voice đã hoàn thiện.
 
 ## 3. Thứ tự triển khai và điều kiện hoàn tất
 
 | Bước | Công việc | Điều kiện đạt |
 | --- | --- | --- |
 | P0 — Chuẩn bị | Theo API contract; kiểm tra quyền dùng voice D08 đã có ID, D10 tier/retention, quyền model, origin HTTPS trên iPad | Có checklist còn mở; chưa coi keys tồn tại hoặc retention đã được duyệt |
-| P1 — Khung Node/TS và fake adapters | Route turn/session lifecycle theo contract; internal adapters; timeout/hủy/idempotency/timing; stub không memory | Fake path chạy không key; lỗi/cancel không sinh audio cũ; không dựng ba route public riêng |
+| P1 — Backend Express/TS và fake adapters | Routers/controllers tách khỏi services/repository/providers; turn/session lifecycle theo contract; timeout/hủy/idempotency/timing; stub không memory | Fake path chạy không key; lỗi/cancel không sinh audio cũ; HTTP và wire contract giữ nguyên khi tách module |
 | P2 — Bàn giao capture iPad | Cùng frontend feature-detect MIME, MediaRecorder + RMS, calibration, Gửi/Stop, permission/audio state | Blob MP4/AAC hoặc WebM theo capability được giữ nguyên; các timer D05 đúng; không auto-upload khi chưa có tín hiệu |
 | P3 — STT batch | `file` + `file_format=other`, `language_code=vi|en` theo cấu hình phiên; lỗi/quota/empty text | Đọc được câu Việt/Anh; không auto-switch; không gọi GPT trên transcript rỗng |
 | P4 — GPT tạm | Responses API, `gpt-6-luna`, effort none, 200 token, input hiện tại, output checks | Lời thoại ngắn đúng ngôn ngữ phiên; không tools/history/memory; engine adapter thay được |
@@ -111,6 +114,6 @@ Mục tiêu tích hợp theo [pipeline chung](../pipeline.md): p95 âm thanh tr�
 
 ## 6. Bàn giao responsive iPad
 
-Frontend owner thực hiện layout có touch target tối thiểu 48 CSS px, không tràn ngang; Talk/Gửi/Stop/Phát lại luôn tiếp cận được ở portrait, landscape và split view. Đổi orientation/kích thước không được tự mở mic hoặc upload lần hai. Phần voice cung cấp state, config, request/response types và event cleanup; không triển khai UI sản phẩm trong đợt docs này.
+Frontend owner thực hiện layout có touch target tối thiểu 48 CSS px, không tràn ngang; Talk/Gửi/Stop/Phát lại luôn tiếp cận được ở portrait, landscape và split view. Đổi orientation/kích thước không được tự mở mic hoặc upload lần hai. Phần voice đã cung cấp state, config, request/response types và event cleanup qua browser library; UI sản phẩm vẫn thuộc frontend owner.
 
 Truy cập từ iPad cần origin HTTPS tin cậy, không dùng URL HTTP IP LAN rồi coi là localhost. Tạo/resume AudioContext từ thao tác Talk; phát audio phải xử lý `play()` bị từ chối và cho nút Phát chủ động. Khi tab ẩn/khóa màn hình/audio bị gián đoạn, hủy lượt và yêu cầu Talk mới. Chi tiết và nguồn ở [microphone-vad.md](microphone-vad.md) và [integration-validation.md](integration-validation.md).

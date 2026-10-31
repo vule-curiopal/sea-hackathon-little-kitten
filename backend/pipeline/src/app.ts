@@ -1,0 +1,59 @@
+import express, { type Express } from 'express';
+import { loadConfig, type VoiceConfig } from './config.js';
+import { PipelineError } from './errors.js';
+import { registerErrorHandler, type RequestContexts } from './http/error-handler.js';
+import { registerHttpMiddleware } from './http/middleware.js';
+import { SessionController } from './modules/sessions/session.controller.js';
+import { registerSessionRoutes } from './modules/sessions/session.routes.js';
+import { SessionService } from './modules/sessions/session.service.js';
+import { registerSystemRoutes } from './modules/system/system.routes.js';
+import { TurnController } from './modules/turns/turn.controller.js';
+import { registerTurnRoutes } from './modules/turns/turn.routes.js';
+import { TurnService } from './modules/turns/turn.service.js';
+import type { PipelineProviders } from './ports.js';
+import { createProviders } from './providers/index.js';
+
+export interface BuildAppOptions {
+  config?: VoiceConfig;
+  providers?: PipelineProviders;
+  /** Retained name for existing callers; this is RAM-only session/protocol state. */
+  state?: SessionService;
+}
+
+const disposers = new WeakMap<Express, () => void>();
+
+/** Abort work and clear timers before the HTTP server closes its sockets. */
+export function disposeApp(app: Express): void {
+  const dispose = disposers.get(app);
+  disposers.delete(app);
+  dispose?.();
+}
+
+/** Composition root: build dependencies, register HTTP modules and own shutdown. */
+export async function buildApp(options: BuildAppOptions = {}) {
+  const config = options.config ?? loadConfig();
+  const providers = options.providers ?? await createProviders(config);
+  if (providers.mode !== config.mode) throw new Error('Provider mode must match server configuration');
+
+  const sessions = options.state ?? new SessionService(config.defaultVoices);
+  const turns = new TurnService({ config, providers, sessions });
+  const contexts: RequestContexts = new WeakMap();
+  const app = express();
+  app.disable('x-powered-by');
+
+  registerHttpMiddleware(app, config);
+  registerSystemRoutes(app, config, sessions);
+  registerSessionRoutes(app, new SessionController(sessions, providers.mode));
+  registerTurnRoutes(app, new TurnController(sessions, turns, contexts));
+  app.use(() => { throw new PipelineError('not_found', 404); });
+  registerErrorHandler(app, sessions, contexts);
+
+  const expiry = setInterval(() => sessions.sweep(), 60_000);
+  expiry.unref();
+  disposers.set(app, () => {
+    clearInterval(expiry);
+    sessions.dispose();
+  });
+
+  return app;
+}

@@ -12,6 +12,14 @@ These are proposed contracts for the [frontend](frontend.md), [pipeline](pipelin
 - Responses include `clock_version` and `state_version`. A canceled turn, closed session, profile switch, deletion, or newer clock/state invalidates obsolete work. The server rechecks versions before response publication and writes.
 - No API response or panel payload contains credentials, a full internal prompt, raw provider output, or raw microphone audio.
 
+### First voice-only implementation
+
+The Express 5/TypeScript voice package on Node.js implements the session/configuration, turn, cancellation and playback routes, plus `GET /api/health` and `GET /api/voices`. Feature routers/controllers delegate to `TurnService` and `SessionService`; the RAM repository and provider adapters are separate modules. See [backend architecture](voice-pipeline/backend-architecture.md). This internal structure preserves the public HTTP contract.
+
+It explicitly returns `engine_mode: "voice_stub"`. In this mode only, `presentation`, `face` and `memory` are `null`, and playback receipts return `learning_status: "disabled"`. The temporary generator is stateless; session/turn/idempotency metadata is protocol state and is never sent as dialogue history. The full character/memory envelope below remains the integration target for those workstreams; null fields do not claim those features are implemented.
+
+Session creation and configuration mutations include a UUID `request_id`, following the common idempotency rule. Supported demo profile keys are `an` and `binh`. The default server binds localhost; demo tokens are fixture access, not production authentication. The voice package keeps at most100 turn records per session and only one cached result, replayable for five minutes. Older completed results return409 without re-running providers; ending/expiring a session clears content and records. Clients must not retry after the session expires.
+
 ## Routes
 
 | Method and path | Purpose |
@@ -54,6 +62,8 @@ For the first batch voice demo, choose `language_mode=vi` or `en` before the ses
 First voice-demo limits: 30 seconds and 5 MiB of audio per recording; cap the complete multipart request at 6 MiB to leave room for metadata and boundaries. Duration includes initial noise calibration. Validate duration/container metadata within bounded resources; do not infer compressed-audio duration from byte count. Browser and server limits must agree. A greeting has no audio and is allowed once at initial entry or explicit return after rollover. It is initiated by a user action, not a background push. It skips STT and creates a synthetic greeting intent; director, safety, and TTS still run.
 
 The browser selects a recording MIME through runtime capability detection and submits the finalized blob after the last recorder data event. Safari/iPad is not restricted to the previous WebM/WAV list. For the ElevenLabs batch adapter, forward original container bytes with `file_format=other`; do not label MP4/WebM as raw PCM or add an isolation/transcoding stage to the first demo. Supported provider audio types: [ElevenLabs speech-to-text](https://elevenlabs.io/docs/overview/capabilities/speech-to-text).
+
+Capture stops at30 seconds of wall time. Server inspection permits at most250ms of compressed MP4/WebM encoder padding while reporting actual media duration; WAV stays strict30 seconds. Probe work is bounded, RAM-only and cancellable. `ffprobe` is a runtime dependency for compressed input and synthesized MP3; missing inspection support fails closed rather than trusting a filename or skipping duration checks.
 
 For no-microphone accessibility testing, the same endpoint may accept a `text` field instead of audio, with `input_mode=text` explicitly marked in diagnostics. Audio and text are mutually exclusive. The voice acceptance test always submits real recorded bytes; the text path cannot substitute for it.
 

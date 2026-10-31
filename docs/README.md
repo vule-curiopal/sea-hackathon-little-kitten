@@ -1,6 +1,6 @@
 # Miu implementation workstreams
 
-These documents split the [product specification](product-specification.md) into buildable workstreams. They specify intended behavior and contracts; implementation and measured performance are still to follow.
+These documents split the [product specification](product-specification.md) into buildable workstreams and describe intended full-product behavior and contracts. The [voice v1 implementation](voice-pipeline/README.md) now uses **Express 5 + TypeScript**, with separate modules documented in [backend architecture](voice-pipeline/backend-architecture.md). Its current [implementation status](voice-pipeline/implementation-status.md) covers fake/mocked validation; character/memory integration, real-provider measurements and iPad verification remain pending.
 
 | Workstream | Document | Implementation location | Owns |
 | --- | --- | --- | --- |
@@ -42,7 +42,7 @@ The dialogue model writes plain words. Application code decides character state,
 - The nightly rollover and the panel's **Next day** action invoke the same idempotent job.
 - The panel is for the supervised fictional-data demo. It is not a parent monitoring dashboard.
 
-## Acceptance walkthrough
+## Planned full-product acceptance walkthrough
 
 1. Run the app with PostgreSQL and `MIU_PROVIDER=fake`, with no AI keys configured. Select a fictional profile and the `mochi_puddle_en` fixture in the demo panel.
 2. Tap Talk, say **“My dog Mochi fell in a puddle”**, then end recording. Fake mode explicitly uses the selected fixture transcript; the submitted microphone audio is not actually recognized.

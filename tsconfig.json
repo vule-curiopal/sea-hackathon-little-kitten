@@ -1,0 +1,8 @@
+{
+  "files": [],
+  "references": [
+    { "path": "packages/voice-contracts" },
+    { "path": "packages/voice-client" },
+    { "path": "backend/pipeline" }
+  ]
+}

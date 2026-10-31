@@ -1,6 +1,6 @@
 # Kế hoạch triển khai voice pipeline
 
-Ngày cập nhật: **31/10/2026**. Đã chốt ElevenLabs STT batch/TTS, RMS thích nghi, React/TypeScript + Node/TypeScript, iPad web, chọn tiếng Việt/Anh trước phiên, GPT tạm và API contract chung. Bộ tài liệu mô tả triển khai dự kiến, chưa có code hoặc benchmark provider. D08 đã lấy bộ voice từ `little-buddy-impl`; thông tin tài khoản/retention D10 còn cần xác minh.
+Ngày cập nhật: **31/10/2026**. Đã triển khai backend **Express 5 + TypeScript trên Node.js**, tách routes/controllers, services, repository RAM và provider adapters; cùng thư viện browser RMS/capture/playback cho frontend React/TypeScript tích hợp trên iPad. Hướng dẫn chạy: [backend/pipeline/README.md](../../backend/pipeline/README.md). Tests dùng fake/mocked provider; chưa benchmark trọn pipeline provider thật hoặc kiểm thử iPad thật. D10 về tài khoản/retention còn cần xác minh.
 
 Phạm vi đã thống nhất: **microphone → STT → GPT tạm → TTS → phát audio**, không memory. Engine trả lời chính thức do thành viên khác phụ trách. Xem [phân chia phạm vi](../voice-pipeline-scope.md) và [đặc tả sản phẩm](../product-specification.md).
 
@@ -11,9 +11,12 @@ Phạm vi đã thống nhất: **microphone → STT → GPT tạm → TTS → ph
 | [decisions.md](decisions.md) | Ghi nhận D01–D12, voice đã kế thừa và checklist tài khoản/thiết bị |
 | [voices.md](voices.md) | 5 voice ID đã chọn trong little-buddy-impl, mặc định Việt/Anh và ví dụ env |
 | [implementation-plan.md](implementation-plan.md) | Kiến trúc, thứ tự thực hiện, module và điều kiện xong từng bước |
+| [backend-architecture.md](backend-architecture.md) | Express routers/controllers, TurnService, SessionService/repository, adapters và shutdown |
+| [implementation-status.md](implementation-status.md) | Phần đã triển khai, cách kiểm tra và các giới hạn bàn giao |
 | [microphone-vad.md](microphone-vad.md) | Microphone, RMS/dBFS, ước lượng nền, ngưỡng thích nghi, thời gian im lặng và cách tune |
 | [provider-parameters.md](provider-parameters.md) | Tham số ElevenLabs STT batch/TTS, giới hạn VAD/lọc nhiễu của batch, GPT tạm và cấu hình server |
 | [integration-validation.md](integration-validation.md) | Hợp đồng frontend/backend/engine, Stop, xử lý lỗi và kịch bản kiểm thử |
+| [Bộ 20 audio đầu vào](../../test-assets/voice-pipeline/README.md) | Việt/Anh, giọng tổng hợp mô phỏng trẻ em, lời rõ/nhỏ/méo/nhiễu, khoảng nghỉ và noise-only; có trang nghe thử |
 
 ## Phương án đã chọn
 

@@ -1,6 +1,6 @@
 # Tích hợp API chung và kiểm thử voice trên iPad
 
-Trạng thái: đã chốt React + TypeScript, Node.js + TypeScript, STT/TTS ElevenLabs batch, detector RMS/ngưỡng thích nghi, chọn Việt/Anh trước phiên và ưu tiên latency. Tài liệu là kế hoạch, chưa có endpoint/code được triển khai. Theo [API contracts](../api-contracts.md); không dựng ba route STT/reply/TTS riêng để browser điều phối.
+Trạng thái: backend dùng **Express 5 + TypeScript trên Node.js** và browser library cho frontend React/TypeScript, theo [API contracts](../api-contracts.md). Express routes/controllers gọi TurnService và SessionService/repository; provider adapters tách riêng, xem [kiến trúc backend](backend-architecture.md). STT/TTS ElevenLabs batch, detector RMS thích nghi và ngôn ngữ chọn trước phiên đã có code/tests; [trạng thái bàn giao](implementation-status.md) ghi rõ phần chưa kiểm thử thật.
 
 Phần frontend responsive do thành viên khác phụ trách. Phần voice bàn giao controller, yêu cầu microphone/playback, kiểu dữ liệu và kiểm thử tích hợp; không nhận thiết kế UI sản phẩm. Khóa provider luôn ở server.
 
@@ -25,7 +25,7 @@ Phần voice không tạo profile/character/memory giả để điền schema. A
 
 ## 2. Interface nội bộ và GPT tạm
 
-Các bước STT/reply/TTS là hàm/adapter nội bộ trên server Node.js, không phải ba request frontend:
+Các bước STT/reply/TTS là adapter nội bộ được `TurnService` gọi trên server Node.js. Controller chỉ map HTTP, xác thực và nối transport abort; service không nhận Express request/response. Contract reply cốt lõi:
 
 ```ts
 type Language = "vi" | "en";
@@ -110,7 +110,7 @@ Receipt `started/completed/interrupted` dùng ID riêng và trạng thái thật
 
 ## 7. Kiểm thử khi triển khai
 
-Đợt này chỉ cập nhật docs; chưa chạy test audio/API thật.
+Đã có test tự động cho backend/provider và browser library, cùng fake smoke Việt/Anh. HTTP localhost dùng frontend API client với runtime Node HTTP/Express; request provider trong tests đều mocked. Chưa kiểm thử mic/playback trên iPad hoặc nghiệm thu trọn pipeline provider thật. Xem [trạng thái triển khai](implementation-status.md).
 
 | Nhóm | Ca cần thử | Điều kiện đánh giá |
 | --- | --- | --- |
@@ -144,4 +144,4 @@ Mục tiêu acceptance chung: **p95 audio trả lời được duyệt bắt đ�
 
 Dùng clock đơn điệu, không trừ hai clock máy khác nhau. Kiểm tra 30 lượt mỗi ngôn ngữ trên mạng/iPad demo, phân biệt cold/warm start và fake/real. Báo số lượt lỗi/timeouts, codec, kích thước blob, browser/iPadOS, cấu hình ngưỡng; không loại lỗi khỏi báo cáo. Theo D11-B, tối ưu connection reuse, blob/container, độ dài reply và TTS trong luồng batch; không đổi sang realtime hoặc giảm khoảng dừng đã chốt chỉ để đạt số đo.
 
-Bàn giao cho frontend: typed controller/hook, state/error mapping, request/envelope và receipt mẫu, cleanup/cancel, MIME và checklist iPad/responsive. Bàn giao cho engine: interface adapter nội bộ và cách thay GPT tạm. Bàn giao vận hành: keys/model/voice config, retention chưa xác minh D10-C, số đo thực và giới hạn còn lại. Không tự tạo UI sản phẩm, deploy hoặc gọi paid API trong đợt docs này.
+Bàn giao cho frontend: library `@miu/voice-client` với controller, state/error mapping, request/envelope và receipt mẫu, cleanup/cancel, MIME và checklist iPad/responsive. Bàn giao cho engine: interface adapter nội bộ và cách thay GPT tạm. Bàn giao vận hành: env example, [kiến trúc Express](backend-architecture.md), runtime listen/close, hướng dẫn chạy/test và D10-C còn mở. Refactor backend dùng fake/mocked provider; bộ [20 audio đầu vào](../../test-assets/voice-pipeline/README.md) được tạo bằng job TTS riêng. UI sản phẩm/deploy vẫn ngoài lần bàn giao này.

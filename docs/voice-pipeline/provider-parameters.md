@@ -1,6 +1,6 @@
 # Tham số provider và cấu hình pipeline
 
-Tra cứu/cập nhật ngày **31/10/2026**. Đã chốt ElevenLabs STT batch/TTS, Node/TS backend, ngôn ngữ chọn trước phiên, GPT tạm `gpt-6-luna`, detector RMS và gửi nguyên blob từ iPad. Voice ID lấy từ bản local `D:/Intern/LittleBuddy_Implementation`, chi tiết tại [voices.md](voices.md). D10-C: tier/retention chưa rõ, xác minh trước real API; hiện chưa gọi API. Phân biệt **lựa chọn đã chốt**, **default provider**, **giá trị kỹ thuật đề xuất** và **trường không gửi**. Các tên dưới đây là wire HTTP; SDK có thể dùng tên khác.
+Tra cứu/cập nhật ngày **31/10/2026**. Đã chốt ElevenLabs STT batch/TTS, Express/TypeScript trên Node.js, ngôn ngữ chọn trước phiên, GPT tạm `gpt-6-luna`, detector RMS và gửi nguyên blob từ iPad. Voice ID lấy từ bản local `D:/Intern/LittleBuddy_Implementation`, chi tiết tại [voices.md](voices.md). D10-C: tier/retention chưa rõ; chưa nghiệm thu trọn pipeline real API. Job TTS riêng tạo audio đầu vào được ghi ở [trạng thái triển khai](implementation-status.md). Phân biệt **lựa chọn đã chốt**, **default provider**, **giá trị kỹ thuật đề xuất** và **trường không gửi**. Các tên dưới đây là wire HTTP; SDK có thể dùng tên khác.
 
 ## 1. Provider/model theo lựa chọn đã xác nhận
 

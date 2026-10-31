@@ -1,6 +1,7 @@
 # Environment files, including nested and local variants
 .env
 .env.*
+!.env.example
 
 # Local editor and operating-system files
 .idea/
@@ -11,3 +12,7 @@ node_modules/
 .venv/
 __pycache__/
 *.py[cod]
+dist/
+*.tsbuildinfo
+coverage/
+.cache/voice-test-audio/

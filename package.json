@@ -1,0 +1,32 @@
+{
+  "name": "miu-voice-workspace",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "backend/pipeline",
+    "packages/voice-contracts",
+    "packages/voice-client"
+  ],
+  "scripts": {
+    "dev": "npm run build && npm run dev --workspace @miu/pipeline",
+    "build": "tsc -b",
+    "typecheck": "tsc -b --pretty false",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "smoke": "tsx scripts/smoke.ts"
+  },
+  "engines": {
+    "node": ">=22.19.0"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/multer": "^2.3.0",
+    "@types/node": "^26.6.6",
+    "@types/supertest": "^7.2.1",
+    "supertest": "^7.3.1",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.5"
+  }
+}

@@ -1,0 +1,111 @@
+<!doctype html><html lang="vi"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>20 audio kiểm thử voice pipeline</title><style>
+body{font:16px/1.6 system-ui,sans-serif;background:#f5f3ee;color:#262722;margin:0;padding:24px;max-width:1100px;margin-inline:auto}
+h1{font-size:28px}main{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,310px),1fr));gap:16px}
+article{background:white;border:1px solid #d9dbd4;border-radius:14px;padding:18px;overflow-wrap:anywhere}
+h2{font-size:17px;margin:0}audio{width:100%;margin:8px 0}.text{font-weight:600}a{color:#246045}aside{margin-bottom:24px}
+</style><h1>20 audio kiểm thử voice pipeline</h1><aside>
+<p>10 file Việt + 10 file Anh · WAV PCM16 mono 24 kHz. Giọng tổng hợp mô phỏng trẻ em qua TTS và chỉnh cao độ, không phải bản thu trẻ thật.</p>
+<p>Nhấn phát từng file. Các biến thể dùng chung câu để so sánh; 1 file cuối mỗi nhóm chỉ có tiếng nền.
+Trang này phát toàn bộ file, không chạy STT hoặc tự dừng bằng detector.</p>
+<p>Upload file chỉ kiểm tra backend; fake mode trả sample cố định. Xem <a href="README.md">README</a> và <a href="manifest.json">manifest</a>.</p>
+</aside><main><article><h2>01_vi_clean</h2>
+<p>Rõ, nền yên tĩnh · 6.02 s</p>
+<audio controls preload="none" src="audio/01_vi_clean.wav"></audio>
+<p class="text">Miu ơi, mình muốn nghe một câu chuyện về chú mèo con.</p><p>Baseline so sánh transcript với câu gốc.</p>
+<a href="audio/01_vi_clean.wav" download>Tải WAV</a></article>
+<article><h2>02_vi_soft</h2>
+<p>Nói rất nhỏ · 6.02 s</p>
+<audio controls preload="none" src="audio/02_vi_soft.wav"></audio>
+<p class="text">Miu ơi, mình muốn nghe một câu chuyện về chú mèo con.</p><p>Kiểm tra bỏ sót tín hiệu; có thể cần Gửi thủ công.</p>
+<a href="audio/02_vi_soft.wav" download>Tải WAV</a></article>
+<article><h2>03_vi_muffled</h2>
+<p>Nghẹt/không rõ · 6.02 s</p>
+<audio controls preload="none" src="audio/03_vi_muffled.wav"></audio>
+<p class="text">Miu ơi, mình muốn nghe một câu chuyện về chú mèo con.</p><p>Low-pass 1.000 Hz giả lập mic bị che, không phải lỗi phát âm thật.</p>
+<a href="audio/03_vi_muffled.wav" download>Tải WAV</a></article>
+<article><h2>04_vi_clipped</h2>
+<p>Vỡ tiếng · 6.02 s</p>
+<audio controls preload="none" src="audio/04_vi_clipped.wav"></audio>
+<p class="text">Miu ơi, mình muốn nghe một câu chuyện về chú mèo con.</p><p>Hard clipping có kiểm soát trước khi xuất WAV PCM hợp lệ.</p>
+<a href="audio/04_vi_clipped.wav" download>Tải WAV</a></article>
+<article><h2>05_vi_fan_snr20</h2>
+<p>Nền quạt, SNR +20 dB · 6.02 s</p>
+<audio controls preload="none" src="audio/05_vi_fan_snr20.wav"></audio>
+<p class="text">Miu ơi, mình muốn nghe một câu chuyện về chú mèo con.</p><p>Nhiễu ổn định hiện diện cả calibration và đuôi.</p>
+<a href="audio/05_vi_fan_snr20.wav" download>Tải WAV</a></article>
+<article><h2>06_vi_rain_snr10</h2>
+<p>Nền mưa, SNR +10 dB · 6.02 s</p>
+<audio controls preload="none" src="audio/06_vi_rain_snr10.wav"></audio>
+<p class="text">Miu ơi, mình muốn nghe một câu chuyện về chú mèo con.</p><p>Nhiễu vừa hiện diện cả calibration và đuôi.</p>
+<a href="audio/06_vi_rain_snr10.wav" download>Tải WAV</a></article>
+<article><h2>07_vi_noise_snr0</h2>
+<p>Nhiễu mạnh, SNR 0 dB, đủ 30 giây · 30.00 s</p>
+<audio controls preload="none" src="audio/07_vi_noise_snr0.wav"></audio>
+<p class="text">Miu ơi, mình muốn nghe một câu chuyện về chú mèo con.</p><p>Nền tăng sau calibration và kéo dài tới 30 giây; kiểm tra giới hạn thu khi nhiễu giữ detector mở.</p>
+<a href="audio/07_vi_noise_snr0.wav" download>Tải WAV</a></article>
+<article><h2>08_vi_pause_0800ms</h2>
+<p>Ngắt câu 800 ms · 6.33 s</p>
+<audio controls preload="none" src="audio/08_vi_pause_0800ms.wav"></audio>
+<p class="text">Hôm nay mình hơi buồn. Bạn chơi với mình nhé.</p><p>Khoảng nghỉ ngắn hơn endSilence 1.500 ms.</p>
+<a href="audio/08_vi_pause_0800ms.wav" download>Tải WAV</a></article>
+<article><h2>09_vi_pause_2200ms</h2>
+<p>Ngắt câu 2.200 ms · 7.73 s</p>
+<audio controls preload="none" src="audio/09_vi_pause_2200ms.wav"></audio>
+<p class="text">Hôm nay mình hơi buồn. Bạn chơi với mình nhé.</p><p>Auto-end có thể gửi trước mệnh đề thứ hai; upload toàn file vẫn có cả hai.</p>
+<a href="audio/09_vi_pause_2200ms.wav" download>Tải WAV</a></article>
+<article><h2>10_vi_noise_only</h2>
+<p>Chỉ tiếng nền, không lời · 6.50 s</p>
+<audio controls preload="none" src="audio/10_vi_noise_only.wav"></audio>
+<p class="text">Không có lời nói / No speech</p><p>Negative control: kiểm tra no-signal hoặc false trigger, không ép STT có transcript.</p>
+<a href="audio/10_vi_noise_only.wav" download>Tải WAV</a></article>
+<article><h2>11_en_clean</h2>
+<p>Rõ, nền yên tĩnh · 5.87 s</p>
+<audio controls preload="none" src="audio/11_en_clean.wav"></audio>
+<p class="text">Miu, can you tell me a story about a little kitten?</p><p>Baseline so sánh transcript với câu gốc.</p>
+<a href="audio/11_en_clean.wav" download>Tải WAV</a></article>
+<article><h2>12_en_soft</h2>
+<p>Nói rất nhỏ · 5.87 s</p>
+<audio controls preload="none" src="audio/12_en_soft.wav"></audio>
+<p class="text">Miu, can you tell me a story about a little kitten?</p><p>Kiểm tra bỏ sót tín hiệu; có thể cần Gửi thủ công.</p>
+<a href="audio/12_en_soft.wav" download>Tải WAV</a></article>
+<article><h2>13_en_muffled</h2>
+<p>Nghẹt/không rõ · 5.87 s</p>
+<audio controls preload="none" src="audio/13_en_muffled.wav"></audio>
+<p class="text">Miu, can you tell me a story about a little kitten?</p><p>Low-pass 1.000 Hz giả lập mic bị che, không phải lỗi phát âm thật.</p>
+<a href="audio/13_en_muffled.wav" download>Tải WAV</a></article>
+<article><h2>14_en_clipped</h2>
+<p>Vỡ tiếng · 5.87 s</p>
+<audio controls preload="none" src="audio/14_en_clipped.wav"></audio>
+<p class="text">Miu, can you tell me a story about a little kitten?</p><p>Hard clipping có kiểm soát trước khi xuất WAV PCM hợp lệ.</p>
+<a href="audio/14_en_clipped.wav" download>Tải WAV</a></article>
+<article><h2>15_en_fan_snr20</h2>
+<p>Nền quạt, SNR +20 dB · 5.87 s</p>
+<audio controls preload="none" src="audio/15_en_fan_snr20.wav"></audio>
+<p class="text">Miu, can you tell me a story about a little kitten?</p><p>Nhiễu ổn định hiện diện cả calibration và đuôi.</p>
+<a href="audio/15_en_fan_snr20.wav" download>Tải WAV</a></article>
+<article><h2>16_en_rain_snr10</h2>
+<p>Nền mưa, SNR +10 dB · 5.87 s</p>
+<audio controls preload="none" src="audio/16_en_rain_snr10.wav"></audio>
+<p class="text">Miu, can you tell me a story about a little kitten?</p><p>Nhiễu vừa hiện diện cả calibration và đuôi.</p>
+<a href="audio/16_en_rain_snr10.wav" download>Tải WAV</a></article>
+<article><h2>17_en_noise_snr0</h2>
+<p>Nhiễu mạnh, SNR 0 dB, đủ 30 giây · 30.00 s</p>
+<audio controls preload="none" src="audio/17_en_noise_snr0.wav"></audio>
+<p class="text">Miu, can you tell me a story about a little kitten?</p><p>Nền tăng sau calibration và kéo dài tới 30 giây; kiểm tra giới hạn thu khi nhiễu giữ detector mở.</p>
+<a href="audio/17_en_noise_snr0.wav" download>Tải WAV</a></article>
+<article><h2>18_en_pause_0800ms</h2>
+<p>Ngắt câu 800 ms · 6.77 s</p>
+<audio controls preload="none" src="audio/18_en_pause_0800ms.wav"></audio>
+<p class="text">I feel a little sad today. Will you play with me?</p><p>Khoảng nghỉ ngắn hơn endSilence 1.500 ms.</p>
+<a href="audio/18_en_pause_0800ms.wav" download>Tải WAV</a></article>
+<article><h2>19_en_pause_2200ms</h2>
+<p>Ngắt câu 2.200 ms · 8.17 s</p>
+<audio controls preload="none" src="audio/19_en_pause_2200ms.wav"></audio>
+<p class="text">I feel a little sad today. Will you play with me?</p><p>Auto-end có thể gửi trước mệnh đề thứ hai; upload toàn file vẫn có cả hai.</p>
+<a href="audio/19_en_pause_2200ms.wav" download>Tải WAV</a></article>
+<article><h2>20_en_noise_only</h2>
+<p>Chỉ tiếng nền, không lời · 6.50 s</p>
+<audio controls preload="none" src="audio/20_en_noise_only.wav"></audio>
+<p class="text">Không có lời nói / No speech</p><p>Negative control: kiểm tra no-signal hoặc false trigger, không ép STT có transcript.</p>
+<a href="audio/20_en_noise_only.wav" download>Tải WAV</a></article></main></html>

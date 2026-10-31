@@ -1,0 +1,516 @@
+{
+  "schema_version": 1,
+  "validation_scope": "Offline PCM waveform simulation, not microphone/browser capture or STT/provider validation.",
+  "reference_text_scope": "TTS input annotations; recognition accuracy and human perceived voice age are not verified.",
+  "window_ms": 20,
+  "detector_config": {
+    "calibrationMs": 750,
+    "maxAnalysisGapMs": 250,
+    "noisePercentile": 20,
+    "noiseFloorMinDbfs": -80,
+    "noiseFloorMaxDbfs": -25,
+    "noiseWindowMs": 2000,
+    "noiseAdaptationMs": 1000,
+    "startMarginDb": 12,
+    "endMarginDb": 6,
+    "startMinDbfs": -55,
+    "startMaxDbfs": -15,
+    "endMinDbfs": -61,
+    "endMaxDbfs": -21,
+    "minSignalMs": 120,
+    "endSilenceMs": 1500,
+    "initialSilenceTimeoutMs": 5000,
+    "maxRecordingMs": 30000
+  },
+  "total_files": 20,
+  "total_bytes": 8320632,
+  "summary": {
+    "submit": 18,
+    "cancel": 2,
+    "no_decision_before_file_end": 0,
+    "premature_endpoints": 2,
+    "noise_only_false_signals": 1
+  },
+  "assets": [
+    {
+      "id": "01_vi_clean",
+      "file": "audio/01_vi_clean.wav",
+      "condition": "clean",
+      "language": "vi",
+      "speech_present": true,
+      "duration_ms": 6016.79,
+      "bytes": 288850,
+      "wav_and_backend_validation": "passed",
+      "detector": {
+        "signal_found": true,
+        "first_decision": {
+          "action": "submit",
+          "reason": "silence"
+        },
+        "decision_at_ms": 5460,
+        "noise_floor_dbfs": -70.26,
+        "start_threshold_dbfs": -55,
+        "end_threshold_dbfs": -61,
+        "reference_speech_after_decision": false,
+        "premature_endpoint": false,
+        "false_signal_on_noise_only": false
+      }
+    },
+    {
+      "id": "02_vi_soft",
+      "file": "audio/02_vi_soft.wav",
+      "condition": "soft",
+      "language": "vi",
+      "speech_present": true,
+      "duration_ms": 6016.79,
+      "bytes": 288850,
+      "wav_and_backend_validation": "passed",
+      "detector": {
+        "signal_found": true,
+        "first_decision": {
+          "action": "submit",
+          "reason": "silence"
+        },
+        "decision_at_ms": 5420,
+        "noise_floor_dbfs": -70.25,
+        "start_threshold_dbfs": -55,
+        "end_threshold_dbfs": -61,
+        "reference_speech_after_decision": false,
+        "premature_endpoint": false,
+        "false_signal_on_noise_only": false
+      }
+    },
+    {
+      "id": "03_vi_muffled",
+      "file": "audio/03_vi_muffled.wav",
+      "condition": "muffled",
+      "language": "vi",
+      "speech_present": true,
+      "duration_ms": 6016.79,
+      "bytes": 288850,
+      "wav_and_backend_validation": "passed",
+      "detector": {
+        "signal_found": true,
+        "first_decision": {
+          "action": "submit",
+          "reason": "silence"
+        },
+        "decision_at_ms": 5460,
+        "noise_floor_dbfs": -70.22,
+        "start_threshold_dbfs": -55,
+        "end_threshold_dbfs": -61,
+        "reference_speech_after_decision": false,
+        "premature_endpoint": false,
+        "false_signal_on_noise_only": false
+      }
+    },
+    {
+      "id": "04_vi_clipped",
+      "file": "audio/04_vi_clipped.wav",
+      "condition": "clipped",
+      "language": "vi",
+      "speech_present": true,
+      "duration_ms": 6016.79,
+      "bytes": 288850,
+      "wav_and_backend_validation": "passed",
+      "detector": {
+        "signal_found": true,
+        "first_decision": {
+          "action": "submit",
+          "reason": "silence"
+        },
+        "decision_at_ms": 5460,
+        "noise_floor_dbfs": -70.23,
+        "start_threshold_dbfs": -55,
+        "end_threshold_dbfs": -61,
+        "reference_speech_after_decision": false,
+        "premature_endpoint": false,
+        "false_signal_on_noise_only": false
+      }
+    },
+    {
+      "id": "05_vi_fan_snr20",
+      "file": "audio/05_vi_fan_snr20.wav",
+      "condition": "fan_snr20",
+      "language": "vi",
+      "speech_present": true,
+      "duration_ms": 6016.79,
+      "bytes": 288850,
+      "wav_and_backend_validation": "passed",
+      "detector": {
+        "signal_found": true,
+        "first_decision": {
+          "action": "submit",
+          "reason": "silence"
+        },
+        "decision_at_ms": 5440,
+        "noise_floor_dbfs": -44.91,
+        "start_threshold_dbfs": -32.91,
+        "end_threshold_dbfs": -38.91,
+        "reference_speech_after_decision": false,
+        "premature_endpoint": false,
+        "false_signal_on_noise_only": false
+      }
+    },
+    {
+      "id": "06_vi_rain_snr10",
+      "file": "audio/06_vi_rain_snr10.wav",
+      "condition": "rain_snr10",
+      "language": "vi",
+      "speech_present": true,
+      "duration_ms": 6016.79,
+      "bytes": 288850,
+      "wav_and_backend_validation": "passed",
+      "detector": {
+        "signal_found": true,
+        "first_decision": {
+          "action": "submit",
+          "reason": "silence"
+        },
+        "decision_at_ms": 5440,
+        "noise_floor_dbfs": -35.97,
+        "start_threshold_dbfs": -23.97,
+        "end_threshold_dbfs": -29.97,
+        "reference_speech_after_decision": false,
+        "premature_endpoint": false,
+        "false_signal_on_noise_only": false
+      }
+    },
+    {
+      "id": "07_vi_noise_snr0",
+      "file": "audio/07_vi_noise_snr0.wav",
+      "condition": "noise_snr0",
+      "language": "vi",
+      "speech_present": true,
+      "duration_ms": 30000,
+      "bytes": 1440044,
+      "wav_and_backend_validation": "passed",
+      "detector": {
+        "signal_found": true,
+        "first_decision": {
+          "action": "submit",
+          "reason": "max_duration"
+        },
+        "decision_at_ms": 30000,
+        "noise_floor_dbfs": -62.86,
+        "start_threshold_dbfs": -50.86,
+        "end_threshold_dbfs": -56.86,
+        "reference_speech_after_decision": false,
+        "premature_endpoint": false,
+        "false_signal_on_noise_only": false
+      }
+    },
+    {
+      "id": "08_vi_pause_0800ms",
+      "file": "audio/08_vi_pause_0800ms.wav",
+      "condition": "pause_0800ms",
+      "language": "vi",
+      "speech_present": true,
+      "duration_ms": 6331.29,
+      "bytes": 303946,
+      "wav_and_backend_validation": "passed",
+      "detector": {
+        "signal_found": true,
+        "first_decision": {
+          "action": "submit",
+          "reason": "silence"
+        },
+        "decision_at_ms": 5760,
+        "noise_floor_dbfs": -70.13,
+        "start_threshold_dbfs": -55,
+        "end_threshold_dbfs": -61,
+        "reference_speech_after_decision": false,
+        "premature_endpoint": false,
+        "false_signal_on_noise_only": false
+      }
+    },
+    {
+      "id": "09_vi_pause_2200ms",
+      "file": "audio/09_vi_pause_2200ms.wav",
+      "condition": "pause_2200ms",
+      "language": "vi",
+      "speech_present": true,
+      "duration_ms": 7731.29,
+      "bytes": 371146,
+      "wav_and_backend_validation": "passed",
+      "detector": {
+        "signal_found": true,
+        "first_decision": {
+          "action": "submit",
+          "reason": "silence"
+        },
+        "decision_at_ms": 3700,
+        "noise_floor_dbfs": -70.32,
+        "start_threshold_dbfs": -55,
+        "end_threshold_dbfs": -61,
+        "reference_speech_after_decision": true,
+        "premature_endpoint": true,
+        "false_signal_on_noise_only": false
+      }
+    },
+    {
+      "id": "10_vi_noise_only",
+      "file": "audio/10_vi_noise_only.wav",
+      "condition": "noise_only",
+      "language": "vi",
+      "speech_present": false,
+      "duration_ms": 6500,
+      "bytes": 312044,
+      "wav_and_backend_validation": "passed",
+      "detector": {
+        "signal_found": false,
+        "first_decision": {
+          "action": "cancel",
+          "reason": "no_signal"
+        },
+        "decision_at_ms": 5760,
+        "noise_floor_dbfs": -43.14,
+        "start_threshold_dbfs": -31.14,
+        "end_threshold_dbfs": -37.14,
+        "reference_speech_after_decision": false,
+        "premature_endpoint": false,
+        "false_signal_on_noise_only": false
+      }
+    },
+    {
+      "id": "11_en_clean",
+      "file": "audio/11_en_clean.wav",
+      "condition": "clean",
+      "language": "en",
+      "speech_present": true,
+      "duration_ms": 5871.92,
+      "bytes": 281896,
+      "wav_and_backend_validation": "passed",
+      "detector": {
+        "signal_found": true,
+        "first_decision": {
+          "action": "submit",
+          "reason": "silence"
+        },
+        "decision_at_ms": 5300,
+        "noise_floor_dbfs": -70.23,
+        "start_threshold_dbfs": -55,
+        "end_threshold_dbfs": -61,
+        "reference_speech_after_decision": false,
+        "premature_endpoint": false,
+        "false_signal_on_noise_only": false
+      }
+    },
+    {
+      "id": "12_en_soft",
+      "file": "audio/12_en_soft.wav",
+      "condition": "soft",
+      "language": "en",
+      "speech_present": true,
+      "duration_ms": 5871.92,
+      "bytes": 281896,
+      "wav_and_backend_validation": "passed",
+      "detector": {
+        "signal_found": false,
+        "first_decision": {
+          "action": "cancel",
+          "reason": "no_signal"
+        },
+        "decision_at_ms": 5760,
+        "noise_floor_dbfs": -70.13,
+        "start_threshold_dbfs": -55,
+        "end_threshold_dbfs": -61,
+        "reference_speech_after_decision": false,
+        "premature_endpoint": false,
+        "false_signal_on_noise_only": false
+      }
+    },
+    {
+      "id": "13_en_muffled",
+      "file": "audio/13_en_muffled.wav",
+      "condition": "muffled",
+      "language": "en",
+      "speech_present": true,
+      "duration_ms": 5871.92,
+      "bytes": 281896,
+      "wav_and_backend_validation": "passed",
+      "detector": {
+        "signal_found": true,
+        "first_decision": {
+          "action": "submit",
+          "reason": "silence"
+        },
+        "decision_at_ms": 5300,
+        "noise_floor_dbfs": -70.33,
+        "start_threshold_dbfs": -55,
+        "end_threshold_dbfs": -61,
+        "reference_speech_after_decision": false,
+        "premature_endpoint": false,
+        "false_signal_on_noise_only": false
+      }
+    },
+    {
+      "id": "14_en_clipped",
+      "file": "audio/14_en_clipped.wav",
+      "condition": "clipped",
+      "language": "en",
+      "speech_present": true,
+      "duration_ms": 5871.92,
+      "bytes": 281896,
+      "wav_and_backend_validation": "passed",
+      "detector": {
+        "signal_found": true,
+        "first_decision": {
+          "action": "submit",
+          "reason": "silence"
+        },
+        "decision_at_ms": 5320,
+        "noise_floor_dbfs": -70.35,
+        "start_threshold_dbfs": -55,
+        "end_threshold_dbfs": -61,
+        "reference_speech_after_decision": false,
+        "premature_endpoint": false,
+        "false_signal_on_noise_only": false
+      }
+    },
+    {
+      "id": "15_en_fan_snr20",
+      "file": "audio/15_en_fan_snr20.wav",
+      "condition": "fan_snr20",
+      "language": "en",
+      "speech_present": true,
+      "duration_ms": 5871.92,
+      "bytes": 281896,
+      "wav_and_backend_validation": "passed",
+      "detector": {
+        "signal_found": true,
+        "first_decision": {
+          "action": "submit",
+          "reason": "silence"
+        },
+        "decision_at_ms": 5240,
+        "noise_floor_dbfs": -45.68,
+        "start_threshold_dbfs": -33.68,
+        "end_threshold_dbfs": -39.68,
+        "reference_speech_after_decision": false,
+        "premature_endpoint": false,
+        "false_signal_on_noise_only": false
+      }
+    },
+    {
+      "id": "16_en_rain_snr10",
+      "file": "audio/16_en_rain_snr10.wav",
+      "condition": "rain_snr10",
+      "language": "en",
+      "speech_present": true,
+      "duration_ms": 5871.92,
+      "bytes": 281896,
+      "wav_and_backend_validation": "passed",
+      "detector": {
+        "signal_found": true,
+        "first_decision": {
+          "action": "submit",
+          "reason": "silence"
+        },
+        "decision_at_ms": 5180,
+        "noise_floor_dbfs": -35.87,
+        "start_threshold_dbfs": -23.87,
+        "end_threshold_dbfs": -29.87,
+        "reference_speech_after_decision": false,
+        "premature_endpoint": false,
+        "false_signal_on_noise_only": false
+      }
+    },
+    {
+      "id": "17_en_noise_snr0",
+      "file": "audio/17_en_noise_snr0.wav",
+      "condition": "noise_snr0",
+      "language": "en",
+      "speech_present": true,
+      "duration_ms": 30000,
+      "bytes": 1440044,
+      "wav_and_backend_validation": "passed",
+      "detector": {
+        "signal_found": true,
+        "first_decision": {
+          "action": "submit",
+          "reason": "max_duration"
+        },
+        "decision_at_ms": 30000,
+        "noise_floor_dbfs": -62.98,
+        "start_threshold_dbfs": -50.98,
+        "end_threshold_dbfs": -56.98,
+        "reference_speech_after_decision": false,
+        "premature_endpoint": false,
+        "false_signal_on_noise_only": false
+      }
+    },
+    {
+      "id": "18_en_pause_0800ms",
+      "file": "audio/18_en_pause_0800ms.wav",
+      "condition": "pause_0800ms",
+      "language": "en",
+      "speech_present": true,
+      "duration_ms": 6766.67,
+      "bytes": 324844,
+      "wav_and_backend_validation": "passed",
+      "detector": {
+        "signal_found": true,
+        "first_decision": {
+          "action": "submit",
+          "reason": "silence"
+        },
+        "decision_at_ms": 6220,
+        "noise_floor_dbfs": -70.18,
+        "start_threshold_dbfs": -55,
+        "end_threshold_dbfs": -61,
+        "reference_speech_after_decision": false,
+        "premature_endpoint": false,
+        "false_signal_on_noise_only": false
+      }
+    },
+    {
+      "id": "19_en_pause_2200ms",
+      "file": "audio/19_en_pause_2200ms.wav",
+      "condition": "pause_2200ms",
+      "language": "en",
+      "speech_present": true,
+      "duration_ms": 8166.67,
+      "bytes": 392044,
+      "wav_and_backend_validation": "passed",
+      "detector": {
+        "signal_found": true,
+        "first_decision": {
+          "action": "submit",
+          "reason": "silence"
+        },
+        "decision_at_ms": 4000,
+        "noise_floor_dbfs": -70.2,
+        "start_threshold_dbfs": -55,
+        "end_threshold_dbfs": -61,
+        "reference_speech_after_decision": true,
+        "premature_endpoint": true,
+        "false_signal_on_noise_only": false
+      }
+    },
+    {
+      "id": "20_en_noise_only",
+      "file": "audio/20_en_noise_only.wav",
+      "condition": "noise_only",
+      "language": "en",
+      "speech_present": false,
+      "duration_ms": 6500,
+      "bytes": 312044,
+      "wav_and_backend_validation": "passed",
+      "detector": {
+        "signal_found": true,
+        "first_decision": {
+          "action": "submit",
+          "reason": "silence"
+        },
+        "decision_at_ms": 3420,
+        "noise_floor_dbfs": -42.64,
+        "start_threshold_dbfs": -30.64,
+        "end_threshold_dbfs": -36.64,
+        "reference_speech_after_decision": false,
+        "premature_endpoint": false,
+        "false_signal_on_noise_only": true
+      }
+    }
+  ]
+}

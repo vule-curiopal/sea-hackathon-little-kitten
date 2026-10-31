@@ -1,0 +1,1065 @@
+{
+  "schema_version": 1,
+  "sample_rate_hz": 24000,
+  "asset_count": 20,
+  "corpus_kind": "synthetic childlike speech and synthetic acoustic degradations",
+  "not_evidence_of": [
+    "real child speech accuracy",
+    "microphone/iPad compatibility",
+    "real STT accuracy",
+    "latency target"
+  ],
+  "generation": {
+    "seed": 841027,
+    "tts_model": "eleven_flash_v2_5",
+    "tts_enable_logging": true,
+    "tts_scope": "Six fictional text snippets only; no voice cloning or user recordings",
+    "source_cache": ".cache/voice-test-audio/tts (gitignored)",
+    "determinism": "Noise/rendering deterministic for cached sources and tool versions; TTS seed is best effort",
+    "numpy_version": "2.2.3",
+    "scipy_version": "1.15.2",
+    "ffmpeg_version": "ffmpeg version N-125365-g9a01c1cb6a-20260630 Copyright (c) 2000-2026 the FFmpeg developers"
+  },
+  "sources": [
+    {
+      "id": "vi_main",
+      "text": "Miu ơi, mình muốn nghe một câu chuyện về chú mèo con.",
+      "voice_id": "x4KAhuXs2G8TfK9Zr7Q4",
+      "model_id": "eleven_flash_v2_5",
+      "seed": 841027,
+      "source_mp3_sha256": "0c02a6cda3cefa03052315f14c8bb32de17e685f9ab7a129c8518f205218221e"
+    },
+    {
+      "id": "vi_pause_a",
+      "text": "Hôm nay mình hơi buồn.",
+      "voice_id": "x4KAhuXs2G8TfK9Zr7Q4",
+      "model_id": "eleven_flash_v2_5",
+      "seed": 841027,
+      "source_mp3_sha256": "89fa2fed18b94f50f02964450cb31c4db841a9d6e704b05e58b463cdd524d378"
+    },
+    {
+      "id": "vi_pause_b",
+      "text": "Bạn chơi với mình nhé.",
+      "voice_id": "x4KAhuXs2G8TfK9Zr7Q4",
+      "model_id": "eleven_flash_v2_5",
+      "seed": 841027,
+      "source_mp3_sha256": "d6a7e4ea0d7a91da0998b9551664c87560b403e73227cea9603a974a9be28c3d"
+    },
+    {
+      "id": "en_main",
+      "text": "Miu, can you tell me a story about a little kitten?",
+      "voice_id": "fBD19tfE58bkETeiwUoC",
+      "model_id": "eleven_flash_v2_5",
+      "seed": 841027,
+      "source_mp3_sha256": "62546dced557a12a0af7418b064753c4db4cab62d8f70448e4d09c377a3b298b"
+    },
+    {
+      "id": "en_pause_a",
+      "text": "I feel a little sad today.",
+      "voice_id": "fBD19tfE58bkETeiwUoC",
+      "model_id": "eleven_flash_v2_5",
+      "seed": 841027,
+      "source_mp3_sha256": "0c4d4dbe8fb2991ac451094b30987dbffe993e24f5ac81ca451bce7b0cf5cddc"
+    },
+    {
+      "id": "en_pause_b",
+      "text": "Will you play with me?",
+      "voice_id": "fBD19tfE58bkETeiwUoC",
+      "model_id": "eleven_flash_v2_5",
+      "seed": 841027,
+      "source_mp3_sha256": "55ae207e6a8960e9de2057a98530ead4dfbd29e161c7f52203b588e6e01cf128"
+    }
+  ],
+  "assets": [
+    {
+      "id": "01_vi_clean",
+      "file": "audio/01_vi_clean.wav",
+      "language": "vi",
+      "condition": "clean",
+      "label_vi": "Rõ, nền yên tĩnh",
+      "test_intent": "Baseline so sánh transcript với câu gốc.",
+      "speech_present": true,
+      "reference_text": "Miu ơi, mình muốn nghe một câu chuyện về chú mèo con.",
+      "reference_status": "TTS input, not an independently verified STT transcript",
+      "segments": [
+        {
+          "start_ms": 1000,
+          "end_ms": 4016.792,
+          "text": "Miu ơi, mình muốn nghe một câu chuyện về chú mèo con."
+        }
+      ],
+      "segment_boundary_method": "trimmed source clip bounds, not word alignment",
+      "lead_in_ms": 1000,
+      "tail_ms": 2000.0,
+      "voice": {
+        "provider": "ElevenLabs",
+        "model_id": "eleven_flash_v2_5",
+        "voice_id": "x4KAhuXs2G8TfK9Zr7Q4",
+        "voice_name": "Cam Hong",
+        "pitch_shift_semitones": 3.0,
+        "description": "Synthetic childlike approximation via TTS and pitch/formant shift; not a real child recording"
+      },
+      "seed": 841027,
+      "transforms": [],
+      "target_snr_db": null,
+      "measured_snr_db_before_pcm_quantization": 46.011,
+      "speech_region_rms_dbfs": -24.0,
+      "noise_rms_dbfs": -70.0,
+      "rms_dbfs": -26.998,
+      "peak_dbfs": -6.104,
+      "duration_ms": 6016.792,
+      "sample_rate_hz": 24000,
+      "channels": 1,
+      "bit_depth": 16,
+      "frames": 144403,
+      "bytes": 288850,
+      "sha256": "92d3ad4d2a8e9874691c894323535ebf0502c48de2e0f93a7d34cb948bbb1548"
+    },
+    {
+      "id": "02_vi_soft",
+      "file": "audio/02_vi_soft.wav",
+      "language": "vi",
+      "condition": "soft",
+      "label_vi": "Nói rất nhỏ",
+      "test_intent": "Kiểm tra bỏ sót tín hiệu; có thể cần Gửi thủ công.",
+      "speech_present": true,
+      "reference_text": "Miu ơi, mình muốn nghe một câu chuyện về chú mèo con.",
+      "reference_status": "TTS input, not an independently verified STT transcript",
+      "segments": [
+        {
+          "start_ms": 1000,
+          "end_ms": 4016.792,
+          "text": "Miu ơi, mình muốn nghe một câu chuyện về chú mèo con."
+        }
+      ],
+      "segment_boundary_method": "trimmed source clip bounds, not word alignment",
+      "lead_in_ms": 1000,
+      "tail_ms": 2000.0,
+      "voice": {
+        "provider": "ElevenLabs",
+        "model_id": "eleven_flash_v2_5",
+        "voice_id": "x4KAhuXs2G8TfK9Zr7Q4",
+        "voice_name": "Cam Hong",
+        "pitch_shift_semitones": 3.0,
+        "description": "Synthetic childlike approximation via TTS and pitch/formant shift; not a real child recording"
+      },
+      "seed": 841028,
+      "transforms": [
+        {
+          "kind": "quiet_speech",
+          "target_region_rms_dbfs": -58
+        }
+      ],
+      "target_snr_db": null,
+      "measured_snr_db_before_pcm_quantization": 12.001,
+      "speech_region_rms_dbfs": -58.0,
+      "noise_rms_dbfs": -70.0,
+      "rms_dbfs": -60.477,
+      "peak_dbfs": -39.992,
+      "duration_ms": 6016.792,
+      "sample_rate_hz": 24000,
+      "channels": 1,
+      "bit_depth": 16,
+      "frames": 144403,
+      "bytes": 288850,
+      "sha256": "ce681a1c1bbd4a9822d43676f7b1d06c610cc11851ff9b2bbd1d98d60f167dc0"
+    },
+    {
+      "id": "03_vi_muffled",
+      "file": "audio/03_vi_muffled.wav",
+      "language": "vi",
+      "condition": "muffled",
+      "label_vi": "Nghẹt/không rõ",
+      "test_intent": "Low-pass 1.000 Hz giả lập mic bị che, không phải lỗi phát âm thật.",
+      "speech_present": true,
+      "reference_text": "Miu ơi, mình muốn nghe một câu chuyện về chú mèo con.",
+      "reference_status": "TTS input, not an independently verified STT transcript",
+      "segments": [
+        {
+          "start_ms": 1000,
+          "end_ms": 4016.792,
+          "text": "Miu ơi, mình muốn nghe một câu chuyện về chú mèo con."
+        }
+      ],
+      "segment_boundary_method": "trimmed source clip bounds, not word alignment",
+      "lead_in_ms": 1000,
+      "tail_ms": 2000.0,
+      "voice": {
+        "provider": "ElevenLabs",
+        "model_id": "eleven_flash_v2_5",
+        "voice_id": "x4KAhuXs2G8TfK9Zr7Q4",
+        "voice_name": "Cam Hong",
+        "pitch_shift_semitones": 3.0,
+        "description": "Synthetic childlike approximation via TTS and pitch/formant shift; not a real child recording"
+      },
+      "seed": 841029,
+      "transforms": [
+        {
+          "kind": "low_pass",
+          "cutoff_hz": 1000,
+          "order": 5
+        }
+      ],
+      "target_snr_db": null,
+      "measured_snr_db_before_pcm_quantization": 46.004,
+      "speech_region_rms_dbfs": -24.0,
+      "noise_rms_dbfs": -70.0,
+      "rms_dbfs": -26.998,
+      "peak_dbfs": -7.643,
+      "duration_ms": 6016.792,
+      "sample_rate_hz": 24000,
+      "channels": 1,
+      "bit_depth": 16,
+      "frames": 144403,
+      "bytes": 288850,
+      "sha256": "28432ab3befd3c77d91f45cde3816f7a88ad465e7d0ad7cae3bf5342be569720"
+    },
+    {
+      "id": "04_vi_clipped",
+      "file": "audio/04_vi_clipped.wav",
+      "language": "vi",
+      "condition": "clipped",
+      "label_vi": "Vỡ tiếng",
+      "test_intent": "Hard clipping có kiểm soát trước khi xuất WAV PCM hợp lệ.",
+      "speech_present": true,
+      "reference_text": "Miu ơi, mình muốn nghe một câu chuyện về chú mèo con.",
+      "reference_status": "TTS input, not an independently verified STT transcript",
+      "segments": [
+        {
+          "start_ms": 1000,
+          "end_ms": 4016.792,
+          "text": "Miu ơi, mình muốn nghe một câu chuyện về chú mèo con."
+        }
+      ],
+      "segment_boundary_method": "trimmed source clip bounds, not word alignment",
+      "lead_in_ms": 1000,
+      "tail_ms": 2000.0,
+      "voice": {
+        "provider": "ElevenLabs",
+        "model_id": "eleven_flash_v2_5",
+        "voice_id": "x4KAhuXs2G8TfK9Zr7Q4",
+        "voice_name": "Cam Hong",
+        "pitch_shift_semitones": 3.0,
+        "description": "Synthetic childlike approximation via TTS and pitch/formant shift; not a real child recording"
+      },
+      "seed": 841030,
+      "transforms": [
+        {
+          "kind": "hard_clip",
+          "drive_gain_db": 15.563,
+          "threshold_amplitude": 0.12,
+          "clipped_source_fraction": 0.559977
+        }
+      ],
+      "target_snr_db": null,
+      "measured_snr_db_before_pcm_quantization": 45.999,
+      "speech_region_rms_dbfs": -24.0,
+      "noise_rms_dbfs": -70.0,
+      "rms_dbfs": -26.998,
+      "peak_dbfs": -21.844,
+      "duration_ms": 6016.792,
+      "sample_rate_hz": 24000,
+      "channels": 1,
+      "bit_depth": 16,
+      "frames": 144403,
+      "bytes": 288850,
+      "sha256": "96ee9341de8eee1b22fc1c5888335881c8fcc9d69189dc4d676d7ce8d0e9ed06"
+    },
+    {
+      "id": "05_vi_fan_snr20",
+      "file": "audio/05_vi_fan_snr20.wav",
+      "language": "vi",
+      "condition": "fan_snr20",
+      "label_vi": "Nền quạt, SNR +20 dB",
+      "test_intent": "Nhiễu ổn định hiện diện cả calibration và đuôi.",
+      "speech_present": true,
+      "reference_text": "Miu ơi, mình muốn nghe một câu chuyện về chú mèo con.",
+      "reference_status": "TTS input, not an independently verified STT transcript",
+      "segments": [
+        {
+          "start_ms": 1000,
+          "end_ms": 4016.792,
+          "text": "Miu ơi, mình muốn nghe một câu chuyện về chú mèo con."
+        }
+      ],
+      "segment_boundary_method": "trimmed source clip bounds, not word alignment",
+      "lead_in_ms": 1000,
+      "tail_ms": 2000.0,
+      "voice": {
+        "provider": "ElevenLabs",
+        "model_id": "eleven_flash_v2_5",
+        "voice_id": "x4KAhuXs2G8TfK9Zr7Q4",
+        "voice_name": "Cam Hong",
+        "pitch_shift_semitones": 3.0,
+        "description": "Synthetic childlike approximation via TTS and pitch/formant shift; not a real child recording"
+      },
+      "seed": 841031,
+      "transforms": [
+        {
+          "kind": "synthetic_fan",
+          "target_snr_db": 20,
+          "snr_region": "union_of_declared_source_segments_including_intra_sentence_silence"
+        }
+      ],
+      "target_snr_db": 20,
+      "measured_snr_db_before_pcm_quantization": 20.0,
+      "speech_region_rms_dbfs": -24.0,
+      "noise_rms_dbfs": -43.995,
+      "rms_dbfs": -26.924,
+      "peak_dbfs": -6.092,
+      "duration_ms": 6016.792,
+      "sample_rate_hz": 24000,
+      "channels": 1,
+      "bit_depth": 16,
+      "frames": 144403,
+      "bytes": 288850,
+      "sha256": "ce416372a7f5ac761ceea9e19b00748e793dbd1de86702d7d087518cd7fb26e1"
+    },
+    {
+      "id": "06_vi_rain_snr10",
+      "file": "audio/06_vi_rain_snr10.wav",
+      "language": "vi",
+      "condition": "rain_snr10",
+      "label_vi": "Nền mưa, SNR +10 dB",
+      "test_intent": "Nhiễu vừa hiện diện cả calibration và đuôi.",
+      "speech_present": true,
+      "reference_text": "Miu ơi, mình muốn nghe một câu chuyện về chú mèo con.",
+      "reference_status": "TTS input, not an independently verified STT transcript",
+      "segments": [
+        {
+          "start_ms": 1000,
+          "end_ms": 4016.792,
+          "text": "Miu ơi, mình muốn nghe một câu chuyện về chú mèo con."
+        }
+      ],
+      "segment_boundary_method": "trimmed source clip bounds, not word alignment",
+      "lead_in_ms": 1000,
+      "tail_ms": 2000.0,
+      "voice": {
+        "provider": "ElevenLabs",
+        "model_id": "eleven_flash_v2_5",
+        "voice_id": "x4KAhuXs2G8TfK9Zr7Q4",
+        "voice_name": "Cam Hong",
+        "pitch_shift_semitones": 3.0,
+        "description": "Synthetic childlike approximation via TTS and pitch/formant shift; not a real child recording"
+      },
+      "seed": 841032,
+      "transforms": [
+        {
+          "kind": "synthetic_rain",
+          "target_snr_db": 10,
+          "snr_region": "union_of_declared_source_segments_including_intra_sentence_silence"
+        }
+      ],
+      "target_snr_db": 10,
+      "measured_snr_db_before_pcm_quantization": 10.0,
+      "speech_region_rms_dbfs": -24.0,
+      "noise_rms_dbfs": -33.911,
+      "rms_dbfs": -26.198,
+      "peak_dbfs": -5.737,
+      "duration_ms": 6016.792,
+      "sample_rate_hz": 24000,
+      "channels": 1,
+      "bit_depth": 16,
+      "frames": 144403,
+      "bytes": 288850,
+      "sha256": "90efe245422d45446ebe508a7a4aa985c427757c643a088dd364cd5092632b4b"
+    },
+    {
+      "id": "07_vi_noise_snr0",
+      "file": "audio/07_vi_noise_snr0.wav",
+      "language": "vi",
+      "condition": "noise_snr0",
+      "label_vi": "Nhiễu mạnh, SNR 0 dB, đủ 30 giây",
+      "test_intent": "Nền tăng sau calibration và kéo dài tới 30 giây; kiểm tra giới hạn thu khi nhiễu giữ detector mở.",
+      "speech_present": true,
+      "reference_text": "Miu ơi, mình muốn nghe một câu chuyện về chú mèo con.",
+      "reference_status": "TTS input, not an independently verified STT transcript",
+      "segments": [
+        {
+          "start_ms": 1000,
+          "end_ms": 4016.792,
+          "text": "Miu ơi, mình muốn nghe một câu chuyện về chú mèo con."
+        }
+      ],
+      "segment_boundary_method": "trimmed source clip bounds, not word alignment",
+      "lead_in_ms": 1000,
+      "tail_ms": 25983.208,
+      "voice": {
+        "provider": "ElevenLabs",
+        "model_id": "eleven_flash_v2_5",
+        "voice_id": "x4KAhuXs2G8TfK9Zr7Q4",
+        "voice_name": "Cam Hong",
+        "pitch_shift_semitones": 3.0,
+        "description": "Synthetic childlike approximation via TTS and pitch/formant shift; not a real child recording"
+      },
+      "seed": 841033,
+      "transforms": [
+        {
+          "kind": "maximum_recording_guardrail",
+          "duration_ms": 30000
+        },
+        {
+          "kind": "synthetic_changing",
+          "target_snr_db": 0,
+          "snr_region": "union_of_declared_source_segments_including_intra_sentence_silence"
+        }
+      ],
+      "target_snr_db": 0,
+      "measured_snr_db_before_pcm_quantization": -0.0,
+      "speech_region_rms_dbfs": -24.0,
+      "noise_rms_dbfs": -24.1,
+      "rms_dbfs": -23.678,
+      "peak_dbfs": -5.006,
+      "duration_ms": 30000.0,
+      "sample_rate_hz": 24000,
+      "channels": 1,
+      "bit_depth": 16,
+      "frames": 720000,
+      "bytes": 1440044,
+      "sha256": "7b93099a108aaa92f8a941014b53279913f720ff591c04667b162965d8b3bf15"
+    },
+    {
+      "id": "08_vi_pause_0800ms",
+      "file": "audio/08_vi_pause_0800ms.wav",
+      "language": "vi",
+      "condition": "pause_0800ms",
+      "label_vi": "Ngắt câu 800 ms",
+      "test_intent": "Khoảng nghỉ ngắn hơn endSilence 1.500 ms.",
+      "speech_present": true,
+      "reference_text": "Hôm nay mình hơi buồn. Bạn chơi với mình nhé.",
+      "reference_status": "TTS input, not an independently verified STT transcript",
+      "segments": [
+        {
+          "start_ms": 1000,
+          "end_ms": 2265.083,
+          "text": "Hôm nay mình hơi buồn."
+        },
+        {
+          "start_ms": 3065.083,
+          "end_ms": 4331.292,
+          "text": "Bạn chơi với mình nhé."
+        }
+      ],
+      "segment_boundary_method": "trimmed source clip bounds, not word alignment",
+      "lead_in_ms": 1000,
+      "tail_ms": 2000.0,
+      "voice": {
+        "provider": "ElevenLabs",
+        "model_id": "eleven_flash_v2_5",
+        "voice_id": "x4KAhuXs2G8TfK9Zr7Q4",
+        "voice_name": "Cam Hong",
+        "pitch_shift_semitones": 3.0,
+        "description": "Synthetic childlike approximation via TTS and pitch/formant shift; not a real child recording"
+      },
+      "seed": 841034,
+      "transforms": [
+        {
+          "kind": "inter_clause_pause",
+          "duration_ms": 800
+        }
+      ],
+      "target_snr_db": null,
+      "measured_snr_db_before_pcm_quantization": 46.008,
+      "speech_region_rms_dbfs": -24.0,
+      "noise_rms_dbfs": -70.0,
+      "rms_dbfs": -27.981,
+      "peak_dbfs": -9.331,
+      "duration_ms": 6331.292,
+      "sample_rate_hz": 24000,
+      "channels": 1,
+      "bit_depth": 16,
+      "frames": 151951,
+      "bytes": 303946,
+      "sha256": "3a3bea143eb42672471af6a23f0749c2a22c98cd90f16e370e43d40f3dd6322e"
+    },
+    {
+      "id": "09_vi_pause_2200ms",
+      "file": "audio/09_vi_pause_2200ms.wav",
+      "language": "vi",
+      "condition": "pause_2200ms",
+      "label_vi": "Ngắt câu 2.200 ms",
+      "test_intent": "Auto-end có thể gửi trước mệnh đề thứ hai; upload toàn file vẫn có cả hai.",
+      "speech_present": true,
+      "reference_text": "Hôm nay mình hơi buồn. Bạn chơi với mình nhé.",
+      "reference_status": "TTS input, not an independently verified STT transcript",
+      "segments": [
+        {
+          "start_ms": 1000,
+          "end_ms": 2265.083,
+          "text": "Hôm nay mình hơi buồn."
+        },
+        {
+          "start_ms": 4465.083,
+          "end_ms": 5731.292,
+          "text": "Bạn chơi với mình nhé."
+        }
+      ],
+      "segment_boundary_method": "trimmed source clip bounds, not word alignment",
+      "lead_in_ms": 1000,
+      "tail_ms": 2000.0,
+      "voice": {
+        "provider": "ElevenLabs",
+        "model_id": "eleven_flash_v2_5",
+        "voice_id": "x4KAhuXs2G8TfK9Zr7Q4",
+        "voice_name": "Cam Hong",
+        "pitch_shift_semitones": 3.0,
+        "description": "Synthetic childlike approximation via TTS and pitch/formant shift; not a real child recording"
+      },
+      "seed": 841035,
+      "transforms": [
+        {
+          "kind": "inter_clause_pause",
+          "duration_ms": 2200
+        }
+      ],
+      "target_snr_db": null,
+      "measured_snr_db_before_pcm_quantization": 45.974,
+      "speech_region_rms_dbfs": -24.0,
+      "noise_rms_dbfs": -70.0,
+      "rms_dbfs": -28.849,
+      "peak_dbfs": -9.316,
+      "duration_ms": 7731.292,
+      "sample_rate_hz": 24000,
+      "channels": 1,
+      "bit_depth": 16,
+      "frames": 185551,
+      "bytes": 371146,
+      "sha256": "eee863c84fcc7e0e76cda76eb41d2eda542d55d459c066132c87fc7371a879c8"
+    },
+    {
+      "id": "10_vi_noise_only",
+      "file": "audio/10_vi_noise_only.wav",
+      "language": "vi",
+      "condition": "noise_only",
+      "label_vi": "Chỉ tiếng nền, không lời",
+      "test_intent": "Negative control: kiểm tra no-signal hoặc false trigger, không ép STT có transcript.",
+      "speech_present": false,
+      "reference_text": "",
+      "reference_status": "TTS input, not an independently verified STT transcript",
+      "segments": [],
+      "segment_boundary_method": "trimmed source clip bounds, not word alignment",
+      "lead_in_ms": null,
+      "tail_ms": null,
+      "voice": null,
+      "seed": 841036,
+      "transforms": [
+        {
+          "kind": "synthetic_fan",
+          "rms_dbfs": -42
+        }
+      ],
+      "target_snr_db": null,
+      "measured_snr_db_before_pcm_quantization": null,
+      "speech_region_rms_dbfs": null,
+      "noise_rms_dbfs": -42.0,
+      "rms_dbfs": -42.0,
+      "peak_dbfs": -29.632,
+      "duration_ms": 6500.0,
+      "sample_rate_hz": 24000,
+      "channels": 1,
+      "bit_depth": 16,
+      "frames": 156000,
+      "bytes": 312044,
+      "sha256": "fd5a6a80ba28be2f64b7112ac3138679d9f96170dd34caa0714093173e676492"
+    },
+    {
+      "id": "11_en_clean",
+      "file": "audio/11_en_clean.wav",
+      "language": "en",
+      "condition": "clean",
+      "label_vi": "Rõ, nền yên tĩnh",
+      "test_intent": "Baseline so sánh transcript với câu gốc.",
+      "speech_present": true,
+      "reference_text": "Miu, can you tell me a story about a little kitten?",
+      "reference_status": "TTS input, not an independently verified STT transcript",
+      "segments": [
+        {
+          "start_ms": 1000,
+          "end_ms": 3871.917,
+          "text": "Miu, can you tell me a story about a little kitten?"
+        }
+      ],
+      "segment_boundary_method": "trimmed source clip bounds, not word alignment",
+      "lead_in_ms": 1000,
+      "tail_ms": 2000.0,
+      "voice": {
+        "provider": "ElevenLabs",
+        "model_id": "eleven_flash_v2_5",
+        "voice_id": "fBD19tfE58bkETeiwUoC",
+        "voice_name": "Little Dude II",
+        "pitch_shift_semitones": 2.0,
+        "description": "Synthetic childlike approximation via TTS and pitch/formant shift; not a real child recording"
+      },
+      "seed": 841127,
+      "transforms": [],
+      "target_snr_db": null,
+      "measured_snr_db_before_pcm_quantization": 45.997,
+      "speech_region_rms_dbfs": -24.0,
+      "noise_rms_dbfs": -70.0,
+      "rms_dbfs": -27.106,
+      "peak_dbfs": -6.937,
+      "duration_ms": 5871.917,
+      "sample_rate_hz": 24000,
+      "channels": 1,
+      "bit_depth": 16,
+      "frames": 140926,
+      "bytes": 281896,
+      "sha256": "723bff8a69511d5ad3ab55461d6b5013d172b4c460b7a53f0f1bd7596f7f150d"
+    },
+    {
+      "id": "12_en_soft",
+      "file": "audio/12_en_soft.wav",
+      "language": "en",
+      "condition": "soft",
+      "label_vi": "Nói rất nhỏ",
+      "test_intent": "Kiểm tra bỏ sót tín hiệu; có thể cần Gửi thủ công.",
+      "speech_present": true,
+      "reference_text": "Miu, can you tell me a story about a little kitten?",
+      "reference_status": "TTS input, not an independently verified STT transcript",
+      "segments": [
+        {
+          "start_ms": 1000,
+          "end_ms": 3871.917,
+          "text": "Miu, can you tell me a story about a little kitten?"
+        }
+      ],
+      "segment_boundary_method": "trimmed source clip bounds, not word alignment",
+      "lead_in_ms": 1000,
+      "tail_ms": 2000.0,
+      "voice": {
+        "provider": "ElevenLabs",
+        "model_id": "eleven_flash_v2_5",
+        "voice_id": "fBD19tfE58bkETeiwUoC",
+        "voice_name": "Little Dude II",
+        "pitch_shift_semitones": 2.0,
+        "description": "Synthetic childlike approximation via TTS and pitch/formant shift; not a real child recording"
+      },
+      "seed": 841128,
+      "transforms": [
+        {
+          "kind": "quiet_speech",
+          "target_region_rms_dbfs": -58
+        }
+      ],
+      "target_snr_db": null,
+      "measured_snr_db_before_pcm_quantization": 11.985,
+      "speech_region_rms_dbfs": -58.0,
+      "noise_rms_dbfs": -70.0,
+      "rms_dbfs": -60.571,
+      "peak_dbfs": -40.623,
+      "duration_ms": 5871.917,
+      "sample_rate_hz": 24000,
+      "channels": 1,
+      "bit_depth": 16,
+      "frames": 140926,
+      "bytes": 281896,
+      "sha256": "5c37d3a8064bef8556e26503521fe513de3d9f82441f496630dda5974609cd1f"
+    },
+    {
+      "id": "13_en_muffled",
+      "file": "audio/13_en_muffled.wav",
+      "language": "en",
+      "condition": "muffled",
+      "label_vi": "Nghẹt/không rõ",
+      "test_intent": "Low-pass 1.000 Hz giả lập mic bị che, không phải lỗi phát âm thật.",
+      "speech_present": true,
+      "reference_text": "Miu, can you tell me a story about a little kitten?",
+      "reference_status": "TTS input, not an independently verified STT transcript",
+      "segments": [
+        {
+          "start_ms": 1000,
+          "end_ms": 3871.917,
+          "text": "Miu, can you tell me a story about a little kitten?"
+        }
+      ],
+      "segment_boundary_method": "trimmed source clip bounds, not word alignment",
+      "lead_in_ms": 1000,
+      "tail_ms": 2000.0,
+      "voice": {
+        "provider": "ElevenLabs",
+        "model_id": "eleven_flash_v2_5",
+        "voice_id": "fBD19tfE58bkETeiwUoC",
+        "voice_name": "Little Dude II",
+        "pitch_shift_semitones": 2.0,
+        "description": "Synthetic childlike approximation via TTS and pitch/formant shift; not a real child recording"
+      },
+      "seed": 841129,
+      "transforms": [
+        {
+          "kind": "low_pass",
+          "cutoff_hz": 1000,
+          "order": 5
+        }
+      ],
+      "target_snr_db": null,
+      "measured_snr_db_before_pcm_quantization": 45.972,
+      "speech_region_rms_dbfs": -24.0,
+      "noise_rms_dbfs": -70.0,
+      "rms_dbfs": -27.106,
+      "peak_dbfs": -7.618,
+      "duration_ms": 5871.917,
+      "sample_rate_hz": 24000,
+      "channels": 1,
+      "bit_depth": 16,
+      "frames": 140926,
+      "bytes": 281896,
+      "sha256": "5e353140cee8270d52a00e222ca4dcc5123e9d085a033e81afae2ea393ef9157"
+    },
+    {
+      "id": "14_en_clipped",
+      "file": "audio/14_en_clipped.wav",
+      "language": "en",
+      "condition": "clipped",
+      "label_vi": "Vỡ tiếng",
+      "test_intent": "Hard clipping có kiểm soát trước khi xuất WAV PCM hợp lệ.",
+      "speech_present": true,
+      "reference_text": "Miu, can you tell me a story about a little kitten?",
+      "reference_status": "TTS input, not an independently verified STT transcript",
+      "segments": [
+        {
+          "start_ms": 1000,
+          "end_ms": 3871.917,
+          "text": "Miu, can you tell me a story about a little kitten?"
+        }
+      ],
+      "segment_boundary_method": "trimmed source clip bounds, not word alignment",
+      "lead_in_ms": 1000,
+      "tail_ms": 2000.0,
+      "voice": {
+        "provider": "ElevenLabs",
+        "model_id": "eleven_flash_v2_5",
+        "voice_id": "fBD19tfE58bkETeiwUoC",
+        "voice_name": "Little Dude II",
+        "pitch_shift_semitones": 2.0,
+        "description": "Synthetic childlike approximation via TTS and pitch/formant shift; not a real child recording"
+      },
+      "seed": 841130,
+      "transforms": [
+        {
+          "kind": "hard_clip",
+          "drive_gain_db": 15.563,
+          "threshold_amplitude": 0.12,
+          "clipped_source_fraction": 0.556974
+        }
+      ],
+      "target_snr_db": null,
+      "measured_snr_db_before_pcm_quantization": 45.987,
+      "speech_region_rms_dbfs": -24.0,
+      "noise_rms_dbfs": -70.0,
+      "rms_dbfs": -27.106,
+      "peak_dbfs": -21.966,
+      "duration_ms": 5871.917,
+      "sample_rate_hz": 24000,
+      "channels": 1,
+      "bit_depth": 16,
+      "frames": 140926,
+      "bytes": 281896,
+      "sha256": "26008dc947053e6c5d49554231fae6b1c4f1684246613557f780bd84b7280220"
+    },
+    {
+      "id": "15_en_fan_snr20",
+      "file": "audio/15_en_fan_snr20.wav",
+      "language": "en",
+      "condition": "fan_snr20",
+      "label_vi": "Nền quạt, SNR +20 dB",
+      "test_intent": "Nhiễu ổn định hiện diện cả calibration và đuôi.",
+      "speech_present": true,
+      "reference_text": "Miu, can you tell me a story about a little kitten?",
+      "reference_status": "TTS input, not an independently verified STT transcript",
+      "segments": [
+        {
+          "start_ms": 1000,
+          "end_ms": 3871.917,
+          "text": "Miu, can you tell me a story about a little kitten?"
+        }
+      ],
+      "segment_boundary_method": "trimmed source clip bounds, not word alignment",
+      "lead_in_ms": 1000,
+      "tail_ms": 2000.0,
+      "voice": {
+        "provider": "ElevenLabs",
+        "model_id": "eleven_flash_v2_5",
+        "voice_id": "fBD19tfE58bkETeiwUoC",
+        "voice_name": "Little Dude II",
+        "pitch_shift_semitones": 2.0,
+        "description": "Synthetic childlike approximation via TTS and pitch/formant shift; not a real child recording"
+      },
+      "seed": 841131,
+      "transforms": [
+        {
+          "kind": "synthetic_fan",
+          "target_snr_db": 20,
+          "snr_region": "union_of_declared_source_segments_including_intra_sentence_silence"
+        }
+      ],
+      "target_snr_db": 20,
+      "measured_snr_db_before_pcm_quantization": 20.0,
+      "speech_region_rms_dbfs": -24.0,
+      "noise_rms_dbfs": -44.075,
+      "rms_dbfs": -27.028,
+      "peak_dbfs": -6.93,
+      "duration_ms": 5871.917,
+      "sample_rate_hz": 24000,
+      "channels": 1,
+      "bit_depth": 16,
+      "frames": 140926,
+      "bytes": 281896,
+      "sha256": "e95542b645aaca279c254d3ab742dcd89666cef043b99be974b24120753c890a"
+    },
+    {
+      "id": "16_en_rain_snr10",
+      "file": "audio/16_en_rain_snr10.wav",
+      "language": "en",
+      "condition": "rain_snr10",
+      "label_vi": "Nền mưa, SNR +10 dB",
+      "test_intent": "Nhiễu vừa hiện diện cả calibration và đuôi.",
+      "speech_present": true,
+      "reference_text": "Miu, can you tell me a story about a little kitten?",
+      "reference_status": "TTS input, not an independently verified STT transcript",
+      "segments": [
+        {
+          "start_ms": 1000,
+          "end_ms": 3871.917,
+          "text": "Miu, can you tell me a story about a little kitten?"
+        }
+      ],
+      "segment_boundary_method": "trimmed source clip bounds, not word alignment",
+      "lead_in_ms": 1000,
+      "tail_ms": 2000.0,
+      "voice": {
+        "provider": "ElevenLabs",
+        "model_id": "eleven_flash_v2_5",
+        "voice_id": "fBD19tfE58bkETeiwUoC",
+        "voice_name": "Little Dude II",
+        "pitch_shift_semitones": 2.0,
+        "description": "Synthetic childlike approximation via TTS and pitch/formant shift; not a real child recording"
+      },
+      "seed": 841132,
+      "transforms": [
+        {
+          "kind": "synthetic_rain",
+          "target_snr_db": 10,
+          "snr_region": "union_of_declared_source_segments_including_intra_sentence_silence"
+        }
+      ],
+      "target_snr_db": 10,
+      "measured_snr_db_before_pcm_quantization": 10.0,
+      "speech_region_rms_dbfs": -24.0,
+      "noise_rms_dbfs": -33.803,
+      "rms_dbfs": -26.272,
+      "peak_dbfs": -6.653,
+      "duration_ms": 5871.917,
+      "sample_rate_hz": 24000,
+      "channels": 1,
+      "bit_depth": 16,
+      "frames": 140926,
+      "bytes": 281896,
+      "sha256": "e5de908ee237fa7d1c144e08335340ce1a0557d21678846c418f5d264c478f89"
+    },
+    {
+      "id": "17_en_noise_snr0",
+      "file": "audio/17_en_noise_snr0.wav",
+      "language": "en",
+      "condition": "noise_snr0",
+      "label_vi": "Nhiễu mạnh, SNR 0 dB, đủ 30 giây",
+      "test_intent": "Nền tăng sau calibration và kéo dài tới 30 giây; kiểm tra giới hạn thu khi nhiễu giữ detector mở.",
+      "speech_present": true,
+      "reference_text": "Miu, can you tell me a story about a little kitten?",
+      "reference_status": "TTS input, not an independently verified STT transcript",
+      "segments": [
+        {
+          "start_ms": 1000,
+          "end_ms": 3871.917,
+          "text": "Miu, can you tell me a story about a little kitten?"
+        }
+      ],
+      "segment_boundary_method": "trimmed source clip bounds, not word alignment",
+      "lead_in_ms": 1000,
+      "tail_ms": 26128.083,
+      "voice": {
+        "provider": "ElevenLabs",
+        "model_id": "eleven_flash_v2_5",
+        "voice_id": "fBD19tfE58bkETeiwUoC",
+        "voice_name": "Little Dude II",
+        "pitch_shift_semitones": 2.0,
+        "description": "Synthetic childlike approximation via TTS and pitch/formant shift; not a real child recording"
+      },
+      "seed": 841133,
+      "transforms": [
+        {
+          "kind": "maximum_recording_guardrail",
+          "duration_ms": 30000
+        },
+        {
+          "kind": "synthetic_changing",
+          "target_snr_db": 0,
+          "snr_region": "union_of_declared_source_segments_including_intra_sentence_silence"
+        }
+      ],
+      "target_snr_db": 0,
+      "measured_snr_db_before_pcm_quantization": 0.0,
+      "speech_region_rms_dbfs": -24.0,
+      "noise_rms_dbfs": -24.17,
+      "rms_dbfs": -23.759,
+      "peak_dbfs": -3.734,
+      "duration_ms": 30000.0,
+      "sample_rate_hz": 24000,
+      "channels": 1,
+      "bit_depth": 16,
+      "frames": 720000,
+      "bytes": 1440044,
+      "sha256": "c6c5c6d29d557ea82584bc087e157f1c3c515f7e41d7bbaec3cb38821f71aa72"
+    },
+    {
+      "id": "18_en_pause_0800ms",
+      "file": "audio/18_en_pause_0800ms.wav",
+      "language": "en",
+      "condition": "pause_0800ms",
+      "label_vi": "Ngắt câu 800 ms",
+      "test_intent": "Khoảng nghỉ ngắn hơn endSilence 1.500 ms.",
+      "speech_present": true,
+      "reference_text": "I feel a little sad today. Will you play with me?",
+      "reference_status": "TTS input, not an independently verified STT transcript",
+      "segments": [
+        {
+          "start_ms": 1000,
+          "end_ms": 2578.0,
+          "text": "I feel a little sad today."
+        },
+        {
+          "start_ms": 3378.0,
+          "end_ms": 4766.667,
+          "text": "Will you play with me?"
+        }
+      ],
+      "segment_boundary_method": "trimmed source clip bounds, not word alignment",
+      "lead_in_ms": 1000,
+      "tail_ms": 2000.0,
+      "voice": {
+        "provider": "ElevenLabs",
+        "model_id": "eleven_flash_v2_5",
+        "voice_id": "fBD19tfE58bkETeiwUoC",
+        "voice_name": "Little Dude II",
+        "pitch_shift_semitones": 2.0,
+        "description": "Synthetic childlike approximation via TTS and pitch/formant shift; not a real child recording"
+      },
+      "seed": 841134,
+      "transforms": [
+        {
+          "kind": "inter_clause_pause",
+          "duration_ms": 800
+        }
+      ],
+      "target_snr_db": null,
+      "measured_snr_db_before_pcm_quantization": 46.006,
+      "speech_region_rms_dbfs": -24.0,
+      "noise_rms_dbfs": -70.0,
+      "rms_dbfs": -27.581,
+      "peak_dbfs": -7.287,
+      "duration_ms": 6766.667,
+      "sample_rate_hz": 24000,
+      "channels": 1,
+      "bit_depth": 16,
+      "frames": 162400,
+      "bytes": 324844,
+      "sha256": "f3830743186cf712234a57247cc0093d38c9d1eb8c53040fe3c506fe13c0d45e"
+    },
+    {
+      "id": "19_en_pause_2200ms",
+      "file": "audio/19_en_pause_2200ms.wav",
+      "language": "en",
+      "condition": "pause_2200ms",
+      "label_vi": "Ngắt câu 2.200 ms",
+      "test_intent": "Auto-end có thể gửi trước mệnh đề thứ hai; upload toàn file vẫn có cả hai.",
+      "speech_present": true,
+      "reference_text": "I feel a little sad today. Will you play with me?",
+      "reference_status": "TTS input, not an independently verified STT transcript",
+      "segments": [
+        {
+          "start_ms": 1000,
+          "end_ms": 2578.0,
+          "text": "I feel a little sad today."
+        },
+        {
+          "start_ms": 4778.0,
+          "end_ms": 6166.667,
+          "text": "Will you play with me?"
+        }
+      ],
+      "segment_boundary_method": "trimmed source clip bounds, not word alignment",
+      "lead_in_ms": 1000,
+      "tail_ms": 2000.0,
+      "voice": {
+        "provider": "ElevenLabs",
+        "model_id": "eleven_flash_v2_5",
+        "voice_id": "fBD19tfE58bkETeiwUoC",
+        "voice_name": "Little Dude II",
+        "pitch_shift_semitones": 2.0,
+        "description": "Synthetic childlike approximation via TTS and pitch/formant shift; not a real child recording"
+      },
+      "seed": 841135,
+      "transforms": [
+        {
+          "kind": "inter_clause_pause",
+          "duration_ms": 2200
+        }
+      ],
+      "target_snr_db": null,
+      "measured_snr_db_before_pcm_quantization": 45.993,
+      "speech_region_rms_dbfs": -24.0,
+      "noise_rms_dbfs": -70.0,
+      "rms_dbfs": -28.398,
+      "peak_dbfs": -7.279,
+      "duration_ms": 8166.667,
+      "sample_rate_hz": 24000,
+      "channels": 1,
+      "bit_depth": 16,
+      "frames": 196000,
+      "bytes": 392044,
+      "sha256": "9ff1e9de51655c298485380839c7c1082210c3aa86bb7b0952a48272d2b1c2f2"
+    },
+    {
+      "id": "20_en_noise_only",
+      "file": "audio/20_en_noise_only.wav",
+      "language": "en",
+      "condition": "noise_only",
+      "label_vi": "Chỉ tiếng nền, không lời",
+      "test_intent": "Negative control: kiểm tra no-signal hoặc false trigger, không ép STT có transcript.",
+      "speech_present": false,
+      "reference_text": "",
+      "reference_status": "TTS input, not an independently verified STT transcript",
+      "segments": [],
+      "segment_boundary_method": "trimmed source clip bounds, not word alignment",
+      "lead_in_ms": null,
+      "tail_ms": null,
+      "voice": null,
+      "seed": 841136,
+      "transforms": [
+        {
+          "kind": "non_speech_burst",
+          "start_ms": 1200,
+          "end_ms": 1900,
+          "rms_dbfs": -20
+        },
+        {
+          "kind": "synthetic_fan",
+          "rms_dbfs": -42
+        }
+      ],
+      "target_snr_db": null,
+      "measured_snr_db_before_pcm_quantization": null,
+      "speech_region_rms_dbfs": null,
+      "noise_rms_dbfs": -29.434,
+      "rms_dbfs": -29.434,
+      "peak_dbfs": -5.032,
+      "duration_ms": 6500.0,
+      "sample_rate_hz": 24000,
+      "channels": 1,
+      "bit_depth": 16,
+      "frames": 156000,
+      "bytes": 312044,
+      "sha256": "942a2dd005a16ee19c432e4ae6b247180513020a5e32e871674c2d2745509fd7"
+    }
+  ]
+}

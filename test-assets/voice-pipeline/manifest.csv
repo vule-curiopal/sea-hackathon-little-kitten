@@ -1,0 +1,21 @@
+﻿id,file,language,condition,speech_present,reference_text,duration_ms,target_snr_db,rms_dbfs,bytes,sha256
+01_vi_clean,audio/01_vi_clean.wav,vi,clean,True,"Miu ơi, mình muốn nghe một câu chuyện về chú mèo con.",6016.792,,-26.998,288850,92d3ad4d2a8e9874691c894323535ebf0502c48de2e0f93a7d34cb948bbb1548
+02_vi_soft,audio/02_vi_soft.wav,vi,soft,True,"Miu ơi, mình muốn nghe một câu chuyện về chú mèo con.",6016.792,,-60.477,288850,ce681a1c1bbd4a9822d43676f7b1d06c610cc11851ff9b2bbd1d98d60f167dc0
+03_vi_muffled,audio/03_vi_muffled.wav,vi,muffled,True,"Miu ơi, mình muốn nghe một câu chuyện về chú mèo con.",6016.792,,-26.998,288850,28432ab3befd3c77d91f45cde3816f7a88ad465e7d0ad7cae3bf5342be569720
+04_vi_clipped,audio/04_vi_clipped.wav,vi,clipped,True,"Miu ơi, mình muốn nghe một câu chuyện về chú mèo con.",6016.792,,-26.998,288850,96ee9341de8eee1b22fc1c5888335881c8fcc9d69189dc4d676d7ce8d0e9ed06
+05_vi_fan_snr20,audio/05_vi_fan_snr20.wav,vi,fan_snr20,True,"Miu ơi, mình muốn nghe một câu chuyện về chú mèo con.",6016.792,20,-26.924,288850,ce416372a7f5ac761ceea9e19b00748e793dbd1de86702d7d087518cd7fb26e1
+06_vi_rain_snr10,audio/06_vi_rain_snr10.wav,vi,rain_snr10,True,"Miu ơi, mình muốn nghe một câu chuyện về chú mèo con.",6016.792,10,-26.198,288850,90efe245422d45446ebe508a7a4aa985c427757c643a088dd364cd5092632b4b
+07_vi_noise_snr0,audio/07_vi_noise_snr0.wav,vi,noise_snr0,True,"Miu ơi, mình muốn nghe một câu chuyện về chú mèo con.",30000.0,0,-23.678,1440044,7b93099a108aaa92f8a941014b53279913f720ff591c04667b162965d8b3bf15
+08_vi_pause_0800ms,audio/08_vi_pause_0800ms.wav,vi,pause_0800ms,True,Hôm nay mình hơi buồn. Bạn chơi với mình nhé.,6331.292,,-27.981,303946,3a3bea143eb42672471af6a23f0749c2a22c98cd90f16e370e43d40f3dd6322e
+09_vi_pause_2200ms,audio/09_vi_pause_2200ms.wav,vi,pause_2200ms,True,Hôm nay mình hơi buồn. Bạn chơi với mình nhé.,7731.292,,-28.849,371146,eee863c84fcc7e0e76cda76eb41d2eda542d55d459c066132c87fc7371a879c8
+10_vi_noise_only,audio/10_vi_noise_only.wav,vi,noise_only,False,,6500.0,,-42.0,312044,fd5a6a80ba28be2f64b7112ac3138679d9f96170dd34caa0714093173e676492
+11_en_clean,audio/11_en_clean.wav,en,clean,True,"Miu, can you tell me a story about a little kitten?",5871.917,,-27.106,281896,723bff8a69511d5ad3ab55461d6b5013d172b4c460b7a53f0f1bd7596f7f150d
+12_en_soft,audio/12_en_soft.wav,en,soft,True,"Miu, can you tell me a story about a little kitten?",5871.917,,-60.571,281896,5c37d3a8064bef8556e26503521fe513de3d9f82441f496630dda5974609cd1f
+13_en_muffled,audio/13_en_muffled.wav,en,muffled,True,"Miu, can you tell me a story about a little kitten?",5871.917,,-27.106,281896,5e353140cee8270d52a00e222ca4dcc5123e9d085a033e81afae2ea393ef9157
+14_en_clipped,audio/14_en_clipped.wav,en,clipped,True,"Miu, can you tell me a story about a little kitten?",5871.917,,-27.106,281896,26008dc947053e6c5d49554231fae6b1c4f1684246613557f780bd84b7280220
+15_en_fan_snr20,audio/15_en_fan_snr20.wav,en,fan_snr20,True,"Miu, can you tell me a story about a little kitten?",5871.917,20,-27.028,281896,e95542b645aaca279c254d3ab742dcd89666cef043b99be974b24120753c890a
+16_en_rain_snr10,audio/16_en_rain_snr10.wav,en,rain_snr10,True,"Miu, can you tell me a story about a little kitten?",5871.917,10,-26.272,281896,e5de908ee237fa7d1c144e08335340ce1a0557d21678846c418f5d264c478f89
+17_en_noise_snr0,audio/17_en_noise_snr0.wav,en,noise_snr0,True,"Miu, can you tell me a story about a little kitten?",30000.0,0,-23.759,1440044,c6c5c6d29d557ea82584bc087e157f1c3c515f7e41d7bbaec3cb38821f71aa72
+18_en_pause_0800ms,audio/18_en_pause_0800ms.wav,en,pause_0800ms,True,I feel a little sad today. Will you play with me?,6766.667,,-27.581,324844,f3830743186cf712234a57247cc0093d38c9d1eb8c53040fe3c506fe13c0d45e
+19_en_pause_2200ms,audio/19_en_pause_2200ms.wav,en,pause_2200ms,True,I feel a little sad today. Will you play with me?,8166.667,,-28.398,392044,9ff1e9de51655c298485380839c7c1082210c3aa86bb7b0952a48272d2b1c2f2
+20_en_noise_only,audio/20_en_noise_only.wav,en,noise_only,False,,6500.0,,-29.434,312044,942a2dd005a16ee19c432e4ae6b247180513020a5e32e871674c2d2745509fd7
