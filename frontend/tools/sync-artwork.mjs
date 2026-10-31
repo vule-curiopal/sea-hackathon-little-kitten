@@ -19,9 +19,8 @@ for (const name of ['miuFur', 'miuCream', 'miuIris', 'miuBtn']) {
 svg = svg.replace(/<g>\s*<g>/, '<g className="miu-body">\n<g className="miu-tail">');
 svg = svg.replaceAll('<g opacity={pose.openL}>', '<g className="miu-eye" opacity={pose.openL}>').replaceAll('<g opacity={pose.openR}>', '<g className="miu-eye" opacity={pose.openR}>');
 svg = svg.replace('<path d={pose.mouthFill}', '<path className="miu-mouth" d={pose.mouthFill}');
-// The output analyser owns speech mouth movement; keep the authored expression at rest.
-svg = svg.replace('<path d={pose.mouthLine}', '<g opacity={mouthLevel !== undefined && mouthLevel > .04 ? 0 : 1}><path d={pose.mouthLine}');
-svg = svg.replace('<ellipse cx="200" cy={pose.tongueY} rx="12" ry="6" fill="#F7A8B4" opacity={pose.tongue}></ellipse>', '<ellipse cx="200" cy={pose.tongueY} rx="12" ry="6" fill="#F7A8B4" opacity={pose.tongue}></ellipse></g>\n{mouthLevel !== undefined && mouthLevel > .04 && <ellipse cx="200" cy="235" rx={8 + mouthLevel * 8} ry={2 + mouthLevel * 13} fill="#0B1220" />}');
+svg = svg.replace('<path d={pose.mouthLine}', '<g className="miu-emotional-mouth" transform={\'translate(200 236) scale(\' + pose.mouthScaleX + \' \' + pose.mouthScaleY + \') translate(-200 -236)\'}><g opacity={mouthLevel !== undefined && mouthLevel > .04 ? 0 : 1}>\n<path d={pose.mouthLine}');
+svg = svg.replace('<path d="M188 207', '</g></g>\n{mouthLevel !== undefined && mouthLevel > .04 && <ellipse cx="200" cy="235" rx={8 + mouthLevel * 8} ry={2 + mouthLevel * 13} fill="#0B1220" />}\n<path d="M188 207');
 svg = svg.replace('r="28" fill="#9DBBFF"', 'className="miu-glow" r="28" fill="#9DBBFF"');
 svg = svg.replace('<g transform={pose.earL}>', '<g className="miu-head">\n<g className="miu-ear-left" transform={pose.earL}>');
 svg = svg.replace('<g transform={pose.earR}>', '<g className="miu-ear-right" transform={pose.earR}>');
@@ -34,5 +33,5 @@ svg = svg.replace('<g fill="#1A56C4" fontWeight="800" opacity={pose.zzz}>', '<g 
 fs.mkdirSync(path.join(root, 'src/components'), { recursive: true });
 fs.mkdirSync(path.join(root, 'src/styles'), { recursive: true });
 fs.copyFileSync(path.join(root, '../design/design/reference/tokens.css'), path.join(root, 'src/styles/tokens.css'));
-fs.writeFileSync(path.join(root, 'src/components/MiuArtwork.tsx'), `// Generated from the original design by tools/sync-artwork.mjs.\nimport { useId } from 'react';\nimport { getMiuPose, type Emotion } from '../lib/miu-pose';\nimport type { CatActivity } from '../lib/miu-behavior';\nimport type { Point } from '../lib/miu-touch';\n\nexport default function MiuArtwork({ emotion, activity, gaze, mouthLevel, label }: { emotion: Emotion; activity?: CatActivity; gaze?: Point; mouthLevel?: number; label: string }) {\n  const id = useId().replaceAll(':', '');\n  const pose = getMiuPose(emotion, activity, gaze);\n  return (${svg});\n}\n`);
+fs.writeFileSync(path.join(root, 'src/components/MiuArtwork.tsx'), `// Generated from the original design by tools/sync-artwork.mjs.\nimport { useId } from 'react';\nimport { getMiuPose, type Emotion } from '../lib/miu-pose';\nimport type { CatActivity } from '../lib/miu-behavior';\nimport type { Point } from '../lib/miu-touch';\n\nexport default function MiuArtwork({ emotion, activity, gaze, intensity = 1, mouthLevel, label }: { emotion: Emotion; activity?: CatActivity; gaze?: Point; intensity?: number; mouthLevel?: number; label: string }) {\n  const id = useId().replaceAll(':', '');\n  const pose = getMiuPose(emotion, activity, gaze, intensity);\n  return (${svg});\n}\n`);
 console.log('Synced the original Miu SVG artwork.');

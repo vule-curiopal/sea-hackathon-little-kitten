@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { VoiceController, type CapturePort, type PlaybackPort, type VoiceApiPort } from '../src/controller.js';
 import { canceledError } from '../src/errors.js';
 import { captured, session, turn } from './fixtures.js';
-import type { CapturedAudio, TurnResponse } from '../src/index.js';
+import type { CapturedAudio, PlaybackEvent, TurnResponse } from '../src/index.js';
 
 function deferred<T>() {
   let resolve!: (value: T) => void;
@@ -12,6 +12,7 @@ function deferred<T>() {
 }
 async function settle() { for (let index = 0; index < 8; index++) await Promise.resolve(); }
 function setup() {
+  const playbackListeners = new Set<(event: PlaybackEvent) => void>();
   let recording = deferred<CapturedAudio>();
   recording.resolve(captured()); // No capture is active before start() is called.
   const capture = {
@@ -21,6 +22,7 @@ function setup() {
   const playback = {
     play: vi.fn<PlaybackPort['play']>().mockResolvedValue('playing'),
     resume: vi.fn<PlaybackPort['resume']>().mockResolvedValue('playing'), stop: vi.fn(), flushReceipts: vi.fn(async () => {}),
+    subscribe: (listener: (event: PlaybackEvent) => void) => { playbackListeners.add(listener); return () => { playbackListeners.delete(listener); }; },
   } satisfies PlaybackPort;
   const api = {
     createRequestId: vi.fn(() => turn().turn_id),
@@ -30,14 +32,33 @@ function setup() {
     cancelTurn: vi.fn(async () => {}), playback: vi.fn(async () => {}), endSession: vi.fn(async () => {}),
   } satisfies VoiceApiPort;
   const controller = new VoiceController({ api, capture, playback });
-  return { controller, api, capture, playback, recording: () => recording };
+  return { controller, api, capture, playback, recording: () => recording, emitPlayback: (event: PlaybackEvent) => { for (const listener of playbackListeners) listener(event); } };
 }
 
 describe('voice controller', () => {
+  it('leaves the microphone off on setup and after playback until another explicit Talk', async () => {
+    const fake = setup();
+    await fake.controller.openProfile('an', 'en');
+    expect(fake.capture.start).not.toHaveBeenCalled();
+    const first = fake.controller.talk();
+    fake.recording().resolve(captured());
+    await first;
+    fake.emitPlayback({ type: 'state', state: 'idle' });
+    await settle();
+    expect(fake.controller.state).toBe('idle');
+    expect(fake.capture.start).toHaveBeenCalledOnce();
+    expect(fake.api.submitTurn).toHaveBeenCalledOnce();
+    const second = fake.controller.talk();
+    expect(fake.capture.start).toHaveBeenCalledTimes(2);
+    fake.recording().resolve(captured());
+    await second;
+    await fake.controller.close();
+  });
+
   it('selects language before recording and runs capture/upload/playback through the canonical API', async () => {
     const fake = setup();
     await fake.controller.openProfile('an', 'vi');
-    expect(fake.api.configure).toHaveBeenCalledWith(session(), 'vi', undefined, expect.any(AbortSignal));
+    expect(fake.api.configure).toHaveBeenCalledWith(session(), 'vi', undefined, expect.any(AbortSignal), {});
     const pending = fake.controller.talk({ fixtureId: 'voice_sample_vi' });
     expect(fake.capture.start).toHaveBeenCalledOnce();
     fake.recording().resolve(captured());

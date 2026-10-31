@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { BrowserVoiceCapture, type CaptureEnvironment } from '../src/capture.js';
+import type { MeterSnapshot } from '../src/detector.js';
 
 function deferred<T>() {
   let resolve!: (value: T) => void;
@@ -64,6 +65,73 @@ function environment(permission?: Promise<MediaStream>) {
 describe('browser capture lifecycle', () => {
   beforeEach(() => { vi.useFakeTimers(); vi.setSystemTime(0); });
   afterEach(() => { vi.useRealTimers(); });
+
+  it('keeps recording through silence in hold mode and sends only when released', async () => {
+    const fake = environment();
+    const capture = new BrowserVoiceCapture({ environment: fake.env, endpointing: 'manual' });
+    let meter: MeterSnapshot | undefined;
+    capture.subscribe(event => { if (event.type === 'meter') meter = event.snapshot; });
+    const result = capture.start();
+    await settle();
+    await vi.advanceTimersByTimeAsync(6000); // A child may pause before speaking.
+    expect(capture.state).toBe('recording');
+    fake.context.analyser.level = -30;
+    await vi.advanceTimersByTimeAsync(200);
+    fake.context.analyser.level = -60;
+    await vi.advanceTimersByTimeAsync(3000); // A pause must not end the held question.
+    expect(capture.state).toBe('recording');
+    expect(fake.recorder.stop).not.toHaveBeenCalled();
+    expect(meter?.elapsedMs).toBe(9200);
+    expect(meter?.levelDbfs).toBeCloseTo(-60);
+    expect(meter?.decision).toBe(null);
+    fake.recorder.emitData('question');
+    expect(capture.send()).toBe(true);
+    expect(capture.send()).toBe(false);
+    fake.recorder.flush();
+    expect(await result).toMatchObject({ reason: 'manual', durationMs: 9200 });
+    expect(fake.track.stop).toHaveBeenCalledOnce();
+  });
+
+  it('cancels a hold released before microphone permission resolves, closing a late-granted stream', async () => {
+    const permission = deferred<MediaStream>();
+    const fake = environment(permission.promise);
+    const capture = new BrowserVoiceCapture({ environment: fake.env, endpointing: 'manual' });
+    const result = capture.start();
+    const rejection = expect(result).rejects.toMatchObject({ code: 'CANCELED' });
+    expect(capture.state).toBe('requesting_permission');
+    expect(capture.send()).toBe(false);
+    permission.resolve(fake.stream);
+    await rejection;
+    await settle();
+    expect(fake.track.stop).toHaveBeenCalledOnce();
+    expect(fake.env.createRecorder).not.toHaveBeenCalled();
+    expect(capture.state).toBe('idle');
+  });
+
+  it('does not upload an empty quick tap and never submits a hold at the recording limit', async () => {
+    const quick = environment();
+    const capture = new BrowserVoiceCapture({ environment: quick.env, endpointing: 'manual' });
+    const short = capture.start();
+    const noAudio = expect(short).rejects.toMatchObject({ code: 'NO_AUDIO' });
+    await settle();
+    await vi.advanceTimersByTimeAsync(50);
+    capture.send();
+    quick.recorder.flush();
+    await noAudio;
+    expect(quick.track.stop).toHaveBeenCalledOnce();
+
+    const long = environment();
+    const second = new BrowserVoiceCapture({ environment: long.env, endpointing: 'manual' });
+    const held = second.start();
+    const limited = expect(held).rejects.toMatchObject({ code: 'RECORDING_LIMIT' });
+    await settle();
+    long.context.analyser.level = -30;
+    await vi.advanceTimersByTimeAsync(30000);
+    await limited;
+    expect(second.state).toBe('idle');
+    expect(second.send()).toBe(false);
+    expect(long.track.stop).toHaveBeenCalledOnce();
+  });
 
   it('uses one stream and actual MIME, waits for the final chunk, and manually sends quiet audio', async () => {
     const fake = environment();

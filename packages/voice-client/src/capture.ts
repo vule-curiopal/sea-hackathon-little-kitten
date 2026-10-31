@@ -54,6 +54,8 @@ export function browserCaptureEnvironment(): CaptureEnvironment {
 }
 
 export interface CaptureOptions {
+  /** Manual endpointing records until send/cancel; silence never submits a turn. */
+  endpointing?: 'automatic' | 'manual';
   environment?: CaptureEnvironment;
   detector?: Partial<AdaptiveSilenceConfig>;
   microphone?: MediaTrackConstraints;
@@ -136,8 +138,13 @@ export class BrowserVoiceCapture {
     });
   }
 
-  /** Manual Send intentionally bypasses the detector's signal decision. */
-  send(): boolean { return this.finalize('manual'); }
+  /** Releasing before permission resolves cancels instead of recording after the gesture ended. */
+  send(): boolean {
+    if (this.options.endpointing === 'manual' && this.active?.phase === 'permission') {
+      this.cancel(); return false;
+    }
+    return this.finalize('manual');
+  }
 
   cancel(code = 'CANCELED'): void {
     const active = this.active;
@@ -213,9 +220,10 @@ export class BrowserVoiceCapture {
     active.startedAt = env.now();
     active.phase = 'recording';
     active.detector = new AdaptiveSilenceDetector(this.detectorConfig, active.startedAt);
-    this.setState(meterAvailable ? 'calibrating' : 'recording');
+    this.setState(meterAvailable && this.options.endpointing !== 'manual' ? 'calibrating' : 'recording');
     active.stopDeadline = env.timeout(() => {
       if (!this.isCurrent(active)) return;
+      if (this.options.endpointing === 'manual') { this.cancel('RECORDING_LIMIT'); return; }
       if (active.detector?.snapshot.hasSignal) this.finalize('max_duration');
       else this.fail(active, new VoiceClientError('NO_SIGNAL', 'No signal was detected before the recording limit.', true));
     }, this.detectorConfig.maxRecordingMs);
@@ -230,12 +238,18 @@ export class BrowserVoiceCapture {
         if (!this.isCurrent(active) || active.phase !== 'recording') return;
         try {
           active.analyser!.getFloatTimeDomainData(samples);
-          const snapshot = active.detector!.update(rmsDbfs(samples), env.now());
+          const now = env.now();
+          const levelDbfs = rmsDbfs(samples);
+          const detected = active.detector!.update(levelDbfs, now);
+          // The automatic detector may have reached a decision; a held recording's meter must keep updating.
+          const snapshot: MeterSnapshot = this.options.endpointing === 'manual'
+            ? { ...detected, phase: detected.hasSignal ? 'signal' : 'waiting', decision: null, elapsedMs: now - active.startedAt, timeMs: now, levelDbfs }
+            : detected;
           notify(this.listeners, { type: 'meter', snapshot });
           if (!this.isCurrent(active)) return;
           if (snapshot.phase === 'waiting' && this.state === 'calibrating') this.setState('recording');
-          if (snapshot.decision?.action === 'submit') this.finalize(snapshot.decision.reason);
-          else if (snapshot.decision?.action === 'cancel') {
+          if (this.options.endpointing !== 'manual' && snapshot.decision?.action === 'submit') this.finalize(snapshot.decision.reason);
+          else if (this.options.endpointing !== 'manual' && snapshot.decision?.action === 'cancel') {
             this.fail(active, new VoiceClientError(snapshot.decision.reason === 'no_signal' ? 'NO_SIGNAL' : 'CAPTURE_INTERRUPTED',
               'The recording could not be finalized automatically.', true));
           }

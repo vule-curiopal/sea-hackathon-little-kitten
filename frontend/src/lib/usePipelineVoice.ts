@@ -9,7 +9,8 @@ export function voiceErrorKey(error: unknown): TranslationKey | null {
   const code = typeof error === 'object' && error !== null && 'code' in error ? String(error.code) : '';
   if (code === 'INSECURE_CONTEXT') return 'voiceSecure';
   if (code === 'MIC_PERMISSION_DENIED') return 'voiceDenied';
-  if (code === 'NO_SIGNAL') return 'voiceNoSignal';
+  if (code === 'NO_SIGNAL' || code === 'NO_AUDIO') return 'voiceNoSignal';
+  if (code === 'RECORDING_LIMIT') return 'voiceRecordingLimit';
   if (['NETWORK_ERROR', 'TIMEOUT', 'INVALID_RESPONSE'].includes(code)) return 'voiceOffline';
   if (['session_closed', 'session_not_found', 'unauthorized'].includes(code)) return 'voiceSessionExpired';
   if (['UNSUPPORTED_AUDIO', 'MIC_UNAVAILABLE', 'MIC_NOT_FOUND'].includes(code)) return 'voiceMissing';
@@ -70,7 +71,7 @@ export function usePipelineVoice(options: Options) {
           }
           return response;
         },
-      }, playback: { environment: output.environment },
+      }, playback: { environment: output.environment }, capture: { endpointing: 'manual' },
     });
     controller.current = client.controller;
     setSession(null); setState('initializing'); setError(null); setMeter(null); setManualOnly(false); setLastTurn(null); setMouthLevel(0); setAdvancing(false);
@@ -127,12 +128,13 @@ export function usePipelineVoice(options: Options) {
   }, [showError]);
   const talk = useCallback(() => {
     const current = controller.current;
-    if (!current?.session) return;
+    if (!current?.session) return false;
     meterRef.current?.unlock();
     setError(null); setManualOnly(false);
-    // Keep capture.start() in the original click/tap stack.
+    // Keep capture.start() in the original press stack for iPhone/iPad microphone access.
     void current.talk(current.session.provider_mode === 'fake'
       ? { fixtureId: `voice_sample_${current.session.configuration.language_mode}` } : {}).catch(showError);
+    return true;
   }, [showError]);
   const send = useCallback(() => { controller.current?.send(); }, []);
   const play = useCallback(() => {
@@ -143,15 +145,17 @@ export function usePipelineVoice(options: Options) {
   }, [showError, lastTurn]);
   const text = useCallback((value: string, textOnly = false) => {
     const current = controller.current;
-    if (!current?.session || !value.trim()) return;
+    if (!current?.session || !value.trim()) return false;
     meterRef.current?.unlock(); setError(null);
     void current.text(value, { textOnly }).catch(showError);
+    return true;
   }, [showError]);
   const greet = useCallback((textOnly = false) => {
     const current = controller.current;
-    if (!current?.session) return;
+    if (!current?.session) return false;
     meterRef.current?.unlock(); setError(null);
     void current.greet({ textOnly }).catch(showError);
+    return true;
   }, [showError]);
   const nextDay = useCallback(async (clockVersion: number) => {
     const current = controller.current;

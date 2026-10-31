@@ -8,7 +8,9 @@ Implementation handoff: [workstream index](README.md), [frontend](frontend.md), 
 
 ## 1 Product vision
 
-Miu is a voice toy for children ages 4–8: one talking kitten who becomes a familiar friend through conversation, play, and shared history. The child taps a button, speaks in Vietnamese or English, and Miu answers with a voice, an expressive face, and a moving body.
+Miu is a voice toy for children ages 4–8: one talking kitten who becomes a familiar friend through conversation, play, and shared history. The child holds a button while speaking in Vietnamese or English, releases to send, and Miu answers with a voice, an expressive face, and a moving body.
+
+Frontend conversation rule: the child presses and holds Talk while speaking; releasing ends and submits exactly one question or conversation turn. Silence while still holding does not submit the turn. Canceling the gesture, losing focus, or releasing before microphone permission resolves discards the attempt. Every new voice message needs a new hold. Opening the room, restoring messages, petting, waking Miu, typing, or finishing an answer never starts the microphone. The frontend saves both the user's typed messages or voice transcripts and Miu's replies on this device, separately per profile, up to 200 recent messages. New conversation deletes the active profile's local history. This local text history is separate from server/model memory; voice recordings are not archived in it.
 
 The experience centers on a kitten with a recognizable life and personality. Miu blinks while listening, purrs when petted, dozes off when left alone, and remembers what the child told it yesterday. The interface is a place to spend a little time with Miu, rather than a message thread or a general-purpose assistant.
 
@@ -151,7 +153,7 @@ Miu's body continues to act when there is nothing to say. A client-side behavior
 | Near bedtime | Lower movement energy, occasional yawn, softer delivery |
 | Child needs comfort | Calm face, slower gestures, no celebratory or startling reactions |
 
-Proposed demo timing: small idle variations every 4–12 seconds; settle after 45 seconds without interaction; doze after 90 seconds. Touching the screen or tapping Talk can wake Miu, but only tapping Talk starts microphone capture. A sleeping Miu never listens for a wake word.
+Proposed demo timing: small idle variations every 4–12 seconds; settle after 45 seconds without interaction; doze after 90 seconds. Touching the screen or pressing Talk can wake Miu, but only holding Talk starts microphone capture. A sleeping Miu never listens for a wake word.
 
 Petting is an on-screen interaction, not a physical sensor. Limit repeated purr playback so touches do not stack audio. During a spoken turn, acknowledge a pet visually and defer any purr that would mask speech. Offer a button or keyboard equivalent for the pet gesture.
 
@@ -286,11 +288,11 @@ An adult demonstrator selects a fictional profile and configures one MBTI preset
 
 ### Talk and be understood
 
-The child taps Talk, speaks, and sees Miu listen. On tap-to-end or the maximum recording timeout, processing begins. Miu answers with one to three short sentences, selected delivery, and matching expression. If a name is unclear, Miu asks once rather than saving a guess.
+The child holds Talk, speaks, and sees Miu listen. Releasing the button ends capture and submits one turn for processing. Silence does not end a held recording. Reaching the 30-second recording limit cancels with a retry message rather than uploading before release. Miu answers with one to three short sentences, selected delivery, and matching expression. If a name is unclear, Miu asks once rather than saving a guess.
 
 ### Pet and wake the kitten
 
-The child strokes Miu or activates Pet. Miu leans in and purrs. After inactivity, it curls up and dozes. A touch wakes it with a small surprised reaction. No microphone opens until Talk is tapped.
+The child strokes Miu or activates Pet. Miu leans in and purrs. After inactivity, it curls up and dozes. A touch wakes it with a small surprised reaction. No microphone opens until Talk is held.
 
 ### Return tomorrow
 

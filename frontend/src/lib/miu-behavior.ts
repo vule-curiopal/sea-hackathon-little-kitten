@@ -11,9 +11,10 @@ const idleDurations: Record<typeof autonomousActivities[number], number> = { loo
 
 // Miu chooses its own little moments. No needs meters, recording, or model calls.
 // A shuffled bag gives variety without repeating one action over and over.
-export function createIdleRoutine(random: () => number = Math.random): IdleRoutine {
+export function createIdleRoutine(random: () => number = Math.random, mood = { energy: .6, poutChance: .25 }): IdleRoutine {
   const routine: [number, CatActivity][] = [[0, 'settled']];
   const choose = () => Math.max(0, Math.min(.999999, random()));
+  const pauseScale = 1.25 - Math.max(.25, Math.min(.95, mood.energy)) * .4;
   let cursor = 4500 + choose() * 2500;
   let previous: CatActivity = 'settled';
   let pouted = false;
@@ -30,13 +31,13 @@ export function createIdleRoutine(random: () => number = Math.random): IdleRouti
       routine.push([cursor, activity]);
       cursor += idleDurations[activity];
       // A brief pretend disappointment about the yarn, never about the child.
-      if (activity === 'play' && !pouted && choose() < .25 && cursor + 2400 < 82000) {
+      if (activity === 'play' && !pouted && choose() < Math.max(0, Math.min(.35, mood.poutChance)) && cursor + 2400 < 82000) {
         routine.push([cursor, 'pout']);
         cursor += 2400;
         pouted = true;
       }
       routine.push([cursor, 'settled']);
-      cursor += 4000 + choose() * 3000;
+      cursor += (4000 + choose() * 3000) * pauseScale;
       previous = activity;
     }
     if (cursor === before) break;
@@ -54,9 +55,10 @@ export function idleMoment(routine: IdleRoutine, elapsed: number, comfort = fals
   return { activity, nextIn: next ? next[0] - Math.max(0, elapsed) : null };
 }
 
-export function presentedActivity(phase: Phase, visible: boolean, suspended: boolean, activity: CatActivity): CatActivity {
+export function presentedActivity(phase: Phase, visible: boolean, suspended: boolean, activity: CatActivity, comfort = false): CatActivity {
   if (phase === 'resting') return 'sleep';
   if (!visible || suspended || phase !== 'answered') return 'settled';
+  if (comfort && ['play', 'tickle', 'highfive', 'pout', 'snack', 'groom', 'stretch'].includes(activity)) return 'settled';
   return activity;
 }
 
