@@ -650,7 +650,9 @@ export class MemoryStore {
     const events = (await tx.query(`SELECT e.*,s.name,s.species,r.expires_at FROM events e
       JOIN memory_records r ON r.profile_id=e.profile_id AND r.id=e.id
       LEFT JOIN entities s ON s.profile_id=e.profile_id AND s.id=e.subject_id
-      WHERE e.profile_id=$1 AND e.local_date < $2 AND e.event_type IN ('fell_in_puddle','planned_activity')`, [profileId, targetDate])).rows;
+      WHERE e.profile_id=$1 AND e.local_date < $2
+        AND e.local_date >= ($2::date - INTERVAL '30 days')
+        AND e.event_type IN ('fell_in_puddle','planned_activity')`, [profileId, targetDate])).rows;
     for (const event of events) {
       if (event.event_type === 'fell_in_puddle' && event.species !== 'dog') continue;
       if (event.event_type === 'planned_activity' && !/drawing|vẽ/iu.test(str(event.value))) continue;

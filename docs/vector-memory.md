@@ -74,7 +74,9 @@ and cutover, rather than mixing coordinates.
 
 Migration `011_durable_memories.sql` removes age-based expiry from surviving
 canonical memories, adds learned/reconfirmation dates, and keeps technical
-diary/follow-up deadlines separate. It does not reconstruct previously deleted
+diary/follow-up deadlines separate. New inferred follow-up questions are limited
+to recent 30-day events so technical cleanup cannot recreate a year-old hook;
+the saved event and vector remain durable. It does not reconstruct previously deleted
 content. Scoped address validity from migration 009 is enforced independently
 of durable storage. Passive recall does not renew a memory's age. The separate
 random age-availability policy remains pending its unresolved product choices.
