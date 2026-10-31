@@ -75,6 +75,6 @@ systemctl list-timers miu-cert-renew.timer
 
 Certificate Miu dùng config/work/log và timer riêng để không tranh lock với Certbot của các app khác. [renew-certificate.sh](renew-certificate.sh) chỉ reload Nginx khi đúng lineage Miu. Không dùng `certbot --nginx` để tự sửa các vhost khác. Các CIDR trong [nginx-cloudflare-realip.conf](nginx-cloudflare-realip.conf) lấy từ danh sách công khai ngày 31/10/2026; cập nhật khi Cloudflare đổi ranges.
 
-113 Vitest tests/12 file và 24 frontend Node tests kiểm tra code; deployment health và mô phỏng browser chưa thay thế nghiệm thu iPad/API thật. [Sites deployment riêng](../../frontend/README.md#separate-sites-deployment) và DNS `little-buddy.curiopal.com` được giữ nguyên.
+115 Vitest tests/12 file và 24 frontend Node tests kiểm tra code; deployment health và mô phỏng browser chưa thay thế nghiệm thu iPad/API thật. [Sites deployment riêng](../../frontend/README.md#separate-sites-deployment) và DNS `little-buddy.curiopal.com` được giữ nguyên.
 
 Nguồn: [Nginx graceful reload](https://nginx.org/en/docs/control.html), [Cloudflare visitor IPs](https://developers.cloudflare.com/support/troubleshooting/restoring-visitor-ips/restoring-original-visitor-ips/).

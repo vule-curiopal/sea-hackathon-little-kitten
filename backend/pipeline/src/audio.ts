@@ -242,11 +242,18 @@ async function inspect(bytes: Buffer, mime: string, signal: AbortSignal, executa
   if (typeof formatName !== 'string' || !formatName.split(',').includes({ mp4: 'mp4', webm: 'webm', mp3: 'mp3' }[container])) unsupported();
   let packetEnd = 0;
   let foundPacket = false;
-  for (const packet of probe.packets) {
+  for (const [index, packet] of probe.packets.entries()) {
     if (!packet || typeof packet !== 'object') invalid();
     if (packet.stream_index !== stream.index || !(finiteNumber(packet.size)! > 0)) invalid();
     const start = finiteNumber(packet.pts_time);
-    const length = finiteNumber(packet.duration_time);
+    let length = finiteNumber(packet.duration_time);
+    // ffprobe 6 omits the first AAC packet's duration in fragmented MP4 even
+    // when its end is identified by the next packet's presentation timestamp.
+    // Accept that measured boundary only; all other packet durations stay required.
+    if (container === 'mp4' && index === 0 && packet.duration_time === undefined && start !== undefined) {
+      const nextStart = finiteNumber(probe.packets[index + 1]?.pts_time);
+      if (nextStart !== undefined) length = nextStart - start;
+    }
     if (start === undefined || length === undefined || length <= 0) invalid();
     packetEnd = Math.max(packetEnd, start + length);
     foundPacket = true;

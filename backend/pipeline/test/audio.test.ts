@@ -184,6 +184,36 @@ describe('bounded and cancellable ffprobe subprocess', () => {
       await expect(inspectAudio(mp4Header(), 'audio/mp4', 'capture.mp4', signal())).rejects.toMatchObject({ code: 'invalid_audio' });
     }
   });
+  it('uses the next timestamp when ffprobe 6 omits a fragmented MP4 first packet duration', async () => {
+    const output = JSON.parse(probe());
+    output.packets = [
+      { stream_index: 0, pts_time: '0', size: '8' },
+      { stream_index: 0, pts_time: '0.064', duration_time: '0.064', size: '8' },
+    ];
+    mockedSpawn.mockReturnValueOnce(fakeChild(JSON.stringify(output)));
+    await expect(inspectAudio(mp4Header(), 'audio/mp4', 'capture.mp4', signal())).resolves.toMatchObject({ durationMs: 128 });
+    output.packets[1].pts_time = '30.2';
+    mockedSpawn.mockReturnValueOnce(fakeChild(JSON.stringify(output)));
+    await expect(inspectAudio(mp4Header(), 'audio/mp4', 'capture.mp4', signal())).rejects.toMatchObject({ code: 'audio_too_long' });
+  });
+  it('requires a positive measured boundary and rejects other absent or invalid packet durations', async () => {
+    const packet = { stream_index: 0, pts_time: '0', duration_time: '0.064', size: '8' };
+    const missing = { stream_index: 0, pts_time: '0', size: '8' };
+    const invalidPackets = [
+      [missing],
+      [missing, packet],
+      [missing, { ...packet, pts_time: '-0.064' }],
+      [packet, { ...missing, pts_time: '0.064' }],
+      [packet, { ...missing, pts_time: '0.064' }, { ...packet, pts_time: '0.128' }],
+      [{ ...packet, duration_time: 'invalid' }, { ...packet, pts_time: '0.064' }],
+      [{ ...packet, duration_time: '0' }, { ...packet, pts_time: '0.064' }],
+    ];
+    for (const packets of invalidPackets) {
+      const output = { ...JSON.parse(probe()), packets };
+      mockedSpawn.mockReturnValueOnce(fakeChild(JSON.stringify(output)));
+      await expect(inspectAudio(mp4Header(), 'audio/mp4', 'capture.mp4', signal())).rejects.toMatchObject({ code: 'invalid_audio' });
+    }
+  });
   it('allows at most 250ms compressed encoder padding without changing the measured duration', async () => {
     mockedSpawn.mockReturnValueOnce(fakeChild(probe(30.2)));
     await expect(inspectAudio(mp4Header(), 'audio/mp4', 'capture.mp4', signal())).resolves.toMatchObject({ durationMs: 30200 });

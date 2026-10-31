@@ -282,6 +282,7 @@ else
   # Frontend has its own lockfile and is intentionally not a root workspace.
   build npm --prefix frontend ci --include=dev --no-audit --no-fund
   build npm --prefix frontend test
+  build npm --prefix frontend run demo:qr -- https://miu.curiopal.com en
   build npm --prefix frontend run build
   build npm test -- --maxWorkers=1
   build npm run smoke
