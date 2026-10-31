@@ -1,0 +1,28 @@
+{
+  "v": 3,
+  "createdOnFiles": { "v": 1, "at": "2026-10-30T09:00:00Z" },
+  "title": "Little Buddy Redesign",
+  "launch": { "view": "canvas" },
+  "pages": [],
+  "boards": {
+    "Miu.dc.html": { "x": 0, "y": 0, "w": 400, "h": 440, "title": "Miu (component)" },
+
+    "Landing.dc.html": { "x": 0, "y": 940, "w": 1440, "h": 4100, "expand": "fill", "title": "Marketing page", "is_interactive": true },
+    "Register.dc.html": { "x": 1520, "y": 940, "w": 390, "h": 844, "title": "Create account", "is_interactive": true },
+
+    "Talk.dc.html": { "x": 0, "y": 6440, "w": 390, "h": 844, "title": "Talk: answered", "is_interactive": true },
+    "TalkListening.dc.html": { "x": 470, "y": 6440, "w": 390, "h": 844, "title": "Talk: listening", "is_interactive": true },
+    "TalkResting.dc.html": { "x": 940, "y": 6440, "w": 390, "h": 844, "title": "Talk: resting", "is_interactive": true }
+  },
+  "order": [
+    "Miu.dc.html",
+    "Landing.dc.html", "Register.dc.html",
+    "Talk.dc.html", "TalkListening.dc.html", "TalkResting.dc.html"
+  ],
+  "notes": {
+    "rowCharacter": { "x": 0, "y": -300, "text": "1 · Miu, the new Buddy", "kind": "title1", "maxW": 400 },
+    "rowWebsite": { "x": 0, "y": 640, "text": "2 · Website and sign up", "kind": "title1", "maxW": 1910 },
+    "rowTalk": { "x": 0, "y": 6140, "text": "3 · Talking to Buddy", "kind": "title1", "maxW": 1330 }
+  },
+  "designSystems": []
+}

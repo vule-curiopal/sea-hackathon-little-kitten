@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Little Buddy home</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@500;600;700;800&display=swap">
+<style>
+body{margin:0}
+a{color:#1A56C4}a:hover{color:#0B1220}
+.wall{background-color:#E3ECFF;background-image:radial-gradient(#CFDDFB 2.5px,transparent 3px);background-size:30px 30px}
+details summary{list-style:none;cursor:pointer}
+details summary::-webkit-details-marker{display:none}
+</style>
+</helmet>
+<div style="width: 100%; background: #F7F9FC; font-family: Nunito, system-ui, sans-serif; color: #0B1220">
+
+<header style="max-width: 1240px; margin: 0 auto; padding: 20px 24px; display: flex; align-items: center; gap: 20px; flex-wrap: wrap">
+<a href="Landing.dc.html" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: #0B1220">
+<span style="width: 48px; height: 48px; border-radius: 16px; background: #E3ECFF; overflow: hidden; display: flex; align-items: flex-start; justify-content: center"><dc-import name="Miu" emotion="happy" size="64" motion="false" hint-size="64px,70px"></dc-import></span>
+<span style="font: 800 26px 'Baloo 2', sans-serif">Little Buddy</span>
+</a>
+<nav aria-label="Page sections" style="display: flex; gap: 22px; flex-wrap: wrap; margin-left: auto; font: 700 16px Nunito, sans-serif">
+<a href="#how" style="text-decoration: none; color: #5B6B82">How it works</a>
+<a href="#emotions" style="text-decoration: none; color: #5B6B82">Emotions</a>
+<a href="#safety" style="text-decoration: none; color: #5B6B82">Safety</a>
+<a href="#faq" style="text-decoration: none; color: #5B6B82">FAQ</a>
+</nav>
+<div style="display: flex; gap: 12px">
+<a href="#" style="text-decoration: none; display: inline-flex; align-items: center; height: 48px; padding: 0 20px; border-radius: 16px; background: #FFFFFF; color: #1A56C4; border: 2px solid #DDE4EE; font: 800 18px 'Baloo 2', sans-serif; box-shadow: 0 5px 0 #DDE4EE">Sign in</a>
+<a href="Register.dc.html" style="text-decoration: none; display: inline-flex; align-items: center; height: 48px; padding: 0 22px; border-radius: 16px; background: #2F6BFF; color: #FFFFFF; font: 800 18px 'Baloo 2', sans-serif; box-shadow: 0 5px 0 #1A56C4">Get started</a>
+</div>
+</header>
+
+<section style="max-width: 1240px; margin: 0 auto; padding: 12px 24px 40px">
+<div class="wall" style="border-radius: 44px; position: relative; overflow: hidden; display: flex; flex-wrap: wrap; align-items: stretch; box-shadow: 0 8px 0 #C9D6EA">
+<div style="position: absolute; left: 0; right: 0; bottom: 0; height: 160px; background: #D3DFF6"></div>
+<div style="flex: 1 1 460px; position: relative; padding: 64px 56px; display: flex; flex-direction: column; gap: 22px; min-width: 0">
+<span style="align-self: flex-start; font: 800 15px Nunito, sans-serif; color: #1A56C4; background: #FFFFFF; border-radius: 999px; padding: 6px 14px; box-shadow: 0 3px 0 #C9D6EA">An AI friend for children 4 to 8</span>
+<h1 style="margin: 0; font: 800 76px/0.95 'Baloo 2', sans-serif; color: #0B1220">Tap the button.<br><span style="color: #2F6BFF">Ask anything.</span></h1>
+<p style="margin: 0; font-size: 19px; line-height: 1.55; color: #3E4C63; max-width: 520px">Your child taps the button once and asks. Buddy notices when they have finished talking, then answers in Vietnamese or English, whichever they just used. The microphone turns off when the turn ends.</p>
+<div style="display: flex; gap: 14px; flex-wrap: wrap">
+<a href="Register.dc.html" style="text-decoration: none; display: inline-flex; align-items: center; height: 62px; padding: 0 32px; border-radius: 22px; background: #2F6BFF; color: #FFFFFF; font: 800 22px 'Baloo 2', sans-serif; box-shadow: 0 7px 0 #1A56C4">Start for free</a>
+<a href="#how" style="text-decoration: none; display: inline-flex; align-items: center; height: 62px; padding: 0 28px; border-radius: 22px; background: #FFFFFF; color: #1A56C4; font: 800 22px 'Baloo 2', sans-serif; box-shadow: 0 7px 0 #C9D6EA">See how it works</a>
+</div>
+</div>
+<div style="flex: 1 1 440px; position: relative; min-height: 560px; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 34px">
+<div style="position: absolute; left: 50%; bottom: 40px; width: 420px; max-width: 90%; height: 96px; transform: translateX(-50%); border-radius: 50%; background: #FFFFFF; box-shadow: 0 0 0 12px #BFD0F2 inset"></div>
+<div style="position: absolute; top: 40px; left: 24px; right: 24px; display: flex; flex-direction: column; gap: 10px; align-items: center">
+<span style="font: 700 14px Nunito, sans-serif; color: #5B6B82; background: #FFFFFF; border-radius: 999px; padding: 6px 14px; box-shadow: 0 3px 0 #C9D6EA">Your child asked: Why is the sky blue?</span>
+<div style="position: relative; max-width: 360px; background: #FFFFFF; border-radius: 26px; padding: 16px 20px; font: 700 18px/1.4 Nunito, sans-serif; box-shadow: 0 5px 0 #C9D6EA">Sunlight bumps into the air and the blue part scatters everywhere, so blue is what we see all around!
+<span style="position: absolute; left: 50%; bottom: -12px; width: 24px; height: 24px; background: #FFFFFF; transform: translateX(-50%) rotate(45deg); border-radius: 4px"></span>
+</div>
+</div>
+<div style="position: relative">
+<dc-import name="Miu" emotion="excited" size="380" hint-size="380px,418px"></dc-import>
+</div>
+</div>
+</div>
+</section>
+
+<section id="how" style="max-width: 1240px; margin: 0 auto; padding: 56px 24px">
+<div style="text-align: center; display: flex; flex-direction: column; gap: 10px; align-items: center; margin-bottom: 36px">
+<span style="font: 800 15px Nunito, sans-serif; letter-spacing: 0.1em; text-transform: uppercase; color: #1A56C4">How it works</span>
+<h2 style="margin: 0; font: 800 52px/1 'Baloo 2', sans-serif">As simple as one tap</h2>
+<p style="margin: 0; font-size: 18px; color: #5B6B82; max-width: 560px">No app for your child, no screen to scroll. Just one button and a friend with answers.</p>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px">
+<div style="background: #FFFFFF; border-radius: 32px; padding: 28px; box-shadow: 0 6px 0 #DDE4EE; display: flex; flex-direction: column; gap: 10px; position: relative">
+<span style="position: absolute; top: -18px; left: 24px; width: 52px; height: 52px; border-radius: 50%; background: #2F6BFF; border: 5px solid #F7F9FC; color: #FFFFFF; font: 800 26px/42px 'Baloo 2', sans-serif; text-align: center; box-sizing: border-box">1</span>
+<div style="height: 190px; border-radius: 24px; background: #E3ECFF; display: flex; align-items: flex-end; justify-content: center; overflow: hidden"><dc-import name="Miu" emotion="listening" size="180" motion="false" hint-size="180px,198px"></dc-import></div>
+<h3 style="margin: 6px 0 0; font: 800 26px/1.1 'Baloo 2', sans-serif">Your child taps and asks</h3>
+<p style="margin: 0; font-size: 16px; line-height: 1.5; color: #5B6B82">One tap opens the microphone. No wake word, no eavesdropping.</p>
+</div>
+<div style="background: #FFFFFF; border-radius: 32px; padding: 28px; box-shadow: 0 6px 0 #DDE4EE; display: flex; flex-direction: column; gap: 10px; position: relative">
+<span style="position: absolute; top: -18px; left: 24px; width: 52px; height: 52px; border-radius: 50%; background: #2F6BFF; border: 5px solid #F7F9FC; color: #FFFFFF; font: 800 26px/42px 'Baloo 2', sans-serif; text-align: center; box-sizing: border-box">2</span>
+<div style="height: 190px; border-radius: 24px; background: #E3ECFF; display: flex; align-items: flex-end; justify-content: center; overflow: hidden"><dc-import name="Miu" emotion="thinking" size="180" motion="false" hint-size="180px,198px"></dc-import></div>
+<h3 style="margin: 6px 0 0; font: 800 26px/1.1 'Baloo 2', sans-serif">Buddy knows when they are done</h3>
+<p style="margin: 0; font-size: 16px; line-height: 1.5; color: #5B6B82">Buddy hears the pause when your child stops talking, turns the microphone off, then answers in a warm voice with a face that shows how it feels.</p>
+</div>
+<div style="background: #FFFFFF; border-radius: 32px; padding: 28px; box-shadow: 0 6px 0 #DDE4EE; display: flex; flex-direction: column; gap: 10px; position: relative">
+<span style="position: absolute; top: -18px; left: 24px; width: 52px; height: 52px; border-radius: 50%; background: #2F6BFF; border: 5px solid #F7F9FC; color: #FFFFFF; font: 800 26px/42px 'Baloo 2', sans-serif; text-align: center; box-sizing: border-box">3</span>
+<div style="height: 190px; border-radius: 24px; background: #E3ECFF; display: flex; align-items: flex-end; justify-content: center; overflow: hidden"><dc-import name="Miu" emotion="happy" size="180" motion="false" hint-size="180px,198px"></dc-import></div>
+<h3 style="margin: 6px 0 0; font: 800 26px/1.1 'Baloo 2', sans-serif">You stay in the loop</h3>
+<p style="margin: 0; font-size: 16px; line-height: 1.5; color: #5B6B82">See what Buddy answered and let Buddy rest when needed, from your phone.</p>
+</div>
+</div>
+</section>
+
+<section id="emotions" style="max-width: 1240px; margin: 0 auto; padding: 56px 24px">
+<div style="background: #FFFFFF; border-radius: 44px; padding: 44px 32px; box-shadow: 0 8px 0 #DDE4EE">
+<div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 24px">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span style="font: 800 15px Nunito, sans-serif; letter-spacing: 0.1em; text-transform: uppercase; color: #1A56C4">Fourteen feelings</span>
+<h2 style="margin: 0; font: 800 48px/1 'Baloo 2', sans-serif">The face speaks before the words</h2>
+</div>
+<p style="margin: 0; font-size: 17px; color: #5B6B82; max-width: 420px">Buddy's face changes with the conversation, right before Buddy speaks. Tap each one to see it.</p>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 14px">
+<sc-for list="{{faces}}" as="f" hint-placeholder-count="7">
+<button type="button" onClick="{{f.pick}}" style="background: {{f.bg}}; border: 0; border-radius: 26px; padding: 8px 6px 14px; display: flex; flex-direction: column; align-items: center; box-shadow: 0 5px 0 {{f.lip}}; cursor: pointer; font: 800 18px 'Baloo 2', sans-serif; color: #0B1220">
+<dc-import name="Miu" emotion="{{f.code}}" size="130" motion="false" hint-size="130px,143px"></dc-import>
+{{f.label}}
+</button>
+</sc-for>
+</div>
+</div>
+</section>
+
+<section style="max-width: 1240px; margin: 0 auto; padding: 56px 24px">
+<div style="text-align: center; display: flex; flex-direction: column; gap: 10px; align-items: center; margin-bottom: 32px">
+<span style="font: 800 15px Nunito, sans-serif; letter-spacing: 0.1em; text-transform: uppercase; color: #1A56C4">Meet Buddy</span>
+<h2 style="margin: 0; font: 800 52px/1 'Baloo 2', sans-serif">A friend, not a screen</h2>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px">
+<div style="background: #FFFFFF; border-radius: 30px; padding: 24px; box-shadow: 0 6px 0 #DDE4EE; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; flex-direction: column; gap: 8px; background: #EEF2F8; border-radius: 22px; padding: 14px; font-size: 14px; font-weight: 700">
+<span style="align-self: flex-end; background: #FFFFFF; border-radius: 16px 16px 4px 16px; padding: 8px 12px">Buddy ơi, cá heo ăn gì?</span>
+<span style="align-self: flex-start; background: #2F6BFF; color: #FFFFFF; border-radius: 16px 16px 16px 4px; padding: 8px 12px">Cá heo thích ăn cá nhỏ và mực đó!</span>
+<span style="align-self: flex-end; background: #FFFFFF; border-radius: 16px 16px 4px 16px; padding: 8px 12px">Why is the moon so bright?</span>
+<span style="align-self: flex-start; background: #2F6BFF; color: #FFFFFF; border-radius: 16px 16px 16px 4px; padding: 8px 12px">It shines with light from the Sun!</span>
+</div>
+<h3 style="margin: 0; font: 800 23px/1.15 'Baloo 2', sans-serif">Speaks Vietnamese and English</h3>
+<p style="margin: 0; font-size: 15px; line-height: 1.5; color: #5B6B82">Whatever language your child asks in, Buddy answers in it, even when they switch mid-sentence.</p>
+</div>
+<div style="background: #FFFFFF; border-radius: 30px; padding: 24px; box-shadow: 0 6px 0 #DDE4EE; display: flex; flex-direction: column; gap: 12px">
+<div style="background: #EEF2F8; border-radius: 22px; padding: 18px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; align-items: flex-end; gap: 5px; height: 60px">
+<sc-for list="{{bars}}" as="b" hint-placeholder-count="18"><span style="flex: 1; height: {{b.h}}px; border-radius: 6px; background: {{b.c}}"></span></sc-for>
+</div>
+<div style="display: flex; justify-content: space-between; font: 800 14px Nunito, sans-serif"><span style="color: #1A56C4">Your child is talking…</span><span style="color: #5B6B82">All done</span></div>
+</div>
+<h3 style="margin: 0; font: 800 23px/1.15 'Baloo 2', sans-serif">Knows when they are done</h3>
+<p style="margin: 0; font-size: 15px; line-height: 1.5; color: #5B6B82">No holding the button. Buddy hears the pause and turns the microphone off by itself.</p>
+</div>
+<div style="background: #FFFFFF; border-radius: 30px; padding: 24px; box-shadow: 0 6px 0 #DDE4EE; display: flex; flex-direction: column; gap: 12px">
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+<span style="height: 64px; border-radius: 16px; background: #111A2E; display: flex; align-items: center; justify-content: center"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#9DBBFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c2 3 3 6 3 9l-3 3-3-3c0-3 1-6 3-9Z"></path><path d="M9 15l-2 4M15 15l2 4"></path></svg></span>
+<span style="height: 64px; border-radius: 16px; background: #E3ECFF; display: flex; align-items: center; justify-content: center"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#2F6BFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6 7 7M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4"></path></svg></span>
+<span style="height: 64px; border-radius: 16px; background: #FBEBD0; display: flex; align-items: center; justify-content: center"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#8F5A0F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20c2-6 6-9 8-9s6 3 8 9"></path><circle cx="12" cy="6" r="2.5"></circle></svg></span>
+<span style="height: 64px; border-radius: 16px; background: #2F6BFF; display: flex; align-items: center; justify-content: center"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2.5 5.5L20 9l-4 4 1 6-5-3-5 3 1-6-4-4 5.5-.5Z"></path></svg></span>
+</div>
+<h3 style="margin: 0; font: 800 23px/1.15 'Baloo 2', sans-serif">Picture stories</h3>
+<p style="margin: 0; font-size: 15px; line-height: 1.5; color: #5B6B82">For questions that need imagining, Buddy adds a short four-scene story on its screen.</p>
+</div>
+<div style="background: #FFFFFF; border-radius: 30px; padding: 24px; box-shadow: 0 6px 0 #DDE4EE; display: flex; flex-direction: column; gap: 12px">
+<div style="background: #EEF2F8; border-radius: 22px; padding: 14px; display: flex; flex-wrap: wrap; gap: 8px">
+<span style="font: 800 15px 'Baloo 2', sans-serif; background: #2F6BFF; color: #FFFFFF; border-radius: 999px; padding: 4px 12px; box-shadow: 0 3px 0 #1A56C4">The Sunshine</span>
+<span style="font: 800 15px 'Baloo 2', sans-serif; background: #FFFFFF; border-radius: 999px; padding: 4px 12px; box-shadow: 0 3px 0 #DDE4EE">The Dreamer</span>
+<span style="font: 800 15px 'Baloo 2', sans-serif; background: #FFFFFF; border-radius: 999px; padding: 4px 12px; box-shadow: 0 3px 0 #DDE4EE">The Inventor</span>
+<span style="font: 800 15px 'Baloo 2', sans-serif; background: #FFFFFF; border-radius: 999px; padding: 4px 12px; box-shadow: 0 3px 0 #DDE4EE">The Keeper</span>
+<span style="font: 800 15px 'Baloo 2', sans-serif; background: #FFFFFF; border-radius: 999px; padding: 4px 12px; box-shadow: 0 3px 0 #DDE4EE">The Artist</span>
+<span style="font: 800 15px 'Baloo 2', sans-serif; color: #5B6B82; padding: 4px 6px">+ 11 more</span>
+</div>
+<h3 style="margin: 0; font: 800 23px/1.15 'Baloo 2', sans-serif">Name Buddy and choose a personality</h3>
+<p style="margin: 0; font-size: 15px; line-height: 1.5; color: #5B6B82">Choose how Buddy talks to your child and one of 16 personalities, picked yourself or found with a 12-question quiz.</p>
+</div>
+</div>
+</section>
+
+<section id="safety" style="background: #0B1220; color: #E8EEFA; padding: 80px 24px; margin-top: 40px">
+<div style="max-width: 1192px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 48px; align-items: center">
+<div style="flex: 1 1 340px; display: flex; flex-direction: column; gap: 14px; min-width: 0">
+<span style="font: 800 15px Nunito, sans-serif; letter-spacing: 0.1em; text-transform: uppercase; color: #9DBBFF">Safe by default</span>
+<h2 style="margin: 0; font: 800 50px/1 'Baloo 2', sans-serif; color: #FFFFFF">Designed for young children from day one</h2>
+<p style="margin: 0; font-size: 18px; color: #A3B3CE">Things Buddy always does, with nothing for you to configure.</p>
+<div style="width: 260px; height: 220px; border-radius: 32px; background: #111A2E; display: flex; align-items: flex-end; justify-content: center; overflow: hidden; margin-top: 10px"><dc-import name="Miu" emotion="sleepy" size="220" motion="false" hint-size="220px,242px"></dc-import></div>
+</div>
+<div style="flex: 2 1 560px; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; min-width: 0">
+<sc-for list="{{safety}}" as="s" hint-placeholder-count="6">
+<div style="background: #111A2E; border-radius: 24px; padding: 22px; display: flex; flex-direction: column; gap: 8px; box-shadow: 0 5px 0 #070C18">
+<span style="width: 44px; height: 44px; border-radius: 14px; background: #2F6BFF; display: flex; align-items: center; justify-content: center"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{s.icon}}"></path></svg></span>
+<h3 style="margin: 4px 0 0; font: 800 21px/1.15 'Baloo 2', sans-serif; color: #FFFFFF">{{s.t}}</h3>
+<p style="margin: 0; font-size: 15px; line-height: 1.5; color: #A3B3CE">{{s.b}}</p>
+</div>
+</sc-for>
+</div>
+</div>
+</section>
+
+<section id="faq" style="max-width: 860px; margin: 0 auto; padding: 56px 24px">
+<h2 style="margin: 0 0 24px; text-align: center; font: 800 48px/1 'Baloo 2', sans-serif">What parents ask us</h2>
+<div style="display: flex; flex-direction: column; gap: 12px">
+<sc-for list="{{faq}}" as="q" hint-placeholder-count="5">
+<details open="{{q.open}}" style="background: #FFFFFF; border-radius: 22px; box-shadow: 0 5px 0 #DDE4EE; padding: 4px 22px">
+<summary style="display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 56px; font: 800 20px 'Baloo 2', sans-serif">{{q.q}}<span style="width: 34px; height: 34px; flex-shrink: 0; border-radius: 50%; background: #E3ECFF; color: #1A56C4; display: flex; align-items: center; justify-content: center; font: 800 22px 'Baloo 2', sans-serif">+</span></summary>
+<p style="margin: 0 0 18px; font-size: 16px; line-height: 1.55; color: #5B6B82">{{q.a}}</p>
+</details>
+</sc-for>
+</div>
+</section>
+
+<section style="max-width: 1240px; margin: 0 auto; padding: 40px 24px 64px">
+<div class="wall" style="border-radius: 44px; padding: 48px 40px 0; display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: center; gap: 24px; box-shadow: 0 8px 0 #C9D6EA; overflow: hidden">
+<div style="flex: 1 1 420px; display: flex; flex-direction: column; gap: 16px; padding-bottom: 48px; min-width: 0">
+<h2 style="margin: 0; font: 800 54px/1 'Baloo 2', sans-serif">Ready for your child's first question?</h2>
+<p style="margin: 0; font-size: 19px; color: #3E4C63">Create an account in a minute.</p>
+<a href="Register.dc.html" style="align-self: flex-start; text-decoration: none; display: inline-flex; align-items: center; height: 62px; padding: 0 32px; border-radius: 22px; background: #2F6BFF; color: #FFFFFF; font: 800 22px 'Baloo 2', sans-serif; box-shadow: 0 7px 0 #1A56C4">Create an account</a>
+</div>
+<dc-import name="Miu" emotion="love" size="300" hint-size="300px,330px"></dc-import>
+</div>
+</section>
+
+<footer style="max-width: 1240px; margin: 0 auto; padding: 24px 24px 48px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; font-size: 15px; color: #5B6B82">
+<span style="font: 800 20px 'Baloo 2', sans-serif; color: #0B1220">Little Buddy</span>
+<span>Made for curious minds aged 4 to 8</span>
+</footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":4900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const picked = this.state?.face ?? 'happy';
+    const codes = [['happy', 'Happy'], ['excited', 'Excited'], ['laughing', 'Laughing'], ['love', 'Loving'], ['curious', 'Curious'], ['surprised', 'Surprised'], ['sleepy', 'Sleepy']];
+    const heights = [14, 26, 40, 30, 52, 44, 60, 36, 48, 28, 40, 22, 14, 8, 6, 6, 6, 6];
+    return {
+      faces: codes.map(([code, label]) => ({
+        code, label,
+        pick: () => this.setState({ face: code }),
+        bg: picked === code ? '#E3ECFF' : '#F7F9FC',
+        lip: picked === code ? '#9DBBFF' : '#DDE4EE',
+      })),
+      bars: heights.map((h, i) => ({ h, c: i < 13 ? '#2F6BFF' : '#C9D6EA' })),
+      safety: [
+        { t: 'The microphone is never always on', b: 'It opens only after your child taps the button and turns off by itself when they finish. There is no wake word.', icon: 'M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3ZM5 11a7 7 0 0 0 14 0M12 18v3M4 4l16 16' },
+        { t: 'Every answer is checked', b: 'Questions and answers both pass a safety filter before Buddy speaks.', icon: 'M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6l7-3ZM9 12l2 2 4-4' },
+        { t: 'You hear about what matters', b: 'If your child shares something worrying, you get an alert right away.', icon: 'M6 16V11a6 6 0 0 1 12 0v5l2 2H4l2-2ZM10 21h4' },
+        { t: 'No ads, no money talk', b: 'Buddy never sells anything and never mentions money.', icon: 'M5 5l14 14M9 4h10v10M5 9v10h10' },
+        { t: "Your child's words stay theirs", b: "The dashboard shows Buddy's answers, never what your child said.", icon: 'M5 11h14v9H5zM8 11V8a4 4 0 0 1 8 0v3' },
+        { t: 'You are in charge', b: 'Let Buddy rest any time. While resting, Buddy stays quiet.', icon: 'M12 3v9M6.5 6.5a8 8 0 1 0 11 0' },
+      ],
+      faq: [
+        { open: true, q: 'Does my child have to hold the button?', a: 'No. They tap it once and talk naturally. Buddy notices when they stop and turns the microphone off. If they want to finish early, one more tap does it.' },
+        { open: false, q: 'Does Buddy listen all day?', a: 'No. The microphone opens only after your child taps the button and closes when the turn ends. There is no wake word and no background listening.' },
+        { open: false, q: 'Can siblings share?', a: 'Yes. Each child can have their own Buddy. You choose which Buddy belongs to which child.' },
+        { open: false, q: 'Which languages does Buddy speak?', a: 'Vietnamese and English. Buddy answers in the language your child just used.' },
+        { open: false, q: 'Can we give Buddy to someone else?', a: 'Yes. Remove Buddy from your family in the app, and the code on the card works again for the new family.' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

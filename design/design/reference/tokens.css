@@ -1,0 +1,77 @@
+/* Colour and type tokens of the Little Buddy website design: light values on :root, dark values under prefers-color-scheme: dark. Build with the token, never the hex. */
+
+/* The palette, plus what the talking-pet look adds: the room (wall, floor,
+   rug), one gold accent for the collar tag of Miu, and the "lip" under every
+   chunky button and card, the solid bottom edge that makes them look like
+   toy pieces. */
+:root {
+  color-scheme: light;
+  --ground: #F7F9FC;
+  --surface: #FFFFFF;
+  --surface-2: #EEF2F8;
+  --ink: #0B1220;
+  --ink-2: #3E4C63;
+  --muted: #5B6B82;
+  --line: #DDE4EE;
+  --lip: #C9D6EA;
+  --ocean: #0B1220;
+  --ocean-2: #111A2E;
+  --on-ocean: #E8EEFA;
+  --on-ocean-muted: #A3B3CE;
+  --pop: #2F6BFF;
+  --pop-deep: #1A56C4;
+  --pop-ink: #FFFFFF;
+  --pop-soft: #E3ECFF;
+  --pop-text: #1A56C4;
+  --sky: #8FB2FF;
+  --glow: #9DBBFF;
+  --gold: #E3A548;
+  --warn: #8F5A0F;
+  --warn-soft: #FBEBD0;
+  --bad: #B93F35;
+  --bad-soft: #F8E1DE;
+  --ok: #2E9E5B;
+  --ok-soft: #E2F4E8;
+  --ok-ink: #1F5132;
+  --wall: #E3ECFF;
+  --wall-dot: #CFDDFB;
+  --floor: #D3DFF6;
+  --rug: #FFFFFF;
+  --rug-ring: #BFD0F2;
+  --night: #111A2E;
+  --shadow-lg: 0 24px 60px -18px rgba(11, 18, 32, 0.35);
+  --display: "Baloo 2", "Nunito", "Segoe UI", system-ui, sans-serif;
+  --body: "Nunito", "Segoe UI", Roboto, system-ui, sans-serif;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --ground: #070C18;
+    --surface: #0F1729;
+    --surface-2: #16213A;
+    --ink: #E6ECF7;
+    --ink-2: #C3CEE0;
+    --muted: #94A3BD;
+    --line: #22304D;
+    --lip: #050912;
+    --pop-soft: #16264D;
+    --pop-text: #A9C1FF;
+    --warn: #E3A548;
+    --warn-soft: #3A2A12;
+    --bad: #E47A70;
+    --bad-soft: #3D211E;
+    --ok: #4CC27E;
+    --ok-soft: #12301F;
+    --ok-ink: #8FE3B0;
+    --wall: #111A2E;
+    --wall-dot: #1A2744;
+    --floor: #0C1424;
+    --rug: #16213A;
+    --rug-ring: #22304D;
+    --night: #070C18;
+    --shadow-lg: 0 24px 60px -18px rgba(0, 0, 0, 0.7);
+  }
+}

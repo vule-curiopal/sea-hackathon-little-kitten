@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Create account</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@500;600;700;800&display=swap">
+<style>
+body{margin:0}
+a{color:#1A56C4}a:hover{color:#0B1220}
+.wall{background-color:#E3ECFF;background-image:radial-gradient(#CFDDFB 2.5px,transparent 3px);background-size:30px 30px}
+</style>
+</helmet>
+<div class="wall" style="width: 390px; height: 844px; position: relative; overflow: hidden; font-family: Nunito, system-ui, sans-serif; color: #0B1220">
+<a href="Landing.dc.html" aria-label="Back to home" style="position: absolute; left: 20px; top: 24px; width: 48px; height: 48px; border-radius: 50%; background: #FFFFFF; box-shadow: 0 4px 0 #C9D6EA; display: flex; align-items: center; justify-content: center">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1A56C4" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>
+</a>
+<div style="position: absolute; right: 18px; top: 22px; display: flex; align-items: flex-end; gap: 0">
+<div style="position: relative; background: #FFFFFF; border-radius: 20px; padding: 10px 14px; font: 700 14px/1.35 Nunito, sans-serif; box-shadow: 0 4px 0 #C9D6EA; width: 150px; margin-bottom: 70px">One tap, one little friend who listens.
+<span style="position: absolute; right: -6px; bottom: 16px; width: 16px; height: 16px; background: #FFFFFF; transform: rotate(45deg); border-radius: 3px"></span>
+</div>
+<dc-import name="Miu" emotion="excited" size="150" hint-size="150px,165px"></dc-import>
+</div>
+<form style="position: absolute; left: 0; right: 0; bottom: 0; height: 640px; background: #FFFFFF; border-radius: 36px 36px 0 0; padding: 26px 24px 24px; box-sizing: border-box; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 -6px 0 #C9D6EA">
+<h1 style="margin: 0; font: 800 32px/1 'Baloo 2', sans-serif">Create a family account</h1>
+<label style="display: flex; flex-direction: column; gap: 5px; font: 800 14px Nunito, sans-serif">Family name
+<input type="text" placeholder="For example: The Nguyen family" style="height: 50px; border-radius: 16px; border: 2px solid #DDE4EE; background: #F7F9FC; padding: 0 14px; font: 600 16px Nunito, sans-serif; color: #0B1220">
+</label>
+<label style="display: flex; flex-direction: column; gap: 5px; font: 800 14px Nunito, sans-serif">Your name
+<input type="text" value="Lan" style="height: 50px; border-radius: 16px; border: 2px solid #DDE4EE; background: #F7F9FC; padding: 0 14px; font: 600 16px Nunito, sans-serif; color: #0B1220">
+</label>
+<label style="display: flex; flex-direction: column; gap: 5px; font: 800 14px Nunito, sans-serif">Email
+<input type="email" value="lan@example" style="height: 50px; border-radius: 16px; border: 2px solid #B93F35; background: #FFFFFF; padding: 0 14px; font: 600 16px Nunito, sans-serif; color: #0B1220">
+<span style="font: 700 13px Nunito, sans-serif; color: #B93F35">That email doesn't look right.</span>
+</label>
+<label style="display: flex; flex-direction: column; gap: 5px; font: 800 14px Nunito, sans-serif">Password
+<input type="password" style="height: 50px; border-radius: 16px; border: 2px solid #DDE4EE; background: #F7F9FC; padding: 0 14px; font: 600 16px Nunito, sans-serif; color: #0B1220">
+<span style="font: 600 13px Nunito, sans-serif; color: #5B6B82">At least 8 characters</span>
+</label>
+<a href="Talk.dc.html" style="margin-top: 4px; text-decoration: none; display: flex; align-items: center; justify-content: center; height: 56px; border-radius: 20px; background: #2F6BFF; color: #FFFFFF; font: 800 21px 'Baloo 2', sans-serif; box-shadow: 0 6px 0 #1A56C4">Create account</a>
+<p style="margin: auto 0 0; text-align: center; font-size: 15px; color: #5B6B82">Already have an account? <a href="#" style="font-weight: 800">Sign in</a></p>
+</form>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

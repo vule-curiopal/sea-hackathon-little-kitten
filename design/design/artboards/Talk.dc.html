@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Talk to Miu</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@500;600;700;800&display=swap">
+<style>
+body{margin:0}
+.wall{background-color:#E3ECFF;background-image:radial-gradient(#CFDDFB 2.5px,transparent 3px);background-size:30px 30px}
+</style>
+</helmet>
+<div class="wall" style="width: 390px; height: 844px; position: relative; overflow: hidden; font-family: Nunito, system-ui, sans-serif; color: #0B1220">
+
+<div style="position: absolute; left: 0; right: 0; bottom: 0; height: 330px; background: #D3DFF6"></div>
+<div style="position: absolute; left: 0; right: 0; bottom: 330px; height: 14px; background: #FFFFFF; box-shadow: 0 4px 0 #BFD0F2"></div>
+<div style="position: absolute; left: 28px; top: 104px; width: 92px; height: 104px; border-radius: 18px; background: #111A2E; border: 6px solid #FFFFFF; box-shadow: 0 4px 0 #C9D6EA; overflow: hidden">
+<div style="position: absolute; right: 12px; top: 12px; width: 24px; height: 24px; border-radius: 50%; background: #E8EEFA; box-shadow: -6px 3px 0 0 #111A2E inset"></div>
+<div style="position: absolute; left: 16px; top: 34px; width: 4px; height: 4px; border-radius: 50%; background: #9DBBFF"></div>
+<div style="position: absolute; left: 40px; top: 66px; width: 5px; height: 5px; border-radius: 50%; background: #E8EEFA"></div>
+<div style="position: absolute; left: 0; right: 0; top: 46px; height: 6px; background: #FFFFFF"></div>
+<div style="position: absolute; top: 0; bottom: 0; left: 37px; width: 6px; background: #FFFFFF"></div>
+</div>
+<div style="position: absolute; left: 50%; bottom: 196px; width: 300px; height: 74px; transform: translateX(-50%); border-radius: 50%; background: #FFFFFF; box-shadow: 0 0 0 10px #BFD0F2 inset"></div>
+
+<sc-if value="{{resting}}" hint-placeholder-val="{{false}}">
+<div style="position: absolute; inset: 0; background: rgba(11, 18, 32, 0.45)"></div>
+</sc-if>
+
+<header style="position: absolute; left: 16px; right: 16px; top: 18px; display: flex; align-items: center; gap: 10px">
+<a href="Landing.dc.html" aria-label="Back" style="width: 48px; height: 48px; flex-shrink: 0; border-radius: 50%; background: #FFFFFF; box-shadow: 0 4px 0 #C9D6EA; display: flex; align-items: center; justify-content: center">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1A56C4" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>
+</a>
+<div style="flex: 1; display: flex; justify-content: center">
+<span style="display: flex; align-items: center; gap: 8px; background: #2F6BFF; color: #FFFFFF; border-radius: 999px; padding: 6px 18px; font: 800 20px/1.2 'Baloo 2', sans-serif; box-shadow: 0 4px 0 #1A56C4">
+<span style="width: 10px; height: 10px; border-radius: 50%; background: {{dot}}; box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.35)"></span>Miu</span>
+</div>
+</header>
+
+<div style="position: absolute; right: 16px; top: 96px; display: flex; flex-direction: column; gap: 12px">
+<button type="button" onClick="{{toggleLang}}" aria-label="Conversation language" style="width: 52px; height: 52px; border-radius: 50%; background: #FFFFFF; border: 0; box-shadow: 0 4px 0 #C9D6EA; font: 800 17px 'Baloo 2', sans-serif; color: #1A56C4; cursor: pointer">{{lang}}</button>
+<button type="button" aria-label="New conversation" style="width: 52px; height: 52px; border-radius: 50%; background: #FFFFFF; border: 0; box-shadow: 0 4px 0 #C9D6EA; display: flex; align-items: center; justify-content: center; cursor: pointer">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2F6BFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7"></path><path d="M20 4v7h-7"></path></svg>
+</button>
+<a href="#" aria-label="Miu's profile" style="width: 52px; height: 52px; border-radius: 50%; background: #FFFFFF; box-shadow: 0 4px 0 #C9D6EA; display: flex; align-items: center; justify-content: center">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2F6BFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"></path><circle cx="16" cy="7" r="2.5"></circle><circle cx="10" cy="17" r="2.5"></circle></svg>
+</a>
+</div>
+
+<sc-if value="{{showBubble}}" hint-placeholder-val="{{true}}">
+<div style="position: absolute; left: 20px; right: 84px; top: 228px; display: flex; flex-direction: column; gap: 8px; align-items: flex-start">
+<div style="position: relative; background: #FFFFFF; border-radius: 24px; padding: 14px 16px; font: 700 17px/1.4 Nunito, sans-serif; box-shadow: 0 5px 0 #C9D6EA">Some dinosaurs were as long as three buses parked in a row. Isn’t that huge?
+<span style="position: absolute; left: 60%; bottom: -10px; width: 20px; height: 20px; background: #FFFFFF; transform: rotate(45deg); border-radius: 3px"></span>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{resting}}" hint-placeholder-val="{{false}}">
+<div style="position: absolute; left: 24px; right: 24px; top: 150px; background: #FFFFFF; border-radius: 28px; padding: 20px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 6px 0 #C9D6EA; text-align: center">
+<span style="font: 800 22px/1.15 'Baloo 2', sans-serif">Miu is resting</span>
+<span style="font: 600 15px/1.45 Nunito, sans-serif; color: #5B6B82">A parent paused Miu. Wake Miu to talk again.</span>
+<a href="#" style="text-decoration: none; display: flex; align-items: center; justify-content: center; height: 52px; border-radius: 18px; background: #2F6BFF; color: #FFFFFF; font: 800 19px 'Baloo 2', sans-serif; box-shadow: 0 5px 0 #1A56C4">Wake Miu</a>
+</div>
+</sc-if>
+
+<div style="position: absolute; left: 50%; bottom: 196px; transform: translateX(-50%)">
+<dc-import name="Miu" emotion="{{emotion}}" size="250" hint-size="250px,275px"></dc-import>
+</div>
+
+<div style="position: absolute; left: 20px; right: 20px; bottom: 150px; display: flex; justify-content: center">
+<span role="status" style="background: {{statusBg}}; color: {{statusFg}}; border-radius: 999px; padding: 8px 16px; font: 800 15px Nunito, sans-serif; box-shadow: 0 4px 0 rgba(11, 18, 32, 0.1); text-align: center">{{status}}</span>
+</div>
+
+<div style="position: absolute; left: 0; right: 0; bottom: 34px; display: flex; align-items: center; justify-content: center; gap: 30px">
+<button type="button" aria-label="Type a message" style="width: 60px; height: 60px; border-radius: 50%; background: #FFFFFF; border: 0; box-shadow: 0 5px 0 #C9D6EA; display: flex; align-items: center; justify-content: center; cursor: pointer">
+<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#2F6BFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="3"></rect><path d="M7 10h.01M11 10h.01M15 10h.01M17 10h.01M8 14h8"></path></svg>
+</button>
+<button type="button" onClick="{{tapMic}}" aria-label="{{micLabel}}" style="width: 104px; height: 104px; border-radius: 50%; background: {{micBg}}; border: 6px solid #FFFFFF; box-shadow: 0 7px 0 {{micLip}}, 0 0 0 {{ringA}}px {{ringColor}}, 0 0 0 {{ringB}}px {{ringColor2}}; display: flex; align-items: center; justify-content: center; cursor: pointer">
+<svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{micIcon}}"></path></svg>
+</button>
+<button type="button" aria-label="Conversation" style="width: 60px; height: 60px; border-radius: 50%; background: #FFFFFF; border: 0; box-shadow: 0 5px 0 #C9D6EA; display: flex; align-items: center; justify-content: center; cursor: pointer">
+<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#2F6BFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 5h14a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1h-7l-5 4v-4H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z"></path><path d="M8 9.5h8M8 12.5h5"></path></svg>
+</button>
+</div>
+<p style="position: absolute; left: 24px; right: 24px; bottom: 8px; margin: 0; text-align: center; font: 600 12px Nunito, sans-serif; color: #3E4C63">This page plays the toy: Miu listens and answers like the real Buddy.</p>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"phase":{"editor":"enum","options":["answered","listening","thinking","resting"],"default":"answered"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const phase = this.state?.phase ?? this.props.phase ?? 'answered';
+    const lang = this.state?.lang ?? 'VI';
+    const next = { answered: 'listening', listening: 'thinking', thinking: 'answered', resting: 'resting' };
+    const mic = 'M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3ZM5 11a7 7 0 0 0 14 0M12 18v3';
+    const stop = 'M8 8h8v8H8z';
+    const look = {
+      answered: { emotion: 'excited', status: 'Say something to Miu', bg: '#FFFFFF', fg: '#1A56C4' },
+      listening: { emotion: 'listening', status: 'Miu is listening…', bg: '#2F6BFF', fg: '#FFFFFF' },
+      thinking: { emotion: 'thinking', status: 'Miu is thinking…', bg: '#FFFFFF', fg: '#1A56C4' },
+      resting: { emotion: 'sleepy', status: 'Miu is resting', bg: '#111A2E', fg: '#E8EEFA' },
+    }[phase];
+    const listening = phase === 'listening';
+    const resting = phase === 'resting';
+    return {
+      emotion: look.emotion,
+      status: look.status,
+      statusBg: look.bg,
+      statusFg: look.fg,
+      showBubble: phase === 'answered',
+      resting,
+      dot: resting ? '#A3B3CE' : '#7DF0B0',
+      lang,
+      toggleLang: () => this.setState({ lang: lang === 'VI' ? 'EN' : 'VI' }),
+      tapMic: () => this.setState({ phase: next[phase] }),
+      micLabel: listening ? 'Send now' : 'Mute the microphone',
+      micIcon: listening ? stop : mic,
+      micBg: resting ? '#A3B3CE' : phase === 'thinking' ? '#8FB2FF' : '#2F6BFF',
+      micLip: resting ? '#7D8CA6' : '#1A56C4',
+      ringA: listening ? 14 : 10,
+      ringB: listening ? 30 : 10,
+      ringColor: listening ? '#9DBBFF' : resting ? 'rgba(255, 255, 255, 0.2)' : '#E3ECFF',
+      ringColor2: listening ? 'rgba(157, 187, 255, 0.45)' : 'transparent',
+    };
+  }
+}
+</script>
+</body>
+</html>
