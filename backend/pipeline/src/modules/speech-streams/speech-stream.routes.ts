@@ -8,6 +8,8 @@ import { createRealtimeSttFactory, type RealtimeSttFactory } from '../../provide
 import type { SessionService } from '../sessions/session.service.js';
 import type { TurnService } from '../turns/turn.service.js';
 import { SpeechStreamService } from './speech-stream.service.js';
+import { randomUUID } from 'node:crypto';
+import { logEvent } from '../../logger.js';
 
 const modules = new WeakMap<Express, { attach(server: Server): void; dispose(): void }>();
 export function attachSpeechStreams(app: Express, server: Server): void { modules.get(app)?.attach(server); }
@@ -31,6 +33,7 @@ export function registerSpeechStreams(app: Express, config: VoiceConfig, session
     const host = request.headers.host;
     const sameOrigin = origin && host && (origin === `https://${host}` || origin === `http://${host}`);
     if (!origin || (!config.allowedOrigins.includes(origin) && !sameOrigin)) {
+      logEvent('speech.rejected', { code: 'origin_not_allowed', status: 403 });
       socket.end('HTTP/1.1 403 Forbidden\r\nConnection: close\r\n\r\n'); return;
     }
     const address = request.socket.remoteAddress ?? '';
@@ -39,6 +42,10 @@ export function registerSpeechStreams(app: Express, config: VoiceConfig, session
     }
     pending.set(address, (pending.get(address) ?? 0) + 1);
     wss.handleUpgrade(request, socket, head, ws => {
+      const connectionId = randomUUID();
+      const connectedAt = performance.now();
+      let sessionId: string | undefined, turnId: string | undefined;
+      logEvent('speech.connected', { connection_id: connectionId });
       let service: SpeechStreamService | undefined;
       let started = false, done = false, failing = false;
       let alive = true;
@@ -56,6 +63,8 @@ export function registerSpeechStreams(app: Express, config: VoiceConfig, session
         if (failing || done) return;
         failing = true;
         const failure = publicSpeechError(error);
+        logEvent('speech.failed', { connection_id: connectionId, session_id: sessionId, turn_id: turnId,
+          ...failure, duration_ms: performance.now() - connectedAt });
         if (ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ type: 'stream.error', ...failure }));
         service?.cancel();
         ws.close(1008, 'Speech stream stopped');
@@ -73,7 +82,8 @@ export function registerSpeechStreams(app: Express, config: VoiceConfig, session
           started = true;
           if (data.type !== 'stream.start' || typeof data.token !== 'string' || data.token.length > 512) throw new PipelineError('unauthorized', 401);
           const session = sessions.session(identifier(match[1]), data.token);
-          const turnId = identifier(data.request_id);
+          turnId = identifier(data.request_id);
+          sessionId = session.id;
           if (data.language !== session.profile.configuration.language_mode) throw new PipelineError('language_mismatch', 400);
           service = new SpeechStreamService({ config, sessions, turns, session, turnId, factory, emit, fail });
           clearTimeout(authenticate);
@@ -84,11 +94,15 @@ export function registerSpeechStreams(app: Express, config: VoiceConfig, session
         if (data.type !== 'audio.end' || !Number.isSafeInteger(data.last_seq)) throw new PipelineError('invalid_request', 400);
         const response = await service.end(Number(data.last_seq));
         if (failing) return;
-        emit({ type: 'turn.result', response }); done = true; ws.close(1000);
+        emit({ type: 'turn.result', response }); done = true;
+        logEvent('speech.result', { connection_id: connectionId, session_id: sessionId, turn_id: turnId, duration_ms: performance.now() - connectedAt });
+        ws.close(1000);
       };
       ws.on('message', (raw, binary) => { void onMessage(raw, binary).catch(fail); });
       ws.on('error', fail);
-      ws.on('close', () => {
+      ws.on('close', code => {
+        logEvent('speech.closed', { connection_id: connectionId, session_id: sessionId, turn_id: turnId,
+          close_code: code, outcome: done ? 'completed' : failing ? 'failed' : 'disconnected', duration_ms: performance.now() - connectedAt });
         clearTimeout(authenticate);
         clearInterval(heartbeat);
         pending.set(address, Math.max(0, (pending.get(address) ?? 1) - 1));

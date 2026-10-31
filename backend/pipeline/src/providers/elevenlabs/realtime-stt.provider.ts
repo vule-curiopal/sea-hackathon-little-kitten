@@ -2,6 +2,7 @@ import WebSocket from 'ws';
 import type { Language } from '@miu/voice-contracts';
 import type { VoiceConfig } from '../../config.js';
 import { PipelineError } from '../../errors.js';
+import { logEvent } from '../../logger.js';
 
 export type RealtimeSttEvent = { type: 'partial' | 'committed'; text: string } | { type: 'error'; code: string };
 export interface RealtimeSttConnection {
@@ -10,11 +11,12 @@ export interface RealtimeSttConnection {
   commit(): void;
   close(): void;
 }
-export type RealtimeSttFactory = (language: Language, emit: (event: RealtimeSttEvent) => void) => RealtimeSttConnection;
+export type RealtimeSttFactory = (language: Language, emit: (event: RealtimeSttEvent) => void,
+  context?: { session_id: string; turn_id: string }) => RealtimeSttConnection;
 
 /** Server-side credentials; provider commits never invoke the response engine. */
 export function createRealtimeSttFactory(config: VoiceConfig): RealtimeSttFactory {
-  return (language, emit) => {
+  return (language, emit, context) => {
     const url = new URL('/v1/speech-to-text/realtime', config.elevenBaseUrl);
     url.protocol = 'wss:';
     for (const [key, value] of Object.entries({
@@ -30,11 +32,14 @@ export function createRealtimeSttFactory(config: VoiceConfig): RealtimeSttFactor
       maxPayload: 256 * 1024, perMessageDeflate: false,
     });
     let closed = false;
+    let failed = false;
     let resolve!: () => void;
     let reject!: (error: Error) => void;
     const ready = new Promise<void>((yes, no) => { resolve = yes; reject = no; });
-    const fail = (code = 'provider_unavailable') => {
-      if (closed) return;
+    const fail = (code = 'provider_unavailable', providerEvent?: string, status?: number) => {
+      if (closed || failed) return;
+      failed = true;
+      logEvent('stt.provider_failed', { ...context, code, provider_event: providerEvent, status });
       reject(new PipelineError(code, 503));
       emit({ type: 'error', code });
     };
@@ -64,9 +69,14 @@ export function createRealtimeSttFactory(config: VoiceConfig): RealtimeSttFactor
           const errors = ['error', 'auth_error', 'quota_exceeded', 'transcriber_error', 'input_error', 'invalid_request',
             'rate_limited', 'queue_overflow', 'resource_exhausted', 'session_time_limit_exceeded',
             'chunk_size_exceeded', 'insufficient_audio_activity', 'unaccepted_terms', 'commit_throttled'];
-          if (errors.includes(String(data.message_type))) fail('provider_unavailable');
+          if (errors.includes(String(data.message_type))) fail('provider_unavailable', String(data.message_type));
         }
       } catch { fail('invalid_transcript'); }
+    });
+    socket.on('unexpected-response', (_request, response) => {
+      response.resume();
+      fail('provider_unavailable', 'http_upgrade_failed', response.statusCode);
+      socket.terminate();
     });
     socket.on('error', () => fail());
     socket.on('close', () => { if (!closed) fail('speech_stream_closed'); });

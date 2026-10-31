@@ -6,6 +6,7 @@ import type { RealtimeSttConnection, RealtimeSttEvent, RealtimeSttFactory } from
 import type { SessionService } from '../sessions/session.service.js';
 import type { Session } from '../sessions/session.types.js';
 import type { TurnService } from '../turns/turn.service.js';
+import { logEvent } from '../../logger.js';
 
 export type StreamMessage = Record<string, unknown>;
 
@@ -23,6 +24,13 @@ export class SpeechStreamService {
   private drainResolve?: () => void;
   private drainReject?: (error: Error) => void;
   private finished = false;
+  private partials = 0;
+  private readonly startedAt = performance.now();
+
+  private log(event: string, fields: Record<string, unknown> = {}): void {
+    logEvent(event, { session_id: this.options.session.id, turn_id: this.options.turnId,
+      duration_ms: performance.now() - this.startedAt, ...fields });
+  }
 
   constructor(private readonly options: {
     config: VoiceConfig; session: Session; turnId: string; sessions: SessionService; turns: TurnService;
@@ -37,10 +45,12 @@ export class SpeechStreamService {
     if (this.phase !== 'connecting') throw new PipelineError('turn_canceled', 409);
     this.controller = sessions.reserveInput(session, turnId, this.reservationId);
     this.controller.signal.addEventListener('abort', () => this.options.fail(new PipelineError('turn_canceled', 409)), { once: true });
-    this.provider = factory(session.profile.configuration.language_mode, event => this.providerEvent(event));
+    this.provider = factory(session.profile.configuration.language_mode, event => this.providerEvent(event), { session_id: session.id, turn_id: turnId });
+    this.log('stt.connecting', { silence_ms: this.options.config.realtimeSilenceMs });
     await Promise.race([this.provider.ready, this.deadline(10_000, 'provider_timeout')]);
     if (this.phase !== 'connecting' || this.controller.signal.aborted) throw new PipelineError('turn_canceled', 409);
     this.phase = 'listening';
+    this.log('stt.ready');
     this.timers.push(setTimeout(() => this.options.fail(new PipelineError('recording_limit', 422)), LIMITS.recordingMs));
     // Allow provider startup/partial latency before concluding that no speech was recognized.
     this.noSpeechTimer = setTimeout(() => this.options.fail(new PipelineError('unclear_audio', 422)), 8000);
@@ -54,6 +64,7 @@ export class SpeechStreamService {
     this.bytes += pcm.length;
     if (this.bytes > 16000 * 2 * LIMITS.recordingMs / 1000) throw new PipelineError('recording_limit', 422);
     this.sequence++;
+    if (this.sequence === 1) this.log('stt.audio_started');
     this.provider!.send(pcm);
   }
 
@@ -62,6 +73,7 @@ export class SpeechStreamService {
       throw new PipelineError('invalid_audio_sequence', 400);
     }
     this.phase = 'draining';
+    this.log('stt.draining', { chunks: this.sequence, bytes: this.bytes, audio_ms: this.bytes / 32, partials: this.partials });
     const drainStarted = performance.now();
     this.clearTimers();
     const drained = new Promise<void>((resolve, reject) => { this.drainResolve = resolve; this.drainReject = reject; });
@@ -74,6 +86,7 @@ export class SpeechStreamService {
     const transcript = this.segments.join(' ').trim();
     if (!transcript || [...transcript].length > LIMITS.transcriptChars) throw new PipelineError('unclear_audio', 422);
     this.phase = 'processing';
+    this.log('stt.final', { characters: [...transcript].length, segments: this.segments.length, partials: this.partials });
     this.options.emit({ type: 'stream.drained' });
     this.options.emit({ type: 'transcript.final', text: transcript });
     this.options.emit({ type: 'stream.processing' });
@@ -90,6 +103,7 @@ export class SpeechStreamService {
 
   cancel(): void {
     if (this.finished || this.phase === 'canceled') return;
+    this.log('stt.canceled', { stage: this.phase, chunks: this.sequence, bytes: this.bytes, partials: this.partials, segments: this.segments.length });
     this.phase = 'canceled';
     this.clearTimers(); this.provider?.close();
     this.drainReject?.(new PipelineError('turn_canceled', 409));
@@ -101,9 +115,13 @@ export class SpeechStreamService {
     if (this.phase === 'canceled' || this.phase === 'done' || this.phase === 'processing') return;
     if (event.type === 'error') { this.options.fail(new PipelineError(event.code, 503)); return; }
     if (event.text) { clearTimeout(this.noSpeechTimer); this.noSpeechTimer = undefined; }
-    if (event.type === 'partial') { this.options.emit({ type: 'transcript.partial', text: event.text }); return; }
+    if (event.type === 'partial') {
+      if (++this.partials === 1) this.log('stt.first_partial', { characters: [...event.text].length });
+      this.options.emit({ type: 'transcript.partial', text: event.text }); return;
+    }
     if (event.text) {
       this.segments.push(event.text);
+      this.log('stt.segment', { segments: this.segments.length, characters: [...event.text].length });
       if ([...this.segments.join(' ')].length > LIMITS.transcriptChars) {
         this.options.fail(new PipelineError('invalid_transcript', 422)); return;
       }

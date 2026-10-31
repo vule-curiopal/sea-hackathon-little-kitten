@@ -14,6 +14,7 @@ import { registerSpeechStreams } from './modules/speech-streams/speech-stream.ro
 import type { RealtimeSttFactory } from './providers/elevenlabs/realtime-stt.provider.js';
 import type { EngineBridge, PipelineProviders } from './ports.js';
 import { createProviders } from './providers/index.js';
+import { registerClientEvents } from './modules/system/client-events.routes.js';
 
 export interface BuildAppOptions {
   config?: VoiceConfig;
@@ -52,6 +53,7 @@ export async function buildApp(options: BuildAppOptions = {}) {
   registerHttpMiddleware(app, config);
   await options.registerRoutes?.(app, sessions);
   registerSystemRoutes(app, config, sessions);
+  registerClientEvents(app, sessions);
   registerSessionRoutes(app, new SessionController(sessions, providers.mode));
   registerTurnRoutes(app, new TurnController(sessions, turns, contexts));
   const disposeStreams = registerSpeechStreams(app, config, sessions, turns, options.realtimeStt);

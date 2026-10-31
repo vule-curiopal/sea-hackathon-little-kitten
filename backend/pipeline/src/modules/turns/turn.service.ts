@@ -10,6 +10,7 @@ import type { Session, TurnRecord } from '../sessions/session.types.js';
 import { fingerprint, uuid } from '../sessions/session.utils.js';
 import { validateReplyText } from './reply-policy.js';
 import type { TurnSubmission } from './turn.types.js';
+import { errorFields, logEvent } from '../../logger.js';
 
 /** Bound even an adapter that ignores AbortSignal; late results never publish. */
 function bounded<T>(promise: Promise<T>, signal: AbortSignal): Promise<T> {
@@ -54,6 +55,12 @@ export class TurnService {
     let record: TurnRecord | undefined;
     let timeout: ReturnType<typeof setTimeout> | undefined;
     let timedOut = false;
+    const loggedAt = performance.now();
+    let stageName = 'session';
+    const trace = (event: string, fields: Record<string, unknown> = {}) => logEvent(event, {
+      session_id: session.id, turn_id: input.requestId, stage: stageName, duration_ms: performance.now() - loggedAt, ...fields,
+    });
+    trace('turn.started', { input_mode: input.inputSource ?? (input.audio ? 'audio' : input.kind === 'greeting' ? 'greeting' : 'text') });
     const cancel = () => {
       if (!record) return;
       record.controller.abort();
@@ -124,6 +131,7 @@ export class TurnService {
 
       let transcript: TurnResponse['transcript'] = null;
       if (audio) {
+        stageName = 'stt'; trace('turn.stage_started');
         const inspected = await bounded(inspectAudio(
           audio.bytes, audio.mimeType, audio.filename, signal, config.ffprobePath,
         ), signal);
@@ -143,6 +151,7 @@ export class TurnService {
       }
 
       let stage = performance.now();
+      stageName = 'engine'; trace('turn.stage_started');
       let prepared: EnginePreparedTurn | undefined;
       let generated: { turnId: string; replyText: string; language: typeof language };
       if (bridge) {
@@ -163,20 +172,25 @@ export class TurnService {
       }
       await check();
       timings.reply = Math.round(performance.now() - stage);
+      trace('turn.stage_completed', { duration_ms: timings.reply });
       stage = performance.now();
+      stageName = 'validation';
       if (generated.turnId !== id || generated.language !== language) throw new PipelineError('invalid_reply', 503);
       const sentences = validateReplyText(generated.replyText);
       timings.validation = Math.round(performance.now() - stage);
 
       stage = performance.now();
+      stageName = 'tts';
       let speech: SpeechOutput | undefined;
       if (!textOnly) {
+        trace('turn.stage_started');
         speech = await bounded(providers.synthesize(
           generated.replyText, session.profile.configuration.voice_id, language, signal, fixtureId,
         ), signal);
         await check();
       }
       timings.tts = Math.round(performance.now() - stage);
+      if (!textOnly) trace('turn.stage_completed', { duration_ms: timings.tts, bytes: speech?.bytes.length });
       if (speech && (!speech.bytes.length || speech.bytes.length > LIMITS.audioBytes
         || !Number.isFinite(speech.durationMs) || speech.durationMs <= 0)) {
         throw new PipelineError('invalid_audio', 503);
@@ -203,8 +217,10 @@ export class TurnService {
       record.resultAt = Date.now();
       record.publishedVersion = result.state_version;
       record.durationMs = speech?.durationMs;
+      stageName = 'complete'; trace('turn.completed', { characters: transcript?.text.length ?? 0 });
       return result;
     } catch (error) {
+      trace('turn.failed', timedOut ? { code: 'provider_timeout', status: 504 } : errorFields(error));
       if (record && record.status !== 'canceled') record.status = 'failed';
       if (bridge && record?.enginePrepared) {
         // A generated but unheard reply must never hold an active turn or learn.

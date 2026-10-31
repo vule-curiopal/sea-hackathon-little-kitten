@@ -39,8 +39,22 @@ export function usePipelineVoice(options: Options) {
   const [lastTurn, setLastTurn] = useState<TurnResponse | null>(null);
   const meterRef = useRef<ReturnType<typeof createPlaybackMeter> | null>(null);
   const dayAbort = useRef<AbortController | null>(null);
+  const lastDiagnostic = useRef({ key: '', at: 0 });
   const showError = useCallback((reason: unknown) => {
     voiceConsole.error(reason);
+    const current = controller.current?.session;
+    const code = typeof reason === 'object' && reason !== null && 'code' in reason ? String(reason.code) : 'unknown_client_error';
+    const diagnosticKey = `${current?.session_id}:${code}`;
+    if (current && code !== 'CANCELED' && (lastDiagnostic.current.key !== diagnosticKey || Date.now() - lastDiagnostic.current.at > 5000)) {
+      lastDiagnostic.current = { key: diagnosticKey, at: Date.now() };
+      const abort = new AbortController();
+      const timer = setTimeout(() => abort.abort(), 5000);
+      // Best effort only; diagnostic failure must not trigger another diagnostic or retry a turn.
+      void fetch(`${import.meta.env.VITE_VOICE_API_URL || ''}/api/client-events`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${current.demo_token}` },
+        body: JSON.stringify({ session_id: current.session_id, code }), signal: abort.signal, keepalive: true,
+      }).catch(() => {}).finally(() => clearTimeout(timer));
+    }
     if (typeof reason === 'object' && reason !== null && 'memoryInvalidated' in reason && reason.memoryInvalidated) {
       setLastTurn(null); callbacks.current.onInvalidate(); setRevision(value => value + 1);
     }
