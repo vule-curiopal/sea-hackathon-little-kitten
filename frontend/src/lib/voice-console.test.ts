@@ -95,3 +95,12 @@ test('unavailable console tooling cannot break a voice turn', () => {
     logger.error({ code: 'PLAYBACK_FAILED' });
   });
 });
+
+test('an explicitly aborted request is informational rather than a network failure', () => {
+  const { logger, rows } = setup();
+  logger.request('POST', '/api/sessions/test/turns', 'canceled', 4500);
+  assert.equal(rows[0].level, 'log');
+  assert.equal((rows[0].data as Record<string, unknown>).status, 'canceled');
+  logger.request('POST', '/api/sessions/test/turns', 'network_error', 200);
+  assert.equal(rows[1].level, 'warn');
+});

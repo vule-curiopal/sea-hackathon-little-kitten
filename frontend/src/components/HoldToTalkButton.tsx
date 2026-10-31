@@ -3,7 +3,7 @@ import Icon, { type IconName } from './Icon';
 import { HoldToTalk } from '../lib/hold-to-talk';
 
 type Props = {
-  className: string; label: string; text?: string; icon: IconName; disabled: boolean; recording: boolean;
+  className: string; label: string; text?: string; icon: IconName; disabled: boolean; recording: boolean; busy?: boolean;
   onStart(): boolean; onSend(): void; onCancel(): void;
 };
 export default function HoldToTalkButton(props: Props) {
@@ -26,7 +26,7 @@ export default function HoldToTalkButton(props: Props) {
     if (release) hold.release(`key:${event.key}`);
     else if (!event.repeat) hold.press(`key:${event.key}`);
   }
-  return <button type="button" className={props.className} aria-label={props.label} aria-pressed={props.recording} disabled={props.disabled}
+  return <button type="button" className={props.className} aria-label={props.label} aria-pressed={props.recording} aria-busy={props.busy || undefined} disabled={props.disabled}
     onPointerDown={event => {
       if (!event.isPrimary || event.button !== 0) return;
       event.preventDefault();

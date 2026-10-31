@@ -5,6 +5,7 @@ import { createPlaybackMeter } from './playback-meter';
 import { engineRequest, type Role } from './engine-api';
 import { createVoiceConsole } from './voice-console';
 import { voiceErrorKey } from './voice-errors';
+import { canStartVoice } from './voice-controls';
 
 type Options = {
   language: Language;
@@ -28,6 +29,7 @@ export function usePipelineVoice(options: Options) {
   const [session, setSession] = useState<SessionResponse | null>(null);
   const [state, setState] = useState<VoiceControllerState>('initializing');
   const [capture, setCapture] = useState<CaptureState>('idle');
+  const captureRef = useRef<CaptureState>('idle');
   const [meter, setMeter] = useState<MeterSnapshot | null>(null);
   const [manualOnly, setManualOnly] = useState(false);
   const [error, setError] = useState<TranslationKey | null>(null);
@@ -62,7 +64,8 @@ export function usePipelineVoice(options: Options) {
             response = await fetch(input, init);
             if (active) voiceConsole.request(init?.method ?? 'GET', path, response.status, performance.now() - start);
           } catch (reason) {
-            if (active) voiceConsole.request(init?.method ?? 'GET', path, 'network_error', performance.now() - start);
+            const canceled = init?.signal?.aborted || (reason instanceof Error && reason.name === 'AbortError');
+            if (active) voiceConsole.request(init?.method ?? 'GET', path, canceled ? 'canceled' : 'network_error', performance.now() - start);
             throw reason;
           }
           if (active && response.ok && String(input).includes('/playback')) {
@@ -89,6 +92,7 @@ export function usePipelineVoice(options: Options) {
       }
     };
     reportError.current = report;
+    captureRef.current = 'idle';
     setSession(null); setState('initializing'); setError(null); setMeter(null); setManualOnly(false); setLastTurn(null); setMouthLevel(0); setAdvancing(false);
     const unsubscribe = client.controller.subscribe(event => {
       if (!active) return;
@@ -110,7 +114,7 @@ export function usePipelineVoice(options: Options) {
       else if (event.type === 'error') report(event.error);
       else if (event.type === 'playback' && (event.event.type === 'error' || event.event.type === 'receipt_error')) report(event.event.error);
       else if (event.type === 'capture') {
-        if (event.event.type === 'state') setCapture(event.event.state);
+        if (event.event.type === 'state') { captureRef.current = event.event.state; setCapture(event.event.state); }
         if (event.event.type === 'meter') setMeter(event.event.snapshot);
         if (event.event.type === 'manual_only') setManualOnly(true);
       }
@@ -148,9 +152,14 @@ export function usePipelineVoice(options: Options) {
     voiceConsole.action('stop', { state: current.state });
     return current.stop().catch(reportError.current);
   }, [showError, voiceConsole]);
+  const canTalk = useCallback(() => {
+    const current = controller.current;
+    return !!current && canStartVoice(current.state, !!current.session) && dayAbort.current === null;
+  }, []);
   const talk = useCallback(() => {
     const current = controller.current;
     if (!current?.session) { voiceConsole.action('hold.ignored', { reason: 'session_not_ready' }); return false; }
+    if (!canTalk()) { voiceConsole.action('hold.ignored', { state: current.state, reason: 'turn_in_progress' }); return false; }
     voiceConsole.action('hold.start', { state: current.state });
     meterRef.current?.unlock();
     setError(null); setManualOnly(false);
@@ -158,11 +167,13 @@ export function usePipelineVoice(options: Options) {
     void current.talk(current.session.provider_mode === 'fake'
       ? { fixtureId: `voice_sample_${current.session.configuration.language_mode}` } : {}).catch(reportError.current);
     return true;
-  }, [showError, voiceConsole]);
+  }, [showError, voiceConsole, canTalk]);
   const send = useCallback(() => {
     const current = controller.current;
     voiceConsole.action('hold.release', { state: current?.state });
+    const preparing = captureRef.current === 'requesting_permission';
     const accepted = current?.send() ?? false;
+    if (!accepted && preparing) setError('voiceHoldUntilReady');
     voiceConsole.action('capture.send', { state: current?.state, accepted });
   }, [voiceConsole]);
   const play = useCallback(() => {
@@ -203,5 +214,5 @@ export function usePipelineVoice(options: Options) {
     finally { if (dayAbort.current === abort) { dayAbort.current = null; setAdvancing(false); } }
   }, [showError, advancing]);
   const reconnect = useCallback(() => { setAttempt(value => value + 1); }, []);
-  return { session, state, capture, meter, mouthLevel, manualOnly, error, stop, talk, text, greet, send, play, reconnect, nextDay, advancing, revision, lastTurn, clearError: () => setError(null) };
+  return { session, state, capture, meter, mouthLevel, manualOnly, error, stop, canTalk, talk, text, greet, send, play, reconnect, nextDay, advancing, revision, lastTurn, clearError: () => setError(null) };
 }

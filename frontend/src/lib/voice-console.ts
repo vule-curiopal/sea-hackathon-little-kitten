@@ -58,7 +58,7 @@ export function createVoiceConsole(sink: ConsoleSink = console, now: () => numbe
   return {
     event, error,
     action(name: string, details: ActionDetails = {}) { write('log', name, { ...(details.state !== undefined ? { state: details.state } : {}), ...(details.capture !== undefined ? { capture: details.capture } : {}), ...(details.accepted !== undefined ? { accepted: details.accepted } : {}), ...(details.reason !== undefined ? { reason: details.reason } : {}) }); },
-    request(method: string, path: string, status: number | 'network_error', durationMs: number) { write(typeof status === 'number' && status < 400 ? 'log' : 'warn', 'request', { method, path: path.split('?')[0], status, durationMs: Math.round(durationMs) }); },
+    request(method: string, path: string, status: number | 'network_error' | 'canceled', durationMs: number) { write(status === 'canceled' || (typeof status === 'number' && status < 400) ? 'log' : 'warn', 'request', { method, path: path.split('?')[0], status, durationMs: Math.round(durationMs) }); },
     session(session: SessionResponse) { write('log', 'session.ready', { provider: session.provider_mode, engine: session.engine_mode, language: session.configuration.language_mode }); },
   };
 }

@@ -49,6 +49,8 @@
 .panel-heading-actions { display: flex; align-items: center; gap: 8px; }
 .microphone-button { flex-direction: column; gap: 2px; touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
 .microphone-button > span { font: 800 11px var(--body); }
+.microphone-button:disabled { opacity: 1; cursor: wait; color: var(--muted); }
+.microphone-button.is-preparing { color: var(--muted); }
 .answer > div { min-width: 0; max-width: 100%; }
 .answer p { white-space: pre-wrap; }
 .answer.user-message { justify-content: flex-end; padding-left: 30px; }
